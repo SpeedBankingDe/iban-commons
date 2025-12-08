@@ -32,7 +32,7 @@ public final class IndexRange implements java.io.Serializable {
     /** Serial version UID. */
     private static final long serialVersionUID = 42L;
 
-    /** The descriptive name for the range (e.g., "Bank Code"). */
+    /** The descriptive name for the range (e.g., "Bank Code"). Can be null. */
     private final String      name;
 
     /** The begin index of the range (inclusive). */
@@ -44,15 +44,13 @@ public final class IndexRange implements java.io.Serializable {
     /**
      * Private constructor.
      *
-     * @param name  The descriptive name for the range (e.g., "Bank Code").
+     * @param name  The descriptive name for the range (e.g., "Bank Code"). May be {@code null}.
      * @param begin The begin index (inclusive).
      * @param end   The ending index (exclusive).
      *
      * @throws IllegalArgumentException if end is less than begin or indices are negative.
      */
     private IndexRange(final String name, final int begin, final int end) {
-        this.name = Objects.requireNonNull(name, "Name must not be null");
-
         if (begin < 0) {
             throw new IllegalArgumentException("Index 'begin' (" + begin + ") must be non-negative");
         } else if (end < begin) {
@@ -60,6 +58,7 @@ public final class IndexRange implements java.io.Serializable {
                 "Index 'end' (" + end + ") must be greater than or equal to 'begin' (" + begin + ")");
         }
 
+        this.name = name;
         this.begin = begin;
         this.end = end;
     }
@@ -76,6 +75,19 @@ public final class IndexRange implements java.io.Serializable {
      */
     public static IndexRange of(String name, int begin, int end) {
         return new IndexRange(name, begin, end);
+    }
+
+    /**
+     * Static factory method to create an unnamed {@code IndexRange} instance.
+     *
+     * @param begin The begin index (inclusive).
+     * @param end   The ending index (exclusive).
+     * @return A new unnamed {@code IndexRange} instance.
+     *
+     * @throws IllegalArgumentException if end is less than begin or indices are negative.
+     */
+    public static IndexRange of(int begin, int end) {
+        return new IndexRange(null, begin, end);
     }
 
     /**
@@ -179,7 +191,7 @@ public final class IndexRange implements java.io.Serializable {
     /**
      * Returns a string representation of this range, including its optional name,
      * inclusive start index, inclusive last index (calculated as {@code end - 1}), and total length.<br>
-     * Example: {@code IndexRange[Bank Code: 4-7 (4)]}
+     * Example: {@code IndexRange[Bank Code: 4-7 (4)]} or {@code IndexRange[4-7 (4)]}
      *
      * @return A string representation of the range.
      */
@@ -187,7 +199,7 @@ public final class IndexRange implements java.io.Serializable {
     public String toString() {
         return getClass().getSimpleName()
             + '['
-            + name + ": "
+            + (name == null ? "" : name + ": ")
             + begin + '-' + (end - 1)
             + " (" + length() + ')'
             + ']';

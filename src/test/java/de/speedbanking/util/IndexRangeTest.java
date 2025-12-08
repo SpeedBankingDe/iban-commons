@@ -4,7 +4,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 /**
@@ -22,10 +21,24 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
 
         IndexRange range = IndexRange.of(DEFAULT_NAME, begin, end);
 
-        assertThat(range).isNotNull();
-        assertThat(range.getName()).isEqualTo(DEFAULT_NAME);
-        assertThat(range.getBegin()).isEqualTo(begin);
-        assertThat(range.getEnd()).isEqualTo(end);
+        assertThat(range)
+            .isNotNull()
+            .extracting(IndexRange::getName, IndexRange::getBegin, IndexRange::getEnd)
+            .containsExactly(DEFAULT_NAME, begin, end);
+    }
+
+    @DisplayName("Should create unnamed IndexRange (name=null) and check getters")
+    @Test
+    void shouldCreateUnnamedRange() {
+        final int begin = 5;
+        final int end = 10;
+
+        IndexRange range = IndexRange.of(begin, end);
+
+        assertThat(range)
+            .isNotNull()
+            .extracting(IndexRange::getName, IndexRange::getBegin, IndexRange::getEnd)
+            .containsExactly(null, begin, end);
     }
 
     @DisplayName("Should handle various names correctly including empty string")
@@ -34,15 +47,6 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     void shouldHandleVariousNames(String name) {
         IndexRange range = IndexRange.of(name, 0, 1);
         assertThat(range.getName()).isEqualTo(name);
-    }
-
-    @DisplayName("Should throw NullPointerException if name is null")
-    @ParameterizedTest
-    @NullSource
-    void shouldThrowNPEWhenNameIsNull(String nullName) {
-        assertThatNullPointerException()
-            .isThrownBy(() -> IndexRange.of(nullName, 0, 1))
-            .withMessage("Name must not be null");
     }
 
     @DisplayName("Should throw IllegalArgumentException if begin index is negative")
@@ -71,9 +75,10 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @Test
     void shouldAllowZeroLengthRange() {
         IndexRange range = IndexRange.of(DEFAULT_NAME, 5, 5);
-        assertThat(range.length()).isZero();
-        assertThat(range.getBegin()).isEqualTo(5);
-        assertThat(range.getEnd()).isEqualTo(5);
+        assertThat(range)
+            .isNotNull()
+            .extracting(IndexRange::length, IndexRange::getBegin, IndexRange::getEnd)
+            .containsExactly(0, 5, 5);
     }
 
     @DisplayName("Should return correct length (end - begin)")
@@ -132,31 +137,45 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
             .isThrownBy(() -> range.applyTo(sequence));
     }
 
-    @DisplayName("Should satisfy equals and hashCode contract")
+    @DisplayName("Should satisfy equals and hashCode contract, including null names")
     @Test
     void shouldSatisfyEqualsAndHashCodeContract() {
         IndexRange range1 = IndexRange.of(DEFAULT_NAME, 1, 5);
         IndexRange range2 = IndexRange.of(DEFAULT_NAME, 1, 5);
+        IndexRange rangeUnnamed1 = IndexRange.of(1, 5);
+        IndexRange rangeUnnamed2 = IndexRange.of(1, 5);
         IndexRange rangeDifferentName = IndexRange.of("OtherName", 1, 5);
         IndexRange rangeDifferentBegin = IndexRange.of(DEFAULT_NAME, 0, 5);
 
+        // Test with names
         assertThat(range1)
             .isEqualTo(range1)
             .isEqualTo(range2)
             .hasSameHashCodeAs(range2)
             .isNotEqualTo(rangeDifferentName)
-            .isNotEqualTo(rangeDifferentBegin)
+            .isNotEqualTo(rangeDifferentBegin);
+
+        // Test with null names
+        assertThat(rangeUnnamed1)
+            .isEqualTo(rangeUnnamed2)
+            .hasSameHashCodeAs(rangeUnnamed2);
+
+        // Test named vs unnamed
+        assertThat(range1).isNotEqualTo(rangeUnnamed1);
+
+        // Test against null and different object type
+        assertThat(range1)
             .isNotEqualTo(null)
             .isNotEqualTo(new Object());
     }
 
-    @DisplayName("Should return correct and descriptive toString format")
+    @DisplayName("Should return correct and descriptive toString format, handling null name")
     @Test
     void shouldReturnCorrectToString() {
-        IndexRange range = IndexRange.of("Bank Code", 4, 8); // Length 4. End-1 = 7
+        IndexRange namedRange = IndexRange.of("Bank Code", 4, 8); // Length 4. End-1 = 7
+        IndexRange unnamedRange = IndexRange.of(1, 5); // Length 4. End-1 = 4
 
-        String result = range.toString();
-
-        assertThat(result).isEqualTo("IndexRange[Bank Code: 4-7 (4)]");
+        assertThat(namedRange.toString()).isEqualTo("IndexRange[Bank Code: 4-7 (4)]");
+        assertThat(unnamedRange.toString()).isEqualTo("IndexRange[1-4 (4)]");
     }
 }

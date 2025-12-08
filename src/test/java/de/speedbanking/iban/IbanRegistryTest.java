@@ -118,7 +118,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
         softly.assertThat(registryDe.getOrganisation()).isEqualTo("Bundesverband deutscher Banken");
         softly.assertThat(registryDe.getDepartment()).isNull();
-        softly.assertThat(registryDe.getStreetAddress()).isEqualTo("Burgstrasse 28");
+        softly.assertThat(registryDe.getStreetAddress()).isEqualTo("Burgstraße 28");
         softly.assertThat(registryDe.getCityPostcode()).isEqualTo("10178 Berlin");
         softly.assertThat(registryDe.getDepartmentGenericEmail()).isEqualTo("iban@bdb.de");
         softly.assertThat(registryDe.getDepartmentTel()).isEqualTo("+ 49 3016632301");
@@ -227,7 +227,8 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             + "SEPA country: Yes, "
             + "IBAN len: 22, "
             + "BBAN pattern: 8!n10!n, "
-            + "IndexRange[Bank Code: 4-11 (8)], IndexRange[Account No: 12-21 (10)], "
+            + "Bank Code: IndexRange[4-11 (8)], "
+            + "Account No: IndexRange[12-21 (10)], "
             + "IBAN Example: DE89370400440532013000, "
             + "Organization: Bundesverband deutscher Banken, "
             + "Last Update: 2011-01]";

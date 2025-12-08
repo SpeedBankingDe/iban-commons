@@ -247,7 +247,8 @@ class IbanTest {
         String expectedCheckDigits, String expectedBban, String expectedBankCode, String expectedBranchCode, String expectedAccountNumber) {
 
         IbanRegistry registry = IbanRegistry.getByCode(expectedCountryCode);
-        assertThat(registry).isNotNull();
+        assertThat(registry).isNotNull()
+            .extracting(IbanRegistry::getIbanExample).isNotNull();
         assertThat(registry.getPrimary()).isNull();
 
         Iban iban = Iban.of(ibanInput);
