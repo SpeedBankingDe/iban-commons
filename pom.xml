@@ -21,7 +21,7 @@
 
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.1</version>
+    <version>1.8.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>${project.organization.name} IBAN Commons</name>
     <description>Ultra-fast, zero-dependency, low-memory, Java 8 compatible IBAN and BIC toolkit
@@ -59,7 +59,7 @@
         <connection>scm:git:ssh//git@github.com/${project.organization.name}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${project.organization.name}/${project.artifactId}/tree/master</url>
-        <tag>iban-commons-1.8.1</tag>
+        <tag></tag>
     </scm>
 
     <issueManagement>
