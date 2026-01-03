@@ -67,11 +67,14 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /** Caches the Basic Bank Account Number (BBAN) part upon first access. */
     private transient volatile String bban;
 
-    /** Caches the Bank Code part of the BBAN upon first access. Can be null if the country's BBAN structure doesn't define it. */
+    /** Caches the Bank Code part of the BBAN upon first access. Can be null if the country's BBAN structure does not define it. */
     private transient volatile String bankCode;
 
-    /** Caches the Branch Code part of the BBAN upon first access. Can be null if the country's BBAN structure doesn't define it. */
+    /** Caches the Branch Code part of the BBAN upon first access. Can be null if the country's BBAN structure does not define it. */
     private transient volatile String branchCode;
+
+    /** Caches the National Check Digit part of the BBAN upon first access. */
+    private transient volatile String nationalCheckDigit;
 
     /** Caches the Account Number part of the BBAN upon first access. */
     private transient volatile String accountNumber;
@@ -327,6 +330,21 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getBankAndBranchCode() {
         return getBranchCode() == null ? getBankCode() : getBankCode() + getBranchCode();
+    }
+
+    /**
+     * Returns the national check digit (NCD) part of the BBAN, if present.
+     *
+     * @return The national check digit (NCD) string.
+     *
+     * @since 1.8.1
+     */
+    public String getNationalCheckDigit() {
+        if (nationalCheckDigit == null && countryData.getNationalCheckDigitIndexRange() != null) {
+            // lazy initialization based on metadata indices
+            nationalCheckDigit = countryData.getNationalCheckDigitIndexRange().applyTo(ibanArr);
+        }
+        return nationalCheckDigit;
     }
 
     /**

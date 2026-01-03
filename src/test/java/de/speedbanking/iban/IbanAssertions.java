@@ -73,8 +73,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (actual.length() != expectedLength) {
-                failWithMessage("Expected IBAN length to be <%d> but was <%d> for IBAN <%s>",
-                        expectedLength, actual.length(), actual.toString());
+                failWithMessage("Expected IBAN length to be %d but was %d for IBAN '%s'",
+                    expectedLength, actual.length(), actual);
             }
 
             return myself;
@@ -90,8 +90,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getCountryCode(), expectedCountryCode)) {
-                failWithMessage("Expected country code to be <%s> but was <%s> for IBAN <%s>",
-                        expectedCountryCode, actual.getCountryCode(), actual.toString());
+                failWithMessage("Expected country code to be '%s' but was '%s' for IBAN '%s'",
+                    expectedCountryCode, actual.getCountryCode(), actual);
             }
 
             return myself;
@@ -107,8 +107,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getCountryFlag(), expectedCountryFlag)) {
-                failWithMessage("Expected country flag to be <%s> but was <%s> for IBAN <%s>",
-                        expectedCountryFlag, actual.getCountryFlag(), actual.toString());
+                failWithMessage("Expected country flag to be '%s' but was '%s' for IBAN '%s'",
+                    expectedCountryFlag, actual.getCountryFlag(), actual);
             }
 
             return myself;
@@ -124,8 +124,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getCountryName(), expectedCountryName)) {
-                failWithMessage("Expected country name to be <%s> but was <%s> for IBAN <%s>",
-                        expectedCountryName, actual.getCountryName(), actual.toString());
+                failWithMessage("Expected country name to be '%s' but was '%s' for IBAN '%s'",
+                    expectedCountryName, actual.getCountryName(), actual);
             }
 
             return myself;
@@ -141,8 +141,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getCheckDigits(), expectedCheckDigits)) {
-                failWithMessage("Expected check digits to be <%s> but was <%s> for IBAN <%s>",
-                        expectedCheckDigits, actual.getCheckDigits(), actual.toString());
+                failWithMessage("Expected check digits to be '%s' but was '%s' for IBAN '%s'",
+                    expectedCheckDigits, actual.getCheckDigits(), actual);
             }
 
             return myself;
@@ -172,8 +172,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getBban(), expectedBban)) {
-                failWithMessage("Expected BBAN to be <%s> but was <%s> for IBAN <%s>",
-                        expectedBban, actual.getBban(), actual.toString());
+                failWithMessage("Expected BBAN to be '%s' but was '%s' for IBAN '%s'",
+                    expectedBban, actual.getBban(), actual);
             }
 
             return myself;
@@ -189,8 +189,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getBankCode(), expectedBankCode)) {
-                failWithMessage("Expected bank code to be <%s> but was <%s> for IBAN <%s>",
-                        expectedBankCode, actual.getBankCode(), actual.toString());
+                failWithMessage("Expected bank code to be '%s' but was '%s' for IBAN '%s'",
+                    expectedBankCode, actual.getBankCode(), actual);
             }
 
             return myself;
@@ -206,8 +206,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getBranchCode(), expectedBranchCode)) {
-                failWithMessage("Expected branch code to be <%s> but was <%s> for IBAN <%s>",
-                        expectedBranchCode, actual.getBranchCode(), actual.toString());
+                failWithMessage("Expected branch code to be '%s' but was '%s' for IBAN '%s'",
+                    expectedBranchCode, actual.getBranchCode(), actual);
             }
 
             return myself;
@@ -223,8 +223,25 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getBankAndBranchCode(), expectedBankAndBranchCode)) {
-                failWithMessage("Expected bank and branch code to be <%s> but was <%s> for IBAN <%s>",
-                        expectedBankAndBranchCode, actual.getBankAndBranchCode(), actual.toString());
+                failWithMessage("Expected bank and branch code to be '%s' but was '%s' for IBAN '%s'",
+                    expectedBankAndBranchCode, actual.getBankAndBranchCode(), actual);
+            }
+
+            return myself;
+        }
+
+        /**
+         * Verifies that the actual IBAN instance has the given national check digit (NCD).
+         *
+         * @param expectedNationalCheckDigit The expected national check digit.
+         * @return This assertion object.
+         */
+        public IbanAssert hasNationalCheckDigit(String expectedNationalCheckDigit) {
+            isNotNull();
+
+            if (!Objects.equals(actual.getNationalCheckDigit(), expectedNationalCheckDigit)) {
+                failWithMessage("Expected national check digit to be '%s' but was '%s' for IBAN '%s'",
+                    expectedNationalCheckDigit, actual.getNationalCheckDigit(), actual);
             }
 
             return myself;
@@ -240,8 +257,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getAccountNumber(), expectedAccountNumber)) {
-                failWithMessage("Expected account number to be <%s> but was <%s> for IBAN <%s>",
-                        expectedAccountNumber, actual.getAccountNumber(), actual.toString());
+                failWithMessage("Expected account number to be '%s' but was '%s' for IBAN '%s'",
+                    expectedAccountNumber, actual.getAccountNumber(), actual);
             }
 
             return myself;
@@ -257,8 +274,8 @@ public class IbanAssertions extends Assertions {
             isNotNull();
 
             if (!Objects.equals(actual.getOrganisation(), expectedOrganisation)) {
-                failWithMessage("Expected organisation to be <%s> but was <%s> for IBAN <%s>",
-                        expectedOrganisation, actual.getOrganisation(), actual.toString());
+                failWithMessage("Expected organisation to be '%s' but was '%s' for IBAN '%s'",
+                    expectedOrganisation, actual.getOrganisation(), actual);
             }
 
             return myself;

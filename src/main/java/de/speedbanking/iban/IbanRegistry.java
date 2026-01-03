@@ -109,6 +109,7 @@ public enum IbanRegistry {
          .withBbanPattern("8!n16!c")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("5!n", IndexRange.of(7, 11))
+         .withNationalCheckDigit(IndexRange.of(11, 12))
          .withAccountNumber(IndexRange.of(12, 28))
          .build(),
        MetaData.of(
@@ -131,6 +132,7 @@ public enum IbanRegistry {
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
          .withAccountNumber(IndexRange.of(12, 23))
+         .withNationalCheckDigit(IndexRange.of(23, 25))
          .build(),
        MetaData.of(
            "Angola", false, "AO06000600000100037131174",
@@ -189,6 +191,7 @@ public enum IbanRegistry {
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("3!n", IndexRange.of(7, 10))
          .withAccountNumber(IndexRange.of(10, 18))
+         .withNationalCheckDigit(IndexRange.of(18, 20))
          .build(),
        MetaData.of(
            "Bosnia and Herzegovina", false, "BA391290079401028494",
@@ -209,6 +212,7 @@ public enum IbanRegistry {
          .withBbanPattern("3!n7!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 14))
+         .withNationalCheckDigit(IndexRange.of(14, 16))
          .build(),
        MetaData.of(
            "Belgium", true, "BE68539007547034",
@@ -514,6 +518,7 @@ public enum IbanRegistry {
          .withBankCode("2!n", IndexRange.of(4, 6))
          .withBranchCode("2!n", IndexRange.of(6, 8))
          .withAccountNumber(IndexRange.of(8, 19))
+         .withNationalCheckDigit(IndexRange.of(19, 20))
          .build(),
        MetaData.of(
            "Estonia", true, "EE382200221020145685",
@@ -555,6 +560,7 @@ public enum IbanRegistry {
          .withBbanPattern("4!n4!n1!n1!n10!n")
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
+         .withNationalCheckDigit(IndexRange.of(12, 14))
          .withAccountNumber(IndexRange.of(14, 24))
          .build(),
        MetaData.of(
@@ -576,6 +582,7 @@ public enum IbanRegistry {
          .withBbanPattern("3!n11!n")
          .withBankCode("6!n", IndexRange.of(4, 10))
          .withAccountNumber(IndexRange.of(10, 17))
+         .withNationalCheckDigit(IndexRange.of(17, 18))
          .build(),
        MetaData.of(
            "Finland", true, "FI2112345600000785",
@@ -625,6 +632,7 @@ public enum IbanRegistry {
          .withBbanPattern("4!n9!n1!n")
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withAccountNumber(IndexRange.of(8, 17))
+         .withNationalCheckDigit(IndexRange.of(17, 18))
          .build(),
        MetaData.of(
            "Faroe Islands", false, "FO6264600001631634",
@@ -646,6 +654,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 9))
          .withBranchCode("5!n", IndexRange.of(9, 14))
          .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
          .build(),
        MetaData.of(
            "France", true, "FR1420041010050500013M02606",
@@ -982,6 +991,7 @@ public enum IbanRegistry {
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("4!n", IndexRange.of(7, 11))
          .withAccountNumber(IndexRange.of(11, 27))
+         .withNationalCheckDigit(IndexRange.of(27, 28))
          .build(),
        MetaData.of(
            "Hungary", true, "HU42117730161111101800000000",
@@ -1101,6 +1111,7 @@ public enum IbanRegistry {
      */
     IT(StructureData.builder().withIbanLength(27)
          .withBbanPattern("1!a5!n5!n12!c")
+         .withNationalCheckDigit(IndexRange.of(4, 5))
          .withBankCode("5!n", IndexRange.of(5, 10))
          .withBranchCode("5!n", IndexRange.of(10, 15))
          .withAccountNumber(IndexRange.of(15, 27))
@@ -1345,6 +1356,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 9))
          .withBranchCode("5!n", IndexRange.of(9, 14))
          .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
          .build(),
        MetaData.of(
            "Monaco", true, "MC5811222000010123456789030",
@@ -1385,6 +1397,7 @@ public enum IbanRegistry {
          .withBbanPattern("3!n13!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 20))
+         .withNationalCheckDigit(IndexRange.of(20, 22))
          .build(),
        MetaData.of(
            "Montenegro", false, "ME25505000012345678951",
@@ -1405,6 +1418,7 @@ public enum IbanRegistry {
          .withBbanPattern("3!n10!c2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 17))
+         .withNationalCheckDigit(IndexRange.of(17, 19))
          .build(),
        MetaData.of(
            "North Macedonia", false, "MK07250120000058984",
@@ -1446,6 +1460,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 9))
          .withBranchCode("5!n", IndexRange.of(9, 14))
          .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
          .build(),
        MetaData.of(
            "Mauritania", false, "MR1300020001010000123456753",
@@ -1509,6 +1524,7 @@ public enum IbanRegistry {
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
          .withAccountNumber(IndexRange.of(12, 23))
+         .withNationalCheckDigit(IndexRange.of(23, 25))
          .build(),
        MetaData.of(
            "Mozambique", false, "MZ59000800005138555713187",
@@ -1566,6 +1582,7 @@ public enum IbanRegistry {
          .withBbanPattern("4!n6!n1!n")
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withAccountNumber(IndexRange.of(8, 14))
+         .withNationalCheckDigit(IndexRange.of(14, 15))
          .build(),
        MetaData.of(
            "Norway", true, "NO9386011117947",
@@ -1626,6 +1643,7 @@ public enum IbanRegistry {
          .withBbanPattern("8!n16!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("4!n", IndexRange.of(7, 11))
+         .withNationalCheckDigit(IndexRange.of(11, 12))
          .withAccountNumber(IndexRange.of(12, 28))
          .build(),
        MetaData.of(
@@ -1668,6 +1686,7 @@ public enum IbanRegistry {
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
          .withAccountNumber(IndexRange.of(12, 23))
+         .withNationalCheckDigit(IndexRange.of(23, 25))
          .build(),
        MetaData.of(
            "Portugal", true, "PT50000201231234567890154",
@@ -1728,6 +1747,7 @@ public enum IbanRegistry {
          .withBbanPattern("3!n13!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 20))
+         .withNationalCheckDigit(IndexRange.of(20, 22))
          .build(),
        MetaData.of(
            "Serbia", false, "RS35260005601001611379",
@@ -1830,6 +1850,7 @@ public enum IbanRegistry {
          .withBbanPattern("3!n16!n1!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 24))
+         .withNationalCheckDigit(IndexRange.of(23, 24))
          .build(),
        MetaData.of(
            "Sweden", true, "SE4550000000058398257466",
@@ -1851,6 +1872,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 6))
          .withBranchCode("3!n", IndexRange.of(6, 9))
          .withAccountNumber(IndexRange.of(9, 17))
+         .withNationalCheckDigit(IndexRange.of(17, 19))
          .build(),
        MetaData.of(
            "Slovenia", true, "SI56263300012039086",
@@ -1889,6 +1911,7 @@ public enum IbanRegistry {
      */
     SM(StructureData.builder().withIbanLength(27)
          .withBbanPattern("1!a5!n5!n12!c")
+         .withNationalCheckDigit(IndexRange.of(4, 5))
          .withBankCode("5!n", IndexRange.of(5, 10))
          .withBranchCode("5!n", IndexRange.of(10, 15))
          .withAccountNumber(IndexRange.of(15, 27))
@@ -1974,6 +1997,7 @@ public enum IbanRegistry {
          .withBbanPattern("3!n14!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 21))
+         .withNationalCheckDigit(IndexRange.of(21, 23))
          .build(),
        MetaData.of(
            "Timor-Leste", false, "TL380080012345678910157",
@@ -1995,6 +2019,7 @@ public enum IbanRegistry {
          .withBankCode("2!n", IndexRange.of(4, 6))
          .withBranchCode("3!n", IndexRange.of(6, 9))
          .withAccountNumber(IndexRange.of(9, 22))
+         .withNationalCheckDigit(IndexRange.of(22, 24))
          .build(),
        MetaData.of(
            "Tunisia", false, "TN5910006035183598478831",
@@ -2014,6 +2039,7 @@ public enum IbanRegistry {
     TR(StructureData.builder().withIbanLength(26)
          .withBbanPattern("5!n1!n16!c")
          .withBankCode("5!n", IndexRange.of(4, 9))
+         .withNationalCheckDigit(IndexRange.of(9, 10))
          .withAccountNumber(IndexRange.of(10, 26))
          .build(),
        MetaData.of(
@@ -2096,6 +2122,7 @@ public enum IbanRegistry {
          .withBankCode("2!n", IndexRange.of(4, 6))
          .withBranchCode("2!n", IndexRange.of(6, 8))
          .withAccountNumber(IndexRange.of(8, 18))
+         .withNationalCheckDigit(IndexRange.of(18, 20))
          .build(),
        MetaData.of(
            "Kosovo", false, "XK051212012345678906",
@@ -2344,6 +2371,15 @@ public enum IbanRegistry {
     }
 
     /**
+     * Returns the index range defining the position of the optional National Check Digit (NCD) within the IBAN.
+     *
+     * @return The {@code IndexRange} for the national check digit.
+     */
+    IndexRange getNationalCheckDigitIndexRange() {
+        return structureData.nationalCheckDigitIndexRange();
+    }
+
+    /**
      * Returns the name of the regulatory or financial organization responsible for the IBAN registry.
      *
      * @return The organization's name.
@@ -2522,6 +2558,7 @@ public enum IbanRegistry {
         private final String     branchCodePatternStr;
         private final IndexRange branchCodeIndexRange;
         private final IndexRange accountNumberIndexRange;
+        private final IndexRange nationalCheckDigitIndexRange;
 
         // Privater Konstruktor akzeptiert den Builder
         private StructureData(Builder builder) {
@@ -2535,6 +2572,7 @@ public enum IbanRegistry {
             this.branchCodePatternStr = builder.branchCodePatternStr;
             this.branchCodeIndexRange = builder.branchCodeIndexRange;
             this.accountNumberIndexRange = Objects.requireNonNull(builder.accountNumberIndexRange, "accountNumberIndexRange required");
+            this.nationalCheckDigitIndexRange = builder.nationalCheckDigitIndexRange;
         }
 
         public static Builder builder() {
@@ -2545,21 +2583,22 @@ public enum IbanRegistry {
 
         public static final class Builder {
             // Alle Felder sind optional initialisiert (0 oder null)
-            private int ibanLength;
-            private String bbanPatternStr;
+            private int        ibanLength;
+            private String     bbanPatternStr;
             private IndexRange accountNumberIndexRange;
 
             // Optionale Felder (Defaulted to null)
-            private String bankCodePatternStr;
+            private String     bankCodePatternStr;
             private IndexRange bankCodeIndexRange;
-            private String branchCodePatternStr;
+            private String     branchCodePatternStr;
             private IndexRange branchCodeIndexRange;
+            private IndexRange nationalCheckDigitIndexRange;
 
             private Builder() {
                 // Parameterloser Konstruktor
             }
 
-            // NEU: Setter für die obligatorischen Felder
+            // Setter für die obligatorischen Felder
             public Builder withIbanLength(int ibanLength) {
                 this.ibanLength = ibanLength;
                 return this;
@@ -2572,6 +2611,11 @@ public enum IbanRegistry {
 
             public Builder withAccountNumber(IndexRange accountNumberIndexRange) {
                 this.accountNumberIndexRange = accountNumberIndexRange;
+                return this;
+            }
+
+            public Builder withNationalCheckDigit(IndexRange nationalCheckDigitIndexRange) {
+                this.nationalCheckDigitIndexRange = nationalCheckDigitIndexRange;
                 return this;
             }
 
@@ -2625,6 +2669,10 @@ public enum IbanRegistry {
 
         public IndexRange accountNumberIndexRange() {
             return accountNumberIndexRange;
+        }
+
+        public IndexRange nationalCheckDigitIndexRange() {
+            return nationalCheckDigitIndexRange;
         }
 
         public boolean hasBranchCode() {
