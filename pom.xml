@@ -364,6 +364,7 @@
                             <owner>${developer1Name}, ${project.organization.name}</owner>
                         </properties>
                         <excludes>
+                            <exclude>**/package-info.java</exclude>
                             <exclude>src/test/java/**/*.java</exclude>
                             <exclude>src/test/resources/**</exclude>
                             <exclude>**/*.properties</exclude>
