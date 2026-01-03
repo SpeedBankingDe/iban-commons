@@ -18,22 +18,20 @@ package de.speedbanking.util;
 import java.util.Objects;
 
 /**
- * Represents an immutable, named range defined by a begin index (inclusive) and an
- * ending index (exclusive).
+ * Represents an immutable range defined by a begin index (inclusive)
+ * and an ending index (exclusive).
  * <p>
  * This class models a **half-open interval** {@code [begin, end)}, which is consistent with
  * indexing conventions used in Java (e.g., {@link String#substring(int, int)}) and
- * is ideally suited for defining segments within a string (such as BBAN parts in an IBAN).
+ * is ideally suited for defining segments within a string (such as BBAN parts in an IBAN).<br>
+ * It implements {@link Comparable} to allow sorting by start position, then end position.
  *
  * @since 1.8.0
  */
-public final class IndexRange implements java.io.Serializable {
+public final class IndexRange implements java.io.Serializable, Comparable<IndexRange> {
 
     /** Serial version UID. */
     private static final long serialVersionUID = 42L;
-
-    /** The descriptive name for the range (e.g., "Bank Code"). Can be null. */
-    private final String      name;
 
     /** The begin index of the range (inclusive). */
     private final int         begin;
@@ -43,14 +41,12 @@ public final class IndexRange implements java.io.Serializable {
 
     /**
      * Private constructor.
-     *
-     * @param name  The descriptive name for the range (e.g., "Bank Code"). May be {@code null}.
      * @param begin The begin index (inclusive).
      * @param end   The ending index (exclusive).
      *
      * @throws IllegalArgumentException if end is less than begin or indices are negative.
      */
-    private IndexRange(final String name, final int begin, final int end) {
+    private IndexRange(final int begin, final int end) {
         if (begin < 0) {
             throw new IllegalArgumentException("Index 'begin' (" + begin + ") must be non-negative");
         } else if (end < begin) {
@@ -58,45 +54,21 @@ public final class IndexRange implements java.io.Serializable {
                 "Index 'end' (" + end + ") must be greater than or equal to 'begin' (" + begin + ")");
         }
 
-        this.name = name;
         this.begin = begin;
         this.end = end;
     }
 
     /**
-     * Static factory method to create an {@code IndexRange} instance with a descriptive name.
-     *
-     * @param name  The descriptive name for the range (e.g., "Bank Code").
-     * @param begin The begin index (inclusive).
-     * @param end   The ending index (exclusive).
-     * @return A new named {@code IndexRange} instance.
-     *
-     * @throws IllegalArgumentException if end is less than begin or indices are negative.
-     */
-    public static IndexRange of(String name, int begin, int end) {
-        return new IndexRange(name, begin, end);
-    }
-
-    /**
-     * Static factory method to create an unnamed {@code IndexRange} instance.
+     * Static factory method to create an {@code IndexRange} instance.
      *
      * @param begin The begin index (inclusive).
      * @param end   The ending index (exclusive).
-     * @return A new unnamed {@code IndexRange} instance.
+     * @return A new {@code IndexRange} instance.
      *
      * @throws IllegalArgumentException if end is less than begin or indices are negative.
      */
     public static IndexRange of(int begin, int end) {
-        return new IndexRange(null, begin, end);
-    }
-
-    /**
-     * Returns the descriptive name of the range.
-     *
-     * @return The name, or {@code null} if no name was provided.
-     */
-    public String getName() {
-        return name;
+        return new IndexRange(begin, end);
     }
 
     /**
@@ -157,10 +129,31 @@ public final class IndexRange implements java.io.Serializable {
         return new String(sequence, begin, count);
     }
 
-    /**
+     /**
+     * Compares this range with another based on the start index, then the end index.
+     * <p>
+     * This sorting order is useful for processing segments of a string in sequential order.
+     *
+     * @param other the range to be compared
+     * @return a negative integer, zero, or a positive integer as this range
+     *         is less than, equal to, or greater than the specified range.
+     * @throws NullPointerException if the specified object is null
+     * @since 1.8.1
+     */
+    @Override
+    public int compareTo(IndexRange other) {
+        Objects.requireNonNull(other, "Comparison object must not be null");
+        int result = Integer.compare(this.begin, other.begin);
+        if (result == 0) {
+            result = Integer.compare(this.end, other.end);
+        }
+        return result;
+    }
+
+   /**
      * Compares this range to the specified object. The result is {@code true}
      * if and only if the argument is not {@code null} and is an {@code IndexRange}
-     * object that has the same name, start, and end indices.
+     * object that has the same start, and end indices.
      *
      * @param o The object to compare with.
      * @return {@code true} if the objects are the same; {@code false} otherwise.
@@ -173,25 +166,23 @@ public final class IndexRange implements java.io.Serializable {
             return false;
         }
         IndexRange other = (IndexRange) o;
-        return begin == other.begin
-            && end == other.end
-            && Objects.equals(name, other.name);
+        return begin == other.begin && end == other.end;
     }
 
     /**
-     * Returns a hash code based on the begin, end, and name fields.
+     * Returns a hash code based on the begin and end fields.
      *
      * @return The hash code.
      */
     @Override
     public int hashCode() {
-        return Objects.hash(begin, end, name);
+        return Objects.hash(begin, end);
     }
 
     /**
-     * Returns a string representation of this range, including its optional name,
+     * Returns a string representation of this range,
      * inclusive start index, inclusive last index (calculated as {@code end - 1}), and total length.<br>
-     * Example: {@code IndexRange[Bank Code: 4-7 (4)]} or {@code IndexRange[4-7 (4)]}
+     * Example: {@code IndexRange[Bank Code: 4-7 (4)]}
      *
      * @return A string representation of the range.
      */
@@ -199,10 +190,8 @@ public final class IndexRange implements java.io.Serializable {
     public String toString() {
         return getClass().getSimpleName()
             + '['
-            + (name == null ? "" : name + ": ")
             + begin + '-' + (end - 1)
-            + " (" + length() + ')'
-            + ']';
+            + " (" + length() + ")]";
     }
 
 }

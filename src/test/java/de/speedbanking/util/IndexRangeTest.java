@@ -11,25 +11,9 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 class IndexRangeTest extends org.assertj.core.api.Assertions {
 
-    private static final String DEFAULT_NAME = "TestRange";
-
     @DisplayName("Should create IndexRange and check getters for valid indices")
     @Test
     void shouldCreateAndCheckGetters() {
-        final int begin = 5;
-        final int end = 10;
-
-        IndexRange range = IndexRange.of(DEFAULT_NAME, begin, end);
-
-        assertThat(range)
-            .isNotNull()
-            .extracting(IndexRange::getName, IndexRange::getBegin, IndexRange::getEnd)
-            .containsExactly(DEFAULT_NAME, begin, end);
-    }
-
-    @DisplayName("Should create unnamed IndexRange (name=null) and check getters")
-    @Test
-    void shouldCreateUnnamedRange() {
         final int begin = 5;
         final int end = 10;
 
@@ -37,16 +21,8 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
 
         assertThat(range)
             .isNotNull()
-            .extracting(IndexRange::getName, IndexRange::getBegin, IndexRange::getEnd)
-            .containsExactly(null, begin, end);
-    }
-
-    @DisplayName("Should handle various names correctly including empty string")
-    @ParameterizedTest
-    @ValueSource(strings = {"Valid Name", "", "a"})
-    void shouldHandleVariousNames(String name) {
-        IndexRange range = IndexRange.of(name, 0, 1);
-        assertThat(range.getName()).isEqualTo(name);
+            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .containsExactly(begin, end);
     }
 
     @DisplayName("Should throw IllegalArgumentException if begin index is negative")
@@ -54,7 +30,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @ValueSource(ints = {-1, -5, Integer.MIN_VALUE})
     void shouldThrowIAEWhenBeginIsNegative(int negativeBegin) {
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> IndexRange.of(DEFAULT_NAME, negativeBegin, 1))
+            .isThrownBy(() -> IndexRange.of(negativeBegin, 1))
             .withMessageContaining("must be non-negative");
     }
 
@@ -67,14 +43,14 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     })
     void shouldThrowIAEWhenEndIsLessThanBegin(int begin, int end) {
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> IndexRange.of(DEFAULT_NAME, begin, end))
+            .isThrownBy(() -> IndexRange.of(begin, end))
             .withMessageContaining("must be greater than or equal to 'begin'");
     }
 
     @DisplayName("Should allow zero-length range (begin == end)")
     @Test
     void shouldAllowZeroLengthRange() {
-        IndexRange range = IndexRange.of(DEFAULT_NAME, 5, 5);
+        IndexRange range = IndexRange.of(5, 5);
         assertThat(range)
             .isNotNull()
             .extracting(IndexRange::length, IndexRange::getBegin, IndexRange::getEnd)
@@ -90,7 +66,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
         " 0 |  0 |  0"
     })
     void shouldReturnCorrectLength(int begin, int end, int expectedLength) {
-        IndexRange range = IndexRange.of(DEFAULT_NAME, begin, end);
+        IndexRange range = IndexRange.of(begin, end);
         assertThat(range.length()).isEqualTo(expectedLength);
     }
 
@@ -98,7 +74,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @Test
     void shouldExtractCorrectSubstringFromCharSequence() {
         final String sequence = "ABCDEFGHIJ"; // 10 chars, indices 0 to 9
-        IndexRange range = IndexRange.of("Segment", 3, 7); // indices 3 (incl.) to 7 (excl.) -> DEFG
+        IndexRange range = IndexRange.of(3, 7); // indices 3 (incl.) to 7 (excl.) -> DEFG
 
         CharSequence result = range.applyTo(sequence);
 
@@ -109,7 +85,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @Test
     void shouldThrowIOOBEWhenSequenceIsTooShortForCharSequence() {
         final String sequence = "ABC"; // Length 3, indices 0, 1, 2
-        IndexRange range = IndexRange.of("LongRange", 1, 5); // needs index 5 (exclusive)
+        IndexRange range = IndexRange.of(1, 5); // needs index 5 (exclusive)
 
         assertThatExceptionOfType(IndexOutOfBoundsException.class)
             .isThrownBy(() -> range.applyTo(sequence));
@@ -119,7 +95,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @Test
     void shouldExtractCorrectStringFromCharArray() {
         final char[] sequence = "KLMNOPQRSTUVWXYZ".toCharArray();
-        IndexRange range = IndexRange.of("MidSection", 4, 10); // indices 4 (incl.) to 10 (excl.) -> OPQRST
+        IndexRange range = IndexRange.of(4, 10); // indices 4 (incl.) to 10 (excl.) -> OPQRST
 
         String result = range.applyTo(sequence);
 
@@ -130,7 +106,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @Test
     void shouldThrowIOOBEWhenCharArrayIsTooShort() {
         final char[] sequence = "K".toCharArray(); // Length 1
-        IndexRange range = IndexRange.of("LongRange", 0, 5); // needs index 5 (exclusive)
+        IndexRange range = IndexRange.of(0, 5); // needs index 5 (exclusive)
 
         // The underlying String constructor throws an IndexOutOfBoundsException
         assertThatExceptionOfType(IndexOutOfBoundsException.class)
@@ -140,28 +116,16 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @DisplayName("Should satisfy equals and hashCode contract, including null names")
     @Test
     void shouldSatisfyEqualsAndHashCodeContract() {
-        IndexRange range1 = IndexRange.of(DEFAULT_NAME, 1, 5);
-        IndexRange range2 = IndexRange.of(DEFAULT_NAME, 1, 5);
-        IndexRange rangeUnnamed1 = IndexRange.of(1, 5);
-        IndexRange rangeUnnamed2 = IndexRange.of(1, 5);
-        IndexRange rangeDifferentName = IndexRange.of("OtherName", 1, 5);
-        IndexRange rangeDifferentBegin = IndexRange.of(DEFAULT_NAME, 0, 5);
+        IndexRange range1 = IndexRange.of(1, 5);
+        IndexRange range2 = IndexRange.of(1, 5);
+        IndexRange rangeDifferentBegin = IndexRange.of(0, 5);
 
         // Test with names
         assertThat(range1)
             .isEqualTo(range1)
             .isEqualTo(range2)
             .hasSameHashCodeAs(range2)
-            .isNotEqualTo(rangeDifferentName)
             .isNotEqualTo(rangeDifferentBegin);
-
-        // Test with null names
-        assertThat(rangeUnnamed1)
-            .isEqualTo(rangeUnnamed2)
-            .hasSameHashCodeAs(rangeUnnamed2);
-
-        // Test named vs unnamed
-        assertThat(range1).isNotEqualTo(rangeUnnamed1);
 
         // Test against null and different object type
         assertThat(range1)
@@ -172,10 +136,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @DisplayName("Should return correct and descriptive toString format, handling null name")
     @Test
     void shouldReturnCorrectToString() {
-        IndexRange namedRange = IndexRange.of("Bank Code", 4, 8); // Length 4. End-1 = 7
-        IndexRange unnamedRange = IndexRange.of(1, 5); // Length 4. End-1 = 4
-
-        assertThat(namedRange.toString()).isEqualTo("IndexRange[Bank Code: 4-7 (4)]");
-        assertThat(unnamedRange.toString()).isEqualTo("IndexRange[1-4 (4)]");
+         // Length 4. End-1 = 4
+        assertThat(IndexRange.of(1, 5).toString()).isEqualTo("IndexRange[1-4 (4)]");
     }
 }
