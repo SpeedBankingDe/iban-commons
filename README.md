@@ -59,7 +59,7 @@ Add the following to your project's `pom.xml`:
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.0</version>
+    <version>1.8.1</version>
 </dependency>
 ```
 
@@ -68,7 +68,7 @@ Add the following to your project's `pom.xml`:
 Add this line to your project's `build.gradle` or `build.gradle.kts`:
 
 ```
-implementation 'de.speedbanking:iban-commons:1.8.0'
+implementation 'de.speedbanking:iban-commons:1.8.1'
 ```
 
 -----
@@ -179,33 +179,33 @@ Bic.tryParse("INVALIDBIC").ifPresentOrElse(
 
 `iban-commons` is designed for **high throughput** and **minimal overhead**.
 
-We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries, [iban4j](http://www.iban4j.org/) and [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/).
+We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries: [iban4j](http://www.iban4j.org/), [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/), and [garvelink-iban](https://github.com/barend/java-iban).
 
 ### Validation Throughput Comparison
 
-The results below demonstrate the significant **throughput** advantage (operations per second) of `iban-commons` compared to other libraries.
+The results below demonstrate the significant **throughput** advantage (operations per second) of `iban-commons`.
 
-| Benchmark Operation | iban-commons (ops/s) | [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/) (ops/s) | [iban4j](https://github.com/arturmkrtchyan/iban4j) (ops/s) | Speedup vs. iban4j |
-| :--- | :--- | :--- | :--- | :--- |
-| **Pure Validation** (`.isValid()`)          | **5048** | 4734 | 789 | **~6.4x faster** |
-| **Object Creation** (`.tryParse()`/`.of()`) | **2723** | n/a  | 748 | **~3.6x faster** |
+| Benchmark Operation                         | iban-commons (ops/s) | Apache Commons (ops/s) | garvelink-iban (ops/s) | iban4j (ops/s) | Speedup vs. iban4j |
+|---------------------------------------------|----------------------|------------------------|------------------------|----------------|--------------------|
+| **Pure Validation** (`.isValid()`)          | **5257**             | 4786                   | n/a                    | 814            | **~6.4x faster**   |
+| **Object Creation** (`.tryParse()`/`.of()`) | **2993**             | n/a                    | 863                    | 754            | **~3.9x faster**   |
 
 ### Memory Footprint Comparison
 
-These results, derived from the JMH **GC Profiler**, quantify the **memory allocation overhead** per operation (B/op). Lower values indicate less work for the Garbage Collector (GC) and a smaller memory footprint.
+These results, derived from the JMH **GC Profiler**, quantify the **memory allocation overhead** per operation (B/op). Lower values indicate less work for the Garbage Collector (GC).
 
-| Benchmark Operation | iban-commons (B/op) | Apache Commons Validator (B/op) | iban4j (B/op) | Allocation Efficiency |
-| :--- | :--- | :--- | :--- | :--- |
-| **Pure Validation** (`.isValid()`)          | **136.9M** | 327.2M | 1627.4M | **~11.9x smaller vs. iban4j** |
-| **Object Creation** (`.tryParse()`/`.of()`) | **253.8M** | n/a    | 1614.5M | **~6.4x smaller vs. iban4j**  |
+| Benchmark Operation                         | iban-commons (B/op) | Apache Commons (B/op) | garvelink-iban (B/op) | iban4j (B/op) | Allocation Efficiency         |
+|---------------------------------------------|---------------------|-----------------------|-----------------------|---------------|-------------------------------|
+| **Pure Validation** (`.isValid()`)          | **136.9M**          | 326.8M                | n/a                   | 1627.3M       | **~11.9x smaller vs. iban4j** |
+| **Object Creation** (`.tryParse()`/`.of()`) | **253.9M**          | n/a                   | 1126.1M               | 1633.7M       | **~6.4x smaller vs. iban4j**  |
 
-*Note on Memory Units: The B/op values are very large due to the nature of the JMH setup. However, the **relative difference** confirms the allocation efficiency.*
+*Note on Memory Units: The B/op values represent normalized allocations per benchmark operation. The **relative difference** confirms the high allocation efficiency of iban-commons.*
 
 ### Key Observations
 
-1.  **Pure Validation Speed:** `iban-commons` maintains the highest throughput at **5048 operations per second**.
-2.  **Memory Efficiency (Pure Validation):** The library is highly memory-efficient, requiring **~11.9 times less memory allocation** per operation than `iban4j` for pure validation.
-3.  **Object Creation:** Even when creating an immutable `Iban` object, `iban-commons` is **3.6 times faster** and **6.4 times more memory efficient** than `iban4j`.
+1. **Leading Throughput:**       `iban-commons` outperforms all tested libraries, reaching **5257 operations per second** for validation.
+2. **Superior Object Creation:** Compared to `garvelink-iban`, `iban-commons` is about **3.4x faster** and uses **4.4x less memory** when creating immutable objects.
+3. **Minimal GC Pressure:**      With only **136.9M B/op** for validation, the library requires significantly less allocation than Apache Commons (~2.4x) and iban4j (~11.9x).
 
 ### Execution Environment Details
 
@@ -214,6 +214,7 @@ The benchmarks were executed under the following configuration:
 * Intel Core i7-1165G7 @ 2.80GHz (4 Cores, 8 Threads), 32 GiB RAM
 * Ubuntu 24.04.3 LTS (Noble Numbat)
 * OpenJDK 21.0.7 LTS (`Temurin-21.0.7+6`), 64-Bit Server VM
+* JMH Version 1.37 (using Compiler Blackholes)
 
 ### Benchmark Suite Repository
 
