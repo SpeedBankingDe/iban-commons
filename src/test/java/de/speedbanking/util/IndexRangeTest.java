@@ -120,14 +120,14 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
         IndexRange range2 = IndexRange.of(1, 5);
         IndexRange rangeDifferentBegin = IndexRange.of(0, 5);
 
-        // Test with names
+        // test with names
         assertThat(range1)
             .isEqualTo(range1)
             .isEqualTo(range2)
             .hasSameHashCodeAs(range2)
             .isNotEqualTo(rangeDifferentBegin);
 
-        // Test against null and different object type
+        // test against null and different object type
         assertThat(range1)
             .isNotEqualTo(null)
             .isNotEqualTo(new Object());

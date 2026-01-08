@@ -18,8 +18,8 @@ public class IbanAssertions extends Assertions {
     /**
      * Creates a new instance of {@link IbanAssert}.
      *
-     * @param actual The IBAN instance to assert on.
-     * @return The custom assertion object.
+     * @param actual the IBAN instance to assert on
+     * @return the custom assertion object
      */
     public static IbanAssert assertThat(Iban actual) {
         return new IbanAssert(actual);
@@ -30,9 +30,9 @@ public class IbanAssertions extends Assertions {
      * This method allows custom assertions like {@code IbanAssert} to be used within
      * a {@code SoftAssertions.assertSoftly(...)} block.
      *
-     * @param actual The {@link Iban} instance to assert on.
-     * @param softly The {@link SoftAssertions} instance used for proxy injection.
-     * @return The custom assertion object, injected with soft assertion behavior.
+     * @param actual the {@link Iban} instance to assert on
+     * @param softly the {@link SoftAssertions} instance used for proxy injection
+     * @return the custom assertion object, injected with soft assertion behavior
      */
     public static IbanAssert using(Iban actual, SoftAssertions softly) {
         // simply delegate to the IbanAssert constructor.
@@ -43,7 +43,7 @@ public class IbanAssertions extends Assertions {
     /**
      * Alias for {@link #assertThatExceptionOfType(Class)} for {@link InvalidIbanException}.
      *
-     * @return the created {@link ThrowableTypeAssert}.
+     * @return the created {@link ThrowableTypeAssert}
      */
     public static ThrowableTypeAssert<InvalidIbanException> assertThatInvalidIbanException() {
         return assertThatExceptionOfType(InvalidIbanException.class);
@@ -57,7 +57,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Creates a new {@link IbanAssert}.
          *
-         * @param actual The IBAN instance to assert on.
+         * @param actual the IBAN instance to assert on.
          */
         public IbanAssert(Iban actual) {
             super(actual, IbanAssert.class);
@@ -66,7 +66,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the expected total length.
          *
-         * @param expectedLength The expected length of the IBAN string.
+         * @param expectedLength the expected length of the IBAN string.
          * @return This assertion object.
          */
         public IbanAssert hasLength(int expectedLength) {
@@ -83,7 +83,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given country code.
          *
-         * @param expectedCountryCode The expected country code (e.g., "DE", "FR").
+         * @param expectedCountryCode the expected country code (e.g., "DE", "FR").
          * @return This assertion object.
          */
         public IbanAssert hasCountryCode(String expectedCountryCode) {
@@ -100,7 +100,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given country flag.
          *
-         * @param expectedCountryFlag The expected country flag string.
+         * @param expectedCountryFlag the expected country flag string.
          * @return This assertion object.
          */
         public IbanAssert hasCountryFlag(String expectedCountryFlag) {
@@ -117,7 +117,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given country name.
          *
-         * @param expectedCountryName The expected country name (e.g., "Germany", "France").
+         * @param expectedCountryName the expected country name (e.g., "Germany", "France").
          * @return This assertion object.
          */
         public IbanAssert hasCountryName(String expectedCountryName) {
@@ -134,7 +134,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given check digits.
          *
-         * @param expectedCheckDigits The expected check digits (e.g., "91").
+         * @param expectedCheckDigits the expected check digits (e.g., "91").
          * @return This assertion object.
          */
         public IbanAssert hasCheckDigits(String expectedCheckDigits) {
@@ -151,7 +151,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given check digits.
          *
-         * @param expectedCheckDigits The expected check digits as an integer (e.g., 91, 5).
+         * @param expectedCheckDigits the expected check digits as an integer (e.g., 91, 5).
          * @return This assertion object.
          */
         public IbanAssert hasCheckDigits(int expectedCheckDigits) {
@@ -165,7 +165,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given BBAN (Basic Bank Account Number).
          *
-         * @param expectedBban The expected BBAN part.
+         * @param expectedBban the expected BBAN part.
          * @return This assertion object.
          */
         public IbanAssert hasBban(String expectedBban) {
@@ -182,7 +182,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given bank code.
          *
-         * @param expectedBankCode The expected bank code (e.g., "37040044").
+         * @param expectedBankCode the expected bank code (e.g., "37040044").
          * @return This assertion object.
          */
         public IbanAssert hasBankCode(String expectedBankCode) {
@@ -199,7 +199,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given branch code.
          *
-         * @param expectedBranchCode The expected branch code (may be null).
+         * @param expectedBranchCode the expected branch code (may be null).
          * @return This assertion object.
          */
         public IbanAssert hasBranchCode(String expectedBranchCode) {
@@ -216,7 +216,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given bank and branch code.
          *
-         * @param expectedBankAndBranchCode The expected bank and branch code (e.g., "37040044").
+         * @param expectedBankAndBranchCode the expected bank and branch code (e.g., "37040044").
          * @return This assertion object.
          */
         public IbanAssert hasBankAndBranchCode(String expectedBankAndBranchCode) {
@@ -233,7 +233,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given national check digit (NCD).
          *
-         * @param expectedNationalCheckDigit The expected national check digit.
+         * @param expectedNationalCheckDigit the expected national check digit.
          * @return This assertion object.
          */
         public IbanAssert hasNationalCheckDigit(String expectedNationalCheckDigit) {
@@ -250,7 +250,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given account number.
          *
-         * @param expectedAccountNumber The expected account number.
+         * @param expectedAccountNumber the expected account number.
          * @return This assertion object.
          */
         public IbanAssert hasAccountNumber(String expectedAccountNumber) {
@@ -267,7 +267,7 @@ public class IbanAssertions extends Assertions {
         /**
          * Verifies that the actual IBAN instance has the given organisation.
          *
-         * @param expectedOrganisation The expected organisation (e.g., "Associazione Bancaria Italiana", "Bundesverband deutscher Banken").
+         * @param expectedOrganisation the expected organisation (e.g., "Associazione Bancaria Italiana", "Bundesverband deutscher Banken").
          * @return This assertion object.
          */
         public IbanAssert hasOrganisation(String expectedOrganisation) {

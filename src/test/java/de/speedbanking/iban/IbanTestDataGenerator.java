@@ -11,7 +11,7 @@ final class IbanTestDataGenerator {
             Iban iban = Iban.of(ir.getIbanExample());
             String str = iban.getBranchCode();
             String line = String.join(" | ",
-                String.format("\"%-" + IbanRegistry.MAX_IBAN_LENGTH + "s", iban.toString()),
+                String.format("\"%-" + IbanRegistry.MAX_IBAN_LENGTH + "s", iban),
                 String.valueOf(ir.getIbanLength()),
                 ir.getCountryCode(),
                 ir.getCountryFlag(),

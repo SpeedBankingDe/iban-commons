@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public final class CountryUtil {
      * This method only checks the format and does not validate if the code
      * actually represents a currently assigned ISO country.
      *
-     * @param countryCode The string to validate (e.g., "US", "CH").
-     * @return {@code true} if the string is a valid two-letter uppercase code; {@code false} otherwise.
+     * @param countryCode the string to validate (e.g., "US", "CH")
+     * @return {@code true} if the string is a valid two-letter uppercase code; {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -58,9 +58,9 @@ public final class CountryUtil {
      * This conversion relies on the Unicode Regional Indicator Symbol Letters (RIS)
      * which are calculated by adding an offset to the uppercase ASCII value of the letters.
      *
-     * @param countryCode The two-letter Alpha-2 country code (case-insensitive).
-     * @return The flag emoji string, or an empty string if the input code is invalid or null.
-     * @throws IllegalArgumentException if the provided {@code countryCode} is not a valid two-letter uppercase code (as checked by {@link #isValidCountryCode(String)}).
+     * @param countryCode the two-letter Alpha-2 country code (case-insensitive)
+     * @return the flag emoji string, or an empty string if the input code is invalid or null
+     * @throws IllegalArgumentException if the provided {@code countryCode} is not a valid two-letter uppercase code (as checked by {@link #isValidCountryCode(String)})
      *
      * @since 1.8.0
      */

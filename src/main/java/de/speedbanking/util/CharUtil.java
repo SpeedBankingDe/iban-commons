@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ public final class CharUtil {
     /**
      * Checks if a character is a numeric digit ('0'-'9').
      *
-     * @param c The character to check.
-     * @return {@code true} if the character is a digit, {@code false} otherwise.
+     * @param c the character to check
+     * @return {@code true} if the character is a digit, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -49,12 +49,12 @@ public final class CharUtil {
     /**
      * Checks if all characters within the specified range of the array are numeric digits ('0'-'9').
      *
-     * @param chars      The character array to check.
-     * @param beginIndex The start index (inclusive).
-     * @param endIndex   The end index (exclusive).
-     * @return {@code true} if all characters are digits, {@code false} otherwise.
-     * @throws NullPointerException if {@code chars} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is invalid.
+     * @param chars      the character array to check
+     * @param beginIndex the start index (inclusive)
+     * @param endIndex   the end index (exclusive)
+     * @return {@code true} if all characters are digits, {@code false} otherwise
+     * @throws NullPointerException if {@code chars} is {@code null}
+     * @throws IndexOutOfBoundsException if the range is invalid
      *
      * @since 1.8.0
      */
@@ -73,8 +73,8 @@ public final class CharUtil {
     /**
      * Checks if a character is an uppercase ASCII letter ('A'-'Z').
      *
-     * @param c The character to check.
-     * @return {@code true} if the character is uppercase, {@code false} otherwise.
+     * @param c the character to check
+     * @return {@code true} if the character is uppercase, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -85,12 +85,12 @@ public final class CharUtil {
     /**
      * Checks if all characters within the specified range of the array are uppercase ASCII letters ('A'-'Z').
      *
-     * @param chars      The character array to check.
-     * @param beginIndex The start index (inclusive).
-     * @param endIndex   The end index (exclusive).
-     * @return {@code true} if all characters are uppercase letters, {@code false} otherwise.
-     * @throws NullPointerException if {@code chars} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is invalid.
+     * @param chars      the character array to check
+     * @param beginIndex the start index (inclusive)
+     * @param endIndex   the end index (exclusive)
+     * @return {@code true} if all characters are uppercase letters, {@code false} otherwise
+     * @throws NullPointerException if {@code chars} is {@code null}
+     * @throws IndexOutOfBoundsException if the range is invalid
      *
      * @since 1.8.0
      */
@@ -109,8 +109,8 @@ public final class CharUtil {
     /**
      * Checks if a character is either a numeric digit ('0'-'9') or an uppercase ASCII letter ('A'-'Z').
      *
-     * @param c The character to check.
-     * @return {@code true} if the character is alphanumeric and uppercase, {@code false} otherwise.
+     * @param c the character to check
+     * @return {@code true} if the character is alphanumeric and uppercase, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -122,12 +122,12 @@ public final class CharUtil {
     /**
      * Checks if all characters within the specified range of the array are either numeric digits or uppercase ASCII letters.
      *
-     * @param chars      The character array to check.
-     * @param beginIndex The start index (inclusive).
-     * @param endIndex   The end index (exclusive).
-     * @return {@code true} if all characters are digits or uppercase letters, {@code false} otherwise.
-     * @throws NullPointerException if {@code chars} is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is invalid.
+     * @param chars      the character array to check
+     * @param beginIndex the start index (inclusive)
+     * @param endIndex   the end index (exclusive)
+     * @return {@code true} if all characters are digits or uppercase letters, {@code false} otherwise
+     * @throws NullPointerException if {@code chars} is {@code null}
+     * @throws IndexOutOfBoundsException if the range is invalid
      *
      * @since 1.8.0
      */

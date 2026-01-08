@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,6 @@ public final class IbanPlusKey {
      * Generates an IBAN Plus lookup key from an {@link Iban} instance.
      * <p>
      * The generated key is used to query the SWIFT database for BIC information.
-     * </p>
      *
      * @param iban the IBAN instance, must not be null
      * @return the concatenated lookup code (Bank + Branch + NCD), or null if no routing data is present

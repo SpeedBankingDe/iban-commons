@@ -143,7 +143,7 @@ class IbanPatternConverterTest extends Assertions {
             createSegment(IbanCharType.ALPHABETIC, 3),
             createSegment(IbanCharType.ALPHABETIC, 4)
         );
-        List<Segment> expectedB = Arrays.asList(
+        List<Segment> expectedB = Collections.singletonList(
             createSegment(IbanCharType.ALPHABETIC, 9)
         );
         assertThat(IbanPatternConverter.aggregateSegments(listB)).isEqualTo(expectedB);

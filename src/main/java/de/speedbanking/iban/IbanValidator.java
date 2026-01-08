@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public final class IbanValidator {
     static final long MAX         = 999999999;
 
     /**
-     * Simple thread-local holder for the last failure reason for the {@link Iban#of(String)} simplicity.
+     * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
      * <p>
      * Ensures that the reason for failure is correctly associated with the calling thread
      * when using a simplified API that doesn't return the full result object.
@@ -62,12 +62,12 @@ public final class IbanValidator {
      * This is the preferred method for factory methods (like {@code Iban.of()})
      * as it aborts validation on failure and provides the normalized data on success.
      *
-     * @param rawIban The IBAN character sequence to validate, potentially containing spaces.
-     * @return The {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed.
+     * @param rawIban the IBAN character sequence to validate, potentially containing spaces
+     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
      *
      * @since 1.8.0
      */
-    public static IbanValidationSuccess validate(final CharSequence rawIban) {
+    static IbanValidationSuccess validate(final CharSequence rawIban) {
         return validateRaw(rawIban);
     }
 
@@ -75,8 +75,8 @@ public final class IbanValidator {
      * Performs a full IBAN validation and returns {@code true} if successful,
      * or {@code false} if any validation step fails.
      *
-     * @param iban The IBAN character sequence to validate (may contain spaces).
-     * @return {@code true} if the IBAN is valid, {@code false} otherwise.
+     * @param iban the IBAN character sequence to validate (may contain spaces)
+     * @return {@code true} if the IBAN is valid, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -103,8 +103,8 @@ public final class IbanValidator {
      * Performs a full IBAN validation on an **unnormalized** IBAN (i.e., may contain spaces)
      * and returns the success data or {@code null} on failure.
      *
-     * @param rawIban The IBAN character sequence to validate, potentially containing spaces.
-     * @return The {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed.
+     * @param rawIban the IBAN character sequence to validate, potentially containing spaces
+     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
      *
      * @since 1.8.0
      */
@@ -127,7 +127,7 @@ public final class IbanValidator {
 
         // the first two non-space characters (should be country code)
         char c1 = 0;
-        char c2 = 0;
+        char c2;
 
         IbanRegistry countryData = null;
 
@@ -223,8 +223,8 @@ public final class IbanValidator {
      * Performs a full IBAN validation on an **already normalized** IBAN (must not contain spaces)
      * and returns the success data or {@code null} on failure.
      *
-     * @param normalizedIban The normalized IBAN character sequence to validate (no spaces).
-     * @return The {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed.
+     * @param normalizedIban the normalized IBAN character sequence to validate (no spaces)
+     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
      *
      * @since 1.8.0
      */
@@ -290,9 +290,9 @@ public final class IbanValidator {
     /**
      * Final validation steps (BBAN structure and Mod 97).
      *
-     * @param normIbanArr The normalized IBAN as a char array.
-     * @param countryData The IbanRegistry data.
-     * @return The {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed.
+     * @param normIbanArr the normalized IBAN as a char array
+     * @param countryData the {@link IbanRegistry} data
+     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
      */
     static IbanValidationSuccess validateCommon(final char[] normIbanArr, final IbanRegistry countryData) {
 
@@ -317,19 +317,26 @@ public final class IbanValidator {
      * Implementation of the highly optimized ISO 7064 Mod 97-10 check.
      * <p>
      * Checks the validity of the IBAN check digit using an optimized Modulo 97 calculation strategy.
-     * It processes the BBAN part (indices 4..end) and the rotated part (indices 0..3)
+     * It processes the BBAN part (indices 4 to end) and the rotated part (indices 0 to 3)
      * in a single loop using the modulo rotation technique.
      *
-     * @param iban The IBAN char array, assumed to be already normalized (uppercase, no spaces).
-     * @return {@code true} if the Modulo 97 remainder is {@code 1}, {@code false} otherwise.
+     * @param iban the IBAN char array, assumed to be already normalized (uppercase, no spaces)
+     * @return {@code true} if the Modulo 97 remainder is {@code 1}, {@code false} otherwise
      */
     static boolean isMod97Valid(final char[] iban) {
-
-        long total = 0;
-        int value; // used for the ISO 7064 value (0-35)
+        if (iban == null) {
+            return false;
+        }
 
         // length of the normalized IBAN array
         final int len = iban.length;
+
+        if (len < 1) {
+            return false;
+        }
+
+        long total = 0;
+        int value; // used for the ISO 7064 value (0-35)
 
         // The point where the rotation starts: index 4 (start of BBAN part)
         // This ensures the BBAN part is processed first (indices 4, 5, ..., len-1),
@@ -376,8 +383,8 @@ public final class IbanValidator {
      * The input must be a normalized IBAN consisting only of digits (0-9)
      * and uppercase letters (A-Z).
      *
-     * @param iban The normalized IBAN as a CharSequence (e.g., String or StringBuilder).
-     * @return {@code true} if the IBAN is valid according to Mod 97, otherwise {@code false}.
+     * @param iban the normalized IBAN as a CharSequence (e.g., {@link String} or {@link StringBuilder})
+     * @return {@code true} if the IBAN is valid according to Mod 97, otherwise {@code false}
      */
     static boolean isMod97Valid(final CharSequence iban) {
 
@@ -431,7 +438,7 @@ public final class IbanValidator {
     /**
      * Retrieves the last single reason for a validation failure, for use by {@link Iban#of(CharSequence)}.
      *
-     * @return The last validation failure.
+     * @return the last validation failure
      *
      * @since 1.8.0
      */
@@ -446,8 +453,8 @@ public final class IbanValidator {
     /**
      * Finalizes an invalid validation result by storing the reason and returning {@code null}.
      *
-     * @param reason The reason for the validation failure.
-     * @return always {@code null}.
+     * @param reason the reason for the validation failure
+     * @return always {@code null}
      */
     static IbanValidationSuccess validationFailed(final IbanValidationError reason) {
         // store the single error for the simple API to retrieve via getLastReason()

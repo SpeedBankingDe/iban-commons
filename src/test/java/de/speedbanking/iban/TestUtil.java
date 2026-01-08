@@ -20,8 +20,8 @@ public final class TestUtil {
      * Swaps two random, distinct characters in the input string to intentionally
      * corrupt a string such as an IBAN, making it invalid (e.g., failing a checksum validation).
      *
-     * @param input The string to corrupt. Must have a length of at least 2.
-     * @return The corrupted string, or the original string if length < 2 or input is null.
+     * @param input the string to corrupt, must have a length of at least 2
+     * @return the corrupted string, or the original string if length less than 2 or input is null
      */
     public static String swapRandomChars(String input) {
         if (input == null || input.length() < 2) {
@@ -56,9 +56,9 @@ public final class TestUtil {
     /**
      * Retrieves a random element from the provided list.
      *
-     * @param <T> The type of elements in the list.
-     * @param list The list from which a random element should be selected. Must not be {@code null} or empty.
-     * @return A randomly selected element of type {@code T} from the list or {@code null} if the list is {@code null} or empty.
+     * @param <T>  the type of elements in the list
+     * @param list the list from which a random element should be selected, must not be {@code null} or empty
+     * @return a randomly selected element of type {@code T} from the list or {@code null} if the list is {@code null} or empty
      */
     public static <T> T getRandomListEntry(List<T> list) {
         if (list == null || list.isEmpty()) {

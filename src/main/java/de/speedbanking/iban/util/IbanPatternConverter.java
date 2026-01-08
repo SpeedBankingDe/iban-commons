@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ public final class IbanPatternConverter {
      * Parses the IBAN-style structure notation, validates the syntax, and converts
      * the components into a list of {@code Segment} records.
      *
-     * @param patternNotation The IBAN structure pattern string (e.g., "4!a16!c").
-     * @return A sequential list of validated segments (intermediate format).
+     * @param patternNotation the IBAN structure pattern string (e.g., "4!a16!c")
+     * @return a sequential list of validated segments (intermediate format)
      * @throws IllegalArgumentException if the pattern is null, empty, contains illegal
      *         characters, or an unknown character type.
      */
@@ -86,7 +86,7 @@ public final class IbanPatternConverter {
             // group 2: type character (e.g., "a", "n", "c", "e")
             String lenStr = matcher.group(1);
             char typeCode = matcher.group(2).charAt(0);
-            int len = -1;
+            int len;
 
             try {
                 len = Integer.parseInt(lenStr);
@@ -126,8 +126,8 @@ public final class IbanPatternConverter {
      * Creates a new list by aggregating all subsequent segments of the same character type,
      * adding up their lengths. This is a form of Run-Length Encoding (RLE).
      *
-     * @param segments The input list of segments.
-     * @return A new list with consecutive segments of the same type merged.
+     * @param segments the input list of segments
+     * @return a new list with consecutive segments of the same type merged
      */
     public static List<Segment> aggregateSegments(List<Segment> segments) {
         if (segments == null || segments.isEmpty()) {
@@ -165,9 +165,9 @@ public final class IbanPatternConverter {
      * Converts the IBAN-style pattern notation (e.g., {@code 4!a16!c}) into a standard
      * Java regular expression string.
      *
-     * @param patternNotation The IBAN structure pattern string (e.g., "4!a16!c").
-     * @return A valid Java regular expression string (e.g., "[A-Z]{4}[A-Z0-9]{16}").
-     * @throws IllegalArgumentException if the pattern is null, empty, or contains invalid syntax.
+     * @param patternNotation the IBAN structure pattern string (e.g., "4!a16!c")
+     * @return a valid Java regular expression string (e.g., "[A-Z]{4}[A-Z0-9]{16}")
+     * @throws IllegalArgumentException if the pattern is null, empty, or contains invalid syntax
      */
     public static String convertToRegex(String patternNotation) {
         // parsing and validation
@@ -180,8 +180,8 @@ public final class IbanPatternConverter {
      * Constructs the final Java Regex string from a sequential list of validated segments.
      * This method handles the concatenation of character sets and the application of quantifiers.
      *
-     * @param segments The list of validated segments (intermediate format).
-     * @return The resulting Java regular expression string (e.g., "[A-Z]{4}[A-Z0-9]{16}").
+     * @param segments the list of validated segments (intermediate format)
+     * @return the resulting Java regular expression string (e.g., "[A-Z]{4}[A-Z0-9]{16}")
      */
     public static String buildRegex(List<Segment> segments) {
         if (segments == null || segments.isEmpty()) {
@@ -206,8 +206,8 @@ public final class IbanPatternConverter {
     /**
      * Checks whether the provided pattern is valid.
      *
-     * @param patternNotation The IBAN structure pattern string (e.g., "4!a16!c").
-     * @return {@code true} if the pattern is valid, {@code false} otherwise.
+     * @param patternNotation the IBAN structure pattern string (e.g., "4!a16!c")
+     * @return {@code true} if the pattern is valid, {@code false} otherwise
      */
     public static boolean isValid(String patternNotation) {
         try {
@@ -235,8 +235,8 @@ public final class IbanPatternConverter {
         /**
          * Private constructor for the immutable segment.
          *
-         * @param charType The character type.
-         * @param length   The fixed length.
+         * @param charType the character type.
+         * @param length   the fixed length.
          */
         public Segment(IbanCharType charType, int length) {
             this.charType = charType;
@@ -246,9 +246,9 @@ public final class IbanPatternConverter {
         /**
          * Static factory method.
          *
-         * @param charType The character type of the segment.
-         * @param length   The fixed length of the segment.
-         * @return A new {@code Segment} instance.
+         * @param charType the character type of the segment.
+         * @param length   the fixed length of the segment.
+         * @return a new {@code Segment} instance.
          */
         public static Segment of(IbanCharType charType, int length) {
             return new Segment(charType, length);
@@ -257,7 +257,7 @@ public final class IbanPatternConverter {
         /**
          * Returns the character type (e.g., {@link IbanCharType#NUMERIC}).
          *
-         * @return The character type.
+         * @return the character type
          */
         public IbanCharType getCharType() {
             return charType;
@@ -266,7 +266,7 @@ public final class IbanPatternConverter {
         /**
          * Returns the fixed length of the segment.
          *
-         * @return The length.
+         * @return the length
          */
         public int getLength() {
             return length;
@@ -276,8 +276,8 @@ public final class IbanPatternConverter {
          * Returns a new instance with the same character type but with the length
          * increased by the given amount.
          *
-         * @param toAdd The length to add to the current segment length.
-         * @return A new {@code Segment} object with the combined length.
+         * @param toAdd the length to add to the current segment length.
+         * @return a new {@code Segment} object with the combined length.
          */
         public Segment addLength(int toAdd) {
             if (toAdd <= 0) {
@@ -289,7 +289,7 @@ public final class IbanPatternConverter {
         /**
          * Compares this segment to the specified object.
          *
-         * @param o The object to compare with.
+         * @param o the object to compare with.
          * @return {@code true} if the objects are the same; {@code false} otherwise.
          */
         @Override
@@ -307,7 +307,7 @@ public final class IbanPatternConverter {
         /**
          * Returns a hash code for this segment.
          *
-         * @return The hash code.
+         * @return the hash code
          */
         @Override
         public int hashCode() {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     private final String                ibanStr;
 
-    /** Reference to the applicable {@link IbanRegistry} entry holding country meta data and BBAN structure details. */
+    /** Reference to the applicable {@link IbanRegistry} entry holding country metadata and BBAN structure details. */
     private final IbanRegistry          countryData;
 
     /**
@@ -85,8 +85,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Construction is restricted to static factory methods after validation and guarantees
      * the input {@code ibanArr} is valid, normalized, and correctly sized.
      *
-     * @param ibanArr     The normalized, validated IBAN characters.
-     * @param countryData The metadata for the country code (format, structure).
+     * @param ibanArr     the normalized, validated IBAN characters
+     * @param countryData the metadata for the country code (format, structure)
      */
     Iban(final char[] ibanArr, final IbanRegistry countryData) {
         this.ibanArr = ibanArr;
@@ -102,9 +102,9 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * For more information, see:
      * <a href="https://www.swift.com/de/node/301396">Official SWIFT IBAN Resources</a>
      *
-     * @param iban The IBAN character sequence, may include spaces (as used in IBAN formatting) but no other whitespace or non-IBAN characters.
-     * @return A valid, immutable {@code Iban} instance.
-     * @throws InvalidIbanException if the IBAN is invalid for any reason (e.g., invalid length, bad format, or incorrect check digits).
+     * @param iban the IBAN character sequence, may include spaces (as used in IBAN formatting) but no other whitespace or non-IBAN characters
+     * @return a valid, immutable {@code Iban} instance
+     * @throws InvalidIbanException if the IBAN is invalid for any reason (e.g., invalid length, bad format, or incorrect check digits)
      *
      * @since 1.8.0
      */
@@ -117,9 +117,9 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * <p>
      * This method skips the initial normalization step but performs full validation.
      *
-     * @param iban The normalized IBAN character sequence.
-     * @return A valid, immutable {@code Iban} instance.
-     * @throws InvalidIbanException if the IBAN is invalid for any reason.
+     * @param iban the normalized IBAN character sequence
+     * @return a valid, immutable {@code Iban} instance
+     * @throws InvalidIbanException if the IBAN is invalid for any reason
      *
      * @since 1.8.0
      */
@@ -137,9 +137,9 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Parses and validates the input character sequence.
      *
-     * @param iban The IBAN character sequence, may include spaces but no other non-IBAN characters.
-     * @return A valid, immutable {@code Iban} instance.
-     * @throws InvalidIbanException if the IBAN is invalid for any reason.
+     * @param iban the IBAN character sequence, may include spaces but no other non-IBAN characters
+     * @return a valid, immutable {@code Iban} instance
+     * @throws InvalidIbanException if the IBAN is invalid for any reason
      *
      * @since 1.8.0
      */
@@ -157,8 +157,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Attempts to parse and validate the input character sequence safely.
      *
-     * @param iban The IBAN character sequence, may include spaces but no other non-IBAN characters.
-     * @return An {@link Optional} containing the {@link Iban} instance if valid, or empty if invalid.
+     * @param iban the IBAN character sequence, may include spaces but no other non-IBAN characters
+     * @return an {@link Optional} containing the {@link Iban} instance if valid, or empty if invalid
      *
      * @since 1.8.0
      */
@@ -174,8 +174,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Performs a full IBAN validation and returns {@code true} if successful,
      * or {@code false} if any validation step fails.
      *
-     * @param iban The IBAN character sequence to validate.
-     * @return {@code true} if the IBAN is valid, {@code false} otherwise.
+     * @param iban the IBAN character sequence to validate
+     * @return {@code true} if the IBAN is valid, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -197,9 +197,12 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * </ul>
      * <p>
      * For more information, see:
-     * <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha-2 Specification</a>
+     * <ul>
+     *   <li><a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha-2 Specification</a></li>
+     *   <li><a href="https://en.wikipedia.org/wiki/International_Bank_Account_Number">Wikipedia: International Bank Account Number</a></li>
+     * </ul>
      *
-     * @return The country code (e.g., {@code "DE"}).
+     * @return the country code (e.g., {@code "DE"})
      *
      * @since 1.8.0
      */
@@ -217,7 +220,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *   <li>For country code {@code "TL"}: Timor-Leste</li>
      * </ul>
      *
-     * @return The country name (e.g., {@code "Palestine"}).
+     * @return the country name (e.g., {@code "Palestine"})
      *
      * @since 1.8.0
      */
@@ -236,7 +239,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *   <li>For country code {@code "TD"}: 🇹🇩 (Chad)</li>
      * </ul>
      *
-     * @return The country flag emoji string.
+     * @return the country flag emoji string
      *
      * @since 1.8.0
      */
@@ -251,7 +254,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * the {@code MOD 97-10} algorithm and ensure that the IBAN is correctly constructed and not
      * corrupted by simple input errors.
      *
-     * @return The check digits (e.g., {@code "91"}).
+     * @return the check digits (e.g., {@code "91"})
      *
      * @since 1.8.0
      */
@@ -271,7 +274,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * account information, typically including the Bank Code, the Branch Code (if applicable),
      * the Account Number, and in some countries, a National Check Digit (NCD), such as in Poland.
      *
-     * @return The BBAN part of the IBAN.
+     * @return the BBAN part of the IBAN
      *
      * @since 1.8.0
      */
@@ -292,7 +295,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *   <li>IBAN {@code FR763000600001123456789018}: Bank Code is {@code 30006}</li>
      * </ul>
      *
-     * @return The bank code string.
+     * @return the bank code string
      *
      * @since 1.8.0
      */
@@ -305,10 +308,9 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
-     * Returns the Branch Identifier Code (Branch Code)
-     * based on the country's BBAN structure.
+     * Returns the Branch Identifier Code (Branch Code) based on the country's BBAN structure.
      *
-     * @return The branch code string, or {@code null} if the country does not define a separate branch code part.
+     * @return the branch code string, or {@code null} if the country does not define a separate branch code part
      *
      * @since 1.8.0
      */
@@ -324,7 +326,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Returns the combination of Bank Identifier Code (Bank Code) and Branch Identifier Code (Branch Code)
      * based on the country's BBAN structure.
      *
-     * @return The bank code string including branch code.
+     * @return the bank code string including branch code
      *
      * @since 1.8.0
      */
@@ -335,7 +337,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Returns the national check digit (NCD) part of the BBAN, if present.
      *
-     * @return The national check digit (NCD) string.
+     * @return the national check digit (NCD) string
      *
      * @since 1.8.1
      */
@@ -356,7 +358,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *   <li>IBAN {@code GB29NWBK60161331926819}: Account Number is {@code 31926819} (for GB)</li>
      * </ul>
      *
-     * @return The account number string.
+     * @return the account number string
      *
      * @since 1.8.0
      */
@@ -380,7 +382,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * <p>
      * Note: This value may be {@code null} if the organization is not defined in the metadata.
      *
-     * @return The organization's name as a string, or {@code null}.
+     * @return the organization's name as a string, or {@code null}
      *
      * @since 1.8.0
      */
@@ -399,7 +401,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Formatted IBAN:  {@code "DE91 1000 0000 0123 4567 89"}
      * </pre>
      *
-     * @return The formatted IBAN string (e.g., {@code "DE91 1000 0000 0123 4567 89"}).
+     * @return the formatted IBAN string (e.g., {@code "DE91 1000 0000 0123 4567 89"})
      *
      * @since 1.8.0
      */
@@ -411,9 +413,9 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Returns the character at the specified index.
      *
-     * @param index The index of the character to return.
-     * @return      The character at the specified index.
-     * @throws IndexOutOfBoundsException if the {@code index} is negative or greater than or equal to {@code length()}.
+     * @param index the index of the character to return
+     * @return the character at the specified index
+     * @throws IndexOutOfBoundsException if the {@code index} is negative or greater than or equal to {@code length()}
      *
      * @since 1.8.0
      */
@@ -434,11 +436,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * <p>
      * Note that this method provides a covariant return of {@code String} instead of {@code CharSequence}.
      *
-     * @param start The start index, inclusive.
-     * @param end   The end index, exclusive.
-     * @return      The specified subsequence as a new {@link String} instance.
+     * @param start the start index, inclusive
+     * @param end   the end index, exclusive
+     * @return the specified subsequence as a new {@link String} instance
      * @throws IndexOutOfBoundsException if {@code start} or {@code end} are out of bounds
-     *                                   (negative, greater than length(), or {@code start > end}).
+     *                                   (negative, greater than length(), or {@code start > end})
      *
      * @since 1.8.0
      */
@@ -454,7 +456,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Returns the length of the normalized IBAN (excluding spaces).
      *
-     * @return The length of the IBAN character array.
+     * @return the length of the IBAN character array
      *
      * @since 1.8.0
      */
@@ -465,11 +467,12 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
 
     /**
      * Compares this IBAN with the specified IBAN for order.
+     * <p>
      * The comparison is based on the lexicographical order of the raw, unformatted IBAN strings.
      *
-     * @param other The IBAN to be compared.
-     * @return      A negative integer, zero, or a positive integer as this object
-     * is less than, equal to, or greater than the specified object.
+     * @param other the IBAN to be compared
+     * @return a negative integer, zero, or a positive integer as this object
+     *         is less than, equal to, or greater than the specified object
      *
      * @since 1.8.0
      */
@@ -488,7 +491,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * <p>
      * Example: {@code "DE91100000000123456789"}
      *
-     * @return The normalized IBAN string (e.g., {@code "DE91100000000123456789"}).
+     * @return the normalized IBAN string (e.g., {@code "DE91100000000123456789"})
      */
     @Override
     public String toString() {
@@ -500,8 +503,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * the argument is not {@code null} and is an {@code Iban} object that represents
      * the same normalized IBAN string.
      *
-     * @param o The object to compare with.
-     * @return {@code true} if the objects are the same; {@code false} otherwise.
+     * @param o the object to compare with
+     * @return {@code true} if the objects are the same; {@code false} otherwise
      */
     @Override
     public boolean equals(Object o) {
@@ -520,7 +523,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * <p>
      * The hash code is based on the normalized IBAN string.
      *
-     * @return A hash code value for this object.
+     * @return a hash code value for this object
      */
     @Override
     public int hashCode() {

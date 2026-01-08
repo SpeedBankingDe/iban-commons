@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@ import java.util.Optional;
  * Represents a valid, immutable Business Identifier Code (BIC), also known as SWIFT Code (ISO 9362).
  * <p>
  * Creation is done exclusively via static factory methods after successful validation.
+ * <p>
+ * For more information, see:
+ * <a href="https://en.wikipedia.org/wiki/ISO_9362">Wikipedia: ISO 9362</a>
  *
  * @since 1.8.0
  */
@@ -70,7 +73,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Construction is restricted to {@link BicValidator} which guarantees
      * the input {@code bicArr} is valid, normalized, and correctly sized (8 or 11).
      *
-     * @param bicArr The normalized, validated BIC characters.
+     * @param bicArr the normalized, validated BIC characters
      */
     Bic(final char[] bicArr) {
         this.bicArr = bicArr;
@@ -82,9 +85,9 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Parses and validates the input character sequence, throwing {@link InvalidBicException} if validation fails.
      *
-     * @param bic The BIC character sequence.
-     * @return    A valid, immutable {@code Bic} instance.
-     * @throws InvalidBicException if the BIC is invalid.
+     * @param bic the BIC character sequence
+     * @return a valid, immutable {@code Bic} instance
+     * @throws InvalidBicException if the BIC is invalid
      *
      * @since 1.8.0
      */
@@ -96,8 +99,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Attempts to parse and validate the input character sequence safely.
      *
-     * @param bic The BIC character sequence.
-     * @return    An {@link Optional} containing the {@link Bic} instance if valid, or empty if invalid.
+     * @param bic the BIC character sequence
+     * @return an {@link Optional} containing the {@link Bic} instance if valid, or empty if invalid
      *
      * @since 1.8.0
      */
@@ -108,8 +111,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Performs a full BIC validation and returns {@code true} if successful.
      *
-     * @param bic The BIC character sequence to validate.
-     * @return    {@code true} if the BIC is valid, {@code false} otherwise.
+     * @param bic the BIC character sequence to validate
+     * @return {@code true} if the BIC is valid, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -120,7 +123,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Checks if this BIC is 8 characters long (without explicit branch code).
      *
-     * @return {@code true} if BIC-8, {@code false} otherwise.
+     * @return {@code true} if BIC-8, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -131,7 +134,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Checks if this BIC is 11 characters long (with explicit branch code).
      *
-     * @return {@code true} if BIC-11, {@code false} otherwise.
+     * @return {@code true} if BIC-11, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -144,7 +147,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * <p>
      * Example: The bank code for Varengold Bank AG (Hamburg) is {@code VGAG}.
      *
-     * @return The Bank Code (e.g., {@code "VGAG"}).
+     * @return the Bank Code (e.g., {@code "VGAG"})
      *
      * @since 1.8.0
      */
@@ -170,7 +173,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * For more information, see:
      * <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha-2 Specification</a>
      *
-     * @return The Country Code (e.g., {@code "EC"}).
+     * @return the Country Code (e.g., {@code "EC"})
      *
      * @since 1.8.0
      */
@@ -192,7 +195,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      *   <li>For country code {@code "HR"}: 🇭🇷 (Croatia)</li>
      * </ul>
      *
-     * @return The country flag emoji string.
+     * @return the country flag emoji string
      *
      * @since 1.8.0
      */
@@ -213,7 +216,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      *   <li>{@code "22"} (Non-bank financial institution or test BIC)</li>
      * </ul>
      *
-     * @return The Location Code (e.g., {@code "FF"}).
+     * @return the Location Code (e.g., {@code "FF"})
      *
      * @since 1.8.0
      */
@@ -234,7 +237,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      *   <li>For BIC {@code DEUTDEFF444}: Branch Code is {@code 500} (Specific Branch of Deutsche Bank AG Frankfurt am Main)</li>
      * </ul>
      *
-     * @return The Branch Code (e.g., {@code "XXX"}), or {@code null} if the BIC is 8 characters long.
+     * @return the Branch Code (e.g., {@code "XXX"}), or {@code null} if the BIC is 8 characters long
      *
      * @since 1.8.0
      */
@@ -251,7 +254,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Returns the BIC in its 8-character format. If the original BIC is 11 characters,
      * the branch code is truncated.
      *
-     * @return The BIC-8 string.
+     * @return the BIC-8 string
      *
      * @since 1.8.0
      */
@@ -260,10 +263,11 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     }
 
     /**
-     * Returns the BIC in its 11-character format. If the original BIC is 8 characters,
-     * the <strong>{@code "XXX"}</strong> (head office) suffix is appended.
+     * Returns the BIC in its 11-character format.
+     * If the original BIC is 8 characters, the <strong>{@code "XXX"}</strong>
+     * (head office) suffix is appended.
      *
-     * @return The BIC-11 string.
+     * @return the BIC-11 string
      *
      * @since 1.8.0
      */
@@ -274,9 +278,9 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Returns the character at the specified index.
      *
-     * @param index The index of the character to return.
-     * @return      The character at the specified index.
-     * @throws IndexOutOfBoundsException if the {@code index} is negative or greater than or equal to {@code length()}.
+     * @param index the index of the character to return
+     * @return the character at the specified inde
+     * @throws IndexOutOfBoundsException if the {@code index} is negative or greater than or equal to {@code length()}
      */
     @Override
     public char charAt(int index) {
@@ -290,11 +294,11 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Returns a new character sequence that is a subsequence of this sequence.
      *
-     * @param start The start index, inclusive.
-     * @param end   The end index, exclusive.
-     * @return      The specified subsequence as a new {@link String} instance.
+     * @param start the start index, inclusive
+     * @param end   the end index, exclusive
+     * @return the specified subsequence as a new {@link String} instance
      * @throws IndexOutOfBoundsException if {@code start} or {@code end} are out of bounds
-     * (negative, greater than length(), or {@code start > end}).
+     *         (negative, greater than length(), or {@code start > end})
      */
     @Override
     public String subSequence(int start, int end) {
@@ -309,7 +313,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Returns the length of the BIC (8 or 11 characters).
      *
-     * @return The length of the BIC character array.
+     * @return the length of the BIC character array
      */
     @Override
     public int length() {
@@ -320,9 +324,9 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Compares this BIC with the specified BIC for order.
      * The comparison is based on the lexicographical order of the normalized 11-character BIC strings.
      *
-     * @param other The BIC to be compared.
-     * @return      A negative integer, zero, or a positive integer as this object
-     * is less than, equal to, or greater than the specified object.
+     * @param other the BIC to be compared
+     * @return a negative integer, zero, or a positive integer as this object
+     *         is less than, equal to, or greater than the specified object
      *
      * @since 1.8.0
      */
@@ -336,7 +340,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Returns the raw, unformatted, normalized BIC string.
      *
-     * @return The normalized BIC string (8 or 11 characters).
+     * @return the normalized BIC string (8 or 11 characters)
      */
     @Override
     public String toString() {
@@ -348,8 +352,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * the argument is not {@code null} and is a {@code Bic} object that represents
      * the same normalized 11-character BIC string.
      *
-     * @param o The object to compare with.
-     * @return  {@code true} if the objects are the same; {@code false} otherwise.
+     * @param o the object to compare with
+     * @return {@code true} if the objects are the same; {@code false} otherwise
      */
     @Override
     public boolean equals(Object o) {
@@ -368,7 +372,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Returns a hash code for this BIC.
      * The hash code is based on the normalized 11-character BIC string.
      *
-     * @return A hash code value for this object.
+     * @return a hash code value for this object
      */
     @Override
     public int hashCode() {

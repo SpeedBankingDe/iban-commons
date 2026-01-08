@@ -22,9 +22,9 @@ import java.util.Optional;
 class IbanTest {
 
     /**
-     * Tests {@link Iban#of(String)} with various valid IBANs.
+     * Tests {@link Iban#of(CharSequence)} with various valid IBANs.
      *
-     * @param ibanInput The valid IBAN string to test.
+     * @param ibanInput the valid IBAN string to test
      */
     @ParameterizedTest(name = "[{index}] Valid IBAN ''{0}''")
     @ValueSource(strings = {
@@ -72,11 +72,11 @@ class IbanTest {
     }
 
     /**
-     * Tests {@link Iban#of(String)} with various invalid IBANs,
+     * Tests {@link Iban#of(CharSequence)} with various invalid IBANs,
      * expecting an {@link InvalidIbanException} with a specific message pattern.
      *
-     * @param ibanInput The invalid IBAN string to test.
-     * @param expectedMessagePattern The regex pattern for the expected exception message.
+     * @param ibanInput              the invalid IBAN string to test
+     * @param expectedMessagePattern the regex pattern for the expected exception message
      */
     @ParameterizedTest(name = "[{index}] Invalid IBAN ''{0}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
@@ -124,9 +124,9 @@ class IbanTest {
     }
 
     /**
-     * Tests {@link Iban#of(String)} with random IBANs.
+     * Tests {@link Iban#of(CharSequence)} with random IBANs.
      *
-     * @param ibanInput The valid random  IBAN string to test.
+     * @param ibanInput the valid random IBAN string to test
      */
     @ParameterizedTest(name = "[{index}] {0}")
     @RandomIbanSource(ibanCount = 500)
@@ -294,7 +294,7 @@ class IbanTest {
     /**
      * Tests various invalid IBANs for all supported countries, expecting structure or checksum errors.
      *
-     * @param entry The {@link IbanRegistry} entry to test.
+     * @param entry the {@link IbanRegistry} entry to test
      */
     @ParameterizedTest
     @EnumSource(IbanRegistry.class)
@@ -353,9 +353,9 @@ class IbanTest {
      * Tests {@link Iban#compareTo(Iban)} to ensure correct alphabetical ordering
      * based on the underlying normalized IBAN string.
      *
-     * @param iban1Input First IBAN string.
-     * @param iban2Input Second IBAN string.
-     * @param expectedSign The expected sign of the comparison result (negative, zero, or positive).
+     * @param iban1Input   first IBAN string
+     * @param iban2Input   second IBAN string
+     * @param expectedSign the expected sign of the comparison result (negative, zero, or positive)
      */
     @ParameterizedTest(name = "[{index}] Compare ''{0}'' with ''{1}'': Expected sign {2}")
     @CsvSource(delimiter = '|', value = {
@@ -385,8 +385,8 @@ class IbanTest {
 
     /**
      * Tests {@link Iban#charAt(int)} for boundary and content checks.
-     * @param index The character index to test.
-     * @param expectedChar The expected character at that index.
+     * @param index        the character index to test
+     * @param expectedChar the expected character at that index
      */
     @ParameterizedTest(name = "[{index}] charAt({0}) must be ''{1}''")
     @CsvSource(delimiter = '|', value = {
@@ -415,9 +415,9 @@ class IbanTest {
 
     /**
      * Tests {@link Iban#subSequence(int, int)} for correct substring extraction.
-     * @param start The start index (inclusive).
-     * @param end The end index (exclusive).
-     * @param expectedString The expected sub-sequence string.
+     * @param start the start index (inclusive)
+     * @param end   the end index (exclusive)
+     * @param expectedString the expected sub-sequence string
      */
     @ParameterizedTest(name = "[{index}] subSequence({0}, {1}) must be ''{2}''")
     @CsvSource(delimiter = '|', value = {

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ public enum IbanValidationError {
 
     /**
      * Private constructor.
-     * @param errorText The descriptive English error message.
+     * @param errorText the descriptive English error message
      */
     IbanValidationError(String errorText) {
         this.errorText = Objects.requireNonNull(errorText, "Error text required");
@@ -63,7 +63,7 @@ public enum IbanValidationError {
 
     /**
      * Retrieves the descriptive English reason for the validation error.
-     * @return The failure text.
+     * @return the failure text
      */
     public String getText() {
         return errorText;
@@ -73,7 +73,7 @@ public enum IbanValidationError {
      * Returns a detailed string representation including the enum class name,
      * the enum constant name, and the descriptive error text.
      *
-     * @return A long string representation of the validation error.
+     * @return a long string representation of the validation error
      */
     public String toLongString() {
         return getClass().getSimpleName()

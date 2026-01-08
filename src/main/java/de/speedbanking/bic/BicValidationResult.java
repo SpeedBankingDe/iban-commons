@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ public final class BicValidationResult {
     /**
      * Private constructor: enforce creation through static factory methods
      *
-     * @param bic             The successfully created {@link Bic} instance (must not be {@code null}).
-     * @param validationError The single reason for validation failure (must not be {@code null}).
+     * @param bic             the successfully created {@link Bic} instance (must not be {@code null})
+     * @param validationError the single reason for validation failure (must not be {@code null})
      */
     private BicValidationResult(Bic bic, BicValidationError validationError) {
         // sanity check to ensure the "either-or" invariant is maintained
@@ -50,8 +50,8 @@ public final class BicValidationResult {
     /**
      * Factory method for a successful validation.
      *
-     * @param bic The successfully created {@link Bic} instance (must not be {@code null}).
-     * @return A valid result has the BIC present and no error reason.
+     * @param bic the successfully created {@link Bic} instance (must not be {@code null})
+     * @return a valid result has the BIC present and no error reason
      */
     public static BicValidationResult valid(Bic bic) {
         if (bic == null) {
@@ -64,8 +64,8 @@ public final class BicValidationResult {
     /**
      * Factory method for a validation error.
      *
-     * @param validationError The single reason for validation failure (must not be {@code null}).
-     * @return An invalid result has no BIC and the specific error reason present.
+     * @param validationError the single reason for validation failure (must not be {@code null})
+     * @return an invalid result has no BIC and the specific error reason present
      */
     public static BicValidationResult invalid(BicValidationError validationError) {
         if (validationError == null) {
@@ -77,7 +77,7 @@ public final class BicValidationResult {
     /**
      * Returns true if the validation was successful.
      *
-     * @return {@code true} if valid, {@code false} otherwise.
+     * @return {@code true} if valid, {@code false} otherwise
      */
     public boolean isValid() {
         return null != bic;
@@ -86,7 +86,7 @@ public final class BicValidationResult {
     /**
      * Returns the validated {@code Bic} instance if available.
      *
-     * @return An {@code Optional} containing the {@link Bic} object, or empty if validation failed.
+     * @return an {@code Optional} containing the {@link Bic} object, or empty if validation failed
      */
     public Optional<Bic> getBic() {
         return Optional.ofNullable(bic);
@@ -95,7 +95,7 @@ public final class BicValidationResult {
     /**
      * Returns the single reason why validation failed.
      *
-     * @return An {@code Optional} containing the {@link BicValidationError}, or empty if validation was successful.
+     * @return an {@code Optional} containing the {@link BicValidationError}, or empty if validation was successful
      */
     public Optional<BicValidationError> getError() {
         return Optional.ofNullable(validationError);

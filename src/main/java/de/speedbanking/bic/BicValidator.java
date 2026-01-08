@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ public final class BicValidator {
      * Performs a full BIC validation on an input character sequence
      * and returns a {@link BicValidationResult}.
      *
-     * @param rawBic The BIC character sequence to validate.
-     * @return The validation result.
+     * @param rawBic the BIC character sequence to validate
+     * @return the validation result
      *
      * @since 1.8.0
      */
@@ -55,8 +55,8 @@ public final class BicValidator {
 
         char[] bicArr = new char[len];
 
-        // Character Set Check
-        // BIC must only contain uppercase ASCII letters (A-Z) and digits (0-9).
+        // 1. Character Set Check
+        // BIC must only contain uppercase ASCII letters (A-Z) and digits (0-9)
         for (int i = 0; i < len; i++) {
             char c = rawBic.charAt(i);
 
@@ -68,7 +68,7 @@ public final class BicValidator {
         }
 
         // 2. Country Code Check (positions 5 and 6, indices 4 and 5)
-        // ISO 9362 requires the Country Code to be 2 alphabetic characters (A-Z).
+        // ISO 9362 requires the Country Code to be 2 alphabetic characters (A-Z)
         if (!isUpperCase(bicArr[Bic.COUNTRY_CODE_START]) || !isUpperCase(bicArr[Bic.COUNTRY_CODE_START + 1])) {
             return validationFailed(BicValidationError.INVALID_COUNTRY);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,10 +48,10 @@ public final class RandomIban {
     /**
      * Generates a random, valid IBAN for the country specified by the given two-letter country code.
      *
-     * @param countryCode The two-letter country code (e.g., "DE").
-     * @return A valid, randomly generated IBAN as an {@code Iban} object.
-     * @throws NullPointerException     if the {@code countryCode} is {@code null}.
-     * @throws IllegalArgumentException if the country code is not supported by the {@link IbanRegistry}.
+     * @param countryCode the two-letter country code (e.g., "DE")
+     * @return a valid, randomly generated IBAN as an {@code Iban} object
+     * @throws NullPointerException     if the {@code countryCode} is {@code null}
+     * @throws IllegalArgumentException if the country code is not supported by the {@link IbanRegistry}
      */
     public static Iban of(String countryCode) {
         IbanRegistry ibanRegistry = Objects.requireNonNull(IbanRegistry.getByCode(countryCode),
@@ -69,8 +69,8 @@ public final class RandomIban {
      *   <li>Applying the calculated check digits to the IBAN string.</li>
      * </ul>
      *
-     * @param ibanRegistry The registry entry defining the country's IBAN structure.
-     * @return A valid, randomly generated IBAN as an {@code Iban} object.
+     * @param ibanRegistry the registry entry defining the country's IBAN structure
+     * @return a valid, randomly generated IBAN as an {@code Iban} object
      */
     public static Iban of(IbanRegistry ibanRegistry) {
         Objects.requireNonNull(ibanRegistry, "IbanRegistry must not be null");
@@ -97,9 +97,9 @@ public final class RandomIban {
      * This method temporarily sets the check digits to "00" to calculate the required remainder $R$,
      * then determines the final check digits $CD = 98 - R$.
      *
-     * @param ibanBuilder The IBAN string builder (must already be of the full IBAN length,
+     * @param ibanBuilder the IBAN string builder (must already be of the full IBAN length,
      * with placeholders at the check digit position).
-     * @return The same {@code StringBuilder} instance with the correct check digits applied.
+     * @return the same {@code StringBuilder} instance with the correct check digits applied
      */
     static StringBuilder fixCheckDigits(StringBuilder ibanBuilder) {
         // 1. Set placeholders to "00" (crucial for correct calculation context)
@@ -127,9 +127,9 @@ public final class RandomIban {
      * The result is the remainder of the overall number when divided by 97.
      * Intermediate modulo operations are performed to prevent {@code long} overflow.
      *
-     * @param cs The full IBAN string (normalized, with placeholder check digits).
-     * @return The Mod 97 remainder (R) of the restructured IBAN value.
-     * @throws InvalidIbanException if the input contains non-alphanumeric characters (outside A-Z, 0-9).
+     * @param cs the full IBAN string (normalized, with placeholder check digits)
+     * @return the Mod 97 remainder (R) of the restructured IBAN value
+     * @throws InvalidIbanException if the input contains non-alphanumeric characters (outside A-Z, 0-9)
      */
     static int calculateMod97(final CharSequence cs) {
         StringBuilder ibanBuilder = new StringBuilder()
@@ -163,8 +163,8 @@ public final class RandomIban {
      *   <li>{@code !}: indicates fixed length (e.g., 4!n)</li>
      * </ul>
      *
-     * @param patternNotation The BBAN structure pattern string provided by {@link IbanRegistry}.
-     * @return A randomly generated string matching the BBAN structure.
+     * @param patternNotation the BBAN structure pattern string provided by {@link IbanRegistry}
+     * @return a randomly generated string matching the BBAN structure
      */
     static String generateRandomBban(String patternNotation) {
 

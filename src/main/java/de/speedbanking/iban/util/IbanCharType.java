@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ public enum IbanCharType {
     /**
      * Returns the single-character code used in the ISO 13616 IBAN structure notation.
      *
-     * @return The character code (e.g., {@code 'a'}, {@code 'n'}, or {@code 'c'}).
+     * @return the character code (e.g., {@code 'a'}, {@code 'n'}, or {@code 'c'})
      */
     public char getIbanCode() {
         return ibanCode;
@@ -76,7 +76,7 @@ public enum IbanCharType {
     /**
      * Returns the Java Regular Expression character set matching this character type.
      *
-     * @return The regular expression pattern string (e.g., {@code "[A-Z]"}).
+     * @return the regular expression pattern string (e.g., {@code "[A-Z]"})
      */
     public String getRegexPattern() {
         return regexPattern;
@@ -85,8 +85,8 @@ public enum IbanCharType {
     /**
      * Finds the {@link IbanCharType} by its single-character IBAN code.
      *
-     * @param ibanCode The character code ({@code 'a'}, {@code 'n'}, {@code 'c'}, or {@code 'e'}).
-     * @return The matching {@code IbanCharType}, or {@code null} if not found.
+     * @param ibanCode the character code ({@code 'a'}, {@code 'n'}, {@code 'c'}, or {@code 'e'})
+     * @return the matching {@code IbanCharType}, or {@code null} if not found
      */
     public static IbanCharType fromIbanCode(char ibanCode) {
         for (IbanCharType type : values()) {
@@ -100,12 +100,11 @@ public enum IbanCharType {
     /**
      * Returns a list of all defined single-character IBAN codes.
      *
-     * @return A list of {@code Character} objects representing the codes.
+     * @return a list of {@code Character} objects representing the codes
      */
     public static List<Character> getIbanCodes() {
         return Arrays.stream(values())
             .map(IbanCharType::getIbanCode)
-            .map(Character::valueOf)
             .collect(Collectors.toList());
     }
 

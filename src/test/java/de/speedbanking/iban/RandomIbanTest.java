@@ -87,8 +87,8 @@ class RandomIbanTest {
      * for check digits) to ensure the calculated remainder matches the required value R, where
      * the actual check digits CD = 98 - R.
      *
-     * @param ibanWithZeroCheckDigits The IBAN with "00" in the check digit position.
-     * @param expectedRemainder The remainder R that must be produced by the modulo 97 calculation.
+     * @param ibanWithZeroCheckDigits the IBAN with "00" in the check digit position
+     * @param expectedRemainder       the remainder R that must be produced by the modulo 97 calculation
      */
     @ParameterizedTest(name = "[{index}] IBAN ''{0}'' should yield Mod 97 Remainder {1}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
@@ -107,7 +107,7 @@ class RandomIbanTest {
      * Tests that the calculation method correctly throws an {@code InvalidIbanException}
      * when encountering illegal characters (those not in A-Z or 0-9) during the numeric conversion.
      *
-     * @param ibanInput The input string containing illegal characters.
+     * @param ibanInput the input string containing illegal characters
      */
     @ParameterizedTest(name = "[{index}] Invalid character in ''{0}'' throws ILLEGAL_CHARACTERS")
     @ValueSource(strings = {
@@ -130,8 +130,8 @@ class RandomIbanTest {
      * 3. Overwrites the placeholders with the correct check digits.
      * 4. Returns the modified StringBuilder (eliminates mutation in line 119).
      *
-     * @param initialCheckDigits The non-'00' initial placeholder digits (e.g., "11", "99").
-     * @param expectedCheckDigits The correctly calculated check digits (CD = 98 - R).
+     * @param initialCheckDigits  the non-'00' initial placeholder digits (e.g., "11", "99")
+     * @param expectedCheckDigits the correctly calculated check digits (CD = 98 - R)
      */
     @DisplayName("Should correctly fix check digits, overwriting initial placeholders")
     @ParameterizedTest(name = "IBAN with initial check digit ''{0}'' should result in ''{1}''")

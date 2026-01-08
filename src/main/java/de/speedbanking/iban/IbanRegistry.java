@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -2190,9 +2190,9 @@ public enum IbanRegistry {
      * <p>
      * Initializes the country's IBAN structure, format details, and regulatory contact information.
      *
-     * @param structureData The IBAN structure details object.
-     * @param metaData The metadata object.
-     * @param contactData The contact details object.
+     * @param structureData the IBAN structure details object
+     * @param metaData      the metadata object
+     * @param contactData   the contact details object
      */
     IbanRegistry(
         StructureData structureData,
@@ -2217,8 +2217,8 @@ public enum IbanRegistry {
      * <p>
      * Copies all structural and contact data from the specified primary entry.
      *
-     * @param countryName The full English name of the country.
-     * @param primary     The {@code IbanRegistry} enum constant whose data is to be used.
+     * @param countryName the full English name of the country
+     * @param primary     the {@code IbanRegistry} enum constant whose data is to be used
      */
     IbanRegistry(String countryName, IbanRegistry primary) {
         // Delegiert an den Hauptkonstruktor mit den Objekten des Primary-Eintrags
@@ -2238,7 +2238,7 @@ public enum IbanRegistry {
     /**
      * Returns the ISO 3166-1 Alpha-2 country code (e.g., "DE", "IT").
      *
-     * @return The two-letter country code.
+     * @return the two-letter country code
      */
     String getCountryCode() {
         return name();
@@ -2247,7 +2247,7 @@ public enum IbanRegistry {
     /**
      * Returns the full English name of the country.
      *
-     * @return The country name.
+     * @return the country name
      */
     String getCountryName() {
         return metaData.getCountryName();
@@ -2256,7 +2256,7 @@ public enum IbanRegistry {
     /**
      * Returns the two-character country flag emoji.
      *
-     * @return The country flag emoji string.
+     * @return the country flag emoji string
      */
     String getCountryFlag() {
         return countryFlag;
@@ -2265,7 +2265,7 @@ public enum IbanRegistry {
     /**
      * Returns whether the country is a part of the SEPA zone.
      *
-     * @return {@code true} if the country is in SEPA, {@code false} otherwise.
+     * @return {@code true} if the country is in SEPA, {@code false} otherwise
      */
     boolean isSepa() {
         return metaData.isSepa();
@@ -2274,7 +2274,7 @@ public enum IbanRegistry {
     /**
      * Returns the fixed length of the IBAN for this country.
      *
-     * @return The total IBAN length.
+     * @return the total IBAN length
      */
     int getIbanLength() {
         return structureData.ibanLength();
@@ -2283,7 +2283,7 @@ public enum IbanRegistry {
     /**
      * Returns the regular expression {@code Pattern} object of the IBAN.
      *
-     * @return The IBAN pattern object.
+     * @return the IBAN pattern object
      */
     Pattern getIbanRegex() {
         return ibanRegex;
@@ -2292,7 +2292,7 @@ public enum IbanRegistry {
     /**
      * Returns the length of the BBAN (Basic Bank Account Number) part of the IBAN.
      *
-     * @return The BBAN length.
+     * @return the BBAN length
      */
     int getBbanLength() {
         return structureData.getBbanLength();
@@ -2301,7 +2301,7 @@ public enum IbanRegistry {
     /**
      * Returns the BBAN structure pattern string (e.g., "4!n4!n12!c").
      *
-     * @return The BBAN pattern string.
+     * @return the BBAN pattern string
      */
     String getBbanPatternStr() {
         return structureData.bbanPatternStr();
@@ -2310,7 +2310,7 @@ public enum IbanRegistry {
     /**
      * Returns an example of a valid IBAN for this country.
      *
-     * @return The IBAN example string.
+     * @return the IBAN example string
      */
     String getIbanExample() {
         return metaData.getIbanExample();
@@ -2319,7 +2319,7 @@ public enum IbanRegistry {
     /**
      * Returns the character pattern string for the Bank Identifier Code.
      *
-     * @return The bank code pattern string.
+     * @return the bank code pattern string
      */
     String getBankCodePatternStr() {
         return structureData.bankCodePatternStr();
@@ -2328,7 +2328,7 @@ public enum IbanRegistry {
     /**
      * Returns the index range defining the position of the Bank Code within the IBAN.
      *
-     * @return The {@code IndexRange} for the bank code.
+     * @return the {@code IndexRange} for the bank code
      */
     IndexRange getBankCodeIndexRange() {
         return structureData.bankCodeIndexRange();
@@ -2337,7 +2337,7 @@ public enum IbanRegistry {
     /**
      * Returns the character pattern string for the Branch Identifier Code.
      *
-     * @return The branch code pattern string.
+     * @return the branch code pattern string
      */
     String getBranchCodePattern() {
         return structureData.branchCodePatternStr();
@@ -2346,7 +2346,7 @@ public enum IbanRegistry {
     /**
      * Returns the index range defining the position of the Branch Code within the IBAN.
      *
-     * @return The {@code IndexRange} for the branch code, or {@code null}.
+     * @return the {@code IndexRange} for the branch code, or {@code null}
      */
     IndexRange getBranchCodeIndexRange() {
         return structureData.branchCodeIndexRange();
@@ -2355,7 +2355,7 @@ public enum IbanRegistry {
     /**
      * Returns whether the country's BBAN structure defines a separate Branch Code part.
      *
-     * @return {@code true} if a branch code exists, {@code false} otherwise.
+     * @return {@code true} if a branch code exists, {@code false} otherwise
      */
     boolean hasBranchCode() {
         return structureData.hasBranchCode();
@@ -2364,7 +2364,7 @@ public enum IbanRegistry {
     /**
      * Returns the index range defining the position of the Account Number within the IBAN.
      *
-     * @return The {@code IndexRange} for the account number.
+     * @return the {@code IndexRange} for the account number
      */
     IndexRange getAccountNumberIndexRange() {
         return structureData.accountNumberIndexRange();
@@ -2373,7 +2373,7 @@ public enum IbanRegistry {
     /**
      * Returns the index range defining the position of the optional National Check Digit (NCD) within the IBAN.
      *
-     * @return The {@code IndexRange} for the national check digit.
+     * @return the {@code IndexRange} for the national check digit
      */
     IndexRange getNationalCheckDigitIndexRange() {
         return structureData.nationalCheckDigitIndexRange();
@@ -2382,7 +2382,7 @@ public enum IbanRegistry {
     /**
      * Returns the name of the regulatory or financial organization responsible for the IBAN registry.
      *
-     * @return The organization's name.
+     * @return the organization's name
      */
     String getOrganisation() {
         return contactData.getOrganisation();
@@ -2391,7 +2391,7 @@ public enum IbanRegistry {
     /**
      * Returns the relevant department name of the organization.
      *
-     * @return The department name.
+     * @return the department name
      */
     String getDepartment() {
         return contactData.getDepartment();
@@ -2400,7 +2400,7 @@ public enum IbanRegistry {
     /**
      * Returns the street address of the organization.
      *
-     * @return The street address.
+     * @return the street address
      */
     String getStreetAddress() {
         return contactData.getStreetAddress();
@@ -2409,7 +2409,7 @@ public enum IbanRegistry {
     /**
      * Returns the city and postal code of the organization.
      *
-     * @return The city and postcode.
+     * @return the city and postcode
      */
     String getCityPostcode() {
         return contactData.getCityPostcode();
@@ -2418,7 +2418,7 @@ public enum IbanRegistry {
     /**
      * Returns the generic contact email address for the department.
      *
-     * @return The email address.
+     * @return the email address
      */
     String getDepartmentGenericEmail() {
         return contactData.getDepartmentGenericEmail();
@@ -2427,7 +2427,7 @@ public enum IbanRegistry {
     /**
      * Returns the contact telephone number for the department.
      *
-     * @return The telephone number.
+     * @return the telephone number
      */
     String getDepartmentTel() {
         return contactData.getDepartmentTel();
@@ -2436,7 +2436,7 @@ public enum IbanRegistry {
     /**
      * Returns the month and year the registry data was last updated by the source.
      *
-     * @return The {@code YearMonth} of the last update.
+     * @return the {@code YearMonth} of the last update
      */
     YearMonth getLastUpdate() {
         return metaData.getLastUpdate();
@@ -2445,7 +2445,7 @@ public enum IbanRegistry {
     /**
      * Returns the optional {@link CountryValidator} instance used for country-specific structure validation.
      *
-     * @return The country validator implementation, or {@code null} if one is not found.
+     * @return the country validator implementation, or {@code null} if one is not found
      */
     CountryValidator getCountryValidator() {
         return countryValidator;
@@ -2455,7 +2455,7 @@ public enum IbanRegistry {
      * Returns the primary {@code IbanRegistry} entry if this entry is a secondary code
      * that shares data with another country (e.g., {@code AX} points to {@code FI}).
      *
-     * @return The primary {@code IbanRegistry} entry, or {@code null} if this is a primary entry.
+     * @return the primary {@code IbanRegistry} entry, or {@code null} if this is a primary entry
      */
     IbanRegistry getPrimary() {
         return primary;
@@ -2464,7 +2464,7 @@ public enum IbanRegistry {
     /**
      * Provides a detailed representation of the registry entry's structure.
      *
-     * @return A string representation of this registry entry.
+     * @return a string representation of this registry entry
      */
     @Override
     public String toString() {
@@ -2473,12 +2473,12 @@ public enum IbanRegistry {
             .add("SEPA country: " + (isSepa() ? "Yes" : "No"))
             .add("IBAN len: " + getIbanLength())
             .add("BBAN pattern: " + getBbanPatternStr())
-            .add("Bank Code: " + Objects.toString(getBankCodeIndexRange()));
+            .add("Bank Code: " + getBankCodeIndexRange());
         if (getBranchCodeIndexRange() != null) {
-            joiner.add("Branch Code: " + Objects.toString(getBranchCodeIndexRange()));
+            joiner.add("Branch Code: " + getBranchCodeIndexRange());
         }
         return joiner
-            .add("Account No: " + Objects.toString(getAccountNumberIndexRange()))
+            .add("Account No: " + getAccountNumberIndexRange())
             .add("IBAN Example: " + getIbanExample())
             .add("Organization: " + getOrganisation())
             .add("Last Update: " + getLastUpdate())
@@ -2493,9 +2493,9 @@ public enum IbanRegistry {
      * nested static class within the {@code ICountryValidator} interface,
      * named after the country code (e.g., {@code ICountryValidator.AD} for "AD").
      *
-     * @param countryCode The two-letter country code (e.g., "DE", "AD").
-     * @return            The instantiated {@link CountryValidator} for the given country,
-     * or {@code null} if the validator class cannot be found or instantiated.
+     * @param countryCode the two-letter country code (e.g., "DE", "AD")
+     * @return the instantiated {@link CountryValidator} for the given country,
+     *         or {@code null} if the validator class cannot be found or instantiated.
      */
     private static CountryValidator loadValidator(final String countryCode) {
         String className = CountryValidator.class.getName() + '$' + countryCode;
@@ -2514,7 +2514,7 @@ public enum IbanRegistry {
     /**
      * Builds the static, immutable map for quick {@code IbanRegistry} lookups by country code.
      *
-     * @return An unmodifiable {@code Map<CharSequence, IbanRegistry>} ready for static member assignment.
+     * @return an unmodifiable {@code Map<CharSequence, IbanRegistry>} ready for static member assignment
      * The map keys are interned country codes.
      */
     private static Map<CharSequence, IbanRegistry> buildCodeMap() {
@@ -2528,8 +2528,8 @@ public enum IbanRegistry {
     /**
      * Returns the registry entry for a given country code instantly.
      *
-     * @param code The two-letter country code (e.g., "DE").
-     * @return     The {@code IbanRegistry} entry, or {@code null} if the country code is unsupported.
+     * @param code the two-letter country code (e.g., "DE")
+     * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
      */
     public static IbanRegistry getByCode(final CharSequence code) {
         return CODE_MAP.get(code);
@@ -2538,9 +2538,9 @@ public enum IbanRegistry {
     /**
      * Returns the registry entry for a given country code instantly.
      *
-     * @param c0 The first character of the country code.
-     * @param c1 The second character of the country code.
-     * @return   The {@code IbanRegistry} entry, or {@code null} if the country code is unsupported.
+     * @param c0 the first character of the country code
+     * @param c1 the second character of the country code
+     * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
      */
     public static IbanRegistry getByCode(final char c0, final char c1) {
         return getByCode(new String(new char[] {c0, c1}).intern());
@@ -2579,8 +2579,6 @@ public enum IbanRegistry {
             return new Builder();
         }
 
-        // --- Builder Innere Klasse ---
-
         public static final class Builder {
             // Alle Felder sind optional initialisiert (0 oder null)
             private int        ibanLength;
@@ -2595,10 +2593,8 @@ public enum IbanRegistry {
             private IndexRange nationalCheckDigitIndexRange;
 
             private Builder() {
-                // Parameterloser Konstruktor
             }
 
-            // Setter für die obligatorischen Felder
             public Builder withIbanLength(int ibanLength) {
                 this.ibanLength = ibanLength;
                 return this;
@@ -2634,10 +2630,10 @@ public enum IbanRegistry {
             public StructureData build() {
                 // Führen Sie die Validierung der Pflichtfelder durch
                 if (ibanLength <= 0) {
-                    throw new IllegalStateException("IBAN length must be set and positive.");
+                    throw new IllegalStateException("IBAN length must be set and positive");
                 }
-                Objects.requireNonNull(bbanPatternStr, "BBAN pattern must be set.");
-                Objects.requireNonNull(accountNumberIndexRange, "Account number index range must be set.");
+                Objects.requireNonNull(bbanPatternStr, "BBAN pattern must be set");
+                Objects.requireNonNull(accountNumberIndexRange, "Account number index range must be set");
 
                 return new StructureData(this);
             }

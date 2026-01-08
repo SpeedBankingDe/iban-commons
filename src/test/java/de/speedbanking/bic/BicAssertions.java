@@ -17,8 +17,8 @@ public class BicAssertions extends Assertions {
     /**
      * Creates a new instance of {@link BicAssert}.
      *
-     * @param actual The BIC instance to assert on.
-     * @return The custom assertion object.
+     * @param actual the BIC instance to assert on
+     * @return the custom assertion object
      */
     public static BicAssert assertThat(Bic actual) {
         return new BicAssert(actual);
@@ -27,7 +27,7 @@ public class BicAssertions extends Assertions {
     /**
      * Alias for {@link #assertThatExceptionOfType(Class)} for {@link InvalidBicException}.
      *
-     * @return the created {@link ThrowableTypeAssert}.
+     * @return the created {@link ThrowableTypeAssert}
      */
     public static ThrowableTypeAssert<InvalidBicException> assertThatInvalidBicException() {
         return assertThatExceptionOfType(InvalidBicException.class);
@@ -41,7 +41,7 @@ public class BicAssertions extends Assertions {
         /**
          * Creates a new {@link BicAssert}.
          *
-         * @param actual The BIC instance to assert on.
+         * @param actual the BIC instance to assert on.
          */
         public BicAssert(Bic actual) {
             super(actual, BicAssert.class);
@@ -102,7 +102,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC length matches the expected length.
          *
-         * @param expectedLength The expected length (8 or 11).
+         * @param expectedLength the expected length (8 or 11).
          * @return This assertion object.
          */
         public BicAssert hasLength(int expectedLength) {
@@ -117,7 +117,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC's toString() representation matches the expected string.
          *
-         * @param expectedToString The expected BIC string (8 or 11 chars, matching original input).
+         * @param expectedToString the expected BIC string (8 or 11 chars, matching original input).
          * @return This assertion object.
          */
         @Override
@@ -133,7 +133,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC instance has the given Bank Code (first 4 characters).
          *
-         * @param expectedBankCode The expected Bank Code.
+         * @param expectedBankCode the expected Bank Code.
          * @return This assertion object.
          */
         public BicAssert hasBankCode(String expectedBankCode) {
@@ -148,7 +148,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC instance has the given Country Code (positions 5-6).
          *
-         * @param expectedCountryCode The expected Country Code (ISO 3166-1 Alpha-2).
+         * @param expectedCountryCode the expected Country Code (ISO 3166-1 Alpha-2).
          * @return This assertion object.
          */
         public BicAssert hasCountryCode(String expectedCountryCode) {
@@ -163,7 +163,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC instance has the given country flag emoji.
          *
-         * @param expectedCountryFlag The expected country flag emoji.
+         * @param expectedCountryFlag the expected country flag emoji.
          * @return This assertion object.
          */
         public BicAssert hasCountryFlag(String expectedCountryFlag) {
@@ -178,7 +178,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC instance has the given Location Code (positions 7-8).
          *
-         * @param expectedLocationCode The expected Location Code.
+         * @param expectedLocationCode the expected Location Code.
          * @return This assertion object.
          */
         public BicAssert hasLocationCode(String expectedLocationCode) {
@@ -194,7 +194,7 @@ public class BicAssertions extends Assertions {
          * Verifies that the actual BIC instance has the given Branch Code (positions 9-11).
          * {@code null} is expected for a BIC-8.
          *
-         * @param expectedBranchCode The expected Branch Code, or {@code null} if BIC-8.
+         * @param expectedBranchCode the expected Branch Code, or {@code null} if BIC-8.
          * @return This assertion object.
          */
         public BicAssert hasBranchCode(String expectedBranchCode) {
@@ -209,7 +209,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC's BIC-11 normalized string matches the expected string.
          *
-         * @param expectedBic11 The expected normalized BIC-11 string.
+         * @param expectedBic11 the expected normalized BIC-11 string.
          * @return This assertion object.
          */
         public BicAssert isBic11NormalizedEqualTo(String expectedBic11) {
@@ -224,7 +224,7 @@ public class BicAssertions extends Assertions {
         /**
          * Verifies that the actual BIC's BIC-8 string matches the expected string.
          *
-         * @param expectedBic8 The expected BIC-8 string.
+         * @param expectedBic8 the expected BIC-8 string.
          * @return This assertion object.
          */
         public BicAssert isBic8EqualTo(String expectedBic8) {

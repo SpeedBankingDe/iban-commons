@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ final class IbanValidationSuccess {
     /**
      * Constructs a success data object.
      *
-     * @param normIbanArr The validated, normalized IBAN characters.
-     * @param countryData The metadata for the country code (format, structure).
+     * @param normIbanArr the validated, normalized IBAN characters
+     * @param countryData the metadata for the country code (format, structure)
      */
     IbanValidationSuccess(final char[] normIbanArr, final IbanRegistry countryData) {
         this.normIbanArr = normIbanArr;

@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ public class InvalidBicException extends RuntimeException {
      * Constructs a new exception with the specified validation failure reason.
      * The exception message is derived from the reason's text.
      *
-     * @param reason The specific {@code BicValidationError} that occurred. Must not be null.
+     * @param reason the specific {@code BicValidationError} that occurred, must not be {@code null}
      */
     InvalidBicException(BicValidationError reason) {
         super(Objects.requireNonNull(reason, "reason required").getText());
@@ -44,8 +44,8 @@ public class InvalidBicException extends RuntimeException {
     /**
      * Static factory method to create an {@code InvalidBicException} instance.
      *
-     * @param reason The specific {@code BicValidationError} that occurred.
-     * @return A new {@code InvalidBicException} instance.
+     * @param reason the specific {@code BicValidationError} that occurred
+     * @return a new {@code InvalidBicException} instance
      */
     public static InvalidBicException of(BicValidationError reason) {
         return new InvalidBicException(reason);
@@ -54,12 +54,20 @@ public class InvalidBicException extends RuntimeException {
     /**
      * Returns the specific reason for the validation failure.
      *
-     * @return The validation error reason.
+     * @return the validation error reason
      */
     public BicValidationError getReason() {
         return reason;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * More specifically, returns a string representation including the class name, the localized message,
+     * and the reason if available.
+     *
+     * @return a string representation of this object
+     */
     @Override
     public String toString() {
         String str = getClass().getSimpleName();

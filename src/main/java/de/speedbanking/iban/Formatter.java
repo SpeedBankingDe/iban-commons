@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ public final class Formatter {
      * <p>
      * Example: "DE91100000000123456789" {@code ->} "DE91 1000 0000 0123 4567 89"
      *
-     * @param normalizedIban The raw, unformatted IBAN character sequence.
-     * @return The formatted IBAN string with spaces.
+     * @param normalizedIban the raw, unformatted IBAN character sequence
+     * @return the formatted IBAN string with spaces
      *
      * @since 1.8.0
      */
@@ -50,9 +50,9 @@ public final class Formatter {
      * Formats a raw, normalized IBAN character sequence into the standard, spaced display format,
      * using a custom group size.
      *
-     * @param inputIban The raw, unformatted IBAN character sequence.
-     * @param groupSize The number of characters per group (must be greater than zero).
-     * @return The formatted IBAN string with spaces.
+     * @param inputIban the raw, unformatted IBAN character sequence
+     * @param groupSize the number of characters per group (must be greater than zero)
+     * @return the formatted IBAN string with spaces
      *
      * @since 1.8.0
      */

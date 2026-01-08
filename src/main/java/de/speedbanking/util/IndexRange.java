@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,10 +41,10 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
 
     /**
      * Private constructor.
-     * @param begin The begin index (inclusive).
-     * @param end   The ending index (exclusive).
+     * @param begin the begin index (inclusive)
+     * @param end   the ending index (exclusive)
      *
-     * @throws IllegalArgumentException if end is less than begin or indices are negative.
+     * @throws IllegalArgumentException if end is less than begin or indices are negative
      */
     private IndexRange(final int begin, final int end) {
         if (begin < 0) {
@@ -61,11 +61,11 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
     /**
      * Static factory method to create an {@code IndexRange} instance.
      *
-     * @param begin The begin index (inclusive).
-     * @param end   The ending index (exclusive).
-     * @return A new {@code IndexRange} instance.
+     * @param begin the begin index (inclusive)
+     * @param end   the ending index (exclusive)
+     * @return a new {@code IndexRange} instance
      *
-     * @throws IllegalArgumentException if end is less than begin or indices are negative.
+     * @throws IllegalArgumentException if end is less than begin or indices are negative
      */
     public static IndexRange of(int begin, int end) {
         return new IndexRange(begin, end);
@@ -76,7 +76,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      * <p>
      * This is the index of the first character included in the range.
      *
-     * @return The begin index.
+     * @return the begin index
      */
     public int getBegin() {
         return begin;
@@ -88,7 +88,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      * This is the index *after* the last character included in the range, following
      * the convention of {@link String#substring(int, int)}.
      *
-     * @return The ending index.
+     * @return the ending index
      */
     public int getEnd() {
         return end;
@@ -97,7 +97,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
     /**
      * Returns the size (length) of the range.
      *
-     * @return The number of characters in the range ({@code end - start()}).
+     * @return the number of characters in the range ({@code end - start()})
      */
     public int length() {
         return end - begin;
@@ -106,9 +106,9 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
     /**
      * Extracts the substring defined by this range from the given character sequence.
      *
-     * @param sequence The character sequence (e.g., a normalized IBAN string).
-     * @return The substring covered by this range.
-     * @throws IndexOutOfBoundsException if the sequence is shorter than {@code end}.
+     * @param sequence the character sequence (e.g., a normalized IBAN string)
+     * @return the substring covered by this range
+     * @throws IndexOutOfBoundsException if the sequence is shorter than {@code end}
      */
     public CharSequence applyTo(final CharSequence sequence) {
         return sequence.subSequence(begin, end);
@@ -119,10 +119,10 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      * <p>
      * This is equivalent to {@code new String(sequence, start(), length())}.
      *
-     * @param sequence The character array to extract from.
-     * @return The extracted substring.
-     * @throws NullPointerException      if the sequence is {@code null}.
-     * @throws IndexOutOfBoundsException if the range is outside the bounds of the sequence.
+     * @param sequence the character array to extract from
+     * @return the extracted substring
+     * @throws NullPointerException      if the sequence is {@code null}
+     * @throws IndexOutOfBoundsException if the range is outside the bounds of the sequence
      */
     public String applyTo(final char[] sequence) {
         int count = end - begin;
@@ -155,8 +155,8 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      * if and only if the argument is not {@code null} and is an {@code IndexRange}
      * object that has the same start, and end indices.
      *
-     * @param o The object to compare with.
-     * @return {@code true} if the objects are the same; {@code false} otherwise.
+     * @param o the object to compare with
+     * @return {@code true} if the objects are the same; {@code false} otherwise
      */
     @Override
     public boolean equals(Object o) {
@@ -172,7 +172,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
     /**
      * Returns a hash code based on the begin and end fields.
      *
-     * @return The hash code.
+     * @return the hash code
      */
     @Override
     public int hashCode() {
@@ -184,7 +184,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      * inclusive start index, inclusive last index (calculated as {@code end - 1}), and total length.<br>
      * Example: {@code IndexRange[Bank Code: 4-7 (4)]}
      *
-     * @return A string representation of the range.
+     * @return a string representation of the range
      */
     @Override
     public String toString() {

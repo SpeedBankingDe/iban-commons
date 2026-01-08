@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright © 2025 Markus Spann, SpeedBankingDe
+    Copyright © 2025-2026 Markus Spann, SpeedBankingDe
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -302,7 +302,7 @@
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${dep.plugin.checkstyle.version}</version>
                     <configuration>
-                        <skip>${check.checkstyle.skip}</skip>
+                        <skip>false</skip>
                         <failOnViolation>true</failOnViolation>
                         <configLocation>${check.checkstyle.ruleset}</configLocation>
                         <excludes>**/*.jpg, **/*.jpeg, **/*.gif, **/*.png, **/*.db, **/*.csv</excludes>
@@ -360,7 +360,7 @@
                     <configuration>
                         <header>com/mycila/maven/plugin/license/templates/APACHE-2-noemail.txt</header>
                         <properties>
-                            <year>${project.inceptionYear}</year>
+                            <year>${project.inceptionYear}-2026</year>
                             <owner>${developer1Name}, ${project.organization.name}</owner>
                         </properties>
                         <excludes>

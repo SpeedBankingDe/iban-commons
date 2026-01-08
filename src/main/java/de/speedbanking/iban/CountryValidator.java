@@ -1,5 +1,5 @@
 /*
- * Copyright © 2025 Markus Spann, SpeedBankingDe
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,11 +33,11 @@ interface CountryValidator {
      * Country-specific validation of the BBAN structure inside the IBAN.
      * <p>
      * Assumes that the input array has already undergone elementary validations (length, characters etc.).<br>
-     * As such the input is expected to contain only digits and uppercase characters. Therefore there is
-     * no need to check for {@code null}, array length, and {@link CharUtil#isDigitOrUpperCase(char)}.
+     * As such, the input is expected to contain only digits and uppercase characters.
+     * Therefore, there is no need to check for {@code null}, array length, and {@link CharUtil#isDigitOrUpperCase(char)}.
      *
-     * @param iban The IBAN character sequence to validate.
-     * @return {@code true} if the IBAN conforms to the country's structure rules, {@code false} otherwise.
+     * @param iban the IBAN character sequence to validate
+     * @return {@code true} if the IBAN conforms to the country's structure rules, {@code false} otherwise
      */
     boolean validateIban(char[] iban);
 

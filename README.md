@@ -6,7 +6,7 @@ IBAN Commons is our zero-dependency, ultra-fast, low-memory IBAN and BIC toolkit
 [](https://www.google.com/search?q=https://central.sonatype.com/artifact/de.speedbanking/iban-commons)
 [](https://www.google.com/search?q=pom.xml)
 
-The `iban-commons` library provides simple, fast, and reliable validation and decomposition of International Bank Account Numbers (**IBAN**) and Business Identifier Codes (**BIC**). Designed for high-performance enterprise applications, it intentionally has **zero compile or runtime dependencies** outside of the Java Standard Library.
+The `iban-commons` library provides simple, fast, and reliable validation and decomposition of International Bank Account Numbers (**IBAN**) and Business Identifier Codes (**BIC**). Designed for high-performance enterprise applications, it intentionally has **zero compile or runtime dependencies** outside the Java Standard Library.
 
 ![Maven Central Version](https://img.shields.io/maven-central/v/de.speedbanking/iban-commons?label=Maven%20Central)
 ![Maven Central Last Update](https://img.shields.io/maven-central/last-update/de.speedbanking/iban-commons?label=Last%20Update)
