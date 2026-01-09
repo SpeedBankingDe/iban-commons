@@ -3,6 +3,8 @@ package de.speedbanking.util;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.converter.ConvertWith;
+import org.junit.jupiter.params.converter.TypedArgumentConverter;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -59,14 +61,13 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should return correct length (end - begin)")
     @ParameterizedTest
-    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        " 0 |  5 |  5",
-        "10 | 10 |  0",
-        " 5 | 15 | 10",
-        " 0 |  0 |  0"
+    @CsvSource(delimiter = '|', value = {
+        " 0,  5 |  5",
+        "10, 10 |  0",
+        " 5, 15 | 10",
+        " 0,  0 |  0"
     })
-    void shouldReturnCorrectLength(int begin, int end, int expectedLength) {
-        IndexRange range = IndexRange.of(begin, end);
+    void shouldReturnCorrectLength(@ConvertWith(IndexRangeConverter.class) IndexRange range, int expectedLength) {
         assertThat(range.length()).isEqualTo(expectedLength);
     }
 
@@ -113,6 +114,37 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
             .isThrownBy(() -> range.applyTo(sequence));
     }
 
+    @DisplayName("Should satisfy compareTo contract")
+    @ParameterizedTest(name = "Comparing {0} with {1} should return sign {2}")
+    @CsvSource(delimiter = '|', value = {
+        " 1, 5 | 1, 5 |  0", // equal
+        " 1, 5 | 2, 5 | -1", // begin is less
+        " 2, 5 | 1, 5 |  1", // begin is greater
+        " 1, 5 | 1, 6 | -1", // begin equal, end is less
+        " 1, 6 | 1, 5 |  1"  // begin equal, end is greater
+    })
+    void shouldSatisfyCompareTo(@ConvertWith(IndexRangeConverter.class) IndexRange range1, @ConvertWith(IndexRangeConverter.class) IndexRange range2, int expectedSign) {
+        int result = range1.compareTo(range2);
+
+        if (expectedSign == 0) {
+            assertThat(result).isZero();
+        } else if (expectedSign < 0) {
+            assertThat(result).isNegative();
+        } else {
+            assertThat(result).isPositive();
+        }
+    }
+
+    @DisplayName("Should throw NullPointerException when compareTo is called with null")
+    @Test
+    void shouldThrowNPEWhenComparingWithNull() {
+        IndexRange range = IndexRange.of(1, 5);
+
+        assertThatNullPointerException()
+            .isThrownBy(() -> range.compareTo(null))
+            .withMessage("Comparison object must not be null");
+    }
+
     @DisplayName("Should satisfy equals and hashCode contract, including null names")
     @Test
     void shouldSatisfyEqualsAndHashCodeContract() {
@@ -137,6 +169,24 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
     @Test
     void shouldReturnCorrectToString() {
          // Length 4. End-1 = 4
-        assertThat(IndexRange.of(1, 5).toString()).isEqualTo("IndexRange[1-4 (4)]");
+        assertThat(IndexRange.of(1, 5)).hasToString("IndexRange[1-4 (4)]");
     }
+
+    /**
+     * Converter to transform a CSV string "begin, end" into an {@link IndexRange} instance.
+     */
+    static class IndexRangeConverter extends TypedArgumentConverter<String, IndexRange> {
+
+        protected IndexRangeConverter() {
+            super(String.class, IndexRange.class);
+        }
+
+        @Override
+        protected IndexRange convert(String source) {
+            String[] parts = source.split("\\s*,\\s*");
+            return IndexRange.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+        }
+    }
+
 }
+

@@ -26,9 +26,13 @@ public final class Formatter {
     /** Standard group size for display formatting (as recommended by ISO) */
     static final int DEFAULT_GROUP_SIZE = 4;
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * @throws UnsupportedOperationException always
+     */
     private Formatter() {
         throw new UnsupportedOperationException(
-            "Utility class " + Formatter.class.getSimpleName() + " cannot be instantiated");
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
 
     /**
@@ -72,18 +76,21 @@ public final class Formatter {
         }
 
         // pre-allocate StringBuilder with sufficient capacity to avoid resizing
-        final StringBuilder formatted = new StringBuilder(2 * ibanLen);
+        final StringBuilder formatted = new StringBuilder(ibanLen + (ibanLen / groupSize));
 
-        // iterate through the CharSequence, remove spaces (if any) and insert a space
-        // after every configured groupSize characters but at the end
-        for (int i = 0, outCount = 0; i < ibanLen; i++) {
+        for (int i = 0; i < ibanLen; i++) {
             char c = inputIban.charAt(i);
+
+            // skip existing spaces to ensure normalization
             if (c != ' ') {
-                formatted.append(c);
-                if (i + 1 < ibanLen && ++outCount % groupSize == 0) {
+                // add space before the next group, if we already have content
+                if (formatted.length() > 0 && formatted.length() % (groupSize + 1) == groupSize) {
                     formatted.append(' ');
                 }
+
+                formatted.append(c);
             }
+
         }
 
         return formatted.length() == 0 ? null : formatted.toString();

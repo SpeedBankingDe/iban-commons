@@ -20,7 +20,6 @@ import de.speedbanking.util.IndexRange;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -59,22 +58,22 @@ public final class IbanPlusKey {
      * <p>
      * The generated key is used to query the SWIFT database for BIC information.
      *
-     * @param iban the IBAN instance, must not be null
-     * @return the concatenated lookup code (Bank + Branch + NCD), or null if no routing data is present
-     * @throws NullPointerException if iban is null
+     * @param iban the IBAN instance
+     * @return the concatenated lookup code (Bank + Branch + NCD), or {@code null} if no routing data is present
      */
     public static String of(final Iban iban) {
-        Objects.requireNonNull(iban, "IBAN required");
+        if (iban == null) {
+            return null;
+        }
 
         Strategy strategy = STRATEGY_CACHE.get(iban.getCountryCode());
         if (strategy == null) {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder();
-        if (strategy.useBankCode) {
-            sb.append(iban.getBankCode());
-        }
+        StringBuilder sb = new StringBuilder(15)
+            .append(iban.getBankCode());
+
         if (strategy.useBranchCode) {
             sb.append(iban.getBranchCode());
         }
@@ -82,7 +81,7 @@ public final class IbanPlusKey {
             sb.append(iban.getNationalCheckDigit());
         }
 
-        return sb.length() > 0 ? sb.toString() : null;
+        return sb.toString();
     }
 
     /**
@@ -102,7 +101,6 @@ public final class IbanPlusKey {
      * Decisions are made based on the connectivity of BBAN segments.
      */
     private static final class Strategy {
-        private final boolean useBankCode;
         private final boolean useBranchCode;
         private final boolean useNcd;
 
@@ -111,7 +109,6 @@ public final class IbanPlusKey {
             IndexRange branchRange = registry.getBranchCodeIndexRange();
             IndexRange ncdRange = registry.getNationalCheckDigitIndexRange();
 
-            this.useBankCode = bankRange != null;
             this.useBranchCode = branchRange != null;
             this.useNcd = isNcdRoutingRelevant(bankRange, branchRange, ncdRange);
         }
@@ -120,9 +117,8 @@ public final class IbanPlusKey {
             if (ncdRange == null) {
                 return false;
             }
-            int ncdBegin = ncdRange.getBegin();
-            return (bankRange != null && ncdBegin == bankRange.getEnd())
-                    || (branchRange != null && ncdBegin == branchRange.getEnd());
+            return ncdRange.getBegin() == bankRange.getEnd()
+                || (branchRange != null && ncdRange.getBegin() == branchRange.getEnd());
         }
     }
 

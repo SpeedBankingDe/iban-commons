@@ -21,6 +21,8 @@ import java.util.Objects;
  * Utility class providing common character and character array validation methods.
  * <p>
  * Focuses primarily on basic ASCII checks (digits, uppercase letters) for banking data validation.
+ * All methods are optimized for performance by avoiding heavy regex or locale-dependent checks.
+ * </p>
  *
  * @since 1.8.0
  */
@@ -28,10 +30,11 @@ public final class CharUtil {
 
     /**
      * Private constructor to prevent instantiation of this utility class.
+     * @throws UnsupportedOperationException always
      */
     private CharUtil() {
         throw new UnsupportedOperationException(
-            "Utility class " + CharUtil.class.getSimpleName() + " cannot be instantiated");
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
 
     /**
@@ -52,14 +55,14 @@ public final class CharUtil {
      * @param chars      the character array to check
      * @param beginIndex the start index (inclusive)
      * @param endIndex   the end index (exclusive)
-     * @return {@code true} if all characters are digits, {@code false} otherwise
+     * @return {@code true} if all characters in the range are digits, {@code false} otherwise
      * @throws NullPointerException if {@code chars} is {@code null}
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if the range is invalid for the given array
      *
      * @since 1.8.0
      */
     public static boolean isAllDigits(final char[] chars, final int beginIndex, final int endIndex) {
-        Objects.requireNonNull(chars, "Character array cannot be null");
+        requireCharArray(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length);
 
         for (int i = beginIndex; i < endIndex; i++) {
@@ -74,7 +77,7 @@ public final class CharUtil {
      * Checks if a character is an uppercase ASCII letter ('A'-'Z').
      *
      * @param c the character to check
-     * @return {@code true} if the character is uppercase, {@code false} otherwise
+     * @return {@code true} if the character is an uppercase letter, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -88,14 +91,14 @@ public final class CharUtil {
      * @param chars      the character array to check
      * @param beginIndex the start index (inclusive)
      * @param endIndex   the end index (exclusive)
-     * @return {@code true} if all characters are uppercase letters, {@code false} otherwise
+     * @return {@code true} if all characters in the range are uppercase letters, {@code false} otherwise
      * @throws NullPointerException if {@code chars} is {@code null}
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if the range is invalid for the given array
      *
      * @since 1.8.0
      */
     public static boolean isAllUpperCase(final char[] chars, final int beginIndex, final int endIndex) {
-        Objects.requireNonNull(chars, "Character array cannot be null");
+        requireCharArray(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length);
 
         for (int i = beginIndex; i < endIndex; i++) {
@@ -110,7 +113,7 @@ public final class CharUtil {
      * Checks if a character is either a numeric digit ('0'-'9') or an uppercase ASCII letter ('A'-'Z').
      *
      * @param c the character to check
-     * @return {@code true} if the character is alphanumeric and uppercase, {@code false} otherwise
+     * @return {@code true} if the character is an alphanumeric uppercase character, {@code false} otherwise
      *
      * @since 1.8.0
      */
@@ -125,14 +128,14 @@ public final class CharUtil {
      * @param chars      the character array to check
      * @param beginIndex the start index (inclusive)
      * @param endIndex   the end index (exclusive)
-     * @return {@code true} if all characters are digits or uppercase letters, {@code false} otherwise
+     * @return {@code true} if all characters in the range are digits or uppercase letters, {@code false} otherwise
      * @throws NullPointerException if {@code chars} is {@code null}
-     * @throws IndexOutOfBoundsException if the range is invalid
+     * @throws IndexOutOfBoundsException if the range is invalid for the given array
      *
      * @since 1.8.0
      */
     public static boolean isAllDigitOrUpperCase(final char[] chars, final int beginIndex, final int endIndex) {
-        Objects.requireNonNull(chars, "Character array cannot be null");
+        requireCharArray(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length);
 
         for (int i = beginIndex; i < endIndex; i++) {
@@ -144,6 +147,24 @@ public final class CharUtil {
         return true;
     }
 
+    /**
+     * Validates that the provided character array is not null.
+     * * @param chars the array to check
+     * @throws NullPointerException if the array is null
+     */
+    private static void requireCharArray(final char[] chars) {
+        Objects.requireNonNull(chars, "Character array cannot be null");
+    }
+
+    /**
+     * Validates that the specified indices define a valid range within given bounds.
+     *
+     * @param beginIndex    the start index to check
+     * @param endIndex      the end index to check
+     * @param minBeginIndex the minimum allowed start index
+     * @param maxEndIndex   the maximum allowed end index
+     * @throws IndexOutOfBoundsException if the range is invalid
+     */
     private static void requireValidIndices(final int beginIndex, final int endIndex, int minBeginIndex, int maxEndIndex) {
         if (beginIndex < minBeginIndex || endIndex > maxEndIndex || beginIndex > endIndex) {
             throw new IndexOutOfBoundsException(String.format("Invalid range (%d, %d) specified, valid range (%d, %d)",
@@ -152,3 +173,4 @@ public final class CharUtil {
     }
 
 }
+

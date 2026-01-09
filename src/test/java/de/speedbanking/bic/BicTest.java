@@ -194,7 +194,7 @@ class BicTest {
         Bic bicD = Bic.of("MARKUS33");    // MARKUS33XXX
 
         // first chain: equals (0) and null check
-        assertThat(bicA.compareTo(bicB)).isEqualTo(0);
+        assertThat(bicA.compareTo(bicB)).as("BICs should be equal by comparison").isZero();
         assertThatNullPointerException()
             .isThrownBy(() -> bicA.compareTo(null))
             .withMessage("Cannot compare Bic to null");

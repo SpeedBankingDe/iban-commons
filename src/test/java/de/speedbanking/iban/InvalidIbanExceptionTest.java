@@ -1,6 +1,5 @@
 package de.speedbanking.iban;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +10,7 @@ import org.junit.jupiter.params.provider.EnumSource;
  * Ensures the exception correctly stores the reason and uses the reason's
  * failure text as the exception message.
  */
-class InvalidIbanExceptionTest extends Assertions {
+class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
 
     @ParameterizedTest(name = "Test Exception for reason: {0}")
     @EnumSource(IbanValidationError.class)

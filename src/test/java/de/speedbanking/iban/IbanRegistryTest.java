@@ -17,7 +17,7 @@ import java.util.Optional;
 /**
  * JUnit test class for {@link IbanRegistry}.
  */
-@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@SuppressWarnings("PMD.LinguisticNaming")
 class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should return the correct registry entry for a valid code")
@@ -36,7 +36,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @ParameterizedTest
     @ValueSource(strings = {"XX", "xx"})
     @NullAndEmptySource
-    void getByCode_ShouldReturnNullForInvalidCode(String code) {
+    void getByCodeShouldReturnNullForInvalidCode(String code) {
         assertThat(IbanRegistry.getByCode(code))
             .as("'%s' should not exist", code)
             .isNull();
@@ -189,21 +189,21 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         SoftAssertions softly = new SoftAssertions();
         IbanRegistry registryIt = IbanRegistry.IT;
 
-        assertThat(registryIt)
+        softly.assertThat(registryIt)
             .as("IT entry should exist and be the static constant")
             .isNotNull()
             .isSameAs(IbanRegistry.getByCode("IT"))
             .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag, IbanRegistry::isSepa, IbanRegistry::getPrimary)
             .containsExactly("IT", "Italy", "🇮🇹", true, null);
 
-        assertThat(registryIt.getBankCodePatternStr()).isEqualTo("5!n");
-        assertThat(registryIt.getBankCodeIndexRange())
+        softly.assertThat(registryIt.getBankCodePatternStr()).isEqualTo("5!n");
+        softly.assertThat(registryIt.getBankCodeIndexRange())
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(5, 10);
 
-        assertThat(registryIt.hasBranchCode()).isTrue();
-        assertThat(registryIt.getBranchCodePattern()).isEqualTo("5!n");
-        assertThat(registryIt.getBranchCodeIndexRange())
+        softly.assertThat(registryIt.hasBranchCode()).isTrue();
+        softly.assertThat(registryIt.getBranchCodePattern()).isEqualTo("5!n");
+        softly.assertThat(registryIt.getBranchCodeIndexRange())
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(10, 15);
 
@@ -262,6 +262,74 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         Optional.ofNullable(entry.getIbanExample()).ifPresent(iban ->
             assertThatCode(() -> Iban.of(iban)).doesNotThrowAnyException()
         );
+    }
+
+    @DisplayName("Should verify ContactData properties and immutability")
+    @Test
+    void shouldVerifyContactData() {
+        IbanRegistry.ContactData contact = IbanRegistry.ContactData.of("Swift", "Standards", "Street", "City", "Email", "Tel");
+
+        assertThat(contact)
+            .isNotNull()
+            .returns("Swift",     IbanRegistry.ContactData::getOrganisation)
+            .returns("Standards", IbanRegistry.ContactData::getDepartment)
+            .returns("Street",    IbanRegistry.ContactData::getStreetAddress)
+            .returns("City",      IbanRegistry.ContactData::getCityPostcode)
+            .returns("Email",     IbanRegistry.ContactData::getDepartmentGenericEmail)
+            .returns("Tel",       IbanRegistry.ContactData::getDepartmentTel);
+    }
+
+    @DisplayName("Should satisfy equals and hashCode for ContactData")
+    @Test
+    void shouldSatisfyEqualsHashCodeForContactData() {
+        IbanRegistry.ContactData contact1 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
+        IbanRegistry.ContactData contact2 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
+        IbanRegistry.ContactData contactDiff = IbanRegistry.ContactData.of("Other", "Dept", "Street", "City", "Mail", "Tel");
+
+        assertThat(contact1)
+            .isEqualTo(contact1) // same instance
+            .isEqualTo(contact2) // same values
+            .hasSameHashCodeAs(contact2)
+            .isNotEqualTo(contactDiff)
+            .isNotEqualTo(null)
+            .isNotEqualTo(new Object());
+    }
+
+    @DisplayName("Should return correct toString for ContactData")
+    @Test
+    void shouldReturnCorrectToStringForContactData() {
+        IbanRegistry.ContactData contact = IbanRegistry.ContactData.of("Org", "Dept", null, null, null, null);
+
+        // checking the pattern: getClass().getSimpleName() + [fields]
+        assertThat(contact).hasToString(
+            "ContactData[organisation=Org, department=Dept, streetAddress=null, "
+            + "cityPostcode=null, departmentGenericEmail=null, departmentTel=null]");
+    }
+
+    @ParameterizedTest(name = "Should throw exception for invalid IBAN length: {0}")
+    @ValueSource(ints = {-1, 0})
+    @DisplayName("Validate IBAN length is positive")
+    void shouldThrowExceptionWhenIbanLengthIsInvalid(int invalidLength) {
+        IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
+            .withIbanLength(invalidLength)
+            .withBbanPattern("4!n")
+            .withAccountNumber(IndexRange.of(4, 8));
+
+        // testing the validation logic inside the constructor (called by build())
+        assertThatIllegalStateException()
+            .isThrownBy(builder::build)
+            .withMessage("IBAN length must be set and positive");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when required BBAN pattern is missing")
+    void shouldThrowExceptionWhenBbanPatternIsMissing() {
+        IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
+            .withIbanLength(20)
+            .withAccountNumber(IndexRange.of(4, 20));
+
+        assertThatNullPointerException()
+            .isThrownBy(builder::build);
     }
 
 }

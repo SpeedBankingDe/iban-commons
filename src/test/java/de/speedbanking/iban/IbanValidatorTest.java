@@ -10,9 +10,6 @@ import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
 import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
 import static de.speedbanking.iban.IbanValidationError.UNSUPPORTED_COUNTRY;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,7 +26,7 @@ import java.util.Arrays;
  * JUnit test class for {@link IbanValidator}.
  */
 @SuppressWarnings("checkstyle:MethodName")
-class IbanValidatorTest {
+class IbanValidatorTest extends org.assertj.core.api.Assertions {
 
     // A valid German IBAN for positive tests
     private static final String VALID_RAW_DE        = "DE91 1000 0000 0123 4567 89";
@@ -76,7 +73,6 @@ class IbanValidatorTest {
     @DisplayName("validateRaw should return null and set error on null or empty input")
     @ParameterizedTest(name = "Input: ''{0}'' -> Expected: EMPTY")
     @NullAndEmptySource
-    @ValueSource(strings = {""})
     void validateRaw_shouldFailOnNullOrEmpty(String input) {
         IbanValidationSuccess result = IbanValidator.validateRaw(input);
         assertThat(result).isNull();
@@ -129,6 +125,14 @@ class IbanValidatorTest {
         IbanValidationSuccess result = IbanValidator.validateRaw("DE9A 1000 0000 0123 4567 89");
         assertThat(result).isNull();
         assertThat(IbanValidator.getLastReason()).isEqualTo(INVALID_CHECK_DIGITS);
+    }
+
+    @DisplayName("validateRaw should fail if length less than min iban length")
+    @Test
+    void validateRaw_shouldFailOnMaxIbanLengthExceeded() {
+        IbanValidationSuccess result = IbanValidator.validateRaw("DE73");
+        assertThat(result).isNull();
+        assertThat(IbanValidator.getLastReason()).isEqualTo(INCORRECT_LENGTH);
     }
 
     @DisplayName("validateNormalized should return success object for valid normalized IBAN (DE)")
@@ -197,10 +201,10 @@ class IbanValidatorTest {
     }
 
     @DisplayName("validateNormalized should return null and set error on non-digit check digits")
-    @Test
-    void validateNormalized_shouldFailOnInvalidCheckDigits() {
-        // Non-digit at position 3 or 4
-        IbanValidationSuccess result = IbanValidator.validateNormalized("DE9A100000000123456789");
+    @ParameterizedTest(name = "Input: ''{0}''")
+    @ValueSource(strings = {"DE9A100000000123456789", "DEA9100000000123456789", "DEAA100000000123456789"})
+    void validateNormalized_shouldFailOnInvalidCheckDigits(String input) {
+        IbanValidationSuccess result = IbanValidator.validateNormalized(input);
         assertThat(result).isNull();
         assertThat(IbanValidator.getLastReason()).isEqualTo(INVALID_CHECK_DIGITS);
     }
@@ -262,11 +266,12 @@ class IbanValidatorTest {
         "invalid_chars | false",
 
         // Null/Empty handling (assuming isMod97Valid handles null/empty gracefully or fails early)
+        "(null) | false",
         "'' | false", // empty string
         "'  ' | false" // whitespace
     })
     void isMod97Valid_shouldHandleAllCases(String ibanString, boolean expectedValidity) {
-        // Handle the CsvSource empty string case
+        // handle the CsvSource empty string case
         char[] ibanArr = ibanString == null
                          ? null
                          : ibanString.toCharArray();

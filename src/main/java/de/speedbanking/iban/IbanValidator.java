@@ -16,7 +16,6 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanRegistry.INDEX_BBAN;
-import static de.speedbanking.iban.IbanRegistry.MAX_IBAN_LENGTH;
 import static de.speedbanking.iban.IbanRegistry.MIN_IBAN_LENGTH;
 import static de.speedbanking.util.CharUtil.isDigit;
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
@@ -51,9 +50,13 @@ public final class IbanValidator {
      */
     private static final ThreadLocal<IbanValidationError> LAST_REASON = new ThreadLocal<>();
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * @throws UnsupportedOperationException always
+     */
     private IbanValidator() {
         throw new UnsupportedOperationException(
-            "Utility class " + IbanValidator.class.getSimpleName() + " cannot be instantiated");
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
 
     /**
@@ -181,10 +184,6 @@ public final class IbanValidator {
                     return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
                 }
 
-            } else if (normLen > MAX_IBAN_LENGTH) {
-
-                return validationFailed(IbanValidationError.INCORRECT_LENGTH);
-
             } else if (!isDigitOrUpperCase(c)) {
 
                 // check IBANs must only contain uppercase ASCII letters (A-Z) and digits (0-9)
@@ -192,7 +191,7 @@ public final class IbanValidator {
 
             }
 
-            if (countryData != null && normLen > countryData.getIbanLength()) {
+            if (normLen > normIbanArr.length) {
                 return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
             }
 
@@ -308,7 +307,7 @@ public final class IbanValidator {
         }
 
         // if successful, return the required data for object creation and reset the last error
-        setLastReason(null);
+        LAST_REASON.remove();
 
         return new IbanValidationSuccess(normIbanArr, countryData);
     }
@@ -447,6 +446,7 @@ public final class IbanValidator {
     }
 
     static void setLastReason(final IbanValidationError reason) {
+        LAST_REASON.remove();
         LAST_REASON.set(reason);
     }
 

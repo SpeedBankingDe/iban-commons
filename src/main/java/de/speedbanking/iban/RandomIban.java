@@ -40,9 +40,13 @@ public final class RandomIban {
     private static final String LETTERS      = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String ALPHANUMERIC = DIGITS + LETTERS;
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * @throws UnsupportedOperationException always
+     */
     private RandomIban() {
         throw new UnsupportedOperationException(
-            "Utility class " + RandomIban.class.getSimpleName() + " cannot be instantiated");
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
 
     /**

@@ -1,6 +1,9 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanAssertions.assertThat;
+import static de.speedbanking.iban.IbanAssertions.assertThatIbanIsValid;
+import static de.speedbanking.iban.IbanAssertions.assertThatIbanOf;
+import static de.speedbanking.iban.IbanAssertions.assertThatIbanOfNormalized;
 import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -41,31 +44,31 @@ class IbanTest {
             .as("IBAN '%s' is valid and should be instantiable", ibanInput)
             .doesNotThrowAnyException();
 
-        Iban iban1 = Iban.of(ibanInput);
-        assertThat(iban1)
+        Iban iban1 = assertThatIbanOf(ibanInput)
             .as("IBAN instance 1 must not be null and match input string")
             .isNotNull()
-            .hasToString(ibanInputNorm);
+            .hasToString(ibanInputNorm)
+            .actual();
 
         assertThatCode(
             () -> Iban.ofNormalized(ibanInputNorm))
             .as("Normalized IBAN '%s' is valid and should be instantiable", ibanInput)
             .doesNotThrowAnyException();
 
-        Iban iban2 = Iban.ofNormalized(ibanInputNorm);
-        assertThat(iban2)
+        Iban iban2 = assertThatIbanOfNormalized(ibanInputNorm)
             .as("IBAN instance 2 must not be null and match input string")
             .isNotNull()
-            .hasToString(ibanInputNorm);
+            .hasToString(ibanInputNorm)
+            .isEqualTo(iban1)
+            .actual();
 
-        assertThat(iban1).isEqualTo(iban2);
         assertThatComparable(iban1).isEqualTo(iban2);
 
         assertThat(Iban.tryParse(ibanInput))
             .isPresent()
             .contains(iban1);
 
-        assertThat(Iban.isValid(ibanInputNorm)).isTrue();
+        assertThatIbanIsValid(ibanInputNorm);
 
         String invalidIban = ibanInput.substring(0, ibanInput.length() - 1) + "X";
         assertThat(Iban.isValid(invalidIban)).isFalse();
@@ -86,10 +89,11 @@ class IbanTest {
         "'   '                         | EMPTY                    | IBAN is null or empty",
         "PS92pals000000000400123456702 | ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
         "ps92pals000000000400123456702 | INVALID_COUNTRY          | IBAN has invalid country code",
+        "Ps92pals000000000400123456702 | INVALID_COUNTRY          | IBAN has invalid country code",
         "XX12345678901234567890        | UNSUPPORTED_COUNTRY      | IBAN has unsupported country code",
         "DE123                         | INCORRECT_LENGTH         | IBAN has incorrect length",
         "DE91BHLSDEM1123456789         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
-        "GB33BUKB2020155555555         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
+        "GB33BUKB2020155555567         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
         "GP464Q85KW3RR7JWATF3TGAZ6JNI  | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
         "DE91100000000123456780        | INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
@@ -118,6 +122,9 @@ class IbanTest {
 
         assertThat(Iban.isValid(ibanInput)).isFalse();
 
+        Optional.ofNullable(ibanInput).ifPresent(input ->
+            assertThat(IbanValidator.isMod97Valid(input)).isFalse());
+
         assertThat(Iban.tryParse(ibanInput)).isEmpty();
         assertThat(IbanValidator.getLastReason()).isEqualTo(expectedValidationError);
         IbanValidator.setLastReason(null);
@@ -142,7 +149,7 @@ class IbanTest {
         assertThat(iban)
             .hasToString(ibanInput)
             .hasCountryName(IbanRegistry.valueOf(iban.getCountryCode()).getCountryName());
-        assertThat(Iban.isValid(ibanInput)).isTrue();
+        assertThatIbanIsValid(ibanInput);
     }
 
     @ParameterizedTest(name = "[{index}] {2}: {0}")
@@ -229,7 +236,7 @@ class IbanTest {
         "SA0380000000608010167519          | 24 | SA | 🇸🇦 | 03 | 80000000608010167519          | 80         |        | 000000608010167519      |    |  2",
         "SC18SSCB11010000000000001497USD   | 31 | SC | 🇸🇨 | 18 | SSCB11010000000000001497USD   | SSCB11     | 01     | 0000000000001497        |    |  8",
         "SD2129010501234001                | 18 | SD | 🇸🇩 | 21 | 29010501234001                | 29         |        | 010501234001            |    |  2",
-        "SE4550000000058398257466          | 24 | SE | 🇸🇪 | 45 | 50000000058398257466          | 500        |        | 00000058398257466       | 6  |  3",
+        "SE4550000000058398257466          | 24 | SE | 🇸🇪 | 45 | 50000000058398257466          | 500        |        | 00000058398257466       |    |  3",
         "SI56263300012039086               | 19 | SI | 🇸🇮 | 56 | 263300012039086               | 26         | 330    | 00120390                | 86 |  5",
         "SK3112000000198742637541          | 24 | SK | 🇸🇰 | 31 | 12000000198742637541          | 1200       |        | 0000198742637541        |    |  4",
         "SM86U0322509800000000270100       | 27 | SM | 🇸🇲 | 86 | U0322509800000000270100       | 03225      | 09800  | 000000270100            | U  | 10",
@@ -251,9 +258,14 @@ class IbanTest {
             String expectedAccountNumber, String expectedNcd, Integer expectedIbanPlusLen) {
 
         IbanRegistry registry = IbanRegistry.getByCode(expectedCountryCode);
-        assertThat(registry).isNotNull()
-            .extracting(IbanRegistry::getIbanExample).isNotNull();
-        assertThat(registry.getPrimary()).isNull();
+
+        assertThat(registry)
+            .isNotNull()
+            .satisfies(reg -> {
+                assertThat(reg.getPrimary()).isNull();
+                assertThat(reg.getStructureData()).isNotNull();
+                assertThat(reg.getIbanExample()).isNotNull();
+            });
 
         Iban iban = Iban.of(ibanInput);
 
@@ -330,23 +342,21 @@ class IbanTest {
         Iban iban2 = Iban.ofNormalized(ibanStr2);
         Iban iban3 = Iban.of(ibanStr3);
 
-        // same IBAN content
-        assertThat(iban1)
-            .as("Iban instances with the same content must be equal")
-            .isEqualTo(iban1)
-            .isEqualTo(iban2)
-            .hasSameHashCodeAs(iban2);
-
-        // different IBAN content
-        assertThat(iban1)
-            .as("Iban instances with different content must not be equal")
-            .isNotEqualTo(iban3)
-            .doesNotHaveSameHashCodeAs(iban3);
-
         assertThat(iban1)
             .isNotEqualTo(null)
             .isNotEqualTo(ibanStr1)
-            .isNotEqualTo(new Object());
+            .isNotEqualTo(new Object())
+
+            // same IBAN content
+            .as("Iban instances with the same content must be equal")
+            .isEqualTo(iban1)
+            .isEqualTo(iban2)
+            .hasSameHashCodeAs(iban2)
+
+            // different IBAN content
+            .as("Iban instances with different content must not be equal")
+            .isNotEqualTo(iban3)
+            .doesNotHaveSameHashCodeAs(iban3);
     }
 
     /**
@@ -401,7 +411,7 @@ class IbanTest {
 
         assertThat(iban.charAt(index)).isEqualTo(expectedChar);
 
-        // Boundary checks
+        // boundary checks
         assertThatIndexOutOfBoundsException().isThrownBy(() -> iban.charAt(-1));
 
         // index equals length (inclusive/exclusive boundary)
@@ -427,12 +437,10 @@ class IbanTest {
         "0 | 22 | DE89370400440532013000" // Full IBAN
     })
     void testSubSequence(int start, int end, String expectedString) {
-        String ibanStr = "DE89370400440532013000"; // Length 22
+        String ibanStr = "DE89370400440532013000"; // length 22
         Iban iban = Iban.of(ibanStr);
 
-        CharSequence result = iban.subSequence(start, end);
-
-        assertThat(result)
+        assertThat(iban.subSequence(start, end))
             .as("Sub-sequence must match the expected string")
             .isInstanceOf(CharSequence.class)
             .hasToString(expectedString)

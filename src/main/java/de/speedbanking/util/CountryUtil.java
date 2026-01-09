@@ -24,10 +24,11 @@ public final class CountryUtil {
 
     /**
      * Private constructor to prevent instantiation of this utility class.
+     * @throws UnsupportedOperationException always
      */
     private CountryUtil() {
         throw new UnsupportedOperationException(
-            "Utility class " + CountryUtil.class.getSimpleName() + " cannot be instantiated");
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
 
     /**

@@ -223,19 +223,20 @@ class IbanPatternConverterTest extends Assertions {
         Segment segmentC = createSegment(IbanCharType.ALPHABETIC, 5);
         Segment segmentD = createSegment(IbanCharType.NUMERIC, 10);
 
-        // 1. Check with null and different class
-        assertThat(segmentA).isNotEqualTo(null);
-        assertThat(segmentA).isNotEqualTo((Object) "Not a Segment");
+        assertThat(segmentA)
+            // check with null and different class
+            .isNotEqualTo(null)
+            .isNotEqualTo((Object) "Not a Segment")
 
-        // 2. Check Equality (A vs B)
-        assertThat(segmentA).isEqualTo(segmentB);
-        assertThat(segmentA).hasSameHashCodeAs(segmentB);
+            // check equality (A vs B)
+            .isEqualTo(segmentB)
+            .hasSameHashCodeAs(segmentB)
 
-        // 3. Check Inequality (A vs C - different length)
-        assertThat(segmentA).isNotEqualTo(segmentC);
+            // check inequality (A vs C - different length)
+            .isNotEqualTo(segmentC)
 
-        // 4. Check Inequality (A vs D - different char type)
-        assertThat(segmentA).isNotEqualTo(segmentD);
+            // check inequality (A vs D - different char type)
+            .isNotEqualTo(segmentD);
     }
 
     /**

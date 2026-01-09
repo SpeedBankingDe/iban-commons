@@ -11,9 +11,13 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class TestUtil {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * @throws UnsupportedOperationException always
+     */
     private TestUtil() {
         throw new UnsupportedOperationException(
-            "Utility class " + TestUtil.class.getSimpleName() + " cannot be instantiated");
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
 
     /**

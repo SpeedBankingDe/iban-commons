@@ -1,6 +1,5 @@
 package de.speedbanking.iban;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -17,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  * JUnit test class for {@link Formatter}.
  */
 @SuppressWarnings("checkstyle:MethodName")
-class FormatterTest extends Assertions {
+class FormatterTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException to prevent instantiation")
     @Test

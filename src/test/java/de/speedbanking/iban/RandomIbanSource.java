@@ -65,7 +65,7 @@ public @interface RandomIbanSource {
             // find the annotation
             RandomIbanSource src = context.getElement()
                 .flatMap(elem -> AnnotationSupport.findAnnotation(elem, RandomIbanSource.class))
-                .orElseThrow(() -> new IllegalStateException("@RandomIbanSource annotation not found on the test element."));
+                .orElseThrow(() -> new IllegalStateException("@RandomIbanSource annotation not found on the test element"));
 
             // Parameter validation
             if (src.ibanCount() <= 0) {

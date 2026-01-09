@@ -62,22 +62,22 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Marked as {@code transient} for serialization and {@code volatile}
      * to ensure correct lazy initialization across multiple threads.
      */
-    private transient volatile String checkDigits;
+    private transient volatile String   checkDigits;
 
     /** Caches the Basic Bank Account Number (BBAN) part upon first access. */
-    private transient volatile String bban;
+    private transient volatile String   bban;
 
     /** Caches the Bank Code part of the BBAN upon first access. Can be null if the country's BBAN structure does not define it. */
-    private transient volatile String bankCode;
+    private transient volatile String   bankCode;
 
     /** Caches the Branch Code part of the BBAN upon first access. Can be null if the country's BBAN structure does not define it. */
-    private transient volatile String branchCode;
+    private transient volatile String   branchCode;
 
     /** Caches the National Check Digit part of the BBAN upon first access. */
-    private transient volatile String nationalCheckDigit;
+    private transient volatile String   nationalCheckDigit;
 
     /** Caches the Account Number part of the BBAN upon first access. */
-    private transient volatile String accountNumber;
+    private transient volatile String   accountNumber;
 
     /**
      * Package-private constructor.

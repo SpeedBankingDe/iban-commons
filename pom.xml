@@ -85,6 +85,7 @@
 
         <dep.junit.version>5.14.1</dep.junit.version>
         <dep.assertj.version>3.27.6</dep.assertj.version>
+        <dep.mockito.version>4.11.0</dep.mockito.version>
         <dep.pitest-junit5-plugin.version>1.2.3</dep.pitest-junit5-plugin.version>
 
         <developer1Id>spannm</developer1Id>
@@ -147,6 +148,13 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${dep.assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${dep.mockito.version}</version>
             <scope>test</scope>
         </dependency>
 

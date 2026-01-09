@@ -27,9 +27,13 @@ import static de.speedbanking.util.CharUtil.isUpperCase;
  */
 public final class BicValidator {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * @throws UnsupportedOperationException always
+     */
     private BicValidator() {
         throw new UnsupportedOperationException(
-            "Utility class " + BicValidator.class.getSimpleName() + " cannot be instantiated");
+            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
 
     /**
