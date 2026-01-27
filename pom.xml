@@ -85,8 +85,8 @@
     <properties>
         <javaVersion>8</javaVersion>
 
-        <dep.junit.version>5.14.1</dep.junit.version>
-        <dep.assertj.version>3.27.6</dep.assertj.version>
+        <dep.junit.version>5.14.2</dep.junit.version>
+        <dep.assertj.version>3.27.7</dep.assertj.version>
         <dep.mockito.version>4.11.0</dep.mockito.version>
         <dep.pitest-junit5-plugin.version>1.2.3</dep.pitest-junit5-plugin.version>
 
