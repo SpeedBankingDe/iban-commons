@@ -619,13 +619,13 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Aland Islands ({@code AX})</strong><p>
+     * <strong>Åland Islands ({@code AX})</strong><p>
      * IBAN Length: 18<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n11!n}<br>
      * Example: {@code FI2112345600000785}
      */
-    AX("Aland Islands", FI),
+    AX("Åland Islands", FI),
 
     /**
      * <strong>Falkland Islands ({@code FK})</strong><p>
@@ -2024,7 +2024,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Sao Tome and Principe ({@code ST})</strong><p>
+     * <strong>São Tomé und Príncipe ({@code ST})</strong><p>
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
@@ -2038,7 +2038,7 @@ public enum IbanRegistry {
          .withAccountNumber(IndexRange.of(12, 25))
          .build(),
        MetaData.of(
-           "Sao Tome and Principe", false, "ST23000100010051845310146",
+           "São Tomé und Príncipe", false, "ST23000100010051845310146",
            YearMonth.of(2020, 5)),
        ContactData.of(
            "Banco Central de Sao Tome e Principe", "DSP", "Avenida Marginal 12 de Julho",
@@ -2515,7 +2515,7 @@ public enum IbanRegistry {
     /**
      * Returns the city and postal code of the organization.
      *
-     * @return the city and postcode
+     * @return the city and postcode (zip code)
      */
     String getCityPostcode() {
         return contactData.getCityPostcode();
@@ -2654,8 +2654,8 @@ public enum IbanRegistry {
     }
 
     /**
-     * The immutable class defining the structure of the BBAN and its component index ranges.
-     * The Builder Pattern is used to handle optional index ranges and improve legibility.
+     * The immutable class defining the structure of the BBAN and its component index ranges.<br>
+     * The builder pattern is used to handle optional index ranges and improve legibility.
      */
     static final class StructureData {
         private final int        ibanLength;
@@ -2667,7 +2667,6 @@ public enum IbanRegistry {
         private final IndexRange accountNumberIndexRange;
         private final IndexRange nationalCheckDigitIndexRange;
 
-        // Privater Konstruktor akzeptiert den Builder
         private StructureData(Builder builder) {
             this.ibanLength = builder.ibanLength;
             this.bbanPatternStr = Objects.requireNonNull(builder.bbanPatternStr, "bbanPatternStr required");
@@ -2730,8 +2729,7 @@ public enum IbanRegistry {
                 return this;
             }
 
-            public StructureData build() {
-                // Führen Sie die Validierung der Pflichtfelder durch
+            StructureData build() {
                 if (ibanLength <= 0) {
                     throw new IllegalStateException("IBAN length must be set and positive");
                 }

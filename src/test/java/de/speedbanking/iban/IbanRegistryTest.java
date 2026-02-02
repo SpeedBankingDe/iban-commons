@@ -61,7 +61,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             "FR | 27 | 5!n5!n11!c2!n | (null)", // Frankreich: 23 Zeichen
             "NO | 15 | 4!n6!n1!n     | (null)", // Norwegen: kürzeste IBAN
             "MT | 31 | 4!a5!n18!c    | (null)", // Malta: längste IBAN
-            "AX | 18 | 3!n11!n       | FI",     // Aland Islands: primary Finland
+            "AX | 18 | 3!n11!n       | FI",     // Åland Islands: primary Finland
             "GP | 27 | 5!n5!n11!c2!n | FR"      // Guadeloupe: primary France"
     })
     void checkIbanProperties(String code, int expectedLength, String expectedPattern, IbanRegistry expectedPrimary) {

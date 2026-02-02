@@ -251,7 +251,7 @@ interface CountryValidator {
         }
     }
 
-    /** Validator for Aland Islands (AX), IBAN length: 18, BBAN pattern: {@code 3!n11!n} */
+    /** Validator for Åland Islands (AX), IBAN length: 18, BBAN pattern: {@code 3!n11!n} */
     final class AX implements CountryValidator {
         @Override
         public boolean validateIban(final char[] iban) {
@@ -869,7 +869,7 @@ interface CountryValidator {
         }
     }
 
-    /** Validator for Sao Tome and Principe (ST), IBAN length: 25, BBAN pattern: {@code 4!n4!n11!n2!n} */
+    /** Validator for São Tomé und Príncipe (ST), IBAN length: 25, BBAN pattern: {@code 4!n4!n11!n2!n} */
     final class ST implements CountryValidator {
         @Override
         public boolean validateIban(final char[] iban) {

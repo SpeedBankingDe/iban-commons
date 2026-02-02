@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * {@code IbanCountrySource} is a JUnit Jupiter {@link ArgumentsSource} used on parameterised test methods
+ * {@code IbanCountrySource} is a JUnit Jupiter {@link ArgumentsSource} used on parameterized test methods
  * to provide arguments based on {@link IbanRegistry} enum constants.
  * <p>
  * Each argument stream yields an {@link Arguments} instance containing:

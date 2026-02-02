@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 /**
- * {@code RandomIbanSource} is a JUnit Jupiter {@link ArgumentsSource} used on parameterised test methods
+ * {@code RandomIbanSource} is a JUnit Jupiter {@link ArgumentsSource} used on parameterized test methods
  * to provide a stream of randomly generated IBAN Strings.
  * <p>
  * Each argument stream yields an {@link Arguments} instance containing
