@@ -128,7 +128,7 @@
         <dep.plugin.jar.version>3.5.0</dep.plugin.jar.version>
         <dep.plugin.javadoc.version>3.12.0</dep.plugin.javadoc.version>
         <dep.plugin.license.version>4.6</dep.plugin.license.version> <!-- latest Java 8-compatible version, see https://mathieu.carbou.me/license-maven-plugin -->
-        <dep.plugin.pitest.version>1.22.0</dep.plugin.pitest.version>
+        <dep.plugin.pitest.version>1.22.1</dep.plugin.pitest.version>
         <dep.plugin.pmd.version>3.28.0</dep.plugin.pmd.version>
         <dep.plugin.release.version>3.3.1</dep.plugin.release.version>
         <dep.plugin.sortpom.version>3.0.1</dep.plugin.sortpom.version> <!-- latest Java 8-compatible version, see https://github.com/Ekryd/sortpom/releases -->
