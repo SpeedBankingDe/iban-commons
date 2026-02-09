@@ -27,9 +27,12 @@
     <packaging>jar</packaging>
     <name>${project.organization.name} IBAN Commons</name>
     <description>
-        Ultra-fast, zero-dependency, and low-memory IBAN and BIC toolkit for Java 8+.
-        Strictly compliant with ISO 13616 / ISO 9362 and optimized for high-throughput
-        financial systems using immutable, thread-safe objects.
+        Zero-dependency, high-performance IBAN and BIC validation library for Java 8+.
+        Strictly compliant with ISO 13616 and ISO 9362 standards. Supports 95+ countries
+        from the SWIFT IBAN Registry. Optimized for high-throughput financial systems with
+        immutable, thread-safe objects. Features: SEPA validation, country metadata,
+        formatted output, minimal memory footprint, zero dependency, small jar (~100KB).
+        Perfect for banking, fintech, e-commerce, and payment processing applications.
     </description>
     <url>https://www.speedbanking.de</url>
     <inceptionYear>2025</inceptionYear>
