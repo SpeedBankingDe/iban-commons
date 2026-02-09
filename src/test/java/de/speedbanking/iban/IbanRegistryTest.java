@@ -54,6 +54,19 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .isNotNull();
     }
 
+    @DisplayName("Should return a non-empty list of SEPA countries")
+    @Test
+    void getSepaCountriesShouldReturnList() {
+        java.util.List<IbanRegistry> sepaCountries = IbanRegistry.getSepaCountries();
+
+        assertThat(sepaCountries)
+            .as("SEPA country list should not be null or empty")
+            .isNotEmpty()
+            .allMatch(IbanRegistry::isSepa)
+            .contains(IbanRegistry.DE, IbanRegistry.FR, IbanRegistry.IT)
+            .hasSizeGreaterThan(35);
+    }
+
     @DisplayName("Should have correct length and derived IBAN pattern string")
     @ParameterizedTest
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
@@ -295,6 +308,28 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .isNotEqualTo(new Object());
     }
 
+    @DisplayName("Should cover all equality branches for ContactData")
+    @Test
+    void contactDataEqualsBranchCoverage() {
+        IbanRegistry.ContactData base = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
+
+        // test for each field being different to trigger 'false' result for each && branch
+        SoftAssertions softly = new SoftAssertions();
+        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Diff", "Dept", "Street", "City", "Mail", "Tel"));
+        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Diff", "Street", "City", "Mail", "Tel"));
+        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Diff", "City", "Mail", "Tel"));
+        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "Diff", "Mail", "Tel"));
+        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Diff", "Tel"));
+        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Diff"));
+
+        // test with null values to cover Objects.equals null-handling
+        IbanRegistry.ContactData withNulls = IbanRegistry.ContactData.of(null, null, null, null, null, null);
+        softly.assertThat(withNulls).isNotEqualTo(base);
+        softly.assertThat(base).isNotEqualTo(withNulls);
+
+        softly.assertAll();
+    }
+
     @DisplayName("Should return correct toString for ContactData")
     @Test
     void shouldReturnCorrectToStringForContactData() {
@@ -330,6 +365,20 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
         assertThatNullPointerException()
             .isThrownBy(builder::build);
+    }
+
+    @ParameterizedTest(name = "Should throw exception for ISO 13616 violation: {0}")
+    @ValueSource(ints = {14, 35})
+    @DisplayName("Validate IBAN length limits (15-34)")
+    void shouldThrowExceptionWhenIbanLengthViolatesIsoLimits(int invalidLength) {
+        IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
+            .withIbanLength(invalidLength)
+            .withBbanPattern("4!n")
+            .withAccountNumber(IndexRange.of(4, invalidLength));
+
+        assertThatIllegalStateException()
+            .isThrownBy(builder::build)
+            .withMessage("IBAN length must be between 15 and 34");
     }
 
 }

@@ -23,12 +23,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The definitive, immutable registry for all **ISO 13616-compliant national IBAN formats**.
@@ -2271,7 +2272,7 @@ public enum IbanRegistry {
     static final int                               MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
 
     /** The map for quick lookups by country code. */
-    private static final Map<CharSequence, IbanRegistry> CODE_MAP             = buildCodeMap();
+    private static final Map<CharSequence, IbanRegistry> CODE_MAP       = buildCodeMap();
 
     /**
      * Main constructor for {@code IbanRegistry} enum constants.
@@ -2290,7 +2291,7 @@ public enum IbanRegistry {
 
         this.structureData = Objects.requireNonNull(structureData, "structureData required");
         this.metaData = Objects.requireNonNull(metaData, "metaData required");
-        this.contactData = Optional.ofNullable(contactData).orElseGet(ContactData::new);
+        this.contactData = Optional.ofNullable(contactData).orElse(ContactData.EMPTY);
 
         this.countryFlag = CountryUtil.createFlagEmoji(name());
 
@@ -2598,10 +2599,14 @@ public enum IbanRegistry {
      * This method expects the validator implementation to be defined as a public
      * nested static class within the {@code CountryValidator} interface,
      * named after the country code (e.g., {@code CountryValidator.AD} for "AD").
+     * <p>
+     * <strong>Note:</strong> This method uses reflection and may fail silently
+     * if the validator class is not found.
      *
      * @param countryCode the two-letter country code (e.g., "DE", "AD")
      * @return the instantiated {@link CountryValidator} for the given country,
-     *         or {@code null} if the validator class cannot be found or instantiated.
+     *         or {@code null} if the validator class cannot be found or instantiated
+     * @see CountryValidator
      */
     private static CountryValidator loadValidator(final String countryCode) {
         String className = CountryValidator.class.getName() + '$' + countryCode;
@@ -2621,15 +2626,16 @@ public enum IbanRegistry {
     /**
      * Builds the static, immutable map for quick {@code IbanRegistry} lookups by country code.
      *
-     * @return an unmodifiable {@code Map<CharSequence, IbanRegistry>} ready for static member assignment
-     * The map keys are interned country codes.
+     * @return an unmodifiable {@code Map<CharSequence, IbanRegistry>} keyed by country codes
      */
     private static Map<CharSequence, IbanRegistry> buildCodeMap() {
-        Map<String, IbanRegistry> map = new LinkedHashMap<>();
-        for (IbanRegistry registry : values()) {
-            map.put(registry.name().intern(), registry);
-        }
-        return Collections.unmodifiableMap(map);
+        return Collections.unmodifiableMap(
+            Arrays.stream(values())
+                .collect(Collectors.toMap(
+                    IbanRegistry::name,
+                    registry -> registry
+                ))
+        );
     }
 
     /**
@@ -2651,6 +2657,20 @@ public enum IbanRegistry {
      */
     public static IbanRegistry getByCode(final char c0, final char c1) {
         return getByCode(new String(new char[] {c0, c1}).intern());
+    }
+
+    /**
+     * Returns all IBAN registries for SEPA countries.
+     *
+     * @return an unmodifiable list of SEPA country registries
+     */
+    public static List<IbanRegistry> getSepaCountries() {
+        return Arrays.stream(values())
+            .filter(IbanRegistry::isSepa)
+            .collect(Collectors.collectingAndThen(
+                Collectors.toList(),
+                Collections::unmodifiableList
+            ));
     }
 
     /**
@@ -2732,6 +2752,8 @@ public enum IbanRegistry {
             StructureData build() {
                 if (ibanLength <= 0) {
                     throw new IllegalStateException("IBAN length must be set and positive");
+                } else if (ibanLength < 15 || ibanLength > 34) { // ISO 13616 limits
+                    throw new IllegalStateException("IBAN length must be between 15 and 34");
                 }
                 Objects.requireNonNull(bbanPatternStr, "BBAN pattern must be set");
                 Objects.requireNonNull(accountNumberIndexRange, "Account number index range must be set");
@@ -2785,16 +2807,14 @@ public enum IbanRegistry {
      * The immutable class defining the contact and regulatory data.
      */
     static final class ContactData {
+        private static final ContactData EMPTY = of(null, null, null, null, null, null);
+
         private final String organisation;
         private final String department;
         private final String streetAddress;
         private final String cityPostcode;
         private final String departmentGenericEmail;
         private final String departmentTel;
-
-        private ContactData() {
-            this(null, null, null, null, null, null);
-        }
 
         private ContactData(
             String organisation,
