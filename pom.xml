@@ -247,6 +247,10 @@
 
                                 <Organization-Name>${project.organization.name}</Organization-Name>
                                 <Organization-Url>${project.organization.url}</Organization-Url>
+                                <!-- JPMS: allows Java 9+ consumers to declare 'requires de.speedbanking.iban;'
+                                     without requiring this library itself to be compiled as a named module.
+                                     Must be a stable, reverse-DNS name and must never change after first release. -->
+                                <Automatic-Module-Name>de.speedbanking.iban</Automatic-Module-Name>
                             </manifestEntries>
                         </archive>
                     </configuration>
