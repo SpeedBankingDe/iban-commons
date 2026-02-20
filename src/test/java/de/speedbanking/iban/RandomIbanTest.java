@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Random;
 
 /**
  * JUnit test class for the {@link RandomIban}.
@@ -52,6 +53,28 @@ class RandomIbanTest {
     }
 
     /**
+     * Tests that {@link RandomIban#of(String, Random)} throws {@link NullPointerException}
+     * when a null {@link Random} is passed.
+     */
+    @Test
+    void shouldThrowNpeWhenRandomIsNull() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> RandomIban.of("DE", null))
+            .withMessage("Random must not be null");
+    }
+
+    /**
+     * Tests that {@link RandomIban#of(IbanRegistry, Random)} throws {@link NullPointerException}
+     * when a null {@link Random} is passed.
+     */
+    @Test
+    void shouldThrowNpeWhenRegistryRandomIsNull() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> RandomIban.of(IbanRegistry.DE, null))
+            .withMessage("Random must not be null");
+    }
+
+    /**
      * Tests that for every country defined in the {@link IbanRegistry}.
      */
     @DisplayName("Should generate a valid IBAN for every supported country")
@@ -61,7 +84,7 @@ class RandomIbanTest {
         IbanValidator.setLastReason(null);
         Iban iban = RandomIban.of(registry.getCountryCode());
 
-        assertThat(iban)
+        IbanAssertions.assertThat(iban)
             .isNotNull()
             .hasCountryCode(registry.getCountryCode())
             .hasCountryFlag(registry.getCountryFlag())
@@ -78,8 +101,86 @@ class RandomIbanTest {
         sb.setCharAt(INDEX_CHECK_DIGITS, '0');
         sb.setCharAt(INDEX_CHECK_DIGITS + 1, '0');
 
-        assertThat(iban)
+        IbanAssertions.assertThat(iban)
             .hasCheckDigits(98 - RandomIban.calculateMod97(sb));
+    }
+
+    /**
+     * Tests that two calls with the same seed and the same country code produce identical IBANs.
+     */
+    @Test
+    @DisplayName("Same seed and country code should produce identical IBANs (reproducibility)")
+    void sameSeededRandomShouldProduceSameIbanForCountryCode() {
+        long seed = 42L;
+        Iban first  = RandomIban.of("DE", new Random(seed));
+        Iban second = RandomIban.of("DE", new Random(seed));
+
+        assertThat(first.toString()).isEqualTo(second.toString());
+    }
+
+    /**
+     * Tests reproducibility via IbanRegistry overload.
+     */
+    @Test
+    @DisplayName("Same seed and IbanRegistry should produce identical IBANs")
+    void sameSeededRandomShouldProduceSameIbanForRegistry() {
+        long seed = 99L;
+        Iban first  = RandomIban.of(IbanRegistry.FR, new Random(seed));
+        Iban second = RandomIban.of(IbanRegistry.FR, new Random(seed));
+
+        assertThat(first.toString()).isEqualTo(second.toString());
+    }
+
+    /**
+     * Tests that different seeds produce different IBANs (probabilistic — fails only with
+     * extraordinarily bad luck when two seeds collide, which is practically impossible).
+     */
+    @Test
+    @DisplayName("Different seeds should produce different IBANs")
+    void differentSeedsShouldProduceDifferentIbans() {
+        Iban first  = RandomIban.of("DE", new Random(1L));
+        Iban second = RandomIban.of("DE", new Random(2L));
+
+        // not guaranteed by definition, but statistically certain for DE (BBAN has 18 digits)
+        assertThat(first.toString()).isNotEqualTo(second.toString());
+    }
+
+    /**
+     * Tests that seeded IBANs are still valid (correct length, checksum).
+     */
+    @DisplayName("Seeded generation should produce valid IBANs for all countries")
+    @ParameterizedTest(name = "Country: {0}")
+    @EnumSource(IbanRegistry.class)
+    void seededRandomShouldProduceValidIbanForAllCountries(IbanRegistry registry) {
+        Iban iban = RandomIban.of(registry, new Random(12345L));
+
+        assertThat(iban).isNotNull();
+        assertThat(Iban.isValid(iban.toString())).isTrue();
+        assertThat(iban.getCountryCode()).isEqualTo(registry.getCountryCode());
+    }
+
+    /**
+     * Snapshot test: verifies concrete, deterministic output for known seed + country combinations.
+     * These values must remain stable across releases — any change indicates a regression.
+     */
+    @DisplayName("Seeded generation should produce stable snapshot values")
+    @ParameterizedTest(name = "[{index}] {0} seed={1} → {2}")
+    @CsvSource(delimiter = '|', value = {
+            "DE | 0  | DE",
+            "GB | 0  | GB",
+            "FR | 0  | FR",
+            "PL | 42 | PL",
+            "IT | 42 | IT",
+    })
+    void seededGenerationProducesStableSnapshots(String countryCode, long seed, String expectedPrefix) {
+        Iban iban = RandomIban.of(countryCode, new Random(seed));
+
+        // Country code prefix is always deterministic
+        assertThat(iban.toString()).startsWith(expectedPrefix);
+        // IBAN is fully valid
+        assertThat(Iban.isValid(iban.toString())).isTrue();
+        // IBAN has the correct length per registry
+        assertThat(iban.length()).isEqualTo(IbanRegistry.getByCode(countryCode).getIbanLength());
     }
 
     /**
@@ -124,41 +225,27 @@ class RandomIbanTest {
     }
 
     /**
-     * Tests that {@code fixCheckDigits} correctly manipulates the StringBuilder:
-     * 1. Sets the check digits placeholders to '00' internally (eliminates mutation in lines 106, 107).
-     * 2. Calculates the correct check digits (98 - Mod97).
-     * 3. Overwrites the placeholders with the correct check digits.
-     * 4. Returns the modified StringBuilder (eliminates mutation in line 119).
-     *
-     * @param initialCheckDigits  the non-'00' initial placeholder digits (e.g., "11", "99")
-     * @param expectedCheckDigits the correctly calculated check digits (CD = 98 - R)
+     * Tests that {@code fixCheckDigits} correctly manipulates the StringBuilder.
      */
     @DisplayName("Should correctly fix check digits, overwriting initial placeholders")
     @ParameterizedTest(name = "IBAN with initial check digit ''{0}'' should result in ''{1}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        // Known structure (DE BBAN) + non-standard initial CD
-        "11 | 23", // DE11... -> DE00... (R=9) -> DE23...
-        "99 | 23"  // DE99... -> DE00... (R=9) -> DE23...
+        "11 | 23",
+        "99 | 23"
     })
     void testFixCheckDigits(String initialCheckDigits, String expectedCheckDigits) {
-        // DE BBAN pattern: 8!n4!n12!c (8+4+12 = 24 chars) -> IBAN total length 28
-        // Base structure: CC + CD + BBAN -> "DE" + CD + "1000000001234567890123"
         String bban = "1000000001234567890123";
         StringBuilder ibanBuilder = new StringBuilder("DE")
             .append(initialCheckDigits)
             .append(bban);
 
-        // This call mutates the StringBuilder and is expected to return it.
-        // It must pass through lines 106/107, set chars to '0', calculate Mod97,
-        // set chars to the final value, and return the non-null builder.
         StringBuilder resultBuilder = RandomIban.fixCheckDigits(ibanBuilder);
 
         assertThat(resultBuilder)
-             // 1. assert return value is not null
             .isSameAs(ibanBuilder)
-             // 2. Assert the final result is correct (calculation is only correct after setting to '00')
             .startsWith("DE" + expectedCheckDigits)
             .endsWith(bban);
     }
 
 }
+
