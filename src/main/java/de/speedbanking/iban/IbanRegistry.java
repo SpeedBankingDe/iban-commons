@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
  */
 public enum IbanRegistry {
 
-    // --- Enum Constants (generated from IBAN Registry) ---
+    // --- BGN: Enum Constants (generated from IBAN Registry) ---
 
     /**
      * <strong>Andorra ({@code AD})</strong><p>
@@ -2240,7 +2240,212 @@ public enum IbanRegistry {
        ContactData.of(
            "Central Bank of Yemen", "Payment Systems Depatment", "Crater Aledaroos Street 452",
            "Aden", null, null)
+    ),
+
+    // --- END: Enum Constants (generated from IBAN Registry) ---
+
+    // --- BGN: Enum Constants (manually maintained) ---
+
+    /**
+     * <strong>Burkina Faso ({@code BF})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!c5!n11!n2!n}<br>
+     * Example: {@code BF21BF084010130046357400039}
+     */
+    BF(StructureData.builder()
+         .withIbanLength(27)
+         .withBbanPattern("5!c5!n11!n2!n")
+         .withBankCode("5!c", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .build(),
+       MetaData.of(
+           "Burkina Faso", false, "BF21BF084010130046357400039", null),
+       ContactData.of(
+           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
+           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
+    ),
+
+    /**
+     * <strong>Benin ({@code BJ})</strong><p>
+     * IBAN Length: 28<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!a5!n12!n2!n}<br>
+     * Example: {@code BJ66BJ0610100100144390000769}
+     */
+    BJ(StructureData.builder()
+         .withIbanLength(28)
+         .withBbanPattern("5!c5!n12!n2!n")
+         .withBankCode("5!c", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 26))
+         .withNationalCheckDigit(IndexRange.of(26, 28))
+         .build(),
+       MetaData.of(
+           "Benin", false, "BJ66BJ0610100100144390000769", null),
+       ContactData.of(
+           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
+           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
+    ),
+
+    /**
+     * <strong>Central African Republic ({@code CF})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
+     * Example: {@code CF4220001000010120069700160}
+     */
+    CF(StructureData.builder()
+         .withIbanLength(27)
+         .withBbanPattern("5!n5!n11!n2!n")
+         .withBankCode("5!n", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .build(),
+       MetaData.of(
+           "Central African Republic", false, "CF4220001000010120069700160", null),
+       ContactData.of(
+           "BEAC", null, "B.P. 851 Bangui - RCA",
+           "Bangui", "beacbgf@beac.int", "+236 21 61 24 00")
+    ),
+
+    /**
+     * <strong>Cameroon ({@code CM})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
+     * Example: {@code CM2110003024000224016952238}
+     */
+    CM(StructureData.builder()
+         .withIbanLength(27)
+         .withBbanPattern("5!n5!n11!n2!n")
+         .withBankCode("5!n", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .build(),
+       MetaData.of(
+           "Cameroon", false, "CM2110003024000224016952238", null),
+       ContactData.of(
+           "BEAC", null, "B.P. 1917 Yaoundé - Cameroun",
+           "Yaoundé", "beac@beac.int", "+237 222 23 40 30")
+    ),
+
+    /**
+     * <strong>Algeria ({@code DZ})</strong><p>
+     * IBAN Length: 24<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 3!n5!n10!n2!n}<br>
+     * Example: {@code DZ1700021000011130000005}
+     */
+    DZ(StructureData.builder()
+         .withIbanLength(24)
+         .withBbanPattern("3!n5!n10!n2!n")
+         .withBankCode("3!n", IndexRange.of(4, 7))
+         .withBranchCode("5!n", IndexRange.of(7, 12))
+         .withAccountNumber(IndexRange.of(12, 22))
+         .withNationalCheckDigit(IndexRange.of(22, 24))
+         .build(),
+       MetaData.of(
+           "Algeria", false, "DZ1700021000011130000005", null),
+       ContactData.of(
+           "Bank of Algeria", null, "38, Avenue Franklin Roosevelt, Sidi M'Hamed",
+           "Algiers", "communication@bank-of-algeria.dz", "+213 23 487 131")
+    ),
+
+    /**
+     * <strong>Equatorial Guinea ({@code GQ})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
+     * Example: {@code GQ7050002001003715228190196}
+     */
+    GQ(StructureData.builder()
+         .withIbanLength(27)
+         .withBbanPattern("5!n5!n11!n2!n")
+         .withBankCode("5!n", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .build(),
+       MetaData.of(
+           "Equatorial Guinea", false, "GQ7050002001003715228190196", null),
+       ContactData.of(
+           "BEAC", null, "B.P. 501 Malabo",
+           "Malabo", "beacmal@beac.int", "+240 333 09 59 30")
+    ),
+
+    /**
+     * <strong>Comoros ({@code KM})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
+     * Example: {@code KM4600005000010010904400137}
+     */
+    KM(StructureData.builder()
+         .withIbanLength(27)
+         .withBbanPattern("5!n5!n11!n2!n")
+         .withBankCode("5!n", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 25))
+         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .build(),
+       MetaData.of(
+           "Comoros", false, "KM4600005000010010904400137", null),
+       ContactData.of(
+           "Banque Centrale des Comores", null, "Place de France",
+           "405 Moroni", "secretariat@banque-comores.km", "+269 773-18-14")
+    ),
+
+    /**
+     * <strong>Senegal ({@code SN})</strong><p>
+     * IBAN Length: 28<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
+     * Example: {@code SN08SN1910100101260047607163}
+     */
+    SN(StructureData.builder()
+         .withIbanLength(28)
+         .withBbanPattern("5!c5!n12!n2!n")
+         .withBankCode("5!c", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 26))
+         .withNationalCheckDigit(IndexRange.of(26, 28))
+         .build(),
+       MetaData.of(
+           "Senegal", false, "SN08SN1910100101260047607163",
+           YearMonth.of(2015, 5)),
+       ContactData.of(
+           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
+           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
+    ),
+
+    /**
+     * <strong>Togo ({@code TG})</strong><p>
+     * IBAN Length: 28<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
+     * Example: {@code TG87TG0090100110232500400512}
+     */
+    TG(StructureData.builder()
+         .withIbanLength(28)
+         .withBbanPattern("5!c5!n12!n2!n")
+         .withBankCode("5!c", IndexRange.of(4, 9))
+         .withBranchCode("5!n", IndexRange.of(9, 14))
+         .withAccountNumber(IndexRange.of(14, 26))
+         .withNationalCheckDigit(IndexRange.of(26, 28))
+         .build(),
+       MetaData.of(
+           "Togo", false, "TG87TG0090100110232500400512", null),
+       ContactData.of(
+           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
+           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
     );
+
+    // --- END: Enum Constants (manually maintained) ---
 
     private final StructureData                    structureData;
     private final MetaData                         metaData;
@@ -2295,10 +2500,10 @@ public enum IbanRegistry {
 
         this.countryFlag = CountryUtil.createFlagEmoji(name());
 
-        String fullIbanPattern = "2!a2!n" + structureData.bbanPatternStr();
-        this.ibanRegex = Pattern.compile('^' + IbanPatternConverter.convertToRegex(fullIbanPattern) + '$');
+        String ibanPatternNoCountry = "2!n" + structureData.bbanPatternStr();
+        this.ibanRegex = Pattern.compile('^' + name() + IbanPatternConverter.convertToRegex(ibanPatternNoCountry) + '$');
 
-        this.countryValidator = loadValidator(this.name());
+        this.countryValidator = loadValidator(name());
     }
 
     /**
@@ -2919,7 +3124,7 @@ public enum IbanRegistry {
             YearMonth lastUpdate) {
             this.countryName = Objects.requireNonNull(countryName, "countryName required");
             this.isSepa = isSepa;
-            this.ibanExample = ibanExample;
+            this.ibanExample = Objects.requireNonNull(ibanExample, "ibanExample required");
             this.lastUpdate = lastUpdate;
         }
 

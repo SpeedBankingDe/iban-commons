@@ -21,7 +21,7 @@ class IbanValidationErrorTest extends org.assertj.core.api.Assertions {
         String text = reason.getText();
 
         assertThat(text)
-            .as("Failure text for %s must be defined and non-blank", reason.name())
+            .as("Failure text must be defined and non-blank for %s", reason.name())
             .isNotBlank();
     }
 

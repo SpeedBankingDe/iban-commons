@@ -230,12 +230,11 @@ class RandomIbanTest {
     @DisplayName("Should correctly fix check digits, overwriting initial placeholders")
     @ParameterizedTest(name = "IBAN with initial check digit ''{0}'' should result in ''{1}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        "11 | 23",
-        "99 | 23"
+        "DE | 11 | 1000000001234567890123 | 23",
+        "DE | 99 | 1000000001234567890123 | 23"
     })
-    void testFixCheckDigits(String initialCheckDigits, String expectedCheckDigits) {
-        String bban = "1000000001234567890123";
-        StringBuilder ibanBuilder = new StringBuilder("DE")
+    void testFixCheckDigits(String countryCode, String initialCheckDigits, String bban, String expectedCheckDigits) {
+        StringBuilder ibanBuilder = new StringBuilder(countryCode)
             .append(initialCheckDigits)
             .append(bban);
 

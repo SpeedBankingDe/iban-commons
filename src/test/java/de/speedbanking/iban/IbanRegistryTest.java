@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.YearMonth;
-import java.util.Optional;
 
 /**
  * JUnit test class for {@link IbanRegistry}.
@@ -252,11 +251,15 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @ParameterizedTest
     @EnumSource(IbanRegistry.class)
     void allEntriesMustHaveLastUpdate(IbanRegistry entry) {
-        if (entry.getLastUpdate() != null) {
-            assertThat(entry.getLastUpdate())
-                .as("lastUpdate date seems too old for %s", entry.getCountryCode())
-                .isAfter(YearMonth.of(2000, 1));
-        }
+        YearMonth firstYearMonth = YearMonth.of(2000, 1);
+        assertThat(entry.getLastUpdate())
+            .as("lastUpdate must be null or a valid date after %s for %s", firstYearMonth, entry.getCountryCode())
+            .satisfiesAnyOf(
+                lu -> assertThat(lu).isNull(),
+                lu -> assertThat(lu)
+                          .isAfter(firstYearMonth)
+                          .isBeforeOrEqualTo(YearMonth.now())
+            );
     }
 
     @DisplayName("All entries must have a valid IBAN length (4 to 34)")
@@ -268,13 +271,16 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .isBetween(IbanRegistry.MIN_IBAN_LENGTH, IbanRegistry.MAX_IBAN_LENGTH);
     }
 
-    @DisplayName("All entries must have a valid sample IBAN or null")
+    @DisplayName("All entries must have a valid example IBAN")
     @ParameterizedTest
     @EnumSource(IbanRegistry.class)
     void allEntriesMustHaveValidIbanExample(IbanRegistry entry) {
-        Optional.ofNullable(entry.getIbanExample()).ifPresent(iban ->
-            assertThatCode(() -> Iban.of(iban)).doesNotThrowAnyException()
-        );
+
+        assertThat(entry.getIbanExample())
+            .as("Example IBAN missing for %s", entry.getCountryCode())
+            .isNotNull();
+
+        assertThatCode(() -> Iban.of(entry.getIbanExample())).doesNotThrowAnyException();
     }
 
     @DisplayName("Should verify ContactData properties and immutability")
