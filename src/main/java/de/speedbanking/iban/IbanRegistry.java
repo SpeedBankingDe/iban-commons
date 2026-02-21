@@ -1758,10 +1758,10 @@ public enum IbanRegistry {
          .build(),
        MetaData.of(
            "Portugal", true, "PT50000201231234567890154",
-           YearMonth.of(2025, 6)),
+           YearMonth.of(2025, 12)),
        ContactData.of(
            "Banco de Portugal", "Payment Systems Department", "Rua do Comércio 148",
-           "1100-150 Lisboa", "dpg@bportugal.pt", "+ 351 217813000")
+           "1100-148 Lisboa", "dpg@bportugal.pt", "+ 351 217813000")
     ),
 
     /**
