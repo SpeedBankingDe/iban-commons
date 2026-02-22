@@ -16,6 +16,7 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanRegistry.INDEX_BBAN;
+import static de.speedbanking.iban.IbanRegistry.INDEX_CHECK_DIGITS;
 import static de.speedbanking.iban.IbanRegistry.MIN_IBAN_LENGTH;
 import static de.speedbanking.util.CharUtil.isDigit;
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
@@ -34,13 +35,13 @@ public final class IbanValidator {
     /**
      * The modulus used in the ISO 7064 Mod 97-10 check (97).
      */
-    static final int  MOD         = 97;
+    private static final int                              MOD         = 97;
 
     /**
      * A limit used to trigger the intermediate modulo operation during the
      * Mod 97-10 calculation to prevent {@code long} overflow, set to 999999999.
      */
-    static final long MAX         = 999999999;
+    private static final long                             MAX         = 999999999;
 
     /**
      * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
@@ -460,6 +461,72 @@ public final class IbanValidator {
         // store the single error for the simple API to retrieve via getLastReason()
         setLastReason(reason);
         return null;
+    }
+
+    /**
+     * Performs the core ISO 7064 Mod 97-10 calculation on the restructured IBAN string.
+     * <p>
+     * The input {@code CharSequence} is rotated by moving the first 4 characters (CC + CD) to the end.
+     * Characters are converted to numerical values (A=10, B=11, ..., Z=35).
+     * The result is the remainder of the overall number when divided by 97.
+     * Intermediate modulo operations are performed to prevent {@code long} overflow.
+     *
+     * @param cs the full IBAN string (normalized, with placeholder check digits)
+     * @return the Mod 97 remainder (R) of the restructured IBAN value
+     * @throws InvalidIbanException if the input contains non-alphanumeric characters (outside A-Z, 0-9)
+     */
+    static int calculateMod97(CharSequence cs) {
+        StringBuilder ibanBuilder = new StringBuilder()
+            .append(cs.subSequence(INDEX_BBAN, cs.length()))
+            .append(cs.subSequence(0, INDEX_BBAN));
+
+        long total = 0;
+        for (int i = 0; i < ibanBuilder.length(); i++) {
+            final int numericValue = Character.getNumericValue(ibanBuilder.charAt(i));
+            if (numericValue < 0 || numericValue > 35) {
+                throw new InvalidIbanException(IbanValidationError.ILLEGAL_CHARACTERS);
+            }
+            total = (numericValue > 9 ? total * 100 : total * 10) + numericValue;
+
+            if (total > MAX) {
+                total = (total % MOD);
+            }
+        }
+        return (int) (total % MOD);
+    }
+
+    /**
+     * Calculates the correct ISO 7064 Mod 97-10 check digits for the given IBAN string
+     * and overwrites the placeholders (usually "00") at the check digit positions (index 2 and 3).
+     * <p>
+     * This method temporarily sets the check digits to "00" to calculate the required remainder $R$,
+     * then determines the final check digits $CD = 98 - R$.
+     *
+     * @param iban the IBAN character sequence (must already be of the full IBAN length,
+     *             with placeholders at the check digit position); if a {@code StringBuilder}
+     *             is passed, it is mutated in place, otherwise a copy is created
+     * @return the same {@code StringBuilder} instance with the correct check digits applied
+     */
+    public static StringBuilder fixCheckDigits(CharSequence iban) {
+        StringBuilder sb = (iban instanceof StringBuilder)
+            ? (StringBuilder) iban
+            : new StringBuilder(iban);
+
+        // 1. Set placeholders to "00" (crucial for correct calculation context)
+        sb.setCharAt(INDEX_CHECK_DIGITS, '0');
+        sb.setCharAt(INDEX_CHECK_DIGITS + 1, '0');
+
+        // 2. Calculate the required check digits value (98 - Modulo result)
+        int checkDigitsValue = 98 - calculateMod97(sb);
+
+        // 3. Format the result to a zero-padded 2-digit String, e.g. 5 -> "05", 91 -> "91"
+        String checkDigitsStr = String.format("%02d", checkDigitsValue);
+
+        // 4. Overwrite the placeholders with the calculated digits
+        sb.setCharAt(INDEX_CHECK_DIGITS, checkDigitsStr.charAt(0));
+        sb.setCharAt(INDEX_CHECK_DIGITS + 1, checkDigitsStr.charAt(1));
+
+        return sb;
     }
 
 }

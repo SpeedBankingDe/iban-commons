@@ -1,5 +1,6 @@
 package de.speedbanking.iban;
 
+import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException;
 import static de.speedbanking.iban.IbanValidationError.EMPTY;
 import static de.speedbanking.iban.IbanValidationError.ILLEGAL_CHARACTERS;
 import static de.speedbanking.iban.IbanValidationError.INCORRECT_LENGTH;
@@ -309,4 +310,68 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         // 3. Assert that LAST_REASON has been reset to null.
         assertThat(IbanValidator.getLastReason()).isNull();
     }
+
+    /**
+     * Tests the {@code calculateMod97} method with known IBAN structures (containing "00" placeholders
+     * for check digits) to ensure the calculated remainder matches the required value R, where
+     * the actual check digits CD = 98 - R.
+     *
+     * @param ibanWithZeroCheckDigits the IBAN with "00" in the check digit position
+     * @param expectedRemainder       the remainder R that must be produced by the modulo 97 calculation
+     */
+    @ParameterizedTest(name = "[{index}] IBAN ''{0}'' should yield Mod 97 Remainder {1}")
+    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
+        // IBAN (00 CD)              | Expected Remainder R (for CD = 98 - R)
+        "DE00370400440532013000      | 9",  // result 9 -> CD 91 (DE91...)
+        "NL00ABNA0417164300          | 7",  // result 7 -> CD 97 (NL91...)
+        "FR0020041010050500013M02606 | 84", // result 84 -> CD 15 (FR14...)
+        "TR000006100519786457841326  | 65"  // longer IBAN structure (implicitly tests intermediate modulo)
+    })
+    void testCalculateMod97ValidIbanFormat(CharSequence ibanWithZeroCheckDigits, int expectedRemainder) {
+        int mod97 = IbanValidator.calculateMod97(ibanWithZeroCheckDigits);
+        assertThat(mod97).isEqualTo(expectedRemainder);
+    }
+
+    /**
+     * Tests that the calculation method correctly throws an {@code InvalidIbanException}
+     * when encountering illegal characters (those not in A-Z or 0-9) during the numeric conversion.
+     *
+     * @param ibanInput the input string containing illegal characters
+     */
+    @ParameterizedTest(name = "[{index}] Invalid character in ''{0}'' throws ILLEGAL_CHARACTERS")
+    @ValueSource(strings = {
+        "DE0010000000012345678/", // Forward slash
+        "DE0010000000012345678-", // Hyphen
+        "DE0010000000012345678 ", // Space (assuming input is normalized, but guards against it)
+        "DE0010000000012345678ß"  // German specific non-alphanumeric character
+    })
+    void testCalculateMod97WithIllegalCharactersShouldThrowException(String ibanInput) {
+        assertThatInvalidIbanException()
+            .isThrownBy(() -> IbanValidator.calculateMod97(ibanInput))
+            .extracting("reason")
+            .isEqualTo(ILLEGAL_CHARACTERS);
+    }
+
+    /**
+     * Tests that {@code fixCheckDigits} correctly manipulates the StringBuilder.
+     */
+    @DisplayName("Should correctly fix check digits, overwriting initial placeholders")
+    @ParameterizedTest(name = "IBAN with initial check digit ''{0}'' should result in ''{1}''")
+    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
+        "DE | 11 | 1000000001234567890123 | 23",
+        "DE | 99 | 1000000001234567890123 | 23"
+    })
+    void testFixCheckDigits(String countryCode, String initialCheckDigits, String bban, String expectedCheckDigits) {
+        StringBuilder ibanBuilder = new StringBuilder(countryCode)
+            .append(initialCheckDigits)
+            .append(bban);
+
+        StringBuilder resultBuilder = IbanValidator.fixCheckDigits(ibanBuilder);
+
+        assertThat(resultBuilder)
+            .isSameAs(ibanBuilder)
+            .startsWith("DE" + expectedCheckDigits)
+            .endsWith(bban);
+    }
+
 }
