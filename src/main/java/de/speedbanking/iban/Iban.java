@@ -45,12 +45,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
 
     private static final Optional<Iban> EMPTY_IBAN       = Optional.empty();
 
-    /** The raw, normalized IBAN character array (e.g., "DE91100000000123456789"). */
-    private final char[]                ibanArr;
-
     /**
-     * The raw, normalized IBAN string, created once in the constructor.<br>
-     * This field is part of the object's essential state and is therefore NOT transient.
+     * The raw, normalized IBAN string, created once in the constructor (e.g., "DE91100000000123456789").
      */
     private final String                ibanStr;
 
@@ -58,26 +54,37 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     private final IbanRegistry          countryData;
 
     /**
-     * Caches the two IBAN check digits (positions 3 and 4) upon first access.
-     * Marked as {@code transient} for serialization and {@code volatile}
-     * to ensure correct lazy initialization across multiple threads.
+     * Caches the two IBAN check digits (positions 3 and 4) upon first access.<br>
+     * Marked {@code transient} so deserialization recomputes on next access,
+     * and {@code volatile} to ensure the written value is visible across threads.
+     * Multiple threads may compute and write the same value; this is harmless
+     * because String assignment is atomic and all threads derive the identical result.
      */
     private transient volatile String   checkDigits;
 
     /** Caches the Basic Bank Account Number (BBAN) part upon first access. */
     private transient volatile String   bban;
 
-    /** Caches the Bank Code part of the BBAN upon first access. Can be null if the country's BBAN structure does not define it. */
+    /**
+     * Caches the Bank Code part of the BBAN upon first access.
+     * May remain {@code null} if the country's BBAN structure does not define a bank code.
+     */
     private transient volatile String   bankCode;
 
-    /** Caches the Branch Code part of the BBAN upon first access. Can be null if the country's BBAN structure does not define it. */
+    /**
+     * Caches the Branch Code part of the BBAN upon first access.
+     * May remain {@code null} if the country's BBAN structure does not define a branch code.
+     */
     private transient volatile String   branchCode;
-
-    /** Caches the National Check Digit part of the BBAN upon first access. */
-    private transient volatile String   nationalCheckDigit;
 
     /** Caches the Account Number part of the BBAN upon first access. */
     private transient volatile String   accountNumber;
+
+    /**
+     * Caches the National Check Digit part of the BBAN upon first access.
+     * May remain {@code null} if the country's BBAN structure does not define a national check digit.
+     */
+    private transient volatile String   nationalCheckDigit;
 
     /**
      * Package-private constructor.
@@ -89,7 +96,6 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @param countryData the metadata for the country code (format, structure)
      */
     Iban(final char[] ibanArr, final IbanRegistry countryData) {
-        this.ibanArr = ibanArr;
         this.ibanStr = new String(ibanArr);
         this.countryData = countryData;
     }
@@ -260,8 +266,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getCheckDigits() {
         if (checkDigits == null) {
-            // lazy initialization of the check digits string
-            checkDigits = new String(ibanArr, 2, 2);
+            checkDigits = ibanStr.substring(2, 4);
         }
         return checkDigits;
     }
@@ -280,8 +285,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getBban() {
         if (bban == null) {
-            // lazy initialization of the BBAN string
-            bban = new String(ibanArr, INDEX_BBAN, ibanArr.length - INDEX_BBAN);
+            bban = ibanStr.substring(INDEX_BBAN);
         }
         return bban;
     }
@@ -301,14 +305,13 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getBankCode() {
         if (bankCode == null && countryData.getBankCodeIndexRange() != null) {
-            // lazy initialization based on metadata indices
-            bankCode = countryData.getBankCodeIndexRange().applyTo(ibanArr);
+            bankCode = countryData.getBankCodeIndexRange().applyTo(ibanStr);
         }
         return bankCode;
     }
 
     /**
-     * Returns the Branch Identifier Code (Branch Code) based on the country's BBAN structure.
+     * Returns the Branch Identifier Code (Branch Code) based on the country's BBAN structure, if present, or {@code null}.
      *
      * @return the branch code string, or {@code null} if the country does not define a separate branch code part
      *
@@ -316,8 +319,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getBranchCode() {
         if (branchCode == null && countryData.getBranchCodeIndexRange() != null) {
-            // lazy initialization based on metadata indices
-            branchCode = countryData.getBranchCodeIndexRange().applyTo(ibanArr);
+            branchCode = countryData.getBranchCodeIndexRange().applyTo(ibanStr);
         }
         return branchCode;
     }
@@ -335,21 +337,6 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
-     * Returns the national check digit (NCD) part of the BBAN, if present.
-     *
-     * @return the national check digit (NCD) string
-     *
-     * @since 1.8.1
-     */
-    public String getNationalCheckDigit() {
-        if (nationalCheckDigit == null && countryData.getNationalCheckDigitIndexRange() != null) {
-            // lazy initialization based on metadata indices
-            nationalCheckDigit = countryData.getNationalCheckDigitIndexRange().applyTo(ibanArr);
-        }
-        return nationalCheckDigit;
-    }
-
-    /**
      * Returns the national account number part of the BBAN.
      * <p>
      * The Account Number is the part of the BBAN that identifies the customer's account.
@@ -364,10 +351,23 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getAccountNumber() {
         if (accountNumber == null) {
-            // lazy initialization based on metadata indices
-            accountNumber = countryData.getAccountNumberIndexRange().applyTo(ibanArr);
+            accountNumber = countryData.getAccountNumberIndexRange().applyTo(ibanStr);
         }
         return accountNumber;
+    }
+
+    /**
+     * Returns the national check digit (NCD) part of the BBAN, if present, or {@code null}.
+     *
+     * @return the national check digit (NCD) string
+     *
+     * @since 1.8.1
+     */
+    public String getNationalCheckDigit() {
+        if (nationalCheckDigit == null && countryData.getNationalCheckDigitIndexRange() != null) {
+            nationalCheckDigit = countryData.getNationalCheckDigitIndexRange().applyTo(ibanStr);
+        }
+        return nationalCheckDigit;
     }
 
     /**
@@ -421,11 +421,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     @Override
     public char charAt(int index) {
-        if (index < 0 || index >= ibanArr.length) {
-            throw new IndexOutOfBoundsException(
-                String.format("Index should be between 0 (inclusive) and %d (exclusive), but was %d", ibanArr.length, index));
-        }
-        return ibanArr[index];
+        // bounds check delegated to String class
+        return ibanStr.charAt(index);
     }
 
     /**
@@ -446,11 +443,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     @Override
     public String subSequence(int start, int end) {
-        if (start < 0 || end > ibanArr.length || start > end) {
-            throw new IndexOutOfBoundsException(String.format(
-                "Start index should be >= %d (was: %d) and end index (exclusive) <= %d (was: %d)", 0, start, ibanArr.length, end));
-        }
-        return new String(ibanArr, start, end - start);
+        // bounds check delegated to String class
+        return ibanStr.substring(start, end);
     }
 
     /**
@@ -462,7 +456,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     @Override
     public int length() {
-        return ibanArr.length;
+        return countryData.getIbanLength();
     }
 
     /**

@@ -110,8 +110,8 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      * @return the substring covered by this range
      * @throws IndexOutOfBoundsException if the sequence is shorter than {@code end}
      */
-    public CharSequence applyTo(final CharSequence sequence) {
-        return sequence.subSequence(begin, end);
+    public String applyTo(final CharSequence sequence) {
+        return sequence.subSequence(begin, end).toString();
     }
 
     /**
@@ -125,8 +125,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      * @throws IndexOutOfBoundsException if the range is outside the bounds of the sequence
      */
     public String applyTo(final char[] sequence) {
-        int count = end - begin;
-        return new String(sequence, begin, count);
+        return new String(sequence, begin, length());
     }
 
      /**
