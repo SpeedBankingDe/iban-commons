@@ -85,22 +85,7 @@ public final class IbanValidator {
      * @since 1.8.0
      */
     public static boolean isValid(final CharSequence iban) {
-        if (iban == null) {
-            return false;
-        }
-
-        final int len = iban.length();
-
-        if (len < MIN_IBAN_LENGTH) {
-            return false;
-        }
-
-        IbanRegistry countryData = IbanRegistry.getByCode(iban.subSequence(0, 2));
-
-        return countryData != null
-            && len == countryData.getIbanLength()
-            && countryData.getIbanRegex().matcher(iban).matches()
-            && isMod97Valid(iban);
+        return validateRaw(iban) != null;
     }
 
     /**
