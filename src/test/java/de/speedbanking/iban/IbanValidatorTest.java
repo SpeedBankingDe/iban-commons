@@ -1,6 +1,5 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException;
 import static de.speedbanking.iban.IbanValidationError.EMPTY;
 import static de.speedbanking.iban.IbanValidationError.ILLEGAL_CHARACTERS;
 import static de.speedbanking.iban.IbanValidationError.INCORRECT_LENGTH;
@@ -106,14 +105,12 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         // Reset for second test
         IbanValidator.setLastReason(null);
 
-        // test that forces an illegal character check after the first 4 chars
         IbanValidationSuccess result2 = IbanValidator.validateRaw("DE51XXXXXXXXXXXXXXXXXX");
-        // This is caught by BBAN structure check if X is allowed char but not in structure
-        // But here X is caught as ILLEGAL_CHARACTERS in validateRaw loop L141 as it's not a digit
-        // for BBAN part of DE
         assertThat(result2).isNull();
-        // Since X is an uppercase char, it passes L141 but fails L277 (INVALID_STRUCTURE)
+        assertThat(IbanValidator.getLastReason()).isEqualTo(INVALID_STRUCTURE);
+
         IbanValidator.setLastReason(null);
+
         IbanValidationSuccess result3 = IbanValidator.validateRaw("DE5110000000012345678!");
         assertThat(result3).isNull();
         assertThat(IbanValidator.getLastReason()).isEqualTo(ILLEGAL_CHARACTERS);
@@ -268,16 +265,11 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
 
         // Null/Empty handling (assuming isMod97Valid handles null/empty gracefully or fails early)
         "(null) | false",
-        "'' | false", // empty string
+        "'' | false",  // empty string
         "'  ' | false" // whitespace
     })
     void isMod97Valid_shouldHandleAllCases(String ibanString, boolean expectedValidity) {
-        // handle the CsvSource empty string case
-        char[] ibanArr = ibanString == null
-                         ? null
-                         : ibanString.toCharArray();
-
-        boolean isValid = IbanValidator.isMod97Valid(ibanArr);
+        boolean isValid = IbanValidator.isMod97Valid(ibanString);
 
         assertThat(isValid)
             .withFailMessage("Validation failed for IBAN: %s (expected: %s, actual: %s)",
@@ -292,6 +284,18 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         assertThat(IbanValidator.isValid(VALID_NORM_DE)).isTrue();
     }
 
+    @ParameterizedTest(name = "[{index}] Validating formatted IBAN: {0}")
+    @ValueSource(strings = {
+        "DE91 1000 0000 0123 4567 89",
+        "GB29 NWBK 6016 1331 9268 19",
+        "PL 61 10 90 10 14 00 00 07 12 19 81 28 74"
+    })
+    @DisplayName("isValid should return true for valid formatted (spaced) IBANs")
+    void isValid_shouldReturnTrueForFormattedIban(String formattedIban) {
+        assertThat(IbanValidator.isValid(formattedIban))
+            .as("IBAN %s should be recognized as valid", formattedIban)
+            .isTrue();
+    }
     /**
      * Tests that {@code setLastReason(null)} is called upon successful validation.
      */
@@ -333,23 +337,20 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
     }
 
     /**
-     * Tests that the calculation method correctly throws an {@code InvalidIbanException}
+     * Tests that the calculation method correctly return {@value IbanValidator#INVALID_MOD97}
      * when encountering illegal characters (those not in A-Z or 0-9) during the numeric conversion.
      *
      * @param ibanInput the input string containing illegal characters
      */
-    @ParameterizedTest(name = "[{index}] Invalid character in ''{0}'' throws ILLEGAL_CHARACTERS")
+    @ParameterizedTest(name = "[{index}] Invalid character in ''{0}'' returns " + IbanValidator.INVALID_MOD97)
     @ValueSource(strings = {
-        "DE0010000000012345678/", // Forward slash
-        "DE0010000000012345678-", // Hyphen
-        "DE0010000000012345678 ", // Space (assuming input is normalized, but guards against it)
+        "DE0010000000012345678/", // forward slash
+        "DE0010000000012345678-", // hyphen
+        "DE0010000000012345678 ", // space (assuming input is normalized, but guards against it)
         "DE0010000000012345678ß"  // German specific non-alphanumeric character
     })
-    void testCalculateMod97WithIllegalCharactersShouldThrowException(String ibanInput) {
-        assertThatInvalidIbanException()
-            .isThrownBy(() -> IbanValidator.calculateMod97(ibanInput))
-            .extracting("reason")
-            .isEqualTo(ILLEGAL_CHARACTERS);
+    void testCalculateMod97WithIllegalCharactersShouldReturnNegativeOne(String ibanInput) {
+        assertThat(IbanValidator.calculateMod97(ibanInput)).isEqualTo(IbanValidator.INVALID_MOD97);
     }
 
     /**
@@ -366,12 +367,54 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
             .append(initialCheckDigits)
             .append(bban);
 
-        StringBuilder resultBuilder = IbanValidator.fixCheckDigits(ibanBuilder);
+        StringBuilder resultBuilder1 = IbanValidator.fixCheckDigits(ibanBuilder);
 
-        assertThat(resultBuilder)
+        assertThat(resultBuilder1)
             .isSameAs(ibanBuilder)
             .startsWith("DE" + expectedCheckDigits)
             .endsWith(bban);
+
+        StringBuilder resultBuilder2 = IbanValidator.fixCheckDigits(ibanBuilder.toString());
+
+        assertThat(resultBuilder2)
+            .hasToString(ibanBuilder.toString())
+            .asString()
+            .startsWith("DE" + expectedCheckDigits)
+            .endsWith(bban);
+    }
+
+    @DisplayName("isValidSpaced: fail on non-digit at check digit position or illegal BBAN")
+    @ParameterizedTest(name = "Input: {0}")
+    @CsvSource(delimiter = '|', value = {
+        "DE A1 1000 0000 0123 4567 89",       // non-digit at pos 3
+        "DE9A 1000 0000 0123 4567 89",        // non-digit at pos 4
+        "DE91 1000 !000 0123 4567 89",        // illegal char in BBAN
+        "DE91 1000 0000 0123 4567 8",         // length check fail via registry
+        "GT00 TRAJ 0102 0000 0012 1002 9690", // no country validator & invalid check digits
+    })
+    @NullAndEmptySource
+    void isValidSpaced_shouldReturnFalseForInvalidCases(String input) {
+        IbanRegistry countryData = input == null || input.length() < 2 ? null : IbanRegistry.getByCode(input.substring(0, 2));
+        boolean result = IbanValidator.isValidSpaced(input, countryData);
+        assertThat(result).isFalse();
+    }
+
+    @ParameterizedTest(name = "[{index}] input: {0} ({1})")
+    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
+        "(null) | null input",
+        "''     | empty input",
+        "DE91   | short mixed input",
+        "123    | numeric short input",
+        "ABCDE  | non-numeric short input",
+        "XX61________________________ | invalid IBAN chars"
+    })
+    @DisplayName("calculateMod97 should return INVALID_MOD97 for invalid inputs")
+    void calculateMod97_shouldHandleInvalidInputs(String input, String description) {
+        char[] charArray = input == null ? null : input.toCharArray();
+
+        assertThat(IbanValidator.calculateMod97(charArray))
+            .as("Check failed for: %s", description)
+            .isEqualTo(IbanValidator.INVALID_MOD97);
     }
 
 }

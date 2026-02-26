@@ -1,7 +1,8 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanAssertions.assertThat;
-import static de.speedbanking.iban.IbanRegistry.INDEX_CHECK_DIGITS;
+import static de.speedbanking.iban.IbanValidator.INDEX_CHECK_DIGIT1;
+import static de.speedbanking.iban.IbanValidator.INDEX_CHECK_DIGIT2;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
@@ -97,8 +98,8 @@ class RandomIbanTest {
         assertThat(IbanValidator.getLastReason()).isNull();
 
         StringBuilder sb = new StringBuilder(ibanStr);
-        sb.setCharAt(INDEX_CHECK_DIGITS, '0');
-        sb.setCharAt(INDEX_CHECK_DIGITS + 1, '0');
+        sb.setCharAt(INDEX_CHECK_DIGIT1, '0');
+        sb.setCharAt(INDEX_CHECK_DIGIT2, '0');
 
         IbanAssertions.assertThat(iban)
             .hasCheckDigits(98 - IbanValidator.calculateMod97(sb));

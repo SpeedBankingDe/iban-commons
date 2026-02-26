@@ -35,7 +35,8 @@ import java.util.stream.Collectors;
  * The definitive, immutable registry for all **ISO 13616-compliant national IBAN formats**.
  * <p>
  * This enumeration holds the official structural rules (total length, BBAN pattern, component index ranges)
- * for each country, as published in the **SWIFT IBAN Registry (Release 100 - Oct 2025)**.
+ * for each country, as published in the **SWIFT IBAN Registry (Release 100 - Oct 2025)**.<br>
+ * Additional countries participating in the IBAN scheme are manually maintained in this class.
  * <p>
  * The **International Organization for Standardization (ISO)** designated **SWIFT** as the
  * Registration Authority for ISO 13616.
@@ -49,7 +50,7 @@ import java.util.stream.Collectors;
  *   <li>{@code !}: Indicates fixed length (e.g., 4!n)</li>
  * </ul>
  *
- * Indexing is zero-based and exclusive of the end index (Java's substring convention).
+ * Indexing is zero-based and exclusive of the end index (Java's substring convention).<br>
  * Example: A position "1-4" in the registry (BBAN starts at char 0) becomes index 4 to 8 in the full IBAN string.
  *
  * @since 1.8.0
@@ -2467,8 +2468,11 @@ public enum IbanRegistry {
     static final int                               MAX_IBAN_LENGTH      = Arrays.stream(values())
         .mapToInt(IbanRegistry::getIbanLength).max().orElse(34);
 
-    /** Begin index of IBAN check digits within the full IBAN string (position 3, 0-based index 2). */
-    static final int                               INDEX_CHECK_DIGITS   = 2;
+    /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
+    static final int                               INDEX_CHECK_DIGIT1   = 2;
+
+    /** Index of second IBAN check digit within the full IBAN string (position 4, 0-based index 3). */
+    static final int                               INDEX_CHECK_DIGIT2   = 3;
 
     /** Begin index of BBAN within IBAN (position 5, 0-based index 4). */
     static final int                               INDEX_BBAN           = MIN_IBAN_BASE_LENGTH;
@@ -2861,7 +2865,7 @@ public enum IbanRegistry {
      * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
      */
     public static IbanRegistry getByCode(final char c0, final char c1) {
-        return getByCode(new String(new char[] {c0, c1}).intern());
+        return CODE_MAP.get(String.valueOf(new char[] {c0, c1}));
     }
 
     /**

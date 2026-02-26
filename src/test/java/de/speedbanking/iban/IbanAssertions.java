@@ -7,6 +7,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.ThrowableTypeAssert;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Entry point for AssertJ custom assertions for the {@link Iban} class.
@@ -177,6 +178,16 @@ public class IbanAssertions extends Assertions {
             }
             return myself;
         }
+
+        public IbanAssert matches(Pattern ibanPattern) {
+            isNotNull();
+            if (ibanPattern != null && !ibanPattern.matcher(actual.toString()).matches()) {
+                failWithMessage("IBAN '%s' does not match pattern '%s'",
+                    actual, ibanPattern);
+            }
+            return myself;
+        }
+
     }
 
 }

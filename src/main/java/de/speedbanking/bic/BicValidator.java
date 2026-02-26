@@ -16,7 +16,7 @@
 package de.speedbanking.bic;
 
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
-import static de.speedbanking.util.CharUtil.isUpperCase;
+import static de.speedbanking.util.CharUtil.isNotUpperCase;
 
 /**
  * The core engine for BIC validation.
@@ -73,7 +73,7 @@ public final class BicValidator {
 
         // 2. Country Code Check (positions 5 and 6, indices 4 and 5)
         // ISO 9362 requires the Country Code to be 2 alphabetic characters (A-Z)
-        if (!isUpperCase(bicArr[Bic.COUNTRY_CODE_START]) || !isUpperCase(bicArr[Bic.COUNTRY_CODE_START + 1])) {
+        if (isNotUpperCase(bicArr[Bic.COUNTRY_CODE_START]) || isNotUpperCase(bicArr[Bic.COUNTRY_CODE_START + 1])) {
             return validationFailed(BicValidationError.INVALID_COUNTRY);
         }
 

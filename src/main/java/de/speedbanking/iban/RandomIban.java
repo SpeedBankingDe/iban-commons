@@ -102,9 +102,9 @@ public final class RandomIban {
      */
     public static Iban of(String countryCode, Random random) {
         Objects.requireNonNull(random, "Random must not be null");
-        IbanRegistry ibanRegistry = Objects.requireNonNull(IbanRegistry.getByCode(countryCode),
+        IbanRegistry countryData = Objects.requireNonNull(IbanRegistry.getByCode(countryCode),
                 "Supported country code required");
-        return of(ibanRegistry, random);
+        return of(countryData, random);
     }
 
     /**

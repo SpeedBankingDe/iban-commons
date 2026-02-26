@@ -153,7 +153,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public String getBankCode() {
         if (bankCode == null) {
-            bankCode = new String(bicArr, BANK_CODE_START, COUNTRY_CODE_START - BANK_CODE_START).intern();
+            bankCode = new String(bicArr, BANK_CODE_START, COUNTRY_CODE_START - BANK_CODE_START);
         }
         return bankCode;
     }
@@ -179,7 +179,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public String getCountryCode() {
         if (countryCode == null) {
-            countryCode = new String(bicArr, COUNTRY_CODE_START, LOCATION_CODE_START - COUNTRY_CODE_START).intern();
+            countryCode = new String(bicArr, COUNTRY_CODE_START, LOCATION_CODE_START - COUNTRY_CODE_START);
         }
         return countryCode;
     }
@@ -200,7 +200,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public String getCountryFlag() {
-        return CountryUtil.createFlagEmoji(getCountryCode()).intern();
+        return CountryUtil.createFlagEmoji(getCountryCode());
     }
 
     /**
@@ -279,7 +279,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Returns the character at the specified index.
      *
      * @param index the index of the character to return
-     * @return the character at the specified inde
+     * @return the character at the specified index
      * @throws IndexOutOfBoundsException if the {@code index} is negative or greater than or equal to {@code length()}
      */
     @Override

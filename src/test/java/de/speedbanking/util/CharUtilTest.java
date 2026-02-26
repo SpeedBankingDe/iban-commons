@@ -3,6 +3,7 @@ package de.speedbanking.util;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Constructor;
@@ -32,34 +33,33 @@ class CharUtilTest extends Assertions {
     @ValueSource(chars = {'0', '5', '9'})
     void isDigit_ShouldReturnTrueForDigits(char c) {
         assertThat(CharUtil.isDigit(c)).isTrue();
+        assertThat(CharUtil.isNotDigit(c)).isFalse();
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should not be a digit")
     @ValueSource(chars = {'A', 'a', '-', ' ', '/', ':', ':', '9' + 1})
     void isDigit_ShouldReturnFalseForNonDigits(char c) {
         assertThat(CharUtil.isDigit(c)).isFalse();
+        assertThat(CharUtil.isNotDigit(c)).isTrue();
     }
 
-    @Test
-    void isAllDigits_ShouldReturnTrueForValidRanges() {
-        char[] arr = {'1', '2', 'A', '4', '5'};
-        // full array (when valid)
-        assertThat(CharUtil.isAllDigits(new char[]{'1', '2', '3'}, 0, 3)).isTrue();
-        // sub-range
-        assertThat(CharUtil.isAllDigits(arr, 0, 2)).isTrue(); // '1', '2'
-        // empty range
-        assertThat(CharUtil.isAllDigits(arr, 2, 2)).isTrue();
-    }
+    @ParameterizedTest
+    @CsvSource({
+        // input, beginIndex, endIndex, expected result
+        "'123',   0, 3, true",  // full array (0 to 3 exclusive)
+        "'12A45', 0, 2, true",  // sub-range '1', '2'
+        "'12A45', 2, 2, true",  // empty range (2 to 2)
+        "'12A4',  0, 4, false", // 'A' in the middle (index 2)
+        "'12A4',  2, 4, false", // 'A', '4' (boundary/end)
+        "'12A4',  2, 3, false"  // just 'A' (index 2 to 3 exclusive)
+    })
+    void isAllDigits_ShouldValidateDigitRanges(String input, int beginIndex, int endIndex, boolean expected) {
+        char[] arr = input.toCharArray();
+        boolean result = CharUtil.isAllDigits(arr, beginIndex, endIndex);
 
-    @Test
-    void isAllDigits_ShouldReturnFalseWhenNonDigitFound() {
-        char[] arr = {'1', '2', 'A', '4'};
-        // in the middle
-        assertThat(CharUtil.isAllDigits(arr, 0, 4)).isFalse(); // 'A'
-        // at the boundary (end)
-        assertThat(CharUtil.isAllDigits(arr, 2, 4)).isFalse(); // 'A', '4'
-        // non-digit at start
-        assertThat(CharUtil.isAllDigits(arr, 2, 3)).isFalse(); // 'A'
+        assertThat(result)
+            .as("Checking if range [%d, %d) in '%s' is digits: %b", beginIndex, endIndex, input, expected)
+            .isEqualTo(expected);
     }
 
     @Test
@@ -86,12 +86,14 @@ class CharUtilTest extends Assertions {
     @ValueSource(chars = {'A', 'M', 'Z'})
     void isUpperCase_ShouldReturnTrueForUpperCaseLetters(char c) {
         assertThat(CharUtil.isUpperCase(c)).isTrue();
+        assertThat(CharUtil.isNotUpperCase(c)).isFalse();
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should not be uppercase")
     @ValueSource(chars = {'a', '5', '!', '@', '[', '`', '{'})
     void isUpperCase_ShouldReturnFalseForNonUpperCase(char c) {
         assertThat(CharUtil.isUpperCase(c)).isFalse();
+        assertThat(CharUtil.isNotUpperCase(c)).isTrue();
     }
 
     @Test

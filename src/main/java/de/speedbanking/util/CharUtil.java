@@ -50,6 +50,18 @@ public final class CharUtil {
     }
 
     /**
+     * Checks if a character is NOT a numeric digit ('0'-'9').
+     *
+     * @param c the character to check
+     * @return {@code true} if the character is not a digit, {@code false} otherwise
+     *
+     * @since 1.8.2
+     */
+    public static boolean isNotDigit(final char c) {
+        return c < '0' || c > '9';
+    }
+
+    /**
      * Checks if all characters within the specified range of the array are numeric digits ('0'-'9').
      *
      * @param chars      the character array to check
@@ -83,6 +95,18 @@ public final class CharUtil {
      */
     public static boolean isUpperCase(final char c) {
         return c >= 'A' && c <= 'Z';
+    }
+
+    /**
+     * Checks if a character is NOT an uppercase ASCII letter ('A'-'Z').
+     *
+     * @param c the character to check
+     * @return {@code true} if the character is not an uppercase letter, {@code false} otherwise
+     *
+     * @since 1.8.2
+     */
+    public static boolean isNotUpperCase(final char c) {
+        return c < 'A' || c > 'Z';
     }
 
     /**

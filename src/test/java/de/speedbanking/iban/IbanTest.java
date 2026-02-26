@@ -266,12 +266,13 @@ class IbanTest {
             String expectedCheckDigits, String expectedBban, String expectedBankCode, String expectedBranchCode,
             String expectedAccountNumber, String expectedNcd, Integer expectedIbanPlusLen) {
 
-        IbanRegistry registry = IbanRegistry.getByCode(expectedCountryCode);
+        IbanRegistry countryData = IbanRegistry.getByCode(expectedCountryCode);
 
-        assertThat(registry)
+        assertThat(countryData)
             .isNotNull()
             .satisfies(reg -> {
                 assertThat(reg.getPrimary()).isNull();
+                assertThat(reg.getIbanRegex()).isNotNull();
                 assertThat(reg.getStructureData()).isNotNull();
                 assertThat(reg.getIbanExample()).isNotNull();
             });
@@ -290,19 +291,19 @@ class IbanTest {
             .hasNationalCheckDigit(expectedNcd)
             .hasAccountNumber(expectedAccountNumber)
 
-            .hasCountryCode(registry.getCountryCode())
-            .hasCountryFlag(registry.getCountryFlag())
-            .hasCountryName(registry.getCountryName())
-            .hasOrganisation(registry.getOrganisation())
+            .hasCountryCode(countryData.getCountryCode())
+            .hasCountryFlag(countryData.getCountryFlag())
+            .hasCountryName(countryData.getCountryName())
+            .hasOrganisation(countryData.getOrganisation())
+
+            .matches(countryData.getIbanRegex())
 
             .extracting(Iban::toFormattedString)
             .asString()
             .isNotBlank()
-            .startsWith(registry.getCountryCode());
+            .startsWith(countryData.getCountryCode());
 
-        assertThat(iban)
-            .extracting(IbanPlusKey::of)
-            .asString()
+        assertThat(IbanPlusKey.of(iban))
             .isNotBlank()
             .as("Expected length of IBAN Plus code to be %d for IBAN '%s'", expectedIbanPlusLen, iban)
             .hasSize(expectedIbanPlusLen);
