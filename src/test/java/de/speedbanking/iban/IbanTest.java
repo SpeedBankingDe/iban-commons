@@ -76,6 +76,9 @@ class IbanTest {
             .isPresent()
             .contains(iban1);
 
+        assertThat(Iban.tryParseOrNull(ibanInput))
+            .isEqualTo(iban1);
+
         assertThatIbanIsValid(ibanInputNorm);
 
         String invalidIban = ibanInput.substring(0, ibanInput.length() - 1) + "X";
@@ -134,6 +137,8 @@ class IbanTest {
             assertThat(IbanValidator.isMod97Valid(input)).isFalse());
 
         assertThat(Iban.tryParse(ibanInput)).isEmpty();
+        assertThat(Iban.tryParseOrNull(ibanInput)).isNull();
+
         assertThat(IbanValidator.getLastReason()).isEqualTo(expectedValidationError);
         IbanValidator.setLastReason(null);
     }

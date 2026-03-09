@@ -114,6 +114,32 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     }
 
     /**
+     * Attempts to parse and validate the input character sequence safely,
+     * returning {@code null} on failure instead of an {@link java.util.Optional}.
+     * <p>
+     * This method is functionally equivalent to {@link #tryParse(CharSequence)} but avoids
+     * any dependency on {@link java.util.Optional}, which requires API level 24 on Android.
+     * Prefer this method in Android projects targeting API level below 24, or in any context
+     * where {@code Optional} is undesirable.
+     * <p>
+     * Example usage:
+     * <pre>{@code
+     * Bic bic = Bic.tryParseOrNull(input);
+     * if (bic != null) {
+     *     // use bic
+     * }
+     * }</pre>
+     *
+     * @param bic the BIC character sequence
+     * @return a valid, immutable {@link Bic} instance, or {@code null} if the input is invalid
+     *
+     * @since 1.8.3
+     */
+    public static Bic tryParseOrNull(CharSequence bic) {
+        return BicValidator.validate(bic).getBic().orElse(null);
+    }
+
+    /**
      * Performs a full BIC validation and returns {@code true} if successful.
      *
      * @param bic the BIC character sequence to validate

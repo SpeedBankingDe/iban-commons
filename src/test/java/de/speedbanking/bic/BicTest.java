@@ -76,12 +76,28 @@ class BicTest {
             .hasValue(Bic.of(bic));
     }
 
+    @DisplayName("tryParseOrNull() should return valid BIC")
+    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
+    void tryParseOrNull_ValidBic_ShouldReturnNonEmptyOptional(String bic) {
+        assertThat(Bic.tryParseOrNull(bic))
+            .isEqualTo(Bic.of(bic));
+    }
+
     @DisplayName("tryParse() should return Optional.empty for invalid BIC")
     @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {" ", "INVALID99", "MARK00FF"})
     @NullAndEmptySource
     void tryParse_InvalidBic_ShouldReturnEmptyOptional(String bic) {
         assertThat(Bic.tryParse(bic)).isEmpty();
+    }
+
+    @DisplayName("tryParseOrNull() should return null for invalid BIC")
+    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ValueSource(strings = {" ", "INVALID99", "MARK00FF"})
+    @NullAndEmptySource
+    void tryParseOrNull_InvalidBic_ShouldReturnEmptyOptional(String bic) {
+        assertThat(Bic.tryParseOrNull(bic)).isNull();
     }
 
     @DisplayName("isValid() should return true/false based on validation")

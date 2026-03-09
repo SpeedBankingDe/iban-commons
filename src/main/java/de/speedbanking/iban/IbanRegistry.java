@@ -2760,6 +2760,35 @@ public enum IbanRegistry {
     }
 
     /**
+     * Returns the year component of the last-update date.
+     * <p>
+     * Equivalent to {@code getLastUpdate().getYear()} but avoids a dependency on
+     * {@link java.time.YearMonth}, which requires API level 26 on Android.
+     *
+     * @return the four-digit year of the last update (e.g., {@code 2025})
+     *
+     * @since 1.8.3
+     */
+    int getLastUpdateYear() {
+        return metaData.getLastUpdateYear();
+    }
+
+    /**
+     * Returns the month component of the last-update date as a value from 1 (January)
+     * to 12 (December).
+     * <p>
+     * Equivalent to {@code getLastUpdate().getMonthValue()} but avoids a dependency on
+     * {@link java.time.YearMonth}, which requires API level 26 on Android.
+     *
+     * @return the month of the last update (1–12)
+     *
+     * @since 1.8.3
+     */
+    int getLastUpdateMonth() {
+        return metaData.getLastUpdateMonth();
+    }
+
+    /**
      * Returns the optional {@link CountryValidator} instance used for country-specific structure validation.
      *
      * @return the country validator implementation, or {@code null} if one is not found
@@ -3156,6 +3185,35 @@ public enum IbanRegistry {
 
         public YearMonth getLastUpdate() {
             return lastUpdate;
+        }
+
+        /**
+         * Returns the year component of the last-update date.
+         * <p>
+         * Equivalent to {@code getLastUpdate().getYear()} but avoids a dependency on
+         * {@link java.time.YearMonth}, which requires API level 26 on Android.
+         *
+         * @return the four-digit year of the last update (e.g., {@code 2025})
+         *
+         * @since 1.8.3
+         */
+        public int getLastUpdateYear() {
+            return lastUpdate.getYear();
+        }
+
+        /**
+         * Returns the month component of the last-update date as a value from 1 (January)
+         * to 12 (December).
+         * <p>
+         * Equivalent to {@code getLastUpdate().getMonthValue()} but avoids a dependency on
+         * {@link java.time.YearMonth}, which requires API level 26 on Android.
+         *
+         * @return the month of the last update (1–12)
+         *
+         * @since 1.8.3
+         */
+        public int getLastUpdateMonth() {
+            return lastUpdate.getMonthValue();
         }
     }
 

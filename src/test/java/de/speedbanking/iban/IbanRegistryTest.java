@@ -140,6 +140,8 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .isNotNull();
 
         softly.assertThat(registryDe.getLastUpdate()).isEqualTo(YearMonth.of(2011, 1));
+        softly.assertThat(registryDe.getLastUpdateYear()).isEqualTo(2011);
+        softly.assertThat(registryDe.getLastUpdateMonth()).isEqualTo(1);
 
         softly.assertAll();
     }
