@@ -89,7 +89,7 @@
     <properties>
         <javaVersion>8</javaVersion>
 
-        <dep.junit.version>5.14.2</dep.junit.version>
+        <dep.junit.version>5.14.3</dep.junit.version>
         <dep.assertj.version>3.27.7</dep.assertj.version>
         <dep.mockito.version>4.11.0</dep.mockito.version>
         <dep.pitest-junit5-plugin.version>1.2.3</dep.pitest-junit5-plugin.version>
@@ -116,7 +116,7 @@
         <dep.checkstyle.version>9.3</dep.checkstyle.version> <!-- latest Java 8-compatible checkstyle version -->
         <check.checkstyle.ruleset>src/test/resources/team/checkstyle-rules.xml</check.checkstyle.ruleset>
 
-        <dep.pmd.version>7.21.0</dep.pmd.version>
+        <dep.pmd.version>7.22.0</dep.pmd.version>
         <check.pmd.ruleset>src/test/resources/team/pmd-rules.xml</check.pmd.ruleset>
 
         <!-- Plugin versions (alphabetically) -->
@@ -134,7 +134,7 @@
         <dep.plugin.release.version>3.3.1</dep.plugin.release.version>
         <dep.plugin.sortpom.version>3.0.1</dep.plugin.sortpom.version> <!-- latest Java 8-compatible version, see https://github.com/Ekryd/sortpom/releases -->
         <dep.plugin.source.version>3.4.0</dep.plugin.source.version>
-        <dep.plugin.surefire.version>3.5.4</dep.plugin.surefire.version>
+        <dep.plugin.surefire.version>3.5.5</dep.plugin.surefire.version>
         <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
     </properties>
 
