@@ -5,6 +5,9 @@ import static de.speedbanking.bic.BicAssertions.assertThatInvalidBicException;
 
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
+import de.speedbanking.util.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +15,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InvalidClassException;
+import java.io.InvalidObjectException;
+import java.io.StreamCorruptedException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * JUnit tests for the new immutable {@link Bic} class, covering BIC validation and component extraction.
@@ -260,6 +270,211 @@ class BicTest {
 
         assertThat(bic8).hasToString("MARKDEFF");
         assertThat(bic11).hasToString("MARKDEFF500");
+    }
+
+    // =========================================================================
+    // Serialization tests (Memento Pattern)
+    // =========================================================================
+
+    /**
+     * Verifies that a round-trip serialization/deserialization of a {@link Bic} instance
+     * produces an equal object with the same string representation.
+     * <p>
+     * This covers the happy path of the Memento pattern: {@code writeReplace} emits the
+     * {@link Bic.Memento} proxy, and {@code readResolve} reconstructs via {@link Bic#of}.
+     *
+     * @param bicInput a valid BIC string to round-trip
+     * @throws IOException            if the byte stream cannot be written or read
+     * @throws ClassNotFoundException never expected in this context
+     */
+    @DisplayName("Serialization round-trip should produce an equal Bic instance")
+    @ParameterizedTest(name = "[{index}] round-trip: ''{0}''")
+    @ValueSource(strings = {
+        "MARKDEFF",
+        "MARKDEFFXXX",
+        "MARKDEFF500",
+        "BHLSDEM1",
+        "DEUTDEFF"
+    })
+    void testSerializationRoundTrip(String bicInput) throws IOException, ClassNotFoundException {
+        Bic original = Bic.of(bicInput);
+        final Bic bic = original;
+
+        Bic restored = TestUtil.deserialize(TestUtil.serialize(bic));
+
+        assertThat(restored)
+            .as("Deserialized Bic must equal the original")
+            .isNotNull()
+            .isEqualTo(original)
+            .hasToString(bicInput)
+            .hasSameHashCodeAs(original);
+
+        assertThat(restored.getBankCode())
+            .as("Bank code must survive round-trip")
+            .isEqualTo(original.getBankCode());
+
+        assertThat(restored.getCountryCode())
+            .as("Country code must survive round-trip")
+            .isEqualTo(original.getCountryCode());
+    }
+
+    /**
+     * Verifies that a BIC-8 remains a BIC-8 and a BIC-11 remains a BIC-11 after round-trip,
+     * since {@code toString()} (and thus the Memento value) preserves the original form.
+     *
+     * @throws IOException            if the byte stream cannot be written or read
+     * @throws ClassNotFoundException never expected in this context
+     */
+    @DisplayName("Serialization round-trip should preserve BIC-8 / BIC-11 distinction")
+    @Test
+    void testSerializationPreservesBicFormat() throws IOException, ClassNotFoundException {
+        Bic originalBic8  = Bic.of("MARKDEFF");
+        Bic originalBic11 = Bic.of("MARKDEFFXXX");
+        final Bic bic = originalBic8;
+
+        Bic restoredBic8  = TestUtil.deserialize(TestUtil.serialize(bic));
+        final Bic bic1 = originalBic11;
+        Bic restoredBic11 = TestUtil.deserialize(TestUtil.serialize(bic1));
+
+        assertThat(restoredBic8.isBic8())
+            .as("BIC-8 must remain BIC-8 after round-trip")
+            .isTrue();
+        assertThat(restoredBic11.isBic11())
+            .as("BIC-11 must remain BIC-11 after round-trip")
+            .isTrue();
+
+        // BIC-8 and BIC-11XXX are equal by value but differ in format
+        assertThat(restoredBic8).isEqualTo(restoredBic11);
+        assertThat(restoredBic8.toString()).isNotEqualTo(restoredBic11.toString());
+    }
+
+    /**
+     * Verifies that the serialized byte stream references the {@link Bic.Memento} proxy class
+     * and not {@code Bic} directly, confirming that {@code writeReplace} is invoked.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @DisplayName("Serialized stream must reference the Memento proxy, not Bic directly")
+    @Test
+    void testSerializedFormUsesMementoProxy() throws IOException {
+        byte[] bytes = TestUtil.serialize(Bic.of("MARKDEFF"));
+        String streamContent = new String(bytes, StandardCharsets.UTF_8);
+
+        assertThat(streamContent)
+            .as("Serialized stream must reference the Memento proxy class")
+            .contains("Memento");
+        assertThat(streamContent)
+            .as("Serialized stream must not reference Bic directly as the top-level type")
+            .doesNotContain("de.speedbanking.bic.Bic\n");
+    }
+
+    /**
+     * Verifies that attempting to deserialize a raw {@code Bic} object directly
+     * (bypassing the Memento proxy) is rejected.
+     * <p>
+     * The byte stream is manipulated by replacing the {@link Bic.Memento} class
+     * descriptor with the {@link Bic} class descriptor, simulating a byte-stream
+     * injection attack.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @DisplayName("Direct deserialization of Bic bypassing Memento must be rejected")
+    @Test
+    void testDirectDeserializationIsRejected() throws IOException {
+        byte[] mementoBytes = TestUtil.serialize(Bic.of("MARKDEFF"));
+        final byte[] stream = mementoBytes;
+
+        byte[] tamperedBytes = TestUtil.replaceClassName(stream, Bic.Memento.class.getName(), Bic.class.getName());
+        final byte[] bytes = tamperedBytes;
+
+        assertThat(catchThrowable(() -> TestUtil.deserialize(bytes)))
+            .as("Direct deserialization of Bic must be rejected")
+            .isInstanceOfAny(InvalidClassException.class, StreamCorruptedException.class, IOException.class);
+    }
+
+    /**
+     * Verifies that serialization followed by deserialization produces an object that
+     * is equal to the original by value but is a distinct instance (no reference sharing).
+     *
+     * @throws IOException            if the byte stream cannot be written or read
+     * @throws ClassNotFoundException never expected in this context
+     */
+    @DisplayName("Deserialized Bic instance must be distinct from the original")
+    @Test
+    void testDeserializedInstanceIsDistinct() throws ClassNotFoundException, IOException {
+        Bic original = Bic.of("DEUTDEFF");
+        final Bic bic = original;
+        Bic restored = TestUtil.deserialize(TestUtil.serialize(bic));
+
+        assertThat(restored)
+            .isNotSameAs(original)
+            .isEqualTo(original);
+    }
+
+    /**
+     * Verifies that {@link Bic.Memento#readResolve()} throws {@link InvalidObjectException}
+     * when the stored value is not a valid BIC string.
+     * <p>
+     * This covers the {@code catch (RuntimeException)} branch in {@code readResolve()}, which
+     * wraps a validation failure into an {@link InvalidObjectException}.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @DisplayName("Memento.readResolve() must reject an invalid BIC stored in the stream")
+    @Test
+    void testMementoReadResolveRejectsInvalidBic() throws IOException {
+        byte[] corruptStream = TestUtil.buildMementoStream(Bic.of("MARKDEFF"), "NOT_A_BIC!!");
+
+        assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
+            .as("readResolve() must reject an invalid BIC stored in the Memento")
+            .isInstanceOf(InvalidObjectException.class)
+            .hasMessageContaining("Cannot restore Bic from serialized form");
+    }
+
+    /**
+     * Verifies that {@link Bic.Memento#readObject(java.io.ObjectInputStream)} throws
+     * {@link InvalidObjectException} when the stream contains an unsupported version number.
+     * <p>
+     * This covers the {@code version != STREAM_VERSION} branch. The stream is crafted with
+     * version {@code 99L} instead of the expected {@code 1L}.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @DisplayName("Memento.readObject() must reject a stream with an unsupported version")
+    @Test
+    void testMementoReadObjectRejectsUnknownStreamVersion() throws IOException {
+        byte[] corruptStream = TestUtil.buildMementoStream(Bic.of("MARKDEFF"), 99L, "MARKDEFF");
+
+        assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
+            .as("readObject() must reject a Memento with an unsupported stream version")
+            .isInstanceOfAny(InvalidObjectException.class, EOFException.class)
+            .hasMessageContaining("Unsupported Bic Memento stream version: 99");
+    }
+
+    /**
+     * Verifies that {@link Bic#readObjectNoData()} throws {@link InvalidObjectException}.
+     * <p>
+     * {@code readObjectNoData()} is called by the JVM when a superclass added
+     * {@code Serializable} after the subclass was already serialized, leaving no instance
+     * data for the subclass in the stream. Since {@code Bic} is {@code final} and has no
+     * subclasses, the only way to reach this path in a unit test is via reflection.
+     *
+     * @throws Exception if reflection access fails
+     */
+    @DisplayName("readObjectNoData() must throw InvalidObjectException")
+    @Test
+    void testReadObjectNoDataThrows() throws Exception {
+        Bic bic = Bic.of("MARKDEFF");
+
+        java.lang.reflect.Method m = Bic.class.getDeclaredMethod("readObjectNoData");
+        m.setAccessible(true);
+
+        assertThat(catchThrowable(() -> m.invoke(bic)))
+            .as("readObjectNoData() must throw InvalidObjectException wrapped in InvocationTargetException")
+            .isInstanceOf(java.lang.reflect.InvocationTargetException.class)
+            .cause()
+            .isInstanceOf(InvalidObjectException.class)
+            .hasMessageContaining("must be deserialized via its Memento proxy");
     }
 
 }

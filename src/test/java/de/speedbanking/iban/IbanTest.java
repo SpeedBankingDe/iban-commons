@@ -9,6 +9,9 @@ import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatComparable;
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
+import static org.assertj.core.api.Assertions.catchThrowable;
+
+import de.speedbanking.util.TestUtil;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,6 +19,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
+import java.io.InvalidClassException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.StreamCorruptedException;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -467,6 +475,214 @@ class IbanTest {
             .hasToString(ibanStr);
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> iban.subSequence(5, 4)); // start > end
+    }
+
+    // =========================================================================
+    // Serialization tests (Memento Pattern)
+    // =========================================================================
+
+    /**
+     * Verifies that a round-trip serialization/deserialization of an {@link Iban} instance
+     * produces an equal object with the same normalized string and country data.
+     * <p>
+     * This covers the happy path of the Memento pattern: {@code writeReplace} emits the
+     * {@link Iban.Memento} proxy, and {@code readResolve} reconstructs via {@link Iban#parse}.
+     *
+     * @param ibanInput a valid IBAN string to round-trip
+     * @throws IOException            if the byte stream cannot be written or read
+     * @throws ClassNotFoundException never expected in this context
+     */
+    @ParameterizedTest(name = "[{index}] Serialization round-trip: ''{0}''")
+    @ValueSource(strings = {
+        "DE89370400440532013000",
+        "GB29NWBK60161331926819",
+        "FR1420041010050500013M02606",
+        "NL91ABNA0417164300",
+        "PL61109010140000071219812874"
+    })
+    void testSerializationRoundTrip(String ibanInput) throws IOException, ClassNotFoundException {
+        Iban original = Iban.of(ibanInput);
+        final Iban iban = original;
+
+        byte[] bytes = TestUtil.serialize(iban);
+        final byte[] bytes1 = bytes;
+        Iban restored = TestUtil.deserialize(bytes1);
+
+        assertThat(restored)
+            .as("Deserialized Iban must equal the original")
+            .isNotNull()
+            .isEqualTo(original)
+            .hasToString(ibanInput)
+            .hasSameHashCodeAs(original);
+
+        assertThat(restored.getCountryCode())
+            .as("Country code must survive round-trip")
+            .isEqualTo(original.getCountryCode());
+
+        assertThat(restored.getCheckDigits())
+            .as("Check digits must survive round-trip")
+            .isEqualTo(original.getCheckDigits());
+    }
+
+    /**
+     * Verifies that the serialized byte stream references the {@link Iban.Memento} proxy class
+     * and NOT {@code Iban} directly, confirming that {@code writeReplace} is invoked.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @Test
+    void testSerializedFormUsesMementoProxy() throws IOException {
+        Iban iban = Iban.of("DE89370400440532013000");
+        final Iban iban1 = iban;
+        byte[] bytes = TestUtil.serialize(iban1);
+
+        // The serialized stream must contain the Memento class name, not Iban itself
+        String streamContent = new String(bytes);
+        assertThat(streamContent)
+            .as("Serialized stream must reference the Memento proxy class")
+            .contains("Memento");
+        assertThat(streamContent)
+            .as("Serialized stream must not reference Iban directly as the top-level type")
+            .doesNotContain("de.speedbanking.iban.Iban\n");
+    }
+
+    /**
+     * Verifies that attempting to deserialize a raw {@code Iban} object directly
+     * (bypassing the Memento proxy) throws {@link InvalidClassException}.
+     * <p>
+     * This protects against crafted byte-stream attacks that try to inject an
+     * {@code Iban} instance without going through validation.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @Test
+    void testDirectDeserializationIsRejected() throws IOException {
+        // Obtain a valid Iban serialized form (which uses Memento)
+        Iban iban = Iban.of("DE89370400440532013000");
+        final Iban iban1 = iban;
+        byte[] mementoBytes = TestUtil.serialize(iban1);
+
+        // Replace the Memento class descriptor with the Iban class descriptor in the stream
+        // to simulate a crafted stream that bypasses writeReplace.
+        String mementoClassName = Iban.Memento.class.getName(); // "de.speedbanking.iban.Iban$Memento"
+        String ibanClassName    = Iban.class.getName();
+        final byte[] stream = mementoBytes;
+        final String oldName = mementoClassName;
+        final String newName = ibanClassName;         // "de.speedbanking.iban.Iban"
+
+        byte[] tamperedBytes = TestUtil.replaceClassName(stream, oldName, newName);
+        final byte[] bytes = tamperedBytes;
+
+        assertThat(catchThrowable(() -> TestUtil.deserialize(bytes)))
+            .as("Direct deserialization of Iban must be rejected")
+            .isInstanceOfAny(InvalidClassException.class, StreamCorruptedException.class, IOException.class);
+    }
+
+    /**
+     * Verifies that serialization followed by deserialization produces an object that
+     * is equal to the original by value but is a distinct instance (no reference sharing).
+     *
+     * @throws IOException            if the byte stream cannot be written or read
+     * @throws ClassNotFoundException never expected in this context
+     */
+    @Test
+    void testDeserializedInstanceIsDistinct() throws IOException, ClassNotFoundException {
+        Iban original = Iban.of("NL91ABNA0417164300");
+        final Iban iban = original;
+        Iban restored = TestUtil.deserialize(TestUtil.serialize(iban));
+
+        assertThat(restored)
+            .isNotSameAs(original)
+            .isEqualTo(original);
+    }
+
+    /**
+     * Verifies that serialization preserves the {@code isSepa()} flag across the round-trip,
+     * covering both a SEPA country (DE) and a non-SEPA country (AE).
+     *
+     * @throws IOException            if the byte stream cannot be written or read
+     * @throws ClassNotFoundException never expected in this context
+     */
+    @ParameterizedTest(name = "[{index}] isSepa flag preserved for ''{0}'' (expected: {1})")
+    @CsvSource(delimiter = '|', value = {
+        "SE4550000000058398257466      | true", // Sweden - SEPA
+        "ES9121000418450200051332      | true", // Spain - SEPA
+        "PS92PALS000000000400123456702 | false" // Palestine - non-SEPA
+    })
+    void testSerializationPreservesSepaFlag(String ibanInput, boolean expectedSepa)
+            throws IOException, ClassNotFoundException {
+        Iban original = Iban.of(ibanInput.trim());
+        final Iban iban = original;
+        Iban restored = TestUtil.deserialize(TestUtil.serialize(iban));
+
+        assertThat(restored.isSepa())
+            .as("isSepa() flag must be preserved through serialization for '%s'", ibanInput)
+            .isEqualTo(expectedSepa);
+    }
+
+    /**
+     * Verifies that {@link Iban.Memento#readResolve()} throws {@link InvalidObjectException}
+     * when the stored value is not a valid IBAN string.
+     * <p>
+     * This covers the {@code catch (RuntimeException)} branch in {@code readResolve()}, which
+     * wraps a validation failure into an {@link InvalidObjectException}. The stream is crafted
+     * manually: standard Memento class descriptor + STREAM_VERSION (1L) + an invalid payload,
+     * so that {@code readResolve()} receives a non-validating string.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @Test
+    void testMementoReadResolveRejectsInvalidIban() throws IOException {
+        byte[] corruptStream = TestUtil.buildMementoStream(Iban.of("DE89370400440532013000"), "NOT_AN_IBAN");
+
+        assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
+            .as("readResolve() must reject an invalid IBAN stored in the Memento")
+            .isInstanceOf(InvalidObjectException.class)
+            .hasMessageContaining("Cannot restore Iban from serialized form");
+    }
+
+    /**
+     * Verifies that {@link Iban.Memento#readObject(ObjectInputStream)} throws
+     * {@link InvalidObjectException} when the stream contains an unsupported version number.
+     * <p>
+     * This covers the {@code version != STREAM_VERSION} branch. The stream is crafted with
+     * version {@code 99L} instead of the expected {@code 1L}.
+     *
+     * @throws IOException if the byte stream cannot be written
+     */
+    @Test
+    void testMementoReadObjectRejectsUnknownStreamVersion() throws IOException {
+        byte[] corruptStream = TestUtil.buildMementoStream(Iban.of("DE89370400440532013000"), 99L, "DE89370400440532013000");
+
+        assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
+            .as("readObject() must reject a Memento with an unsupported stream version")
+            .isInstanceOf(InvalidObjectException.class)
+            .hasMessageContaining("Unsupported Iban Memento stream version: 99");
+    }
+
+    /**
+     * Verifies that {@link Iban#readObjectNoData()} throws {@link InvalidObjectException}.
+     * <p>
+     * {@code readObjectNoData()} is called by the JVM when a superclass added
+     * {@code Serializable} after the subclass was already serialized, leaving no instance
+     * data for the subclass in the stream. Since {@code Iban} is {@code final} and has no
+     * subclasses, the only way to reach this path in a unit test is via reflection.
+     *
+     * @throws Exception if reflection access fails
+     */
+    @Test
+    void testReadObjectNoDataThrows() throws Exception {
+        Iban iban = Iban.of("DE89370400440532013000");
+
+        java.lang.reflect.Method m = Iban.class.getDeclaredMethod("readObjectNoData");
+        m.setAccessible(true);
+
+        assertThat(catchThrowable(() -> m.invoke(iban)))
+            .as("readObjectNoData() must throw InvalidObjectException wrapped in InvocationTargetException")
+            .isInstanceOf(java.lang.reflect.InvocationTargetException.class)
+            .cause()
+            .isInstanceOf(InvalidObjectException.class)
+            .hasMessageContaining("must be deserialized via its Memento proxy");
     }
 
 }

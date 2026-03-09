@@ -15,6 +15,11 @@
  */
 package de.speedbanking.iban;
 
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
@@ -533,6 +538,138 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     @Override
     public int hashCode() {
         return ibanStr.hashCode();
+    }
+
+    /**
+     * Substitutes this instance with a lightweight {@link Memento} during Java serialization.
+     * <p>
+     * This ensures that the validated, normalized IBAN string is the only data written to
+     * the stream, and that deserialization always re-validates through {@link #parse(CharSequence)}.
+     * No public no-arg constructor or mutable fields are required on this class.
+     *
+     * @return a {@link Memento} carrying the normalized IBAN string
+     * @throws ObjectStreamException never
+     *
+     * @since 1.8.3
+     */
+    private Object writeReplace() throws ObjectStreamException {
+        return new Memento(ibanStr);
+    }
+
+    /**
+     * Blocks direct deserialization of {@code Iban} instances.
+     * <p>
+     * {@code Iban} objects are never written directly to a stream - only their
+     * {@link Memento} proxy is. If a raw {@code Iban} is encountered in a stream
+     * (e.g., from a manipulated byte payload), deserialization is rejected.
+     *
+     * @param stream ignored
+     * @throws InvalidObjectException always
+     *
+     * @since 1.8.3
+     */
+    private void readObject(final ObjectInputStream stream) throws InvalidObjectException {
+        readObjectNoData();
+    }
+
+    /**
+     * Blocks deserialization when no instance data is present in the stream.
+     * <p>
+     * Called by the JVM serialization framework; never invoked directly.
+     *
+     * @throws InvalidObjectException always
+     *
+     * @since 1.8.3
+     */
+    @SuppressWarnings("unused") // invoked exclusively by the Java serialization framework
+    private void readObjectNoData() throws InvalidObjectException {
+        throw new InvalidObjectException(
+            Iban.class.getSimpleName() + " must be deserialized via its " + Memento.class.getSimpleName() + " proxy");
+    }
+
+    /**
+     * Serialization proxy for {@link Iban}.
+     * <p>
+     * Implements the <em>Serialization Proxy Pattern</em>: during serialization,
+     * {@link Iban#writeReplace()} substitutes the {@code Iban} instance with this
+     * lightweight carrier. During deserialization, {@link #readResolve()} reconstructs
+     * the {@code Iban} by calling {@link Iban#parse(CharSequence)}, which runs the full
+     * validation pipeline. This guarantees that:
+     * <ul>
+     *   <li>No invalid {@code Iban} object can be injected via a crafted byte stream.</li>
+     *   <li>The {@code Iban} class needs neither a public no-arg constructor nor mutable fields.</li>
+     *   <li>The serialized form remains stable across library versions (only the IBAN string is stored).</li>
+     * </ul>
+     * <p>
+     * A custom {@code writeObject}/{@code readObject} pair is used deliberately:
+     * an explicit stream-version {@code long} is written before the IBAN string,
+     * enabling future format evolution while maintaining backward-compatible deserialization.
+     * <p>
+     * Clients should never reference or instantiate this class directly.
+     *
+     * @since 1.8.3
+     */
+    static final class Memento implements Serializable {
+
+        private static final long serialVersionUID = 1L;
+
+        /** The single supported stream format version. */
+        private static final long STREAM_VERSION   = 1L;
+
+        /** The normalized IBAN string carried across the serialization boundary. */
+        private String            value;
+
+        /** No-arg constructor required by Java serialization. */
+        Memento() {
+        }
+
+        Memento(final String value) {
+            this();
+            this.value = value;
+        }
+
+        /**
+         * Writes the stream-format version followed by the normalized IBAN string.
+         *
+         * @param out the object output stream
+         * @throws IOException if an I/O error occurs
+         */
+        private void writeObject(final ObjectOutputStream out) throws IOException {
+            out.writeLong(STREAM_VERSION);
+            out.writeUTF(value);
+        }
+
+        /**
+         * Reads the stream-format version and the normalized IBAN string.
+         * Rejects any stream whose version does not match {@link #STREAM_VERSION}.
+         *
+         * @param in the object input stream
+         * @throws InvalidObjectException if an I/O error occurs or the version is unsupported
+         */
+        private void readObject(final ObjectInputStream in) throws IOException {
+            final long version = in.readLong();
+            if (version != STREAM_VERSION) {
+                throw new InvalidObjectException("Unsupported Iban Memento stream version: " + version);
+            }
+            this.value = in.readUTF();
+        }
+
+        /**
+         * Reconstructs the {@link Iban} instance after deserialization by running full validation.
+         *
+         * @return the validated, immutable {@link Iban} instance
+         * @throws InvalidObjectException if the stored IBAN string fails validation
+         */
+        private Object readResolve() throws InvalidObjectException {
+            try {
+                return parse(this.value);
+            } catch (final RuntimeException ex) {
+                final InvalidObjectException ioe =
+                    new InvalidObjectException("Cannot restore " + Iban.class.getSimpleName() + " from serialized form: " + ex.getMessage());
+                ioe.initCause(ex);
+                throw ioe;
+            }
+        }
     }
 
 }
