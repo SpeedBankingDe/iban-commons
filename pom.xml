@@ -21,7 +21,7 @@
 
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.3-SNAPSHOT</version>
+    <version>1.8.3</version>
     <packaging>jar</packaging>
     <name>${project.organization.name} IBAN Commons</name>
     <description>
@@ -65,7 +65,7 @@
         <connection>scm:git:ssh//git@github.com/${project.organization.name}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${project.organization.name}/${project.artifactId}</url>
-        <tag></tag>
+        <tag>iban-commons-1.8.3</tag>
     </scm>
 
     <issueManagement>
