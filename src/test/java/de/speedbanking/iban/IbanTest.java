@@ -292,9 +292,10 @@ class IbanTest {
             .hasAccountNumber(expectedAccountNumber)
 
             .hasCountryCode(countryData.getCountryCode())
-            .hasCountryFlag(countryData.getCountryFlag())
             .hasCountryName(countryData.getCountryName())
+            .hasCountryFlag(countryData.getCountryFlag())
             .hasOrganisation(countryData.getOrganisation())
+            .isSepa(countryData.isSepa())
 
             .matches(countryData.getIbanRegex())
 

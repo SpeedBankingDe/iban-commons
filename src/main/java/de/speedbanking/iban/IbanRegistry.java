@@ -2561,9 +2561,10 @@ public enum IbanRegistry {
     }
 
     /**
-     * Returns whether the country is a part of the SEPA zone.
+     * Checks whether the country participates in the Single Euro Payments Area (SEPA).
      *
-     * @return {@code true} if the country is in SEPA, {@code false} otherwise
+     * @return {@code true} if the country is a SEPA member, {@code false} otherwise
+     * @see <a href="https://www.europeanpaymentscouncil.eu/document-library/other/map-sepa-scheme-countries-and-territories">Map of SEPA Scheme Countries and Territories</a>
      */
     boolean isSepa() {
         return metaData.isSepa();

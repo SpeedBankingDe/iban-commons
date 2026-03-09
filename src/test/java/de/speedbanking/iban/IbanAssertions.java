@@ -85,6 +85,15 @@ public class IbanAssertions extends Assertions {
             return myself;
         }
 
+        public IbanAssert hasCountryName(String expectedCountryName) {
+            isNotNull();
+            if (!Objects.equals(actual.getCountryName(), expectedCountryName)) {
+                failWithMessage("Expected country name to be '%s' but was '%s' for IBAN '%s'",
+                    expectedCountryName, actual.getCountryName(), actual);
+            }
+            return myself;
+        }
+
         public IbanAssert hasCountryFlag(String expectedCountryFlag) {
             isNotNull();
             if (!Objects.equals(actual.getCountryFlag(), expectedCountryFlag)) {
@@ -94,11 +103,11 @@ public class IbanAssertions extends Assertions {
             return myself;
         }
 
-        public IbanAssert hasCountryName(String expectedCountryName) {
+        public IbanAssert isSepa(boolean expectedSepaParticipation) {
             isNotNull();
-            if (!Objects.equals(actual.getCountryName(), expectedCountryName)) {
-                failWithMessage("Expected country name to be '%s' but was '%s' for IBAN '%s'",
-                    expectedCountryName, actual.getCountryName(), actual);
+            if (!Objects.equals(actual.isSepa(), expectedSepaParticipation)) {
+                failWithMessage("Expected SEPA participation to be '%s' but was '%s' for IBAN '%s'",
+                    expectedSepaParticipation, actual.isSepa(), actual);
             }
             return myself;
         }

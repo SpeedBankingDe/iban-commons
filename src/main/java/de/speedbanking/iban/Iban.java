@@ -254,6 +254,17 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
+     * Checks whether the country associated with this IBAN participates in the Single Euro Payments Area (SEPA).
+     *
+     * @return {@code true} if the country is in SEPA, {@code false} otherwise
+     *
+     * @since 1.8.3
+     */
+    public boolean isSepa() {
+        return countryData.isSepa();
+    }
+
+    /**
      * Returns the two numeric IBAN check digits (positions 3 and 4).
      * <p>
      * These digits serve as the primary checksum for IBAN validation. They are calculated using
