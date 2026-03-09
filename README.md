@@ -418,6 +418,17 @@ mvn clean verify
 
 -----
 
+## 🔒 Security
+
+To report a vulnerability, please use GitHub's private
+[Security Advisory](https://github.com/SpeedBankingDe/iban-commons/security/advisories/new)
+mechanism rather than opening a public issue.
+
+For details on the project's security policy and the serialization hardening built
+into `Iban` and `Bic`, see [SECURITY.md](SECURITY.md).
+
+-----
+
 ## ⚖️ License
 
 This project is licensed under the **Apache License, Version 2.0**. You can find the full text of the license [here](https://www.apache.org/licenses/LICENSE-2.0).
