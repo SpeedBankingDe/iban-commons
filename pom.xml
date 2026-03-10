@@ -25,12 +25,13 @@
     <packaging>jar</packaging>
     <name>${project.organization.name} IBAN Commons</name>
     <description>
-        Zero-dependency, high-performance IBAN and BIC validation library for Java 8+.
-        Strictly compliant with ISO 13616 and ISO 9362 standards. Supports 95+ countries
-        from the SWIFT IBAN Registry. Optimized for high-throughput financial systems with
-        immutable, thread-safe objects. Features: SEPA validation, country metadata,
-        formatted output, minimal memory footprint, zero dependency, small jar (~100KB).
-        Perfect for banking, fintech, e-commerce, and payment processing applications.
+        Zero-dependency, high-performance Java 8+ library for IBAN and BIC validation,
+        parsing, and formatting. Supports 120 countries from the SWIFT IBAN Registry
+        (ISO 13616) and BIC validation per ISO 9362. Outperforms iban4j and Apache Commons
+        Validator by up to 4x in throughput (7,700,000 ops/s) with 10x lower memory
+        allocation. Android-compatible (API 21+). Features: SEPA validation, country
+        metadata, immutable thread-safe objects, serialization security, small JAR (~100KB).
+        Suitable for banking, fintech, e-commerce, and payment processing applications.
     </description>
     <url>https://www.speedbanking.de</url>
     <inceptionYear>2025</inceptionYear>
@@ -125,6 +126,7 @@
         <dep.plugin.compiler.version>3.15.0</dep.plugin.compiler.version>
         <dep.plugin.cyclonedx.version>2.9.1</dep.plugin.cyclonedx.version>
         <dep.plugin.enforcer.version>3.6.2</dep.plugin.enforcer.version>
+        <dep.plugin.exec.version>3.6.3</dep.plugin.exec.version>
         <dep.plugin.gpg.version>3.2.8</dep.plugin.gpg.version>
         <dep.plugin.jar.version>3.5.0</dep.plugin.jar.version>
         <dep.plugin.javadoc.version>3.12.0</dep.plugin.javadoc.version>
@@ -515,7 +517,35 @@
                         <useReleaseProfile>false</useReleaseProfile>
                         <goals>deploy</goals>
                         <releaseProfiles>release</releaseProfiles>
-                    </configuration>
+                        <!-- After tagging, update version strings in docs.
+                             The script reads the new release version from the
+                             ${releaseVersion} property injected by the plugin. -->
+                        <completionGoals>exec:exec@update-docs-version</completionGoals>
+                   </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>${dep.plugin.exec.version}</version>
+                    <executions>
+                        <execution>
+                            <id>update-docs-version</id>
+                            <!-- phase is irrelevant here; invoked explicitly via completionGoals -->
+                            <phase>none</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>bash</executable>
+                                <arguments>
+                                    <argument>${project.basedir}/src/main/scripts/update-docs-version.sh</argument>
+                                    <argument>${releaseVersion}</argument>
+                                </arguments>
+                                <workingDirectory>${project.basedir}</workingDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <plugin>

@@ -8,19 +8,21 @@
 [![Build (JDK 11 Win)](https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win))](https://github.com/SpeedBankingDe/iban-commons/actions)
 [![GitHub Repo stars](https://img.shields.io/github/stars/SpeedBankingDe/iban-commons)](https://github.com/SpeedBankingDe/iban-commons/stargazers)
 
-**[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
+**[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [📚 Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
 
-The `iban-commons` library provides simple, fast, and reliable validation and decomposition of International Bank Account Numbers (IBAN) and Business Identifier Codes (BIC).
-Designed for high-performance enterprise applications, it intentionally has zero compile or runtime dependencies outside the Java Standard Library.
+`iban-commons` is a Java IBAN validation library and BIC validator for Java 8+, providing fast and reliable parsing, validation, and formatting of International Bank Account Numbers (IBAN) and Business Identifier Codes (BIC/SWIFT codes).
+Designed for high-performance enterprise applications, it covers 120 countries, is Android-compatible (API 21+), and has zero compile or runtime dependencies outside the Java Standard Library.
 
 ## Why IBAN Commons?
 
-| Feature            | iban-commons    | Apache Commons | iban4j      | garvelink java-iban |
-|--------------------|-----------------|----------------|-------------|---------------------|
-| **Performance**    | **5,257 ops/s** | 4,786 ops/s    | 814 ops/s   | 863 ops/s           |
-| **Dependencies**   | 0               | 5              | 0           | 0                   |
-| **Memory**         | **137 MB/op**   | 327 MB/op      | 1,627 MB/op | 1,126 MB/op         |
-| **Java Version**   | 8+              | 8+             | 11+         | 8+                  |
+| Feature                    | iban-commons  | Apache Commons |  iban4j   | garvelink java-iban |
+|----------------------------|:-------------:|:--------------:|:---------:|:-------------------:|
+| **Throughput (ops/s)**     | **7,700,000** |   4,100,000    | 1,800,000 |      1,600,000      |
+| **Memory (B/op)**          |    **106**    |      319       |   1,114   |         882         |
+| **Dependencies**           |       0       |       5        |     0     |          0          |
+| **Java Version**           |      8+       |       8+       |    11+    |         8+          |
+| **Android (API 21+)**      |       ✅       |       ?        |     ?     |          ✅          |
+| **Countries**              |      120      |  regex-based   |    111    |         111         |
 
 -----
 
@@ -33,13 +35,13 @@ Designed for high-performance enterprise applications, it intentionally has zero
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.1</version>
+    <version>1.8.3</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.1'
+implementation 'de.speedbanking:iban-commons:1.8.3'
 ```
 
 ### 2. Validate & Parse
@@ -80,7 +82,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 * **High Performance**
 
-  Optimized for execution speed and minimum memory footprint. **6.4x faster** than iban4j, **11.9x less memory** allocation
+  Optimized for throughput and minimal memory footprint. Validates 7,700,000 IBANs per second — **4.3x faster** than iban4j, **10x lower** memory allocation (106 B/op vs. 1,114 B/op).
 
 * **Small Footprint**
 
@@ -100,7 +102,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 * **Comprehensive Coverage**
 
-  Full support for IBAN and BIC validation according to ISO 13616 and ISO 9362 standards. Supports **95+ countries** from the SWIFT IBAN Registry
+  Full support for IBAN and BIC validation per ISO 13616 and ISO 9362. Covers **120 countries** including all from the SWIFT IBAN Registry — more than any comparable Java IBAN validation library.
 
 * **Rich Metadata**
 
@@ -197,7 +199,7 @@ A BIC comparison is always based on the 11-character representation (`toBic11()`
 import de.speedbanking.bic.Bic;
 
 // BIC-11
-Bic bic11 = Bic.of("PALSPS22XXX");                    // Bank of Palestine P.S.C.
+Bic bic11 = Bic.of("PALSPS22XXX"); // Bank of Palestine P.S.C.
 
 System.out.println("Bank Code    : " + bic11.getBankCode());     // PALS
 System.out.println("Country Code : " + bic11.getCountryCode());  // PS
@@ -208,7 +210,7 @@ System.out.println("is BIC-8     : " + bic11.isBic8());          // false
 System.out.println("to BIC-8     : " + bic11.toBic8());          // PALSPS22
 
 // BIC-8
-Bic bic8 = Bic.of("MARKDEFF");                        // Deutsche Bundesbank, Zentrale
+Bic bic8 = Bic.of("MARKDEFF"); // Deutsche Bundesbank, Zentrale
 
 System.out.println("is BIC-8     : " + bic8.isBic8());           // true
 System.out.println("is BIC-11    : " + bic8.isBic11());          // false
@@ -277,40 +279,35 @@ Iban iban = Iban.of("GB82WEST12345698765432");
 
 We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries: [iban4j](http://www.iban4j.org/), [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/), and [garvelink java-iban](https://github.com/barend/java-iban).
 
-### Validation Throughput Comparison
+Measured on **Intel Core i7-1165G7 @ 2.80GHz**, OpenJDK 21.0.7, Linux, single core (`taskset -c 0`),
+Generational ZGC, `-XX:-StackTraceInThrowable`.
+30 measurement iterations (3 forks × 10 iterations × 2 s each).
 
-The results below demonstrate the significant **throughput** advantage (operations per second) of `iban-commons`.
+### Valid IBANs (accept path)
 
-| Benchmark Operation                         | iban-commons (ops/s) | Apache Commons (ops/s) | garvelink java-iban (ops/s) | iban4j (ops/s) | Speedup vs. iban4j  |
-|---------------------------------------------|----------------------|------------------------|-----------------------------|----------------|---------------------|
-| **Pure Validation** (`.isValid()`)          | **5257**             | 4786                   | n/a                         | 814            | **~6.4x faster**    |
-| **Object Creation** (`.tryParse()`/`.of()`) | **2993**             | n/a                    | 863                         | 754            | **~3.9x faster**    |
+| Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
+|:------------------------|-------------------:|--------------:|:----------------:|
+| 🌟 **iban-commons**     |      **7,700,000** |       **106** | baseline         |
+| Apache Commons          |          4,100,000 |           319 | 1.9× slower      |
+| iban4j                  |          1,800,000 |         1,114 | 4.3× slower      |
+| garvelink java-iban     |          1,600,000 |           882 | 4.8× slower      |
 
-### Memory Footprint Comparison
+### Invalid IBANs (rejection path)
 
-These results, derived from the JMH **GC Profiler**, quantify the **memory allocation overhead** per operation (B/op). Lower values indicate less work for the Garbage Collector (GC).
-
-| Benchmark Operation                         | iban-commons (B/op) | Apache Commons (B/op) | garvelink java-iban (B/op) | iban4j (B/op) | Allocation Efficiency         |
-|---------------------------------------------|---------------------|-----------------------|----------------------------|---------------|-------------------------------|
-| **Pure Validation** (`.isValid()`)          | **136.9M**          | 326.8M                | n/a                        | 1627.3M       | **~11.9x smaller vs. iban4j** |
-| **Object Creation** (`.tryParse()`/`.of()`) | **253.9M**          | n/a                   | 1126.1M                    | 1633.7M       | **~6.4x smaller vs. iban4j**  |
-
-*Note on Memory Units: The B/op values represent normalized allocations per benchmark operation. The **relative difference** confirms the high allocation efficiency of iban-commons.*
+| Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
+|:------------------------|-------------------:|--------------:|:----------------:|
+| 🌟 **iban-commons**     |     **11,000,000** |        **78** | baseline         |
+| Apache Commons          |          9,200,000 |           165 | 1.2× slower      |
+| garvelink java-iban     |          1,700,000 |           689 | 6.4× slower      |
+| iban4j                  |          1,500,000 |           999 | 7.3× slower      |
 
 ### Key Observations
 
-1. **Leading Throughput:**       `iban-commons` outperforms all tested libraries, reaching **5257 operations per second** for validation.
-2. **Superior Object Creation:** Compared to `garvelink java-iban`, `iban-commons` is about **3.4x faster** and uses **4.4x less memory** when creating immutable objects.
-3. **Minimal GC Pressure:**      With only **136.9M B/op** for validation, the library requires significantly less allocation than Apache Commons (~2.4x) and iban4j (~11.9x).
+1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input — reaching **7,700,000 ops/s** on the accept path and **11,000,000 ops/s** on early rejection.
+2. **Fast Rejection:** Invalid IBANs are rejected faster than valid ones because many fail length or country-code checks before the full Mod-97 computation is reached.
+3. **Minimal GC Pressure:** Memory allocation is **3×–10× lower** than competing libraries, thanks to an ASCII-math Mod-97 approach that avoids intermediate `String` and `BigInteger` allocations.
 
-### Execution Environment Details
-
-The benchmarks were executed under the following configuration:
-
-* Intel Core i7-1165G7 @ 2.80GHz (4 Cores, 8 Threads), 32 GiB RAM
-* Ubuntu 24.04.3 LTS (Noble Numbat)
-* OpenJDK 21.0.7 LTS (`Temurin-21.0.7+6`), 64-Bit Server VM
-* JMH Version 1.37 (using Compiler Blackholes)
+> **Note on `-XX:-StackTraceInThrowable`:** All forks run with this JVM flag, which suppresses stack trace generation to isolate pure algorithmic cost. This makes the comparison fair for libraries using exceptions for control flow (notably `iban4j`). For production-realistic measurements, remove the flag and re-run.
 
 ### Benchmark Suite Repository
 
@@ -323,17 +320,17 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 <details>
 <summary><b>Which countries are supported?</summary>
 
-All 95+ countries from the SWIFT IBAN Registry Release 100 (October 2025), including:
-- All SEPA countries
-- Major economies: UK, Switzerland, Norway, etc.
+120 countries including all from the SWIFT IBAN Registry Release 100 (October 2025):
+- All SEPA countries including major economies: Germany, UK, Switzerland, Norway, etc.
+- All known non-SEPA countries that support IBAN
 - Full list available in the [source code](src/main/java/de/speedbanking/iban/IbanRegistry.java)
 </details>
 
 <details>
 <summary>Is this library production-ready?</summary>
 
-Yes, and already in use in critical production systems. Features:
-- Comprehensive test suite (>95% coverage)
+Yes, and already in use in production systems. Features:
+- Comprehensive test suite (>99% coverage)
 - Zero runtime dependencies
 - Immutable, thread-safe design
 - Regular updates with SWIFT registry
@@ -354,7 +351,6 @@ if (Iban.isValid(userInput)) {
     Iban iban = Iban.of(userInput);
 }
 ```
-The library automatically handles whitespace and case normalization.
 </details>
 
 <details>
@@ -376,7 +372,38 @@ public @interface ValidIban {
 </details>
 
 <details>
-<summary>What's the difference between IBAN validation and checksum validation?</summary>
+<summary><b>Where can I find the full API documentation?</b></summary>
+
+The complete Javadoc is hosted on [javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/).
+It covers all public classes and methods including `Iban`, `Bic`, `IbanRegistry`, and the validation API.
+</details>
+
+<details>
+<summary><b>Can I use this library on Android?</b></summary>
+
+Yes. `iban-commons` is Android-compatible from API level 21 (Android 5.0) onwards.
+
+The primary API (`Iban.tryParse()`, `Bic.tryParse()`) uses `java.util.Optional`, which requires API 24+.
+For projects targeting API 21–23, use the Android-safe alternatives introduced in v1.8.3:
+
+```java
+// Android-safe (API 21+) — returns null instead of Optional
+Iban iban = Iban.tryParseOrNull("DE91100000000123456789");
+Bic  bic  = Bic.tryParseOrNull("MARKDEFF");
+```
+
+The library has zero compile or runtime dependencies and does not use `java.time` types in its public API.
+</details>
+
+<details>
+<summary><b>Is the library thread-safe?</b></summary>
+
+Yes. Both `Iban` and `Bic` are immutable value objects — all fields are `final` and set in the constructor.
+They can be safely shared across threads without synchronization.
+The validation and registry classes are stateless and equally safe for concurrent use.
+</details>
+
+
 
 `iban-commons` performs **complete validation**:
 1. Format validation: Country code, length, character set
@@ -412,9 +439,10 @@ mvn clean verify
 
 - 💡 Questions? Ask in [Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)
 - 🐛 Found a bug? Open an [Issue](https://github.com/SpeedBankingDe/iban-commons/issues)
+- 📚 API Reference: [Javadoc on javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/)
 - 🌐 Website: [www.speedbanking.de](https://www.speedbanking.de/)
 
-**Star this repo if you find it useful!** ⭐
+**Please star this repo if you find it useful!** ⭐
 
 -----
 
@@ -433,3 +461,9 @@ into `Iban` and `Bic`, see [SECURITY.md](SECURITY.md).
 
 This project is licensed under the **Apache License, Version 2.0**. You can find the full text of the license [here](https://www.apache.org/licenses/LICENSE-2.0).
 
+-----
+
+<!-- SEO: common search terms for this project -->
+<!-- java iban validation | iban validator java | bic validation java | swift code validator java -->
+<!-- iban4j alternative | apache commons iban | sepa validation java | java iban library -->
+<!-- android iban validation | iban parser java 8 | iso 13616 java | mod97 java -->
