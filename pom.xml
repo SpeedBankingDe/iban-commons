@@ -215,38 +215,23 @@
                     <version>${dep.plugin.jar.version}</version>
                     <configuration>
                         <archive>
-                            <addMavenDescriptor>true</addMavenDescriptor>
+                            <addMavenDescriptor>false</addMavenDescriptor>
                             <compress>true</compress>
                             <index>false</index>
                             <manifest>
                                 <addClasspath>false</addClasspath>
                                 <addDefaultEntries>true</addDefaultEntries>
-                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>  <!-- Implementation-Title/Version/Vendor -->
                                 <addDefaultSpecificationEntries>false</addDefaultSpecificationEntries>
-                                <addBuildEnvironmentEntries>true</addBuildEnvironmentEntries>
+                                <addBuildEnvironmentEntries>true</addBuildEnvironmentEntries>  <!-- Build-Jdk, Build-Os, Build-Tool -->
                             </manifest>
 
                             <manifestEntries>
                                 <Build-Time>${maven.build.timestamp}</Build-Time>
                                 <Project-Java-Version>${javaVersion}</Project-Java-Version>
-
-                                <Creation-Java-Vendor>${java.vendor}</Creation-Java-Vendor>
-                                <Creation-Java-Version>${java.version}</Creation-Java-Version>
-                                <Creation-Java-Runtime-Name>${java.runtime.name}</Creation-Java-Runtime-Name>
-                                <Creation-Java-Runtime-Version>${java.runtime.version}</Creation-Java-Runtime-Version>
-
-                                <Creation-Os-Name>${os.name}</Creation-Os-Name>
-                                <Creation-Os-Arch>${os.arch}</Creation-Os-Arch>
-                                <Creation-Os-Version>${os.version}</Creation-Os-Version>
-                                <Creation-User>${developer1Id} (${developer1Name}), ${developer2Id} (${developer2Name})</Creation-User>
-                                <Creation-Time>${maven.build.timestamp}</Creation-Time>
-
-                                <Project-Description>${project.description}</Project-Description>
                                 <Project-Url>${project.url}</Project-Url>
                                 <Project-Inception-Year>${project.inceptionYear}</Project-Inception-Year>
-
-                                <Organization-Name>${project.organization.name}</Organization-Name>
-                                <Organization-Url>${project.organization.url}</Organization-Url>
+                                <Creation-User>${developer1Id} (${developer1Name}), ${developer2Id} (${developer2Name})</Creation-User>
                                 <!-- JPMS: allows Java 9+ consumers to declare 'requires de.speedbanking.iban;'
                                      without requiring this library itself to be compiled as a named module.
                                      Must be a stable, reverse-DNS name and must never change after first release. -->
