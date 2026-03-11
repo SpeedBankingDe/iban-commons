@@ -35,13 +35,13 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.3</version>
+    <version>1.8.4</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.3'
+implementation 'de.speedbanking:iban-commons:1.8.4'
 ```
 
 ### 2. Validate & Parse
@@ -185,6 +185,46 @@ if (iban.isSepa()) {
     processCrossBorderPayment(iban);
 }
 ```
+
+#### 4\. Random IBAN Generation
+
+Use `RandomIban` to generate syntactically correct, structurally valid IBANs with proper ISO 7064 Mod 97-10 check digits — ideal for testing, seeding demo data, or populating sandboxes.
+
+**Any supported country (non-deterministic):**
+```java
+import de.speedbanking.iban.RandomIban;
+
+Iban iban     = RandomIban.of();         // random country
+Iban deIban   = RandomIban.of("DE");     // specific country
+Iban sepaIban = RandomIban.ofSepa();     // random SEPA country
+```
+
+**Reproducible generation with a seeded `Random`:**
+
+Pass a seeded `java.util.Random` to get deterministic output — the same seed always produces the same IBAN for the same country, which is useful for unit tests and snapshot tests.
+
+```java
+import java.util.Random;
+
+// Always produces the same IBAN for seed 42 + country "DE"
+Iban iban = RandomIban.of("DE", new Random(42L));
+
+// Reproducible across any supported country
+Iban anyIban = RandomIban.of(new Random(42L));
+
+// Reproducible SEPA IBAN
+Iban sepaIban = RandomIban.ofSepa(new Random(42L));
+```
+
+**Using an `IbanRegistry` entry directly:**
+```java
+import de.speedbanking.iban.IbanRegistry;
+
+Iban iban = RandomIban.of(IbanRegistry.DE);
+Iban reproducible = RandomIban.of(IbanRegistry.FR, new Random(123L));
+```
+
+> **Note:** Generated IBANs are syntactically and structurally valid but do **not** correspond to real bank accounts. Do not use them for actual financial transactions.
 
 -----
 
