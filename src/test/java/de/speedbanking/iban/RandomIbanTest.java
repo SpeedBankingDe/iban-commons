@@ -183,5 +183,72 @@ class RandomIbanTest {
         assertThat(iban.length()).isEqualTo(IbanRegistry.getByCode(countryCode).getIbanLength());
     }
 
+    /**
+     * Tests that {@link RandomIban#of()} generates a valid IBAN for an arbitrary supported country.
+     */
+    @Test
+    @DisplayName("Should generate a valid IBAN for any country")
+    void shouldGenerateValidIbanForAnyCountry() {
+        Iban iban = RandomIban.of();
+
+        assertThat(iban).isNotNull();
+        assertThat(Iban.isValid(iban.toString())).isTrue();
+        assertThat(IbanRegistry.getByCode(iban.getCountryCode())).isNotNull();
+    }
+
+    /**
+     * Tests that {@link RandomIban#ofSepa()} generates a valid IBAN that belongs to a SEPA country.
+     */
+    @Test
+    @DisplayName("Should generate only SEPA IBANs when calling ofSepa")
+    void shouldGenerateOnlySepaIbans() {
+        // test multiple times to increase statistical confidence in random selection
+        for (int i = 0; i < 20; i++) {
+            Iban iban = RandomIban.ofSepa();
+            IbanRegistry registry = IbanRegistry.getByCode(iban.getCountryCode());
+
+            assertThat(registry.isSepa())
+                .withFailMessage("Generated IBAN %s is not from a SEPA country", iban)
+                .isTrue();
+            assertThat(Iban.isValid(iban.toString())).isTrue();
+        }
+    }
+
+    /**
+     * Tests reproducibility for the 'any country' generation.
+     */
+    @Test
+    @DisplayName("Same seed should produce identical IBANs for any-country selection")
+    void seededRandomShouldProduceSameIbanForAnyCountry() {
+        long seed = 123456L;
+        Iban first  = RandomIban.of(new Random(seed));
+        Iban second = RandomIban.of(new Random(seed));
+
+        assertThat(first.toString()).isEqualTo(second.toString());
+    }
+
+    /**
+     * Tests reproducibility for the SEPA generation.
+     */
+    @Test
+    @DisplayName("Same seed should produce identical IBANs for SEPA selection")
+    void seededRandomShouldProduceSameIbanForSepa() {
+        long seed = 789L;
+        Iban first  = RandomIban.ofSepa(new Random(seed));
+        Iban second = RandomIban.ofSepa(new Random(seed));
+
+        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(IbanRegistry.getByCode(first.getCountryCode()).isSepa()).isTrue();
+    }
+
+    /**
+     * Verifies that null Random is handled for the new methods.
+     */
+    @Test
+    void shouldThrowNpeWhenRandomIsNullForNewMethods() {
+        assertThatNullPointerException().isThrownBy(() -> RandomIban.of((Random) null));
+        assertThatNullPointerException().isThrownBy(() -> RandomIban.ofSepa(null));
+    }
+
 }
 

@@ -47,9 +47,12 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class RandomIban {
 
-    private static final String DIGITS       = "0123456789";
-    private static final String LETTERS      = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String ALPHANUMERIC = DIGITS + LETTERS;
+    private static final String         DIGITS        = "0123456789";
+    private static final String         LETTERS       = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String         ALPHANUMERIC  = DIGITS + LETTERS;
+
+    /** Cached array of all registry entries to avoid repeated .values() allocations. */
+    private static final IbanRegistry[] ALL_COUNTRIES = IbanRegistry.values();
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -58,6 +61,28 @@ public final class RandomIban {
     private RandomIban() {
         throw new UnsupportedOperationException(
             "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+    }
+
+    /**
+     * Generates a random, valid IBAN for any supported country.
+     * <p>
+     * Uses {@link ThreadLocalRandom} as the source of randomness.
+     *
+     * @return a valid, randomly generated IBAN as an {@code Iban} object
+     */
+    public static Iban of() {
+        return of(ThreadLocalRandom.current());
+    }
+
+    /**
+     * Generates a random, valid IBAN for any supported SEPA country.
+     * <p>
+     * Uses {@link ThreadLocalRandom} as the source of randomness.
+     *
+     * @return a valid, randomly generated IBAN from a SEPA country
+     */
+    public static Iban ofSepa() {
+        return ofSepa(ThreadLocalRandom.current());
     }
 
     /**
@@ -87,6 +112,35 @@ public final class RandomIban {
     // -------------------------------------------------------------------------
     // Public API — with explicit Random (reproducible / seeded)
     // -------------------------------------------------------------------------
+
+    /**
+     * Generates a random, valid IBAN for any supported country using the provided {@link Random} instance.
+     * <p>
+     * Passing a seeded {@code Random} makes the selection of the country and the BBAN deterministic.
+     *
+     * @param random the {@link Random} instance to use; must not be {@code null}
+     * @return a valid, randomly generated IBAN
+     * @throws NullPointerException if {@code random} is {@code null}
+     */
+    public static Iban of(Random random) {
+        Objects.requireNonNull(random, "Random must not be null");
+        return of(ALL_COUNTRIES[random.nextInt(ALL_COUNTRIES.length)], random);
+    }
+
+    /**
+     * Generates a random, valid IBAN for any supported SEPA country using the provided {@link Random} instance.
+     * <p>
+     * Passing a seeded {@code Random} makes the selection of the SEPA country and the BBAN deterministic.
+     *
+     * @param random the {@link Random} instance to use; must not be {@code null}
+     * @return a valid, randomly generated SEPA IBAN
+     * @throws NullPointerException if {@code random} is {@code null}
+     */
+    public static Iban ofSepa(Random random) {
+        Objects.requireNonNull(random, "Random must not be null");
+        List<IbanRegistry> sepaCountries = IbanRegistry.getSepaCountries();
+        return of(sepaCountries.get(random.nextInt(sepaCountries.size())), random);
+    }
 
     /**
      * Generates a random, valid IBAN for the country specified by the given two-letter country code,

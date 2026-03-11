@@ -87,10 +87,15 @@ public @interface RandomIbanSource {
             List<Arguments> ibans = new ArrayList<>(src.ibanCount());
 
             for (int i = 0; i < src.ibanCount(); i++) {
-                int randomCcIdx = random.nextInt(includeCountries.size());
-                IbanRegistry randomCountry = includeCountries.get(randomCcIdx);
+                String iban;
+                if (includeCountries.isEmpty()) {
+                    iban = RandomIban.of().toString();
+                } else {
+                    int randomCcIdx = random.nextInt(includeCountries.size());
+                    IbanRegistry randomCountry = includeCountries.get(randomCcIdx);
+                    iban = RandomIban.of(randomCountry).toString();
+                }
 
-                String iban = RandomIban.of(randomCountry).toString();
                 // Die invalidIbanPercentage gibt die Wahrscheinlichkeit an, dass ein IBAN ungültig ist.
                 // Ein Zufallswert von 1 bis 100 wird mit dem Prozentsatz verglichen.
                 if (random.nextInt(100) + 1 <= src.invalidIbanPercentage()) {
