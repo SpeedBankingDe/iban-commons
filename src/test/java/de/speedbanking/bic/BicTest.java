@@ -20,7 +20,10 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InvalidClassException;
 import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
 import java.io.StreamCorruptedException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -321,6 +324,31 @@ class BicTest {
             .withMessage("Start index should be >= 0 (was: 5) and end index (exclusive) <= 8 (was: 4)");
     }
 
+    @DisplayName("subSequence() should return correct substring when range crosses into branch code (BIC-11)")
+    @ParameterizedTest(name = "[{index}] subSequence({1},{2}) on ''{0}'' → ''{3}''")
+    @CsvSource(delimiter = '|', value = {
+        "MARKDEFF500 | 6  | 11 | FF500",
+        "MARKDEFF500 | 0  | 11 | MARKDEFF500",
+        "MARKDEFF500 | 8  | 11 | 500",
+        "MARKDEFFXXX | 6  | 11 | FFXXX"
+    })
+    void charSequenceSubSequence_crossBoundaryBic11(String bicInput, int start, int end, String expected) {
+        // exercises the toBic11() fallback path in subSequence() where end > BIC8_LENGTH
+        assertThat(Bic.of(bicInput).subSequence(start, end))
+            .as("subSequence(%d, %d) on %s", start, end, bicInput)
+            .isEqualTo(expected);
+    }
+
+    @DisplayName("toBic11() should lazily compute and cache the BIC-11 string for BIC-8 objects")
+    @Test
+    void toBic11_lazyInit_bic8Object() {
+        Bic bic = Bic.of("MARKDEFF");
+        // first call: triggers lazy initialisation (bic11 == null branch)
+        assertThat(bic.toBic11()).isEqualTo("MARKDEFFXXX");
+        // second call: exercises the cached path (bic11 != null)
+        assertThat(bic.toBic11()).isEqualTo("MARKDEFFXXX");
+    }
+
     @DisplayName("toString() should return the original input string")
     @Test
     void toStringShouldReturnOriginalInput() {
@@ -491,7 +519,7 @@ class BicTest {
     }
 
     /**
-     * Verifies that {@link Bic.Memento#readObject(java.io.ObjectInputStream)} throws
+     * Verifies that {@link Bic.Memento#readObject(ObjectInputStream)} throws
      * {@link InvalidObjectException} when the stream contains an unsupported version number.
      * <p>
      * This covers the {@code version != STREAM_VERSION} branch. The stream is crafted with
@@ -525,13 +553,43 @@ class BicTest {
     void testReadObjectNoDataThrows() throws Exception {
         Bic bic = Bic.of("MARKDEFF");
 
-        java.lang.reflect.Method m = Bic.class.getDeclaredMethod("readObjectNoData");
+        Method m = Bic.class.getDeclaredMethod("readObjectNoData");
         m.setAccessible(true);
 
         assertThat(catchThrowable(() -> m.invoke(bic)))
             .as("readObjectNoData() must throw InvalidObjectException wrapped in InvocationTargetException")
-            .isInstanceOf(java.lang.reflect.InvocationTargetException.class)
+            .isInstanceOf(InvocationTargetException.class)
             .cause()
+            .isInstanceOf(InvalidObjectException.class)
+            .hasMessageContaining("must be deserialized via its Memento proxy");
+    }
+
+    /**
+     * Verifies that {@link Bic#readObject(ObjectInputStream)} delegates to
+     * {@link Bic#readObjectNoData()} and throws {@link InvalidObjectException}.
+     * <p>
+     * {@code readObject()} is unreachable in normal deserialisation because {@code writeReplace()}
+     * always substitutes the Memento proxy. The only way to cover this branch is via reflection.
+     *
+     * @throws Exception if reflection access fails
+     */
+    @DisplayName("readObject() must throw InvalidObjectException when invoked directly")
+    @Test
+    void testReadObjectThrows() throws Exception {
+        Bic bic = Bic.of("MARKDEFF");
+
+        Method m = Bic.class.getDeclaredMethod("readObject", ObjectInputStream.class);
+        m.setAccessible(true);
+
+        Throwable thrown = catchThrowable(() -> m.invoke(bic, (ObjectInputStream) null));
+
+        // InvocationTargetException wraps the actual InvalidObjectException (checked or not)
+        Throwable cause = thrown instanceof InvocationTargetException
+            ? ((InvocationTargetException) thrown).getTargetException()
+            : thrown;
+
+        assertThat(cause)
+            .as("readObject() must throw InvalidObjectException")
             .isInstanceOf(InvalidObjectException.class)
             .hasMessageContaining("must be deserialized via its Memento proxy");
     }

@@ -31,6 +31,10 @@ import java.util.Optional;
  * <p>
  * Creation is done exclusively via static factory methods after successful validation.
  * <p>
+ * Internally, only the normalized BIC-8 string is stored eagerly. The BIC-11 string and
+ * all component strings (bank code, country code, location code, branch code) are derived
+ * lazily on first access and then cached.
+ * <p>
  * For more information, see:
  * <a href="https://en.wikipedia.org/wiki/ISO_9362">Wikipedia: ISO 9362</a>
  *
@@ -55,36 +59,43 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     static final int                  LOCATION_CODE_START = 6;
     static final int                  BRANCH_CODE_START   = 8; // only for BIC-11
 
-    /** The raw, normalized BIC character array. */
-    private final char[]              bicArr;
+    /**
+     * The normalized BIC-8 string — the single source of truth for this instance.
+     * <p>
+     * All other string representations and component extractions are derived from
+     * this field on demand.
+     */
+    private final String              bic8;
 
     /** {@code true} if the object represents a BIC-8. */
     private final boolean             isBic8;
 
-    /** The normalized BIC-8 string. */
-    private final String              bic8;
-    /** The normalized BIC-11 string. */
-    private final String              bic11;
-
-    // cached components
+    // lazily derived strings — transient so they are re-derived after deserialization
+    private transient volatile String bic11;
     private transient volatile String bankCode;
     private transient volatile String countryCode;
     private transient volatile String locationCode;
-    private transient volatile String branchCode; // null if BIC-8
+    private transient volatile String branchCode; // null for BIC-8; set eagerly in constructor for BIC-11
 
     /**
      * Package-private constructor.
      * <p>
      * Construction is restricted to {@link BicValidator} which guarantees
      * the input {@code bicArr} is valid, normalized, and correctly sized (8 or 11).
+     * <p>
+     * For BIC-11 input the branch code is stored eagerly so that {@link #toBic11()}
+     * can reconstruct the full string without retaining the original {@code char[]}.
      *
      * @param bicArr the normalized, validated BIC characters
      */
     Bic(final char[] bicArr) {
-        this.bicArr = bicArr;
         this.isBic8 = bicArr.length == BIC8_LENGTH;
         this.bic8 = new String(bicArr, 0, BIC8_LENGTH);
-        this.bic11 = isBic8 ? bic8 + HEAD_OFFICE_SUFFIX : new String(bicArr);
+        // for BIC-11 the branch code is stored now; for BIC-8 it stays null
+        if (!isBic8) {
+            this.bic11 = new String(bicArr);
+            this.branchCode = new String(bicArr, BRANCH_CODE_START, BIC11_LENGTH - BRANCH_CODE_START);
+        }
     }
 
     /**
@@ -184,7 +195,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public String getBankCode() {
         if (bankCode == null) {
-            bankCode = new String(bicArr, BANK_CODE_START, COUNTRY_CODE_START - BANK_CODE_START);
+            bankCode = bic8.substring(BANK_CODE_START, COUNTRY_CODE_START);
         }
         return bankCode;
     }
@@ -210,7 +221,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public String getCountryCode() {
         if (countryCode == null) {
-            countryCode = new String(bicArr, COUNTRY_CODE_START, LOCATION_CODE_START - COUNTRY_CODE_START);
+            countryCode = bic8.substring(COUNTRY_CODE_START, LOCATION_CODE_START);
         }
         return countryCode;
     }
@@ -253,7 +264,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public String getLocationCode() {
         if (locationCode == null) {
-            locationCode = new String(bicArr, LOCATION_CODE_START, BRANCH_CODE_START - LOCATION_CODE_START);
+            locationCode = bic8.substring(LOCATION_CODE_START, BRANCH_CODE_START);
         }
         return locationCode;
     }
@@ -273,11 +284,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public String getBranchCode() {
-        if (isBic8) {
-            return null;
-        } else if (branchCode == null) {
-            branchCode = new String(bicArr, BRANCH_CODE_START, BIC11_LENGTH - BRANCH_CODE_START);
-        }
+        // branchCode is null for BIC-8, and set eagerly in the constructor for BIC-11
         return branchCode;
     }
 
@@ -303,6 +310,10 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public String toBic11() {
+        if (bic11 == null) {
+            // can only occur for BIC-8
+            bic11 = bic8 + HEAD_OFFICE_SUFFIX;
+        }
         return bic11;
     }
 
@@ -315,11 +326,12 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public char charAt(int index) {
-        if (index < 0 || index >= bicArr.length) {
+        // delegate to bic8 for indices 0–7; for BIC-11 indices 8–10 read from bic11
+        if (index < 0 || index >= length()) {
             throw new IndexOutOfBoundsException(String
-                .format("Index should be between 0 (inclusive) and %d (exclusive), but was %d", bicArr.length, index));
+                .format("Index should be between 0 (inclusive) and %d (exclusive), but was %d", length(), index));
         }
-        return bicArr[index];
+        return index < BIC8_LENGTH ? bic8.charAt(index) : toBic11().charAt(index);
     }
 
     /**
@@ -333,22 +345,27 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public String subSequence(int start, int end) {
-        if (start < 0 || end > bicArr.length || start > end) {
+        final int len = length();
+        if (start < 0 || end > len || start > end) {
             throw new IndexOutOfBoundsException(
                 String.format("Start index should be >= %d (was: %d) and end index (exclusive) <= %d (was: %d)", 0,
-                    start, bicArr.length, end));
+                    start, len, end));
         }
-        return new String(bicArr, start, end - start);
+        // fast path: range falls entirely within bic8
+        if (end <= BIC8_LENGTH) {
+            return bic8.substring(start, end);
+        }
+        return toBic11().substring(start, end);
     }
 
     /**
      * Returns the length of the BIC (8 or 11 characters).
      *
-     * @return the length of the BIC character array
+     * @return the length of the BIC string
      */
     @Override
     public int length() {
-        return bicArr.length;
+        return isBic8 ? BIC8_LENGTH : BIC11_LENGTH;
     }
 
     /**
@@ -365,7 +382,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     public int compareTo(Bic other) {
         Objects.requireNonNull(other, "Cannot compare Bic to null");
         // delegate comparison to the 11-character String representation
-        return bic11.compareTo(other.bic11);
+        return toBic11().compareTo(other.toBic11());
     }
 
     /**
@@ -375,7 +392,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public String toString() {
-        return isBic8 ? bic8 : bic11;
+        return isBic8 ? bic8 : toBic11();
     }
 
     /**
@@ -393,10 +410,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
         } else if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
-        Bic other = (Bic) o;
         // comparison is based on the normalized 11-character representation
-        return bic11.equals(other.bic11);
+        return toBic11().equals(((Bic) o).toBic11());
     }
 
     /**
@@ -407,8 +422,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public int hashCode() {
-        // hash code based on the normalized 11-character representation
-        return Objects.hash(bic11);
+        return Objects.hash(toBic11());
     }
 
     // -------------------------------------------------------------------------
