@@ -24,7 +24,7 @@ import java.io.StreamCorruptedException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * JUnit tests for the new immutable {@link Bic} class, covering BIC validation and component extraction.
+ * JUnit tests for the new immutable {@link Bic} class.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 class BicTest {
@@ -56,15 +56,58 @@ class BicTest {
             .hasCountryFlag("🇩🇪");
     }
 
-    @DisplayName("of() should throw InvalidBicException for invalid BIC")
+    @DisplayName("of() should throw exception for null or empty BIC")
     @ParameterizedTest(name = "BIC: ''{0}''")
-    @ValueSource(strings = {" ", "INVALID99", "MARKDE"})
-    void of_InvalidBic_ShouldThrowException(String bic) {
+    @NullAndEmptySource
+    void of_NullOrEmpty_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withCause(null)
+            .withMessage("BIC is null or empty")
+            .hasFieldOrPropertyWithValue("reason", BicValidationError.EMPTY);
+    }
+
+    @ParameterizedTest(name = "BIC: ''{0}''")
+    @DisplayName("of() should throw exception for incorrect length")
+    @ValueSource(strings = {
+        "SHORT12",      // 7 chars
+        "LONG12345678", // 12 chars
+        "INVALID99",    // 9 chars
+        "MARKDEFFX",    // 9 chars
+        "DEUTDEFF1234"  // 12 chars
+    })
+    void of_InvalidLength_ShouldThrowException(String bic) {
+        assertThatInvalidBicException()
+            .isThrownBy(() -> Bic.of(bic))
             .withMessage("BIC has incorrect length")
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INCORRECT_LENGTH);
+    }
+
+    @ParameterizedTest(name = "BIC: ''{0}''")
+    @DisplayName("of() should throw exception for invalid country code")
+    @ValueSource(strings = {
+        "MARK99FF", // 99 is not a valid ISO country
+        "MARKXXFF"  // XX is not a valid ISO country
+    })
+    void of_InvalidCountry_ShouldThrowException(String bic) {
+        assertThatInvalidBicException()
+            .isThrownBy(() -> Bic.of(bic))
+            .withMessage("BIC has invalid country code")
+            .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_COUNTRY);
+    }
+
+    @ParameterizedTest(name = "BIC: ''{0}''")
+    @DisplayName("of() should throw exception for illegal characters")
+    @ValueSource(strings = {
+        "MARKDE 1", // space
+        "MARKDE_1", // underscore
+        "markdeff", // lowercase
+        "MÄRKDEFF"  // non-ASCII
+    })
+    void of_IllegalCharacters_ShouldThrowException(String bic) {
+        assertThatInvalidBicException()
+            .isThrownBy(() -> Bic.of(bic))
+            .withMessage("BIC contains illegal character(s)")
+            .hasFieldOrPropertyWithValue("reason", BicValidationError.ILLEGAL_CHARACTERS);
     }
 
     @DisplayName("tryParse() should return non-empty Optional for valid BIC")

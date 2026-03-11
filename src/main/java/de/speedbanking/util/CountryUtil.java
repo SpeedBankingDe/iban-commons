@@ -18,6 +18,8 @@ package de.speedbanking.util;
 /**
  * Utility class providing functionality regarding country codes and countries.
  *
+ * @see Iso3166Alpha2
+ *
  * @since 1.8.0
  */
 public final class CountryUtil {
@@ -32,24 +34,22 @@ public final class CountryUtil {
     }
 
     /**
-     * Checks if the given string is a valid two-letter country code according to
-     * the basic format requirements of ISO 3166-1 Alpha-2.
+     * Checks if the given string is a valid, officially assigned ISO 3166-1 Alpha-2
+     * country code by performing an exact lookup against the full {@link Iso3166Alpha2}
+     * enumeration.
      * <p>
-     * A country code is considered valid if it is not null, has a length of exactly two,
-     * and both characters are uppercase ASCII letters ('A' through 'Z').
-     * <p>
-     * This method only checks the format and does not validate if the code
-     * actually represents a currently assigned ISO country.
+     * A pure format check (two uppercase letters A–Z) is <em>not</em> sufficient:
+     * syntactically correct codes such as {@code "AA"}, {@code "QQ"}, or {@code "ZZ"}
+     * are not assigned and will therefore return {@code false}.
      *
-     * @param countryCode the string to validate (e.g., "US", "CH")
-     * @return {@code true} if the string is a valid two-letter uppercase code; {@code false} otherwise
+     * @param countryCode the string to validate (e.g., {@code "FI"}, {@code "JP"})
+     * @return {@code true} if the code is an officially assigned ISO 3166-1 Alpha-2
+     *         country code; {@code false} otherwise
      *
      * @since 1.8.0
      */
     public static boolean isValidCountryCode(final String countryCode) {
-        return countryCode != null && countryCode.length() == 2
-            && countryCode.charAt(0) >= 'A' && countryCode.charAt(0) <= 'Z'
-            && countryCode.charAt(1) >= 'A' && countryCode.charAt(1) <= 'Z';
+        return Iso3166Alpha2.isAssigned(countryCode);
     }
 
     /**
@@ -66,8 +66,11 @@ public final class CountryUtil {
      * @since 1.8.0
      */
     public static String createFlagEmoji(final String countryCode) {
-        if (!isValidCountryCode(countryCode)) {
-            throw new IllegalArgumentException("Valid country code required");
+        if (countryCode == null || countryCode.isEmpty()
+            || countryCode.length() != 2
+            || !Character.isUpperCase(countryCode.charAt(0))
+            || !Character.isUpperCase(countryCode.charAt(1))) {
+            throw new IllegalArgumentException("Valid country code required: " + countryCode);
         }
 
         // the base Unicode value for the Regional Indicator Symbol Letter 'A'

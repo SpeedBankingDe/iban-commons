@@ -1,6 +1,7 @@
 package de.speedbanking.iban;
 
 import de.speedbanking.util.IndexRange;
+import de.speedbanking.util.Iso3166Alpha2;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -247,6 +248,13 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             + "Organization: Bundesverband deutscher Banken, "
             + "Last Update: 2011-01]";
         assertThat(IbanRegistry.DE).hasToString(expected);
+    }
+
+    @DisplayName("All entries must exist in Iso3166Alpha2")
+    @ParameterizedTest
+    @EnumSource(IbanRegistry.class)
+    void allEntriesMustExistInIso3166Alpha2(IbanRegistry entry) {
+        assertThat(Iso3166Alpha2.fromCode(entry.getCountryCode())).isNotNull();
     }
 
     @DisplayName("All entries must have null or valid lastUpdate date")
