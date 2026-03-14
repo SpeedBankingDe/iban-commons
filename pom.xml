@@ -63,10 +63,10 @@
     </developers>
 
     <scm>
-        <connection>scm:git:ssh//git@github.com/${project.organization.name}/${project.artifactId}.git</connection>
+        <connection>scm:git:ssh://git@github.com/${project.organization.name}/${project.artifactId}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/${project.artifactId}.git</developerConnection>
         <url>https://github.com/${project.organization.name}/${project.artifactId}</url>
-        <tag></tag>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
@@ -103,6 +103,8 @@
         <developer2Name>Noah Spann</developer2Name>
         <developer2Email>spannn@outlook.de</developer2Email>
 
+        <!-- NOTE: maven.compiler.release requires JDK 9+; source/target are kept
+             as fallback for strict Java-8 toolchains -->
         <maven.compiler.release>${javaVersion}</maven.compiler.release>
         <maven.compiler.source>${javaVersion}</maven.compiler.source>
         <maven.compiler.target>${javaVersion}</maven.compiler.target>
@@ -195,15 +197,13 @@
                     <version>${dep.plugin.surefire.version}</version>
                     <configuration>
                         <failIfNoTests>true</failIfNoTests>
-                        <trimStackTrace>true</trimStackTrace>
+                        <trimStackTrace>false</trimStackTrace>
                         <printSummary>true</printSummary>
                         <testFailureIgnore>false</testFailureIgnore>
 
                         <forkCount>2</forkCount>
                         <reuseForks>true</reuseForks>
                         <forkedProcessTimeoutInSeconds>180</forkedProcessTimeoutInSeconds>
-                        <parallel>classes</parallel>
-                        <threadCount>8</threadCount>
 
                         <argLine>-Xmx2048m</argLine>
                     </configuration>
@@ -247,12 +247,11 @@
                     <version>${dep.plugin.javadoc.version}</version>
                     <configuration>
                         <failOnError>true</failOnError>
-                        <legacyMode>false</legacyMode>
                         <release>${maven.compiler.release}</release>
                         <source>${maven.compiler.source}</source>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <maxmemory>1024m</maxmemory>
-                        <quiet>true</quiet>
+                        <quiet>false</quiet>
                         <doclint>all,-missing</doclint>
                         <show>protected</show>
                         <windowtitle>${project.name} ${project.version} API</windowtitle>
@@ -575,6 +574,7 @@
                 <artifactId>license-maven-plugin</artifactId>
             </plugin>
 
+            <!-- Sources are attached here for the default build -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -606,27 +606,15 @@
             <id>release</id>
 
             <properties>
-                <!-- tests have been run in the preparation step of the release -->
+                <!-- Tests have already been run in the release:prepare step; skip here
+                     to avoid re-running them during release:perform
+                     Note: failIfNoTests in Surefire has no effect when skipTests=true
+                     because Surefire does not execute at all -->
                 <skipTests>true</skipTests>
             </properties>
 
             <build>
                 <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>${dep.plugin.source.version}</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                                <phase>package</phase>
-                            </execution>
-                        </executions>
-                    </plugin>
-
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
