@@ -15,68 +15,64 @@
  */
 package de.speedbanking.iban;
 
-import java.util.Objects;
+import de.speedbanking.iban.util.InvalidBaseException;
 
 /**
- * Exception thrown when a string fails IBAN validation in the strict Iban.of() method.
+ * Exception thrown when a string fails IBAN validation in the strict {@code Iban.of()} method.
+ * <p>
+ * Instances are typically created via the static factory methods {@link #of(IbanValidationError)}
+ * or {@link #of(IbanValidationError, CharSequence)} rather than directly via constructors.
  *
  * @since 1.8.0
  */
-public class InvalidIbanException extends RuntimeException {
+public class InvalidIbanException extends InvalidBaseException {
 
     /** Serial version UID. */
-    private static final long         serialVersionUID = 42L;
-
-    /** The specific reason why IBAN validation failed. */
-    private final IbanValidationError reason;
+    private static final long serialVersionUID = 42L;
 
     /**
-     * Constructs a new exception with the specified validation failure reason.
+     * Constructs a new exception with the specified validation failure reason and the erroneous input.
      * The exception message is derived from the reason's text.
      *
-     * @param reason the specific {@code IbanValidationError} that occurred, must not be null
+     * @param reason the specific {@code IbanValidationError} that occurred, must not be {@code null}
+     * @param input  the IBAN input string that caused the error, may be {@code null};
+     *               blank values are normalized to {@code null}
      */
-    InvalidIbanException(IbanValidationError reason) {
-        super(Objects.requireNonNull(reason, "reason required").getText());
-        this.reason = reason;
+    InvalidIbanException(IbanValidationError reason, CharSequence input) {
+        super(reason, input);
     }
 
     /**
-     * Static factory method to create an {@code InvalidIbanException} instance.
+     * Static factory method to create an {@code InvalidIbanException} with the specified reason.
      *
-     * @param reason the specific {@code IbanValidationError} that occurred
+     * @param reason the specific {@code IbanValidationError} that occurred, must not be {@code null}
      * @return a new {@code InvalidIbanException} instance
      */
     public static InvalidIbanException of(IbanValidationError reason) {
-        return new InvalidIbanException(reason);
+        return new InvalidIbanException(reason, null);
     }
 
     /**
-     * Returns the specific reason for the validation failure.
+     * Static factory method to create an {@code InvalidIbanException} with the specified reason
+     * and the erroneous IBAN input.
      *
-     * @return the validation error reason
+     * @param reason the specific {@code IbanValidationError} that occurred, must not be {@code null}
+     * @param input  the IBAN input string that caused the error, may be {@code null};
+     *               blank values are normalized to {@code null}
+     * @return a new {@code InvalidIbanException} instance
      */
-    public IbanValidationError getReason() {
-        return reason;
+    public static InvalidIbanException of(IbanValidationError reason, CharSequence input) {
+        return new InvalidIbanException(reason, input);
     }
 
     /**
-     * Returns a detailed string representation of this exception, including the
-     * simple class name, the error message, and the specific validation reason.
+     * Returns the specific reason for the IBAN validation failure.
      *
-     * @return a string representation of the exception
+     * @return the validation error reason, never {@code null}
      */
     @Override
-    public String toString() {
-        String str = getClass().getSimpleName();
-        String message = getLocalizedMessage();
-        if (message != null) {
-            str += ": " + message;
-        }
-        if (reason != null) {
-            str += " (" + reason + ")";
-        }
-        return str;
+    public IbanValidationError getReason() {
+        return (IbanValidationError) super.getReason();
     }
 
 }

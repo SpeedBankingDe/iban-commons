@@ -15,70 +15,64 @@
  */
 package de.speedbanking.bic;
 
-import java.util.Objects;
+import de.speedbanking.iban.util.InvalidBaseException;
 
 /**
  * Exception thrown when a string fails BIC validation in the strict {@link Bic#of(CharSequence)} method.
+ * <p>
+ * Instances are typically created via the static factory methods {@link #of(BicValidationError)}
+ * or {@link #of(BicValidationError, CharSequence)} rather than directly via constructors.
  *
  * @since 1.8.0
  */
-public class InvalidBicException extends RuntimeException {
+public class InvalidBicException extends InvalidBaseException {
 
     /** Serial version UID. */
-    private static final long        serialVersionUID = 42L;
-
-    /** The specific reason why BIC validation failed. */
-    private final BicValidationError reason;
+    private static final long serialVersionUID = 42L;
 
     /**
-     * Constructs a new exception with the specified validation failure reason.
+     * Constructs a new exception with the specified validation failure reason and the erroneous input.
      * The exception message is derived from the reason's text.
      *
      * @param reason the specific {@code BicValidationError} that occurred, must not be {@code null}
+     * @param input  the BIC input string that caused the error, may be {@code null};
+     *               blank values are normalized to {@code null}
      */
-    InvalidBicException(BicValidationError reason) {
-        super(Objects.requireNonNull(reason, "reason required").getText());
-        this.reason = reason;
+    InvalidBicException(BicValidationError reason, CharSequence input) {
+        super(reason, input);
     }
 
     /**
-     * Static factory method to create an {@code InvalidBicException} instance.
+     * Static factory method to create an {@code InvalidBicException} with the specified reason.
      *
-     * @param reason the specific {@code BicValidationError} that occurred
+     * @param reason the specific {@code BicValidationError} that occurred, must not be {@code null}
      * @return a new {@code InvalidBicException} instance
      */
     public static InvalidBicException of(BicValidationError reason) {
-        return new InvalidBicException(reason);
+        return new InvalidBicException(reason, null);
     }
 
     /**
-     * Returns the specific reason for the validation failure.
+     * Static factory method to create an {@code InvalidBicException} with the specified reason
+     * and the erroneous BIC input.
      *
-     * @return the validation error reason
+     * @param reason the specific {@code BicValidationError} that occurred, must not be {@code null}
+     * @param input  the BIC input string that caused the error, may be {@code null};
+     *               blank values are normalized to {@code null}
+     * @return a new {@code InvalidBicException} instance
      */
-    public BicValidationError getReason() {
-        return reason;
+    public static InvalidBicException of(BicValidationError reason, CharSequence input) {
+        return new InvalidBicException(reason, input);
     }
 
     /**
-     * {@inheritDoc}
-     * <p>
-     * More specifically, returns a string representation including the class name, the localized message,
-     * and the reason if available.
+     * Returns the specific reason for the BIC validation failure.
      *
-     * @return a string representation of this object
+     * @return the validation error reason, never {@code null}
      */
     @Override
-    public String toString() {
-        String str = getClass().getSimpleName();
-        String message = getLocalizedMessage();
-        if (message != null) {
-            str += ": " + message;
-        }
-        if (reason != null) {
-            str += " (" + reason + ")";
-        }
-        return str;
+    public BicValidationError getReason() {
+        return (BicValidationError) super.getReason();
     }
 
 }

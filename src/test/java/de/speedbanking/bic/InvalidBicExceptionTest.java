@@ -1,4 +1,4 @@
-package de.speedbanking.iban;
+package de.speedbanking.bic;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -6,29 +6,31 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 /**
- * JUnit test class for {@link InvalidIbanException}.<br>
+ * JUnit test class for {@link InvalidBicException}.<br>
  * Ensures the exception correctly stores the reason and uses the reason's
  * failure text as the exception message.
+ *
+ * @since 1.8.5
  */
 @SuppressWarnings("PMD.LinguisticNaming")
-class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
+class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
 
     // -------------------------------------------------------------------------
     // Factory method: of(reason)
     // -------------------------------------------------------------------------
 
     @ParameterizedTest(name = "Test Exception for reason: {0}")
-    @EnumSource(IbanValidationError.class)
+    @EnumSource(BicValidationError.class)
     @DisplayName("of(reason) should store reason and derive message from reason text")
-    void ofShouldInitializeCorrectly(IbanValidationError reason) {
-        InvalidIbanException exception = InvalidIbanException.of(reason);
+    void ofShouldInitializeCorrectly(BicValidationError reason) {
+        InvalidBicException exception = InvalidBicException.of(reason);
 
         assertThat(exception)
             .isNotNull()
             .isInstanceOf(RuntimeException.class);
 
         assertThat(exception.getReason())
-            .as("getReason() should return the original ValidationError")
+            .as("getReason() should return the original BicValidationError")
             .isEqualTo(reason);
 
         assertThat(exception.getMessage())
@@ -36,14 +38,14 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
             .isEqualTo(reason.getText());
 
         assertThat(exception.toString())
-            .startsWith("InvalidIbanException: ")
+            .startsWith("InvalidBicException: ")
             .endsWith(" (" + reason + ")");
     }
 
     @Test
     @DisplayName("of(reason) should yield no input")
     void ofWithoutInputShouldHaveNoInput() {
-        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.values()[0]);
+        InvalidBicException exception = InvalidBicException.of(BicValidationError.values()[0]);
 
         assertThat(exception.getInput())
             .as("getInput() should be null when no input was supplied")
@@ -61,10 +63,10 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("of(reason, input) should store both reason and input")
     void ofWithInputShouldStoreInput() {
-        IbanValidationError reason = IbanValidationError.values()[0];
-        String input = "DE00123456789012345678";
+        BicValidationError reason = BicValidationError.values()[0];
+        String input = "DEUTDEDB";
 
-        InvalidIbanException exception = InvalidIbanException.of(reason, input);
+        InvalidBicException exception = InvalidBicException.of(reason, input);
 
         assertThat(exception.getReason())
             .isEqualTo(reason);
@@ -85,7 +87,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("of(reason, null) should treat null input as absent")
     void ofWithNullInputShouldHaveNoInput() {
-        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.values()[0], null);
+        InvalidBicException exception = InvalidBicException.of(BicValidationError.values()[0], null);
 
         assertThat(exception.getInput()).isNull();
         assertThat(exception.hasInput()).isFalse();
@@ -94,7 +96,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("of(reason, empty string) should treat empty input as absent")
     void ofWithEmptyInputShouldHaveNoInput() {
-        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.values()[0], "");
+        InvalidBicException exception = InvalidBicException.of(BicValidationError.values()[0], "");
 
         assertThat(exception.getInput()).isNull();
         assertThat(exception.hasInput())
@@ -110,7 +112,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("of(null) should throw NullPointerException")
     void ofShouldThrowOnNullReason() {
         assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(() -> InvalidIbanException.of(null))
+            .isThrownBy(() -> InvalidBicException.of(null))
             .withMessage("reason required");
     }
 
@@ -118,7 +120,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("of(null, input) should throw NullPointerException")
     void ofWithInputShouldThrowOnNullReason() {
         assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(() -> InvalidIbanException.of(null, "DE00123456789012345678"))
+            .isThrownBy(() -> InvalidBicException.of(null, "DEUTDEDB"))
             .withMessage("reason required");
     }
 
@@ -129,11 +131,11 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("equals() should be true for same reason and same input")
     void equalsShouldBeTrueForSameReasonAndInput() {
-        IbanValidationError reason = IbanValidationError.values()[0];
-        String input = "DE00123456789012345678";
+        BicValidationError reason = BicValidationError.values()[0];
+        String input = "DEUTDEDB";
 
-        InvalidIbanException a = InvalidIbanException.of(reason, input);
-        InvalidIbanException b = InvalidIbanException.of(reason, input);
+        InvalidBicException a = InvalidBicException.of(reason, input);
+        InvalidBicException b = InvalidBicException.of(reason, input);
 
         assertThat(a).isEqualTo(b);
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
@@ -142,10 +144,10 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("equals() should be true for same reason and both inputs null")
     void equalsShouldBeTrueForSameReasonAndNullInput() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        BicValidationError reason = BicValidationError.values()[0];
 
-        InvalidIbanException a = InvalidIbanException.of(reason, null);
-        InvalidIbanException b = InvalidIbanException.of(reason, null);
+        InvalidBicException a = InvalidBicException.of(reason, null);
+        InvalidBicException b = InvalidBicException.of(reason, null);
 
         assertThat(a).isEqualTo(b);
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
@@ -154,12 +156,12 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("equals() should be false for different reasons")
     void equalsShouldBeFalseForDifferentReasons() {
-        IbanValidationError[] errors = IbanValidationError.values();
+        BicValidationError[] errors = BicValidationError.values();
         org.junit.jupiter.api.Assumptions.assumeTrue(errors.length >= 2,
-            "Need at least two IbanValidationError values for this test");
+            "Need at least two BicValidationError values for this test");
 
-        InvalidIbanException a = InvalidIbanException.of(errors[0]);
-        InvalidIbanException b = InvalidIbanException.of(errors[1]);
+        InvalidBicException a = InvalidBicException.of(errors[0]);
+        InvalidBicException b = InvalidBicException.of(errors[1]);
 
         assertThat(a).isNotEqualTo(b);
     }
@@ -167,10 +169,10 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("equals() should be false when one has input and the other does not")
     void equalsShouldBeFalseWhenInputDiffers() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        BicValidationError reason = BicValidationError.values()[0];
 
-        InvalidIbanException withInput    = InvalidIbanException.of(reason, "DE00123456789012345678");
-        InvalidIbanException withoutInput = InvalidIbanException.of(reason);
+        InvalidBicException withInput    = InvalidBicException.of(reason, "DEUTDEDB");
+        InvalidBicException withoutInput = InvalidBicException.of(reason);
 
         assertThat(withInput).isNotEqualTo(withoutInput);
     }
@@ -178,14 +180,14 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("equals() should be reflexive")
     void equalsShouldBeReflexive() {
-        InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.values()[0]);
+        InvalidBicException ex = InvalidBicException.of(BicValidationError.values()[0]);
         assertThat(ex).isEqualTo(ex);
     }
 
     @Test
     @DisplayName("equals() should return false for null and other types")
     void equalsShouldReturnFalseForNullAndOtherTypes() {
-        InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.values()[0]);
+        InvalidBicException ex = InvalidBicException.of(BicValidationError.values()[0]);
         assertThat(ex).isNotEqualTo(null);
         assertThat(ex).isNotEqualTo("some string");
     }
@@ -197,13 +199,13 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("toString() should include class name, message, reason and input")
     void toStringShouldContainAllParts() {
-        IbanValidationError reason = IbanValidationError.values()[0];
-        String input = "DE00123456789012345678";
+        BicValidationError reason = BicValidationError.values()[0];
+        String input = "DEUTDEDB";
 
-        String result = InvalidIbanException.of(reason, input).toString();
+        String result = InvalidBicException.of(reason, input).toString();
 
         assertThat(result)
-            .startsWith("InvalidIbanException: ")
+            .startsWith("InvalidBicException: ")
             .contains("(" + reason + ")")
             .endsWith(": " + input);
     }
@@ -211,12 +213,12 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     @DisplayName("toString() without input should not contain trailing colon segment")
     void toStringShouldNotContainInputSegmentWhenAbsent() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        BicValidationError reason = BicValidationError.values()[0];
 
-        String result = InvalidIbanException.of(reason).toString();
+        String result = InvalidBicException.of(reason).toString();
 
         assertThat(result)
-            .startsWith("InvalidIbanException: ")
+            .startsWith("InvalidBicException: ")
             .endsWith("(" + reason + ")")
             .doesNotContain(": " + reason + ":");
     }

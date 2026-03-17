@@ -109,7 +109,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public static Bic of(CharSequence bic) {
         BicValidationResult result = BicValidator.validate(bic);
-        return result.getBic().orElseThrow(() -> InvalidBicException.of(result.getError().get()));
+        return result.getBic().orElseThrow(() -> InvalidBicException.of(result.getError().get(), bic));
     }
 
     /**

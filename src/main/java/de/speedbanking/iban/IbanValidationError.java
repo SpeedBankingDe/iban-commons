@@ -15,6 +15,8 @@
  */
 package de.speedbanking.iban;
 
+import de.speedbanking.util.ValidationError;
+
 import java.util.Objects;
 
 /**
@@ -22,7 +24,7 @@ import java.util.Objects;
  *
  * @since 1.8.0
  */
-public enum IbanValidationError {
+public enum IbanValidationError implements ValidationError {
 
     /** The IBAN input string is null or empty. */
     EMPTY("IBAN is null or empty"),
@@ -65,6 +67,7 @@ public enum IbanValidationError {
      * Retrieves the descriptive English reason for the validation error.
      * @return the failure text
      */
+    @Override
     public String getText() {
         return errorText;
     }

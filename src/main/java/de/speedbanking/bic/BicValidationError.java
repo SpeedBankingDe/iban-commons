@@ -15,6 +15,8 @@
  */
 package de.speedbanking.bic;
 
+import de.speedbanking.util.ValidationError;
+
 import java.util.Objects;
 
 /**
@@ -22,7 +24,7 @@ import java.util.Objects;
  *
  * @since 1.8.0
  */
-public enum BicValidationError {
+public enum BicValidationError implements ValidationError {
 
     /** The input string for the BIC was {@code null} or contained no characters. */
     EMPTY("BIC is null or empty"),
@@ -50,6 +52,7 @@ public enum BicValidationError {
      * Retrieves the descriptive English reason for the validation error.
      * @return the failure text
      */
+    @Override
     public String getText() {
         return errorText;
     }

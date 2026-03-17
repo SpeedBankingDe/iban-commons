@@ -139,7 +139,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
 
         if (success == null) {
             IbanValidationError error = IbanValidator.getLastReason();
-            throw InvalidIbanException.of(error);
+            throw InvalidIbanException.of(error, iban);
         }
 
         return new Iban(success.normIbanArr, success.countryData);
@@ -159,7 +159,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
 
         if (success == null) {
             IbanValidationError error = IbanValidator.getLastReason();
-            throw InvalidIbanException.of(error);
+            throw InvalidIbanException.of(error, iban);
         }
 
         return new Iban(success.normIbanArr, success.countryData);
