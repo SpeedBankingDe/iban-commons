@@ -23,6 +23,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * Represents a valid, immutable **International Bank Account Number (IBAN)**,
@@ -309,7 +310,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getCheckDigits() {
         if (checkDigits == null) {
-            checkDigits = ibanStr.substring(2, 4);
+            checkDigits = ibanStr.substring(IbanRegistry.INDEX_CHECK_DIGIT1, IbanRegistry.INDEX_BBAN);
         }
         return checkDigits;
     }
@@ -451,6 +452,49 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     public String toFormattedString() {
         // delegate formatting to external Formatter
         return Formatter.format(toString());
+    }
+
+    /**
+     * Returns the IBAN formatted into its components in order.
+     * <p>
+     * Example:
+     * <pre>
+     * IBAN:      {@code "GL8964710001000206"}
+     * Formatted: {@code "GL 89 6471 0001000206"}
+     * </pre>
+     *
+     * @return the IBAN formatted into components (e.g., {@code "AT 61 19043 00234573201"})
+     *
+     * @since 1.8.5
+     */
+    public String toComponentString() {
+        int[] rawIndices = {
+            IbanRegistry.INDEX_CHECK_DIGIT1,
+            IbanRegistry.INDEX_BBAN,
+            countryData.getBankCodeIndexRange().getBegin(),
+            countryData.getBranchCodeIndexRange() != null
+                ? countryData.getBranchCodeIndexRange().getBegin() : -1,
+            countryData.getAccountNumberIndexRange().getBegin(),
+            countryData.getNationalCheckDigitIndexRange() != null
+                ? countryData.getNationalCheckDigitIndexRange().getBegin() : -1
+        };
+
+        // filter, sort and unique check using primitives
+        int[] sortedIndices = IntStream.of(rawIndices)
+            .filter(idx -> idx > 0)
+            .distinct()
+            .sorted()
+            .toArray();
+
+        StringBuilder sb = new StringBuilder(ibanStr.length() + sortedIndices.length);
+        int lastIdx = 0;
+        for (int idx : sortedIndices) {
+            sb.append(ibanStr, lastIdx, idx).append(' ');
+            lastIdx = idx;
+        }
+        sb.append(ibanStr.substring(lastIdx));
+
+        return sb.toString();
     }
 
     /**

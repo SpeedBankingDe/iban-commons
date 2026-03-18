@@ -35,12 +35,12 @@ public final class IbanValidator {
     /**
      * The modulus used in the ISO 7064 Mod 97-10 check (97).
      */
-    private static final int                              MOD97              = 97;
+    private static final int                              MOD97         = 97;
 
     /**
      * Return value for a failed Mod 97-10 calculation.
      */
-    static final int                                      INVALID_MOD97      = -1;
+    static final int                                      INVALID_MOD97 = -1;
 
     /**
      * A limit used to trigger the intermediate modulo operation during the
@@ -49,13 +49,7 @@ public final class IbanValidator {
      * Safe upper bound: the next iteration multiplies by at most 100 and adds at most 35,
      * so {@code 10^15 * 100 + 35 < Long.MAX_VALUE}.
      */
-    private static final long                             MAX                = 1_000_000_000_000_000L;
-
-    /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
-    static final int                                      INDEX_CHECK_DIGIT1 = IbanRegistry.INDEX_CHECK_DIGIT1;
-
-    /** Index of second IBAN check digit within the full IBAN string (position 4, 0-based index 3). */
-    static final int                                      INDEX_CHECK_DIGIT2 = IbanRegistry.INDEX_CHECK_DIGIT2;
+    private static final long                             MAX           = 1_000_000_000_000_000L;
 
     /**
      * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
@@ -67,7 +61,7 @@ public final class IbanValidator {
      * {@link #isValid} never touches this field, avoiding unnecessary ThreadLocal overhead
      * on the hot validation-only path.
      */
-    private static final ThreadLocal<IbanValidationError> LAST_REASON = new ThreadLocal<>();
+    private static final ThreadLocal<IbanValidationError> LAST_REASON   = new ThreadLocal<>();
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -563,15 +557,15 @@ public final class IbanValidator {
             : new StringBuilder(iban);
 
         // set placeholders to "00" (required for correct calculation context)
-        sb.setCharAt(INDEX_CHECK_DIGIT1, '0');
-        sb.setCharAt(INDEX_CHECK_DIGIT2, '0');
+        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, '0');
+        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, '0');
 
         // calculate the required check digits value (98 - modulo result)
         final int checkDigitsValue = 98 - calculateMod97(sb);
 
         // manual zero-padding: faster than String.format
-        sb.setCharAt(INDEX_CHECK_DIGIT1, (char) ('0' + (checkDigitsValue / 10)));
-        sb.setCharAt(INDEX_CHECK_DIGIT2, (char) ('0' + (checkDigitsValue % 10)));
+        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, (char) ('0' + (checkDigitsValue / 10)));
+        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, (char) ('0' + (checkDigitsValue % 10)));
 
         return sb;
     }

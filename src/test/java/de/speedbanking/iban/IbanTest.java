@@ -310,14 +310,28 @@ class IbanTest {
             .hasOrganisation(countryData.getOrganisation())
             .isSepa(countryData.isSepa())
 
-            .matches(countryData.getIbanRegex())
+            .matches(countryData.getIbanRegex());
 
-            .extracting(Iban::toFormattedString)
-            .asString()
+        String ibanLastChar = iban.subSequence(iban.length() - 1, iban.length());
+
+        assertThat(iban.toFormattedString())
+            .as("Expected valid formatted string for IBAN '%s' but got: '%s'", iban, iban.toFormattedString())
             .isNotBlank()
-            .startsWith(countryData.getCountryCode());
+            .hasSizeGreaterThan(iban.length())
+            .startsWith(iban.getCountryCode() + iban.getCheckDigits() + ' ')
+            .endsWith(ibanLastChar);
+
+        assertThat(iban.toComponentString())
+            .as("Expected valid component string for IBAN '%s' but got: '%s'", iban, iban.toComponentString())
+            .isNotBlank()
+            .hasSizeGreaterThan(iban.length())
+            .startsWith(iban.getCountryCode() + ' ' + iban.getCheckDigits())
+            .contains(iban.getBankCode(), iban.getAccountNumber())
+            .doesNotContain("  ")
+            .endsWith(ibanLastChar);
 
         assertThat(IbanPlusKey.of(iban))
+            .as("Expected valid Iban Plus key for IBAN '%s' but got: '%s'", iban, IbanPlusKey.of(iban))
             .isNotBlank()
             .as("Expected length of IBAN Plus code to be %d for IBAN '%s'", expectedIbanPlusLen, iban)
             .hasSize(expectedIbanPlusLen);
