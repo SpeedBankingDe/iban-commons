@@ -64,7 +64,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n4!n12!c}<br>
-     * Example: {@code AD1200012030200359100100}
+     * Examples:<pre>
+     *   unformatted: {@code AD1200012030200359100100}
+     *   formatted:   {@code AD12 0001 2030 2003 5910 0100}
+     *   components:  {@code AD 12 0001 2030 200359100100}
+     * </pre>
      */
     AD(StructureData.builder()
          .withIbanLength(24)
@@ -86,7 +90,11 @@ public enum IbanRegistry {
      * IBAN Length: 23<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n16!n}<br>
-     * Example: {@code AE070331234567890123456}
+     * Examples:<pre>
+     *   unformatted: {@code AE070331234567890123456}
+     *   formatted:   {@code AE07 0331 2345 6789 0123 456}
+     *   components:  {@code AE 07 033 1234567890123456}
+     * </pre>
      */
     AE(StructureData.builder()
          .withIbanLength(23)
@@ -107,14 +115,18 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 8!n16!c}<br>
-     * Example: {@code AL47212110090000000235698741}
+     * Examples:<pre>
+     *   unformatted: {@code AL47212110090000000235698741}
+     *   formatted:   {@code AL47 2121 1009 0000 0002 3569 8741}
+     *   components:  {@code AL 47 212 1100 9 0000000235698741}
+     * </pre>
      */
     AL(StructureData.builder()
          .withIbanLength(28)
          .withBbanPattern("8!n16!c")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("5!n", IndexRange.of(7, 11))
-         .withNationalCheckDigit(IndexRange.of(11, 12))
+         .withNationalCheckDigit(IndexRange.of(11, 12)) // AL
          .withAccountNumber(IndexRange.of(12, 28))
          .build(),
        MetaData.of(
@@ -130,7 +142,11 @@ public enum IbanRegistry {
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
-     * Example: {@code AO06000600000100037131174}
+     * Examples:<pre>
+     *   unformatted: {@code AO06000600000100037131174}
+     *   formatted:   {@code AO06 0006 0000 0100 0371 3117 4}
+     *   components:  {@code AO 06 0006 0000 01000371311 74}
+     * </pre>
      */
     AO(StructureData.builder()
          .withIbanLength(25)
@@ -138,7 +154,7 @@ public enum IbanRegistry {
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
          .withAccountNumber(IndexRange.of(12, 23))
-         .withNationalCheckDigit(IndexRange.of(23, 25))
+         .withNationalCheckDigit(IndexRange.of(23, 25)) // AO
          .build(),
        MetaData.of(
            "Angola", false, "AO06000600000100037131174",
@@ -150,7 +166,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n11!n}<br>
-     * Example: {@code AT611904300234573201}
+     * Examples:<pre>
+     *   unformatted: {@code AT611904300234573201}
+     *   formatted:   {@code AT61 1904 3002 3457 3201}
+     *   components:  {@code AT 61 19043 00234573201}
+     * </pre>
      */
     AT(StructureData.builder()
          .withIbanLength(20)
@@ -171,7 +191,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a20!c}<br>
-     * Example: {@code AZ21NABZ00000000137010001944}
+     * Examples:<pre>
+     *   unformatted: {@code AZ21NABZ00000000137010001944}
+     *   formatted:   {@code AZ21 NABZ 0000 0000 1370 1000 1944}
+     *   components:  {@code AZ 21 NABZ 00000000137010001944}
+     * </pre>
      */
     AZ(StructureData.builder()
          .withIbanLength(28)
@@ -192,7 +216,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n3!n8!n2!n}<br>
-     * Example: {@code BA391290079401028494}
+     * Examples:<pre>
+     *   unformatted: {@code BA391290079401028494}
+     *   formatted:   {@code BA39 1290 0794 0102 8494}
+     *   components:  {@code BA 39 129 007 94010284 94}
+     * </pre>
      */
     BA(StructureData.builder()
          .withIbanLength(20)
@@ -200,7 +228,7 @@ public enum IbanRegistry {
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("3!n", IndexRange.of(7, 10))
          .withAccountNumber(IndexRange.of(10, 18))
-         .withNationalCheckDigit(IndexRange.of(18, 20))
+         .withNationalCheckDigit(IndexRange.of(18, 20)) // BA
          .build(),
        MetaData.of(
            "Bosnia and Herzegovina", false, "BA391290079401028494",
@@ -215,14 +243,18 @@ public enum IbanRegistry {
      * IBAN Length: 16<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n7!n2!n}<br>
-     * Example: {@code BE68539007547034}
+     * Examples:<pre>
+     *   unformatted: {@code BE68539007547034}
+     *   formatted:   {@code BE68 5390 0754 7034}
+     *   components:  {@code BE 68 539 0075470 34}
+     * </pre>
      */
     BE(StructureData.builder()
          .withIbanLength(16)
          .withBbanPattern("3!n7!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 14))
-         .withNationalCheckDigit(IndexRange.of(14, 16))
+         .withNationalCheckDigit(IndexRange.of(14, 16)) // BE
          .build(),
        MetaData.of(
            "Belgium", true, "BE68539007547034",
@@ -237,7 +269,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a4!n2!n8!c}<br>
-     * Example: {@code BG80BNBG96611020345678}
+     * Examples:<pre>
+     *   unformatted: {@code BG80BNBG96611020345678}
+     *   formatted:   {@code BG80 BNBG 9661 1020 3456 78}
+     *   components:  {@code BG 80 BNBG 966110 20345678}
+     * </pre>
      */
     BG(StructureData.builder()
          .withIbanLength(22)
@@ -259,7 +295,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a14!c}<br>
-     * Example: {@code BH67BMAG00001299123456}
+     * Examples:<pre>
+     *   unformatted: {@code BH67BMAG00001299123456}
+     *   formatted:   {@code BH67 BMAG 0000 1299 1234 56}
+     *   components:  {@code BH 67 BMAG 00001299123456}
+     * </pre>
      */
     BH(StructureData.builder()
          .withIbanLength(22)
@@ -280,7 +320,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
-     * Example: {@code BI4210000100010000332045181}
+     * Examples:<pre>
+     *   unformatted: {@code BI4210000100010000332045181}
+     *   formatted:   {@code BI42 1000 0100 0100 0033 2045 181}
+     *   components:  {@code BI 42 10000 10001 0000332045181}
+     * </pre>
      */
     BI(StructureData.builder()
          .withIbanLength(27)
@@ -302,7 +346,11 @@ public enum IbanRegistry {
      * IBAN Length: 29<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 8!n5!n10!n1!a1!c}<br>
-     * Example: {@code BR1800360305000010009795493C1}
+     * Examples:<pre>
+     *   unformatted: {@code BR1800360305000010009795493C1}
+     *   formatted:   {@code BR18 0036 0305 0000 1000 9795 493C 1}
+     *   components:  {@code BR 18 00360305 00001 0009795493C1}
+     * </pre>
      */
     BR(StructureData.builder()
          .withIbanLength(29)
@@ -324,7 +372,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!c4!n16!c}<br>
-     * Example: {@code BY13NBRB3600900000002Z00AB00}
+     * Examples:<pre>
+     *   unformatted: {@code BY13NBRB3600900000002Z00AB00}
+     *   formatted:   {@code BY13 NBRB 3600 9000 0000 2Z00 AB00}
+     *   components:  {@code BY 13 NBRB 3600 900000002Z00AB00}
+     * </pre>
      */
     BY(StructureData.builder()
          .withIbanLength(28)
@@ -346,7 +398,11 @@ public enum IbanRegistry {
      * IBAN Length: 21<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n12!c}<br>
-     * Example: {@code CH9300762011623852957}
+     * Examples:<pre>
+     *   unformatted: {@code CH9300762011623852957}
+     *   formatted:   {@code CH93 0076 2011 6238 5295 7}
+     *   components:  {@code CH 93 00762 011623852957}
+     * </pre>
      */
     CH(StructureData.builder()
          .withIbanLength(21)
@@ -367,7 +423,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n14!n}<br>
-     * Example: {@code CR05015202001026284066}
+     * Examples:<pre>
+     *   unformatted: {@code CR05015202001026284066}
+     *   formatted:   {@code CR05 0152 0200 1026 2840 66}
+     *   components:  {@code CR 05 0152 02001026284066}
+     * </pre>
      */
     CR(StructureData.builder()
          .withIbanLength(22)
@@ -388,7 +448,11 @@ public enum IbanRegistry {
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n13!c}<br>
-     * Example: {@code CV05123412341234123412341}
+     * Examples:<pre>
+     *   unformatted: {@code CV05123412341234123412341}
+     *   formatted:   {@code CV05 1234 1234 1234 1234 1234 1}
+     *   components:  {@code CV 05 1234 1234 1234123412341}
+     * </pre>
      */
     CV(StructureData.builder()
          .withIbanLength(25)
@@ -407,7 +471,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n5!n16!c}<br>
-     * Example: {@code CY17002001280000001200527600}
+     * Examples:<pre>
+     *   unformatted: {@code CY17002001280000001200527600}
+     *   formatted:   {@code CY17 0020 0128 0000 0012 0052 7600}
+     *   components:  {@code CY 17 002 00128 0000001200527600}
+     * </pre>
      */
     CY(StructureData.builder()
          .withIbanLength(28)
@@ -429,7 +497,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n16!n}<br>
-     * Example: {@code CZ6508000000192000145399}
+     * Examples:<pre>
+     *   unformatted: {@code CZ6508000000192000145399}
+     *   formatted:   {@code CZ65 0800 0000 1920 0014 5399}
+     *   components:  {@code CZ 65 0800 0000192000145399}
+     * </pre>
      */
     CZ(StructureData.builder()
          .withIbanLength(24)
@@ -450,7 +522,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 8!n10!n}<br>
-     * Example: {@code DE89370400440532013000}
+     * Examples:<pre>
+     *   unformatted: {@code DE89370400440532013000}
+     *   formatted:   {@code DE89 3704 0044 0532 0130 00}
+     *   components:  {@code DE 89 37040044 0532013000}
+     * </pre>
      */
     DE(StructureData.builder()
          .withIbanLength(22)
@@ -471,7 +547,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
-     * Example: {@code DJ2100010000000154000100186}
+     * Examples:<pre>
+     *   unformatted: {@code DJ2100010000000154000100186}
+     *   formatted:   {@code DJ21 0001 0000 0001 5400 0100 186}
+     *   components:  {@code DJ 21 00010 00000 0154000100186}
+     * </pre>
      */
     DJ(StructureData.builder()
          .withIbanLength(27)
@@ -493,7 +573,11 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n9!n1!n}<br>
-     * Example: {@code DK5000400440116243}
+     * Examples:<pre>
+     *   unformatted: {@code DK5000400440116243}
+     *   formatted:   {@code DK50 0040 0440 1162 43}
+     *   components:  {@code DK 50 0040 0440116243}
+     * </pre>
      */
     DK(StructureData.builder()
          .withIbanLength(18)
@@ -514,7 +598,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!c20!n}<br>
-     * Example: {@code DO28BAGR00000001212453611324}
+     * Examples:<pre>
+     *   unformatted: {@code DO28BAGR00000001212453611324}
+     *   formatted:   {@code DO28 BAGR 0000 0001 2124 5361 1324}
+     *   components:  {@code DO 28 BAGR 00000001212453611324}
+     * </pre>
      */
     DO(StructureData.builder()
          .withIbanLength(28)
@@ -535,7 +623,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 2!n14!n}<br>
-     * Example: {@code EE382200221020145685}
+     * Examples:<pre>
+     *   unformatted: {@code EE382200221020145685}
+     *   formatted:   {@code EE38 2200 2210 2014 5685}
+     *   components:  {@code EE 38 22 00 22102014568 5}
+     * </pre>
      */
     EE(StructureData.builder()
          .withIbanLength(20)
@@ -543,7 +635,7 @@ public enum IbanRegistry {
          .withBankCode("2!n", IndexRange.of(4, 6))
          .withBranchCode("2!n", IndexRange.of(6, 8))
          .withAccountNumber(IndexRange.of(8, 19))
-         .withNationalCheckDigit(IndexRange.of(19, 20))
+         .withNationalCheckDigit(IndexRange.of(19, 20)) // EE
          .build(),
        MetaData.of(
            "Estonia", true, "EE382200221020145685",
@@ -558,7 +650,11 @@ public enum IbanRegistry {
      * IBAN Length: 29<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n17!n}<br>
-     * Example: {@code EG380019000500000000263180002}
+     * Examples:<pre>
+     *   unformatted: {@code EG380019000500000000263180002}
+     *   formatted:   {@code EG38 0019 0005 0000 0000 2631 8000 2}
+     *   components:  {@code EG 38 0019 0005 00000000263180002}
+     * </pre>
      */
     EG(StructureData.builder()
          .withIbanLength(29)
@@ -580,14 +676,18 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n4!n1!n1!n10!n}<br>
-     * Example: {@code ES9121000418450200051332}
+     * Examples:<pre>
+     *   unformatted: {@code ES9121000418450200051332}
+     *   formatted:   {@code ES91 2100 0418 4502 0005 1332}
+     *   components:  {@code ES 91 2100 0418 45 0200051332}
+     * </pre>
      */
     ES(StructureData.builder()
          .withIbanLength(24)
          .withBbanPattern("4!n4!n1!n1!n10!n")
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withNationalCheckDigit(IndexRange.of(12, 14))
+         .withNationalCheckDigit(IndexRange.of(12, 14)) // ES
          .withAccountNumber(IndexRange.of(14, 24))
          .build(),
        MetaData.of(
@@ -603,14 +703,18 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n11!n}<br>
-     * Example: {@code FI2112345600000785}
+     * Examples:<pre>
+     *   unformatted: {@code FI2112345600000785}
+     *   formatted:   {@code FI21 1234 5600 0007 85}
+     *   components:  {@code FI 21 123456 0000078 5}
+     * </pre>
      */
     FI(StructureData.builder()
          .withIbanLength(18)
          .withBbanPattern("3!n11!n")
          .withBankCode("6!n", IndexRange.of(4, 10))
          .withAccountNumber(IndexRange.of(10, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 18))
+         .withNationalCheckDigit(IndexRange.of(17, 18)) // FI
          .build(),
        MetaData.of(
            "Finland", true, "FI2112345600000785",
@@ -625,7 +729,11 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n11!n}<br>
-     * Example: {@code FI2112345600000785}
+     * Examples:<pre>
+     *   unformatted: {@code FI2112345600000785}
+     *   formatted:   {@code FI21 1234 5600 0007 85}
+     *   components:  {@code FI 21 123456 0000078 5}
+     * </pre>
      */
     AX("Åland Islands", FI),
 
@@ -634,7 +742,11 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!a12!n}<br>
-     * Example: {@code FK88SC123456789012}
+     * Examples:<pre>
+     *   unformatted: {@code FK88SC123456789012}
+     *   formatted:   {@code FK88 SC12 3456 7890 12}
+     *   components:  {@code FK 88 SC 123456789012}
+     * </pre>
      */
     FK(StructureData.builder()
          .withIbanLength(18)
@@ -655,14 +767,18 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n9!n1!n}<br>
-     * Example: {@code FO6264600001631634}
+     * Examples:<pre>
+     *   unformatted: {@code FO6264600001631634}
+     *   formatted:   {@code FO62 6460 0001 6316 34}
+     *   components:  {@code FO 62 6460 000163163 4}
+     * </pre>
      */
     FO(StructureData.builder()
          .withIbanLength(18)
          .withBbanPattern("4!n9!n1!n")
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withAccountNumber(IndexRange.of(8, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 18))
+         .withNationalCheckDigit(IndexRange.of(17, 18)) // FO
          .build(),
        MetaData.of(
            "Faroe Islands", false, "FO6264600001631634",
@@ -674,7 +790,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     FR(StructureData.builder()
          .withIbanLength(27)
@@ -682,7 +802,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 9))
          .withBranchCode("5!n", IndexRange.of(9, 14))
          .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .withNationalCheckDigit(IndexRange.of(25, 27)) // FR
          .build(),
        MetaData.of(
            "France", true, "FR1420041010050500013M02606",
@@ -697,7 +817,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     GF("French Guiana", FR),
 
@@ -706,7 +830,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     GP("Guadeloupe", FR),
 
@@ -715,7 +843,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     MQ("Martinique", FR),
 
@@ -724,7 +856,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     RE("Réunion", FR),
 
@@ -733,7 +869,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     PF("French Polynesia", FR),
 
@@ -742,7 +882,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     TF("French Southern Territories", FR),
 
@@ -751,7 +895,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     YT("Mayotte", FR),
 
@@ -760,7 +908,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     NC("New Caledonia", FR),
 
@@ -769,7 +921,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     BL("Saint Barthélemy", FR),
 
@@ -778,7 +934,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     MF("Saint Martin (French part)", FR),
 
@@ -787,7 +947,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     PM("Saint Pierre and Miquelon", FR),
 
@@ -796,7 +960,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code FR1420041010050500013M02606}
+     * Examples:<pre>
+     *   unformatted: {@code FR1420041010050500013M02606}
+     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
+     *   components:  {@code FR 14 20041 01005 0500013M026 06}
+     * </pre>
      */
     WF("Wallis and Futuna Islands", FR),
 
@@ -805,7 +973,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n13!c}<br>
-     * Example: {@code GA2140021010032001890020126}
+     * Examples:<pre>
+     *   unformatted: {@code GA2140021010032001890020126}
+     *   formatted:   {@code GA21 4002 1010 0320 0189 0020 126}
+     *   components:  {@code GA 21 40021 01003 2001890020126}
+     * </pre>
      */
     GA(StructureData.builder()
          .withIbanLength(27)
@@ -824,7 +996,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Example: {@code GB29NWBK60161331926819}
+     * Examples:<pre>
+     *   unformatted: {@code GB29NWBK60161331926819}
+     *   formatted:   {@code GB29 NWBK 6016 1331 9268 19}
+     *   components:  {@code GB 29 NWBK 601613 31926819}
+     * </pre>
      */
     GB(StructureData.builder()
          .withIbanLength(22)
@@ -846,7 +1022,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Example: {@code GB29NWBK60161331926819}
+     * Examples:<pre>
+     *   unformatted: {@code GB29NWBK60161331926819}
+     *   formatted:   {@code GB29 NWBK 6016 1331 9268 19}
+     *   components:  {@code GB 29 NWBK 601613 31926819}
+     * </pre>
      */
     IM("Isle of Man", GB),
 
@@ -855,7 +1035,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Example: {@code GB29NWBK60161331926819}
+     * Examples:<pre>
+     *   unformatted: {@code GB29NWBK60161331926819}
+     *   formatted:   {@code GB29 NWBK 6016 1331 9268 19}
+     *   components:  {@code GB 29 NWBK 601613 31926819}
+     * </pre>
      */
     JE("Jersey", GB),
 
@@ -864,7 +1048,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Example: {@code GB29NWBK60161331926819}
+     * Examples:<pre>
+     *   unformatted: {@code GB29NWBK60161331926819}
+     *   formatted:   {@code GB29 NWBK 6016 1331 9268 19}
+     *   components:  {@code GB 29 NWBK 601613 31926819}
+     * </pre>
      */
     GG("Guernsey", GB),
 
@@ -873,7 +1061,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!a16!n}<br>
-     * Example: {@code GE29NB0000000101904917}
+     * Examples:<pre>
+     *   unformatted: {@code GE29NB0000000101904917}
+     *   formatted:   {@code GE29 NB00 0000 0101 9049 17}
+     *   components:  {@code GE 29 NB 0000000101904917}
+     * </pre>
      */
     GE(StructureData.builder()
          .withIbanLength(22)
@@ -894,7 +1086,11 @@ public enum IbanRegistry {
      * IBAN Length: 23<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a15!c}<br>
-     * Example: {@code GI75NWBK000000007099453}
+     * Examples:<pre>
+     *   unformatted: {@code GI75NWBK000000007099453}
+     *   formatted:   {@code GI75 NWBK 0000 0000 7099 453}
+     *   components:  {@code GI 75 NWBK 000000007099453}
+     * </pre>
      */
     GI(StructureData.builder()
          .withIbanLength(23)
@@ -915,7 +1111,11 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n9!n1!n}<br>
-     * Example: {@code GL8964710001000206}
+     * Examples:<pre>
+     *   unformatted: {@code GL8964710001000206}
+     *   formatted:   {@code GL89 6471 0001 0002 06}
+     *   components:  {@code GL 89 6471 0001000206}
+     * </pre>
      */
     GL(StructureData.builder()
          .withIbanLength(18)
@@ -933,7 +1133,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n4!n16!c}<br>
-     * Example: {@code GR1601101250000000012300695}
+     * Examples:<pre>
+     *   unformatted: {@code GR1601101250000000012300695}
+     *   formatted:   {@code GR16 0110 1250 0000 0001 2300 695}
+     *   components:  {@code GR 16 011 0125 0000000012300695}
+     * </pre>
      */
     GR(StructureData.builder()
          .withIbanLength(27)
@@ -955,7 +1159,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!c20!c}<br>
-     * Example: {@code GT82TRAJ01020000001210029690}
+     * Examples:<pre>
+     *   unformatted: {@code GT82TRAJ01020000001210029690}
+     *   formatted:   {@code GT82 TRAJ 0102 0000 0012 1002 9690}
+     *   components:  {@code GT 82 TRAJ 01020000001210029690}
+     * </pre>
      */
     GT(StructureData.builder()
          .withIbanLength(28)
@@ -976,7 +1184,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a20!n}<br>
-     * Example: {@code HN88CABF00000000000250005469}
+     * Examples:<pre>
+     *   unformatted: {@code HN88CABF00000000000250005469}
+     *   formatted:   {@code HN88 CABF 0000 0000 0002 5000 5469}
+     *   components:  {@code HN 88 CABF 00000000000250005469}
+     * </pre>
      */
     HN(StructureData.builder()
          .withIbanLength(28)
@@ -997,7 +1209,11 @@ public enum IbanRegistry {
      * IBAN Length: 21<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 7!n10!n}<br>
-     * Example: {@code HR1210010051863000160}
+     * Examples:<pre>
+     *   unformatted: {@code HR1210010051863000160}
+     *   formatted:   {@code HR12 1001 0051 8630 0016 0}
+     *   components:  {@code HR 12 1001005 1863000160}
+     * </pre>
      */
     HR(StructureData.builder()
          .withIbanLength(21)
@@ -1018,7 +1234,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n4!n1!n15!n1!n}<br>
-     * Example: {@code HU42117730161111101800000000}
+     * Examples:<pre>
+     *   unformatted: {@code HU42117730161111101800000000}
+     *   formatted:   {@code HU42 1177 3016 1111 1018 0000 0000}
+     *   components:  {@code HU 42 117 7301 6111110180000000 0}
+     * </pre>
      */
     HU(StructureData.builder()
          .withIbanLength(28)
@@ -1026,7 +1246,7 @@ public enum IbanRegistry {
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("4!n", IndexRange.of(7, 11))
          .withAccountNumber(IndexRange.of(11, 27))
-         .withNationalCheckDigit(IndexRange.of(27, 28))
+         .withNationalCheckDigit(IndexRange.of(27, 28)) // HU
          .build(),
        MetaData.of(
            "Hungary", true, "HU42117730161111101800000000",
@@ -1041,7 +1261,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Example: {@code IE29AIBK93115212345678}
+     * Examples:<pre>
+     *   unformatted: {@code IE29AIBK93115212345678}
+     *   formatted:   {@code IE29 AIBK 9311 5212 3456 78}
+     *   components:  {@code IE 29 AIBK 931152 12345678}
+     * </pre>
      */
     IE(StructureData.builder()
          .withIbanLength(22)
@@ -1063,7 +1287,11 @@ public enum IbanRegistry {
      * IBAN Length: 23<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n3!n13!n}<br>
-     * Example: {@code IL620108000000099999999}
+     * Examples:<pre>
+     *   unformatted: {@code IL620108000000099999999}
+     *   formatted:   {@code IL62 0108 0000 0009 9999 999}
+     *   components:  {@code IL 62 010 800 0000099999999}
+     * </pre>
      */
     IL(StructureData.builder()
          .withIbanLength(23)
@@ -1085,7 +1313,11 @@ public enum IbanRegistry {
      * IBAN Length: 23<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a3!n12!n}<br>
-     * Example: {@code IQ98NBIQ850123456789012}
+     * Examples:<pre>
+     *   unformatted: {@code IQ98NBIQ850123456789012}
+     *   formatted:   {@code IQ98 NBIQ 8501 2345 6789 012}
+     *   components:  {@code IQ 98 NBIQ 850 123456789012}
+     * </pre>
      */
     IQ(StructureData.builder()
          .withIbanLength(23)
@@ -1107,7 +1339,11 @@ public enum IbanRegistry {
      * IBAN Length: 26<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n19!n}<br>
-     * Example: {@code IR062960000000100324200001}
+     * Examples:<pre>
+     *   unformatted: {@code IR062960000000100324200001}
+     *   formatted:   {@code IR06 2960 0000 0010 0324 2000 01}
+     *   components:  {@code IR 06 296 0000000100324200001}
+     * </pre>
      */
     IR(StructureData.builder()
          .withIbanLength(26)
@@ -1125,7 +1361,11 @@ public enum IbanRegistry {
      * IBAN Length: 26<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n2!n6!n10!n}<br>
-     * Example: {@code IS140159260076545510730339}
+     * Examples:<pre>
+     *   unformatted: {@code IS140159260076545510730339}
+     *   formatted:   {@code IS14 0159 2600 7654 5510 7303 39}
+     *   components:  {@code IS 14 0159 26 0076545510730339}
+     * </pre>
      */
     IS(StructureData.builder()
          .withIbanLength(26)
@@ -1147,12 +1387,16 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 1!a5!n5!n12!c}<br>
-     * Example: {@code IT60X0542811101000000123456}
+     * Examples:<pre>
+     *   unformatted: {@code IT60X0542811101000000123456}
+     *   formatted:   {@code IT60 X054 2811 1010 0000 0123 456}
+     *   components:  {@code IT 60 X 05428 11101 000000123456}
+     * </pre>
      */
     IT(StructureData.builder()
          .withIbanLength(27)
          .withBbanPattern("1!a5!n5!n12!c")
-         .withNationalCheckDigit(IndexRange.of(4, 5))
+         .withNationalCheckDigit(IndexRange.of(4, 5)) // IT
          .withBankCode("5!n", IndexRange.of(5, 10))
          .withBranchCode("5!n", IndexRange.of(10, 15))
          .withAccountNumber(IndexRange.of(15, 27))
@@ -1170,7 +1414,11 @@ public enum IbanRegistry {
      * IBAN Length: 30<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a4!n18!c}<br>
-     * Example: {@code JO94CBJO0010000000000131000302}
+     * Examples:<pre>
+     *   unformatted: {@code JO94CBJO0010000000000131000302}
+     *   formatted:   {@code JO94 CBJO 0010 0000 0000 0131 0003 02}
+     *   components:  {@code JO 94 CBJO 0010 000000000131000302}
+     * </pre>
      */
     JO(StructureData.builder()
          .withIbanLength(30)
@@ -1192,7 +1440,11 @@ public enum IbanRegistry {
      * IBAN Length: 30<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a22!c}<br>
-     * Example: {@code KW81CBKU0000000000001234560101}
+     * Examples:<pre>
+     *   unformatted: {@code KW81CBKU0000000000001234560101}
+     *   formatted:   {@code KW81 CBKU 0000 0000 0000 1234 5601 01}
+     *   components:  {@code KW 81 CBKU 0000000000001234560101}
+     * </pre>
      */
     KW(StructureData.builder()
          .withIbanLength(30)
@@ -1213,7 +1465,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n13!c}<br>
-     * Example: {@code KZ86125KZT5004100100}
+     * Examples:<pre>
+     *   unformatted: {@code KZ86125KZT5004100100}
+     *   formatted:   {@code KZ86 125K ZT50 0410 0100}
+     *   components:  {@code KZ 86 125 KZT5004100100}
+     * </pre>
      */
     KZ(StructureData.builder()
          .withIbanLength(20)
@@ -1234,7 +1490,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n20!c}<br>
-     * Example: {@code LB62099900000001001901229114}
+     * Examples:<pre>
+     *   unformatted: {@code LB62099900000001001901229114}
+     *   formatted:   {@code LB62 0999 0000 0001 0019 0122 9114}
+     *   components:  {@code LB 62 0999 00000001001901229114}
+     * </pre>
      */
     LB(StructureData.builder()
          .withIbanLength(28)
@@ -1255,7 +1515,11 @@ public enum IbanRegistry {
      * IBAN Length: 32<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a24!c}<br>
-     * Example: {@code LC55HEMM000100010012001200023015}
+     * Examples:<pre>
+     *   unformatted: {@code LC55HEMM000100010012001200023015}
+     *   formatted:   {@code LC55 HEMM 0001 0001 0012 0012 0002 3015}
+     *   components:  {@code LC 55 HEMM 000100010012001200023015}
+     * </pre>
      */
     LC(StructureData.builder()
          .withIbanLength(32)
@@ -1276,7 +1540,11 @@ public enum IbanRegistry {
      * IBAN Length: 21<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n12!c}<br>
-     * Example: {@code LI21088100002324013AA}
+     * Examples:<pre>
+     *   unformatted: {@code LI21088100002324013AA}
+     *   formatted:   {@code LI21 0881 0000 2324 013A A}
+     *   components:  {@code LI 21 08810 0002324013AA}
+     * </pre>
      */
     LI(StructureData.builder()
          .withIbanLength(21)
@@ -1297,7 +1565,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n11!n}<br>
-     * Example: {@code LT121000011101001000}
+     * Examples:<pre>
+     *   unformatted: {@code LT121000011101001000}
+     *   formatted:   {@code LT12 1000 0111 0100 1000}
+     *   components:  {@code LT 12 10000 11101001000}
+     * </pre>
      */
     LT(StructureData.builder()
          .withIbanLength(20)
@@ -1318,7 +1590,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n13!c}<br>
-     * Example: {@code LU280019400644750000}
+     * Examples:<pre>
+     *   unformatted: {@code LU280019400644750000}
+     *   formatted:   {@code LU28 0019 4006 4475 0000}
+     *   components:  {@code LU 28 001 9400644750000}
+     * </pre>
      */
     LU(StructureData.builder()
          .withIbanLength(20)
@@ -1339,7 +1615,11 @@ public enum IbanRegistry {
      * IBAN Length: 21<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a13!c}<br>
-     * Example: {@code LV80BANK0000435195001}
+     * Examples:<pre>
+     *   unformatted: {@code LV80BANK0000435195001}
+     *   formatted:   {@code LV80 BANK 0000 4351 9500 1}
+     *   components:  {@code LV 80 BANK 0000435195001}
+     * </pre>
      */
     LV(StructureData.builder()
          .withIbanLength(21)
@@ -1360,7 +1640,11 @@ public enum IbanRegistry {
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n3!n15!n}<br>
-     * Example: {@code LY83002048000020100120361}
+     * Examples:<pre>
+     *   unformatted: {@code LY83002048000020100120361}
+     *   formatted:   {@code LY83 0020 4800 0020 1001 2036 1}
+     *   components:  {@code LY 83 002 048 000020100120361}
+     * </pre>
      */
     LY(StructureData.builder()
          .withIbanLength(25)
@@ -1382,7 +1666,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n5!n16!n}<br>
-     * Example: {@code MA64360815000001793222001617}
+     * Examples:<pre>
+     *   unformatted: {@code MA64360815000001793222001617}
+     *   formatted:   {@code MA64 3608 1500 0001 7932 2200 1617}
+     *   components:  {@code MA 64 360 81500 0001793222001617}
+     * </pre>
      */
     MA(StructureData.builder()
          .withIbanLength(28)
@@ -1401,7 +1689,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Example: {@code MC5811222000010123456789030}
+     * Examples:<pre>
+     *   unformatted: {@code MC5811222000010123456789030}
+     *   formatted:   {@code MC58 1122 2000 0101 2345 6789 030}
+     *   components:  {@code MC 58 11222 00001 01234567890 30}
+     * </pre>
      */
     MC(StructureData.builder()
          .withIbanLength(27)
@@ -1409,7 +1701,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 9))
          .withBranchCode("5!n", IndexRange.of(9, 14))
          .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .withNationalCheckDigit(IndexRange.of(25, 27)) // MC
          .build(),
        MetaData.of(
            "Monaco", true, "MC5811222000010123456789030",
@@ -1424,7 +1716,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!c18!c}<br>
-     * Example: {@code MD24AG000225100013104168}
+     * Examples:<pre>
+     *   unformatted: {@code MD24AG000225100013104168}
+     *   formatted:   {@code MD24 AG00 0225 1000 1310 4168}
+     *   components:  {@code MD 24 AG 000225100013104168}
+     * </pre>
      */
     MD(StructureData.builder()
          .withIbanLength(24)
@@ -1445,14 +1741,18 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n13!n2!n}<br>
-     * Example: {@code ME25505000012345678951}
+     * Examples:<pre>
+     *   unformatted: {@code ME25505000012345678951}
+     *   formatted:   {@code ME25 5050 0001 2345 6789 51}
+     *   components:  {@code ME 25 505 0000123456789 51}
+     * </pre>
      */
     ME(StructureData.builder()
          .withIbanLength(22)
          .withBbanPattern("3!n13!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 20))
-         .withNationalCheckDigit(IndexRange.of(20, 22))
+         .withNationalCheckDigit(IndexRange.of(20, 22)) // ME
          .build(),
        MetaData.of(
            "Montenegro", false, "ME25505000012345678951",
@@ -1467,14 +1767,18 @@ public enum IbanRegistry {
      * IBAN Length: 19<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n10!c2!n}<br>
-     * Example: {@code MK07250120000058984}
+     * Examples:<pre>
+     *   unformatted: {@code MK07250120000058984}
+     *   formatted:   {@code MK07 2501 2000 0058 984}
+     *   components:  {@code MK 07 250 1200000589 84}
+     * </pre>
      */
     MK(StructureData.builder()
          .withIbanLength(19)
          .withBbanPattern("3!n10!c2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 19))
+         .withNationalCheckDigit(IndexRange.of(17, 19)) // MK
          .build(),
        MetaData.of(
            "North Macedonia", false, "MK07250120000058984",
@@ -1489,7 +1793,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n12!n}<br>
-     * Example: {@code MN121234123456789123}
+     * Examples:<pre>
+     *   unformatted: {@code MN121234123456789123}
+     *   formatted:   {@code MN12 1234 1234 5678 9123}
+     *   components:  {@code MN 12 1234 123456789123}
+     * </pre>
      */
     MN(StructureData.builder()
          .withIbanLength(20)
@@ -1510,7 +1818,11 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
-     * Example: {@code MR1300020001010000123456753}
+     * Examples:<pre>
+     *   unformatted: {@code MR1300020001010000123456753}
+     *   formatted:   {@code MR13 0002 0001 0100 0012 3456 753}
+     *   components:  {@code MR 13 00020 00101 00001234567 53}
+     * </pre>
      */
     MR(StructureData.builder()
          .withIbanLength(27)
@@ -1518,7 +1830,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 9))
          .withBranchCode("5!n", IndexRange.of(9, 14))
          .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
+         .withNationalCheckDigit(IndexRange.of(25, 27)) // MR
          .build(),
        MetaData.of(
            "Mauritania", false, "MR1300020001010000123456753",
@@ -1533,7 +1845,11 @@ public enum IbanRegistry {
      * IBAN Length: 31<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a5!n18!c}<br>
-     * Example: {@code MT84MALT011000012345MTLCAST001S}
+     * Examples:<pre>
+     *   unformatted: {@code MT84MALT011000012345MTLCAST001S}
+     *   formatted:   {@code MT84 MALT 0110 0001 2345 MTLC AST0 01S}
+     *   components:  {@code MT 84 MALT 01100 0012345MTLCAST001S}
+     * </pre>
      */
     MT(StructureData.builder()
          .withIbanLength(31)
@@ -1555,7 +1871,11 @@ public enum IbanRegistry {
      * IBAN Length: 30<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a2!n2!n12!n3!n3!a}<br>
-     * Example: {@code MU17BOMM0101101030300200000MUR}
+     * Examples:<pre>
+     *   unformatted: {@code MU17BOMM0101101030300200000MUR}
+     *   formatted:   {@code MU17 BOMM 0101 1010 3030 0200 000M UR}
+     *   components:  {@code MU 17 BOMM01 01 101030300200000MUR}
+     * </pre>
      */
     MU(StructureData.builder()
          .withIbanLength(30)
@@ -1577,7 +1897,11 @@ public enum IbanRegistry {
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
-     * Example: {@code MZ59000800005138555713187}
+     * Examples:<pre>
+     *   unformatted: {@code MZ59000800005138555713187}
+     *   formatted:   {@code MZ59 0008 0000 5138 5557 1318 7}
+     *   components:  {@code MZ 59 0008 0000 51385557131 87}
+     * </pre>
      */
     MZ(StructureData.builder()
          .withIbanLength(25)
@@ -1585,7 +1909,7 @@ public enum IbanRegistry {
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
          .withAccountNumber(IndexRange.of(12, 23))
-         .withNationalCheckDigit(IndexRange.of(23, 25))
+         .withNationalCheckDigit(IndexRange.of(23, 25)) // MZ
          .build(),
        MetaData.of(
            "Mozambique", false, "MZ59000800005138555713187",
@@ -1597,7 +1921,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a20!n}<br>
-     * Example: {@code NI45BAPR00000013000003558124}
+     * Examples:<pre>
+     *   unformatted: {@code NI45BAPR00000013000003558124}
+     *   formatted:   {@code NI45 BAPR 0000 0013 0000 0355 8124}
+     *   components:  {@code NI 45 BAPR 00000013000003558124}
+     * </pre>
      */
     NI(StructureData.builder()
          .withIbanLength(28)
@@ -1618,7 +1946,11 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a10!n}<br>
-     * Example: {@code NL91ABNA0417164300}
+     * Examples:<pre>
+     *   unformatted: {@code NL91ABNA0417164300}
+     *   formatted:   {@code NL91 ABNA 0417 1643 00}
+     *   components:  {@code NL 91 ABNA 0417164300}
+     * </pre>
      */
     NL(StructureData.builder()
          .withIbanLength(18)
@@ -1639,14 +1971,18 @@ public enum IbanRegistry {
      * IBAN Length: 15<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n6!n1!n}<br>
-     * Example: {@code NO9386011117947}
+     * Examples:<pre>
+     *   unformatted: {@code NO9386011117947}
+     *   formatted:   {@code NO93 8601 1117 947}
+     *   components:  {@code NO 93 8601 111794 7}
+     * </pre>
      */
     NO(StructureData.builder()
          .withIbanLength(15)
          .withBbanPattern("4!n6!n1!n")
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withAccountNumber(IndexRange.of(8, 14))
-         .withNationalCheckDigit(IndexRange.of(14, 15))
+         .withNationalCheckDigit(IndexRange.of(14, 15)) // NO
          .build(),
        MetaData.of(
            "Norway", true, "NO9386011117947",
@@ -1661,7 +1997,11 @@ public enum IbanRegistry {
      * IBAN Length: 23<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n16!c}<br>
-     * Example: {@code OM810180000001299123456}
+     * Examples:<pre>
+     *   unformatted: {@code OM810180000001299123456}
+     *   formatted:   {@code OM81 0180 0000 0129 9123 456}
+     *   components:  {@code OM 81 018 0000001299123456}
+     * </pre>
      */
     OM(StructureData.builder()
          .withIbanLength(23)
@@ -1682,7 +2022,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a16!c}<br>
-     * Example: {@code PK36SCBL0000001123456702}
+     * Examples:<pre>
+     *   unformatted: {@code PK36SCBL0000001123456702}
+     *   formatted:   {@code PK36 SCBL 0000 0011 2345 6702}
+     *   components:  {@code PK 36 SCBL 0000001123456702}
+     * </pre>
      */
     PK(StructureData.builder()
          .withIbanLength(24)
@@ -1703,14 +2047,18 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 8!n16!n}<br>
-     * Example: {@code PL61109010140000071219812874}
+     * Examples:<pre>
+     *   unformatted: {@code PL61109010140000071219812874}
+     *   formatted:   {@code PL61 1090 1014 0000 0712 1981 2874}
+     *   components:  {@code PL 61 109 0101 4 0000071219812874}
+     * </pre>
      */
     PL(StructureData.builder()
          .withIbanLength(28)
          .withBbanPattern("8!n16!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withBranchCode("4!n", IndexRange.of(7, 11))
-         .withNationalCheckDigit(IndexRange.of(11, 12))
+         .withNationalCheckDigit(IndexRange.of(11, 12)) // PL
          .withAccountNumber(IndexRange.of(12, 28))
          .build(),
        MetaData.of(
@@ -1726,7 +2074,11 @@ public enum IbanRegistry {
      * IBAN Length: 29<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a21!c}<br>
-     * Example: {@code PS92PALS000000000400123456702}
+     * Examples:<pre>
+     *   unformatted: {@code PS92PALS000000000400123456702}
+     *   formatted:   {@code PS92 PALS 0000 0000 0400 1234 5670 2}
+     *   components:  {@code PS 92 PALS 000000000400123456702}
+     * </pre>
      */
     PS(StructureData.builder()
          .withIbanLength(29)
@@ -1747,7 +2099,11 @@ public enum IbanRegistry {
      * IBAN Length: 25<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
-     * Example: {@code PT50000201231234567890154}
+     * Examples:<pre>
+     *   unformatted: {@code PT50000201231234567890154}
+     *   formatted:   {@code PT50 0002 0123 1234 5678 9015 4}
+     *   components:  {@code PT 50 0002 0123 12345678901 54}
+     * </pre>
      */
     PT(StructureData.builder()
          .withIbanLength(25)
@@ -1755,7 +2111,7 @@ public enum IbanRegistry {
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withBranchCode("4!n", IndexRange.of(8, 12))
          .withAccountNumber(IndexRange.of(12, 23))
-         .withNationalCheckDigit(IndexRange.of(23, 25))
+         .withNationalCheckDigit(IndexRange.of(23, 25)) // PT
          .build(),
        MetaData.of(
            "Portugal", true, "PT50000201231234567890154",
@@ -1770,7 +2126,11 @@ public enum IbanRegistry {
      * IBAN Length: 29<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a21!c}<br>
-     * Example: {@code QA58DOHB00001234567890ABCDEFG}
+     * Examples:<pre>
+     *   unformatted: {@code QA58DOHB00001234567890ABCDEFG}
+     *   formatted:   {@code QA58 DOHB 0000 1234 5678 90AB CDEF G}
+     *   components:  {@code QA 58 DOHB 00001234567890ABCDEFG}
+     * </pre>
      */
     QA(StructureData.builder()
          .withIbanLength(29)
@@ -1791,7 +2151,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a16!c}<br>
-     * Example: {@code RO49AAAA1B31007593840000}
+     * Examples:<pre>
+     *   unformatted: {@code RO49AAAA1B31007593840000}
+     *   formatted:   {@code RO49 AAAA 1B31 0075 9384 0000}
+     *   components:  {@code RO 49 AAAA 1B31007593840000}
+     * </pre>
      */
     RO(StructureData.builder()
          .withIbanLength(24)
@@ -1812,14 +2176,18 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n13!n2!n}<br>
-     * Example: {@code RS35260005601001611379}
+     * Examples:<pre>
+     *   unformatted: {@code RS35260005601001611379}
+     *   formatted:   {@code RS35 2600 0560 1001 6113 79}
+     *   components:  {@code RS 35 260 0056010016113 79}
+     * </pre>
      */
     RS(StructureData.builder()
          .withIbanLength(22)
          .withBbanPattern("3!n13!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 20))
-         .withNationalCheckDigit(IndexRange.of(20, 22))
+         .withNationalCheckDigit(IndexRange.of(20, 22)) // RS
          .build(),
        MetaData.of(
            "Serbia", false, "RS35260005601001611379",
@@ -1834,7 +2202,11 @@ public enum IbanRegistry {
      * IBAN Length: 33<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 9!n5!n15!c}<br>
-     * Example: {@code RU0304452522540817810538091310419}
+     * Examples:<pre>
+     *   unformatted: {@code RU0304452522540817810538091310419}
+     *   formatted:   {@code RU03 0445 2522 5408 1781 0538 0913 1041 9}
+     *   components:  {@code RU 03 044525225 40817 810538091310419}
+     * </pre>
      */
     RU(StructureData.builder()
          .withIbanLength(33)
@@ -1856,7 +2228,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!n18!c}<br>
-     * Example: {@code SA0380000000608010167519}
+     * Examples:<pre>
+     *   unformatted: {@code SA0380000000608010167519}
+     *   formatted:   {@code SA03 8000 0000 6080 1016 7519}
+     *   components:  {@code SA 03 80 000000608010167519}
+     * </pre>
      */
     SA(StructureData.builder()
          .withIbanLength(24)
@@ -1877,7 +2253,11 @@ public enum IbanRegistry {
      * IBAN Length: 31<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a2!n2!n16!n3!a}<br>
-     * Example: {@code SC18SSCB11010000000000001497USD}
+     * Examples:<pre>
+     *   unformatted: {@code SC18SSCB11010000000000001497USD}
+     *   formatted:   {@code SC18 SSCB 1101 0000 0000 0000 1497 USD}
+     *   components:  {@code SC 18 SSCB11 01 0000000000001497USD}
+     * </pre>
      */
     SC(StructureData.builder()
          .withIbanLength(31)
@@ -1899,7 +2279,11 @@ public enum IbanRegistry {
      * IBAN Length: 18<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!n12!n}<br>
-     * Example: {@code SD2129010501234001}
+     * Examples:<pre>
+     *   unformatted: {@code SD2129010501234001}
+     *   formatted:   {@code SD21 2901 0501 2340 01}
+     *   components:  {@code SD 21 29 010501234001}
+     * </pre>
      */
     SD(StructureData.builder()
          .withIbanLength(18)
@@ -1920,7 +2304,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n16!n1!n}<br>
-     * Example: {@code SE4550000000058398257466}
+     * Examples:<pre>
+     *   unformatted: {@code SE4550000000058398257466}
+     *   formatted:   {@code SE45 5000 0000 0583 9825 7466}
+     *   components:  {@code SE 45 500 00000058398257466}
+     * </pre>
      */
     SE(StructureData.builder()
          .withIbanLength(24)
@@ -1941,7 +2329,11 @@ public enum IbanRegistry {
      * IBAN Length: 19<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 2!n3!n8!n2!n}<br>
-     * Example: {@code SI56263300012039086}
+     * Examples:<pre>
+     *   unformatted: {@code SI56263300012039086}
+     *   formatted:   {@code SI56 2633 0001 2039 086}
+     *   components:  {@code SI 56 26 330 00120390 86}
+     * </pre>
      */
     SI(StructureData.builder()
          .withIbanLength(19)
@@ -1949,7 +2341,7 @@ public enum IbanRegistry {
          .withBankCode("5!n", IndexRange.of(4, 6))
          .withBranchCode("3!n", IndexRange.of(6, 9))
          .withAccountNumber(IndexRange.of(9, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 19))
+         .withNationalCheckDigit(IndexRange.of(17, 19)) // SI
          .build(),
        MetaData.of(
            "Slovenia", true, "SI56263300012039086",
@@ -1964,7 +2356,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!n6!n10!n}<br>
-     * Example: {@code SK3112000000198742637541}
+     * Examples:<pre>
+     *   unformatted: {@code SK3112000000198742637541}
+     *   formatted:   {@code SK31 1200 0000 1987 4263 7541}
+     *   components:  {@code SK 31 1200 0000198742637541}
+     * </pre>
      */
     SK(StructureData.builder()
          .withIbanLength(24)
@@ -1985,12 +2381,16 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 1!a5!n5!n12!c}<br>
-     * Example: {@code SM86U0322509800000000270100}
+     * Examples:<pre>
+     *   unformatted: {@code SM86U0322509800000000270100}
+     *   formatted:   {@code SM86 U032 2509 8000 0000 0270 100}
+     *   components:  {@code SM 86 U 03225 09800 000000270100}
+     * </pre>
      */
     SM(StructureData.builder()
          .withIbanLength(27)
          .withBbanPattern("1!a5!n5!n12!c")
-         .withNationalCheckDigit(IndexRange.of(4, 5))
+         .withNationalCheckDigit(IndexRange.of(4, 5)) // SM
          .withBankCode("5!n", IndexRange.of(5, 10))
          .withBranchCode("5!n", IndexRange.of(10, 15))
          .withAccountNumber(IndexRange.of(15, 27))
@@ -2008,7 +2408,11 @@ public enum IbanRegistry {
      * IBAN Length: 23<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n3!n12!n}<br>
-     * Example: {@code SO211000001001000100141}
+     * Examples:<pre>
+     *   unformatted: {@code SO211000001001000100141}
+     *   formatted:   {@code SO21 1000 0010 0100 0100 141}
+     *   components:  {@code SO 21 1000 001 001000100141}
+     * </pre>
      */
     SO(StructureData.builder()
          .withIbanLength(23)
@@ -2030,7 +2434,11 @@ public enum IbanRegistry {
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
-     * Example: {@code ST23000100010051845310146}
+     * Examples:<pre>
+     *   unformatted: {@code ST23000100010051845310146}
+     *   formatted:   {@code ST23 0001 0001 0051 8453 1014 6}
+     *   components:  {@code ST 23 0001 0001 0051845310146}
+     * </pre>
      */
     ST(StructureData.builder()
          .withIbanLength(25)
@@ -2052,7 +2460,11 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a20!n}<br>
-     * Example: {@code SV62CENR00000000000000700025}
+     * Examples:<pre>
+     *   unformatted: {@code SV62CENR00000000000000700025}
+     *   formatted:   {@code SV62 CENR 0000 0000 0000 0070 0025}
+     *   components:  {@code SV 62 CENR 00000000000000700025}
+     * </pre>
      */
     SV(StructureData.builder()
          .withIbanLength(28)
@@ -2073,14 +2485,18 @@ public enum IbanRegistry {
      * IBAN Length: 23<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n14!n2!n}<br>
-     * Example: {@code TL380080012345678910157}
+     * Examples:<pre>
+     *   unformatted: {@code TL380080012345678910157}
+     *   formatted:   {@code TL38 0080 0123 4567 8910 157}
+     *   components:  {@code TL 38 008 00123456789101 57}
+     * </pre>
      */
     TL(StructureData.builder()
          .withIbanLength(23)
          .withBbanPattern("3!n14!n2!n")
          .withBankCode("3!n", IndexRange.of(4, 7))
          .withAccountNumber(IndexRange.of(7, 21))
-         .withNationalCheckDigit(IndexRange.of(21, 23))
+         .withNationalCheckDigit(IndexRange.of(21, 23)) // TL
          .build(),
        MetaData.of(
            "Timor-Leste", false, "TL380080012345678910157",
@@ -2095,7 +2511,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!n3!n13!n2!n}<br>
-     * Example: {@code TN5910006035183598478831}
+     * Examples:<pre>
+     *   unformatted: {@code TN5910006035183598478831}
+     *   formatted:   {@code TN59 1000 6035 1835 9847 8831}
+     *   components:  {@code TN 59 10 006 0351835984788 31}
+     * </pre>
      */
     TN(StructureData.builder()
          .withIbanLength(24)
@@ -2103,7 +2523,7 @@ public enum IbanRegistry {
          .withBankCode("2!n", IndexRange.of(4, 6))
          .withBranchCode("3!n", IndexRange.of(6, 9))
          .withAccountNumber(IndexRange.of(9, 22))
-         .withNationalCheckDigit(IndexRange.of(22, 24))
+         .withNationalCheckDigit(IndexRange.of(22, 24)) // TN
          .build(),
        MetaData.of(
            "Tunisia", false, "TN5910006035183598478831",
@@ -2118,13 +2538,17 @@ public enum IbanRegistry {
      * IBAN Length: 26<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n1!n16!c}<br>
-     * Example: {@code TR330006100519786457841326}
+     * Examples:<pre>
+     *   unformatted: {@code TR330006100519786457841326}
+     *   formatted:   {@code TR33 0006 1005 1978 6457 8413 26}
+     *   components:  {@code TR 33 00061 0 0519786457841326}
+     * </pre>
      */
     TR(StructureData.builder()
          .withIbanLength(26)
          .withBbanPattern("5!n1!n16!c")
          .withBankCode("5!n", IndexRange.of(4, 9))
-         .withNationalCheckDigit(IndexRange.of(9, 10))
+         .withNationalCheckDigit(IndexRange.of(9, 10)) // TR
          .withAccountNumber(IndexRange.of(10, 26))
          .build(),
        MetaData.of(
@@ -2140,7 +2564,11 @@ public enum IbanRegistry {
      * IBAN Length: 29<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 6!n19!c}<br>
-     * Example: {@code UA213223130000026007233566001}
+     * Examples:<pre>
+     *   unformatted: {@code UA213223130000026007233566001}
+     *   formatted:   {@code UA21 3223 1300 0002 6007 2335 6600 1}
+     *   components:  {@code UA 21 322313 0000026007233566001}
+     * </pre>
      */
     UA(StructureData.builder()
          .withIbanLength(29)
@@ -2161,7 +2589,11 @@ public enum IbanRegistry {
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n15!n}<br>
-     * Example: {@code VA59001123000012345678}
+     * Examples:<pre>
+     *   unformatted: {@code VA59001123000012345678}
+     *   formatted:   {@code VA59 0011 2300 0012 3456 78}
+     *   components:  {@code VA 59 001 123000012345678}
+     * </pre>
      */
     VA(StructureData.builder()
          .withIbanLength(22)
@@ -2182,7 +2614,11 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a16!n}<br>
-     * Example: {@code VG96VPVG0000012345678901}
+     * Examples:<pre>
+     *   unformatted: {@code VG96VPVG0000012345678901}
+     *   formatted:   {@code VG96 VPVG 0000 0123 4567 8901}
+     *   components:  {@code VG 96 VPVG 0000012345678901}
+     * </pre>
      */
     VG(StructureData.builder()
          .withIbanLength(24)
@@ -2203,7 +2639,11 @@ public enum IbanRegistry {
      * IBAN Length: 20<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n10!n2!n}<br>
-     * Example: {@code XK051212012345678906}
+     * Examples:<pre>
+     *   unformatted: {@code XK051212012345678906}
+     *   formatted:   {@code XK05 1212 0123 4567 8906}
+     *   components:  {@code XK 05 12 12 0123456789 06}
+     * </pre>
      */
     XK(StructureData.builder()
          .withIbanLength(20)
@@ -2211,7 +2651,7 @@ public enum IbanRegistry {
          .withBankCode("2!n", IndexRange.of(4, 6))
          .withBranchCode("2!n", IndexRange.of(6, 8))
          .withAccountNumber(IndexRange.of(8, 18))
-         .withNationalCheckDigit(IndexRange.of(18, 20))
+         .withNationalCheckDigit(IndexRange.of(18, 20)) // XK
          .build(),
        MetaData.of(
            "Kosovo", false, "XK051212012345678906",
@@ -2226,7 +2666,11 @@ public enum IbanRegistry {
      * IBAN Length: 30<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a4!n18!c}<br>
-     * Example: {@code YE15CBYE0001018861234567891234}
+     * Examples:<pre>
+     *   unformatted: {@code YE15CBYE0001018861234567891234}
+     *   formatted:   {@code YE15 CBYE 0001 0188 6123 4567 8912 34}
+     *   components:  {@code YE 15 CBYE 0001 018861234567891234}
+     * </pre>
      */
     YE(StructureData.builder()
          .withIbanLength(30)
