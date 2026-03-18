@@ -1130,9 +1130,9 @@ public enum IbanRegistry {
     IS(StructureData.builder()
          .withIbanLength(26)
          .withBbanPattern("4!n2!n6!n10!n")
-         .withBankCode("2!n", IndexRange.of(4, 6))
-         .withBranchCode("2!n", IndexRange.of(6, 8))
-         .withAccountNumber(IndexRange.of(10, 16))
+         .withBankCode("4!n", IndexRange.of(4, 8))
+         .withBranchCode("2!n", IndexRange.of(8, 10))
+         .withAccountNumber(IndexRange.of(10, 26))
          .build(),
        MetaData.of(
            "Iceland", true, "IS140159260076545510730339",
