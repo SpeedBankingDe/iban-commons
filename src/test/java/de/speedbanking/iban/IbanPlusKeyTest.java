@@ -84,26 +84,26 @@ class IbanPlusKeyTest extends org.assertj.core.api.Assertions {
             .isEqualTo(expected);
     }
 
+    @DisplayName("Should return null for invalid, empty, or unparseable IBAN strings")
     @ParameterizedTest(name = "{index}: input=\"{0}\" should return null")
     @ValueSource(strings = {"INVALID", " ", "DE89", "123", "\n"})
     @NullAndEmptySource
-    @DisplayName("Should return null for invalid, empty, or unparseable IBAN strings")
     void shouldReturnNullForInvalidInput(String invalidInput) {
         assertThat(IbanPlusKey.of(invalidInput))
             .as("Input '%s' should result in a null key", invalidInput)
             .isNull();
     }
 
-    @Test
     @DisplayName("Should return null for null IBAN")
+    @Test
     void shouldReturnNullForNullIban() {
         assertThat(IbanPlusKey.of((Iban) null))
             .as("Null Iban should result in a null key")
             .isNull();
     }
 
-    @Test
     @DisplayName("Should return null for IBAN with invalid country code")
+    @Test
     void shouldReturnNullForIbanWithInvalidCountryCode() {
         Iban iban = spy(Iban.of("MT84 MALT 0110 0001 2345 MTLC AST0 01S"));
         when(iban.getCountryCode()).thenReturn("!!");
@@ -112,8 +112,8 @@ class IbanPlusKeyTest extends org.assertj.core.api.Assertions {
             .isNull();
     }
 
-    @Test
     @DisplayName("Should be thread-safe due to immutable strategy cache")
+    @Test
     void shouldBeThreadSafe() {
         // the strategy cache is pre-calculated and read-only
         // test ensures the class can be loaded and used without side effects

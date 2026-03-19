@@ -69,8 +69,8 @@ class BicTest {
             .hasFieldOrPropertyWithValue("reason", BicValidationError.EMPTY);
     }
 
-    @ParameterizedTest(name = "BIC: ''{0}''")
     @DisplayName("of() should throw exception for incorrect length")
+    @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {
         "SHORT12",      // 7 chars
         "LONG12345678", // 12 chars
@@ -85,8 +85,8 @@ class BicTest {
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INCORRECT_LENGTH);
     }
 
-    @ParameterizedTest(name = "BIC: ''{0}''")
     @DisplayName("of() should throw exception for invalid country code")
+    @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {
         "MARK99FF", // 99 is not a valid ISO country
         "MARKXXFF"  // XX is not a valid ISO country
@@ -98,8 +98,8 @@ class BicTest {
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_COUNTRY);
     }
 
-    @ParameterizedTest(name = "BIC: ''{0}''")
     @DisplayName("of() should throw exception for illegal characters")
+    @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {
         "MARKDE 1", // space
         "MARKDE_1", // underscore

@@ -19,9 +19,9 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
     // Factory method: of(reason)
     // -------------------------------------------------------------------------
 
+    @DisplayName("of(reason) should store reason and derive message from reason text")
     @ParameterizedTest(name = "Test Exception for reason: {0}")
     @EnumSource(BicValidationError.class)
-    @DisplayName("of(reason) should store reason and derive message from reason text")
     void ofShouldInitializeCorrectly(BicValidationError reason) {
         InvalidBicException exception = InvalidBicException.of(reason);
 
@@ -42,8 +42,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
             .endsWith(" (" + reason + ")");
     }
 
-    @Test
     @DisplayName("of(reason) should yield no input")
+    @Test
     void ofWithoutInputShouldHaveNoInput() {
         InvalidBicException exception = InvalidBicException.of(BicValidationError.values()[0]);
 
@@ -60,8 +60,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
     // Factory method: of(reason, input)
     // -------------------------------------------------------------------------
 
-    @Test
     @DisplayName("of(reason, input) should store both reason and input")
+    @Test
     void ofWithInputShouldStoreInput() {
         BicValidationError reason = BicValidationError.values()[0];
         String input = "DEUTDEDB";
@@ -84,8 +84,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
             .endsWith(": " + input);
     }
 
-    @Test
     @DisplayName("of(reason, null) should treat null input as absent")
+    @Test
     void ofWithNullInputShouldHaveNoInput() {
         InvalidBicException exception = InvalidBicException.of(BicValidationError.values()[0], null);
 
@@ -93,8 +93,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         assertThat(exception.hasInput()).isFalse();
     }
 
-    @Test
     @DisplayName("of(reason, empty string) should treat empty input as absent")
+    @Test
     void ofWithEmptyInputShouldHaveNoInput() {
         InvalidBicException exception = InvalidBicException.of(BicValidationError.values()[0], "");
 
@@ -108,16 +108,16 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
     // Null-safety
     // -------------------------------------------------------------------------
 
-    @Test
     @DisplayName("of(null) should throw NullPointerException")
+    @Test
     void ofShouldThrowOnNullReason() {
         assertThatExceptionOfType(NullPointerException.class)
             .isThrownBy(() -> InvalidBicException.of(null))
             .withMessage("reason required");
     }
 
-    @Test
     @DisplayName("of(null, input) should throw NullPointerException")
+    @Test
     void ofWithInputShouldThrowOnNullReason() {
         assertThatExceptionOfType(NullPointerException.class)
             .isThrownBy(() -> InvalidBicException.of(null, "DEUTDEDB"))
@@ -128,8 +128,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
     // equals / hashCode
     // -------------------------------------------------------------------------
 
-    @Test
     @DisplayName("equals() should be true for same reason and same input")
+    @Test
     void equalsShouldBeTrueForSameReasonAndInput() {
         BicValidationError reason = BicValidationError.values()[0];
         String input = "DEUTDEDB";
@@ -141,8 +141,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
     }
 
-    @Test
     @DisplayName("equals() should be true for same reason and both inputs null")
+    @Test
     void equalsShouldBeTrueForSameReasonAndNullInput() {
         BicValidationError reason = BicValidationError.values()[0];
 
@@ -153,8 +153,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         assertThat(a.hashCode()).isEqualTo(b.hashCode());
     }
 
-    @Test
     @DisplayName("equals() should be false for different reasons")
+    @Test
     void equalsShouldBeFalseForDifferentReasons() {
         BicValidationError[] errors = BicValidationError.values();
         org.junit.jupiter.api.Assumptions.assumeTrue(errors.length >= 2,
@@ -166,8 +166,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         assertThat(a).isNotEqualTo(b);
     }
 
-    @Test
     @DisplayName("equals() should be false when one has input and the other does not")
+    @Test
     void equalsShouldBeFalseWhenInputDiffers() {
         BicValidationError reason = BicValidationError.values()[0];
 
@@ -177,15 +177,15 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         assertThat(withInput).isNotEqualTo(withoutInput);
     }
 
-    @Test
     @DisplayName("equals() should be reflexive")
+    @Test
     void equalsShouldBeReflexive() {
         InvalidBicException ex = InvalidBicException.of(BicValidationError.values()[0]);
         assertThat(ex).isEqualTo(ex);
     }
 
-    @Test
     @DisplayName("equals() should return false for null and other types")
+    @Test
     void equalsShouldReturnFalseForNullAndOtherTypes() {
         InvalidBicException ex = InvalidBicException.of(BicValidationError.values()[0]);
         assertThat(ex).isNotEqualTo(null);
@@ -196,8 +196,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
     // toString
     // -------------------------------------------------------------------------
 
-    @Test
     @DisplayName("toString() should include class name, message, reason and input")
+    @Test
     void toStringShouldContainAllParts() {
         BicValidationError reason = BicValidationError.values()[0];
         String input = "DEUTDEDB";
@@ -210,8 +210,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
             .endsWith(": " + input);
     }
 
-    @Test
     @DisplayName("toString() without input should not contain trailing colon segment")
+    @Test
     void toStringShouldNotContainInputSegmentWhenAbsent() {
         BicValidationError reason = BicValidationError.values()[0];
 

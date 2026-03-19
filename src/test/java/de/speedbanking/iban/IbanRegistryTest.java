@@ -357,9 +357,9 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             + "cityPostcode=null, departmentGenericEmail=null, departmentTel=null]");
     }
 
+    @DisplayName("Validate IBAN length is positive")
     @ParameterizedTest(name = "Should throw exception for invalid IBAN length: {0}")
     @ValueSource(ints = {-1, 0})
-    @DisplayName("Validate IBAN length is positive")
     void shouldThrowExceptionWhenIbanLengthIsInvalid(int invalidLength) {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(invalidLength)
@@ -372,8 +372,8 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .withMessage("IBAN length must be set and positive");
     }
 
-    @Test
     @DisplayName("Should throw exception when required BBAN pattern is missing")
+    @Test
     void shouldThrowExceptionWhenBbanPatternIsMissing() {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(20)
@@ -383,9 +383,9 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .isThrownBy(builder::build);
     }
 
+    @DisplayName("Validate IBAN length limits (15-34)")
     @ParameterizedTest(name = "Should throw exception for ISO 13616 violation: {0}")
     @ValueSource(ints = {14, 35})
-    @DisplayName("Validate IBAN length limits (15-34)")
     void shouldThrowExceptionWhenIbanLengthViolatesIsoLimits(int invalidLength) {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(invalidLength)

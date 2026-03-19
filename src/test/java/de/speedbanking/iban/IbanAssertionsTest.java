@@ -14,8 +14,8 @@ import org.junit.jupiter.params.provider.CsvSource;
  */
 class IbanAssertionsTest {
 
-    @Test
     @DisplayName("Should assert on normalized IBAN creation")
+    @Test
     void shouldAssertOnNormalizedIban() {
         // test lowercase and spaces
         assertThatIbanOfNormalized("DE89370400440532013000")
@@ -35,8 +35,8 @@ class IbanAssertionsTest {
         assertThatIbanIsValid(input).isEqualTo(expected);
     }
 
-    @Test
     @DisplayName("Should catch InvalidIbanException fluently")
+    @Test
     void shouldCatchInvalidIbanException() {
         assertThatInvalidIbanException().isThrownBy(() -> Iban.of("SHORT"))
             .withMessage("IBAN has unsupported country code")

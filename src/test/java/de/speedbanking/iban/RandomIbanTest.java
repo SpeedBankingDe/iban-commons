@@ -106,8 +106,8 @@ class RandomIbanTest {
     /**
      * Tests that two calls with the same seed and the same country code produce identical IBANs.
      */
-    @Test
     @DisplayName("Same seed and country code should produce identical IBANs (reproducibility)")
+    @Test
     void sameSeededRandomShouldProduceSameIbanForCountryCode() {
         long seed = 42L;
         Iban first  = RandomIban.of("DE", new Random(seed));
@@ -119,8 +119,8 @@ class RandomIbanTest {
     /**
      * Tests reproducibility via IbanRegistry overload.
      */
-    @Test
     @DisplayName("Same seed and IbanRegistry should produce identical IBANs")
+    @Test
     void sameSeededRandomShouldProduceSameIbanForRegistry() {
         long seed = 99L;
         Iban first  = RandomIban.of(IbanRegistry.FR, new Random(seed));
@@ -133,8 +133,8 @@ class RandomIbanTest {
      * Tests that different seeds produce different IBANs (probabilistic — fails only with
      * extraordinarily bad luck when two seeds collide, which is practically impossible).
      */
-    @Test
     @DisplayName("Different seeds should produce different IBANs")
+    @Test
     void differentSeedsShouldProduceDifferentIbans() {
         Iban first  = RandomIban.of("DE", new Random(1L));
         Iban second = RandomIban.of("DE", new Random(2L));
@@ -184,8 +184,8 @@ class RandomIbanTest {
     /**
      * Tests that {@link RandomIban#of()} generates a valid IBAN for an arbitrary supported country.
      */
-    @Test
     @DisplayName("Should generate a valid IBAN for any country")
+    @Test
     void shouldGenerateValidIbanForAnyCountry() {
         Iban iban = RandomIban.of();
 
@@ -197,8 +197,8 @@ class RandomIbanTest {
     /**
      * Tests that {@link RandomIban#ofSepa()} generates a valid IBAN that belongs to a SEPA country.
      */
-    @Test
     @DisplayName("Should generate only SEPA IBANs when calling ofSepa")
+    @Test
     void shouldGenerateOnlySepaIbans() {
         // test multiple times to increase statistical confidence in random selection
         for (int i = 0; i < 20; i++) {
@@ -215,8 +215,8 @@ class RandomIbanTest {
     /**
      * Tests reproducibility for the 'any country' generation.
      */
-    @Test
     @DisplayName("Same seed should produce identical IBANs for any-country selection")
+    @Test
     void seededRandomShouldProduceSameIbanForAnyCountry() {
         long seed = 123456L;
         Iban first  = RandomIban.of(new Random(seed));
@@ -228,8 +228,8 @@ class RandomIbanTest {
     /**
      * Tests reproducibility for the SEPA generation.
      */
-    @Test
     @DisplayName("Same seed should produce identical IBANs for SEPA selection")
+    @Test
     void seededRandomShouldProduceSameIbanForSepa() {
         long seed = 789L;
         Iban first  = RandomIban.ofSepa(new Random(seed));
