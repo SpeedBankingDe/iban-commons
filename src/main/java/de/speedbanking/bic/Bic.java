@@ -107,7 +107,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      *
      * @since 1.8.0
      */
-    public static Bic of(CharSequence bic) {
+    public static Bic of(CharSequence bic) throws InvalidBicException {
         BicValidationResult result = BicValidator.validate(bic);
         return result.getBic().orElseThrow(() -> InvalidBicException.of(result.getError().get(), bic));
     }
@@ -458,7 +458,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.3
      */
     private void readObject(final ObjectInputStream stream) throws InvalidObjectException {
-        readObjectNoData();
+        throw new InvalidObjectException(
+            Bic.class.getSimpleName() + " must be deserialized via its " + Memento.class.getSimpleName() + " proxy");
     }
 
     /**
