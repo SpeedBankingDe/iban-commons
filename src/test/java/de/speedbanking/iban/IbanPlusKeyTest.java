@@ -3,6 +3,8 @@ package de.speedbanking.iban;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import de.speedbanking.test.TestUtil;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,8 +12,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
 /**
@@ -23,17 +23,8 @@ class IbanPlusKeyTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructorShouldThrowException() throws Exception {
-        Constructor<IbanPlusKey> constructor = IbanPlusKey.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-
-        assertThatExceptionOfType(InvocationTargetException.class)
-            .isThrownBy(constructor::newInstance)
-            .withCauseInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getCause)
-            .isInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getMessage)
-            .isEqualTo("Utility class " + IbanPlusKey.class.getSimpleName() + " cannot be instantiated");
+    void privateConstructorShouldThrowException() {
+        TestUtil.assertConstructorIsPrivate(IbanPlusKey.class);
     }
 
     @ParameterizedTest(name = "{index}: {2} ({0})")

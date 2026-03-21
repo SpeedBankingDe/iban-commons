@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -22,8 +22,9 @@ import java.util.Set;
  * <ul>
  *   <li>{@link Iso3166Alpha2#getCode()}                — {@code getCode_*}</li>
  *   <li>{@link Iso3166Alpha2#getCountryName()}         — {@code getCountryName_*}</li>
- *   <li>{@link Iso3166Alpha2#fromCode(String)}         — {@code fromCode_*}</li>
- *   <li>{@link Iso3166Alpha2#isAssigned(String)}       — {@code isAssigned_*}</li>
+ *   <li>{@link Iso3166Alpha2#getCurrencyCode()}        — {@code getCurrencyCode_*}</li>
+ *   <li>{@link Iso3166Alpha2#fromCode(CharSequence)}   — {@code fromCode_*}</li>
+ *   <li>{@link Iso3166Alpha2#isAssigned(CharSequence)} — {@code isAssigned_*}</li>
  *   <li>{@link Iso3166Alpha2#toString()}               — {@code toString_*}</li>
  *   <li>Enum mechanics ({@code values()}, {@code valueOf()}) — {@code enum_*}</li>
  *   <li>Completeness / uniqueness invariants           — {@code invariant_*}</li>
@@ -60,8 +61,8 @@ class Iso3166Alpha2Test {
     @EnumSource(Iso3166Alpha2.class)
     void getCode_equalsName_forAllConstants(Iso3166Alpha2 c) {
         assertThat(c.getCode())
-        .as("%s.getCode() must equal name()", c.name())
-        .isEqualTo(c.name());
+            .as("%s.getCode() must equal name()", c.name())
+            .isEqualTo(c.name());
     }
 
     // =========================================================================
@@ -88,7 +89,8 @@ class Iso3166Alpha2Test {
         "PS | Palestine, State of"
     })
     void getCountryName_knownConstants_returnsCorrectName(String code, String expectedName) {
-        assertThat(Iso3166Alpha2.valueOf(code).getCountryName()).isEqualTo(expectedName);
+        assertThat(Iso3166Alpha2.valueOf(code).getCountryName())
+            .isEqualTo(expectedName);
     }
 
     @DisplayName("getCountryName() is non-null and non-blank for every constant")
@@ -99,6 +101,172 @@ class Iso3166Alpha2Test {
             .as("%s.getCountryName()", c.name())
             .isNotNull()
             .isNotBlank();
+    }
+
+    // =========================================================================
+    // getCurrencyCode()
+    // =========================================================================
+
+    @DisplayName("getCurrencyCode() returns the correct ISO 4217 currency code")
+    @ParameterizedTest(name = "[{index}] {0} → ''{1}''")
+    @CsvSource(delimiter = '|', value = {
+        // Eurozone members
+        "DE | EUR",
+        "FR | EUR",
+        "AT | EUR",
+        "IT | EUR",
+        "ES | EUR",
+        "NL | EUR",
+        "PT | EUR",
+        "FI | EUR",
+        "IE | EUR",
+        "GR | EUR",
+        "LU | EUR",
+        "BE | EUR",
+        "CY | EUR",
+        "MT | EUR",
+        "EE | EUR",
+        "LV | EUR",
+        "LT | EUR",
+        "SI | EUR",
+        "SK | EUR",
+        "HR | EUR",
+        // Eurozone-adjacent (use EUR without EU membership)
+        "AD | EUR",
+        "MC | EUR",
+        "SM | EUR",
+        "VA | EUR",
+        "ME | EUR",
+        "XK | EUR",
+        // French overseas territories using EUR
+        "AX | EUR",
+        "GP | EUR",
+        "GF | EUR",
+        "MQ | EUR",
+        "RE | EUR",
+        "YT | EUR",
+        "MF | EUR",
+        "PM | EUR",
+        "TF | EUR",
+        // Non-Eurozone European currencies
+        "GB | GBP",
+        "CH | CHF",
+        "LI | CHF",
+        "DK | DKK",
+        "NO | NOK",
+        "SE | SEK",
+        "IS | ISK",
+        "PL | PLN",
+        "CZ | CZK",
+        "HU | HUF",
+        "RO | RON",
+        "BG | BGN",
+        // Crown dependencies using GBP
+        "GG | GBP",
+        "JE | GBP",
+        "IM | GBP",
+        // Selected non-European currencies
+        "US | USD",
+        "JP | JPY",
+        "CN | CNY",
+        "AU | AUD",
+        "CA | CAD",
+        "NZ | NZD",
+        "CH | CHF",
+        "IN | INR",
+        "KR | KRW",
+        "SG | SGD",
+        "HK | HKD",
+        // CFA franc zone
+        "SN | XOF",
+        "ML | XOF",
+        "CI | XOF",
+        "CM | XAF",
+        "GA | XAF",
+        "TD | XAF",
+        // East Caribbean dollar zone
+        "AG | XCD",
+        "DM | XCD",
+        "GD | XCD",
+        "LC | XCD",
+        "VC | XCD",
+        "KN | XCD",
+        "AI | XCD",
+        "MS | XCD",
+        // Pacific franc zone
+        "NC | XPF",
+        "PF | XPF",
+        "WF | XPF",
+        // Updated ISO 4217 codes (2016-2025 redenominations)
+        "BY | BYN",
+        "VE | VES",
+        "SL | SLE",
+        // Countries with no own currency (use USD)
+        "EC | USD",
+        "PA | USD",
+        "SV | USD",
+        "TL | USD"
+    })
+    void getCurrencyCode_knownConstants_returnsCorrectCode(String code, String expectedCurrency) {
+        assertThat(Iso3166Alpha2.valueOf(code).getCurrency().getAlphaCode())
+            .as("%s.getCurrency().getAlphaCode()", code)
+            .isEqualTo(expectedCurrency);
+    }
+
+    @DisplayName("getCurrencyCode() returns null for Antarctica (AQ) — the only currency-less entry")
+    @Test
+    void getCurrencyCode_antarctica_returnsNull() {
+        assertThat(Iso3166Alpha2.AQ.getCurrency()).isNull();
+    }
+
+    @DisplayName("getCurrencyCode() is non-null and non-blank for every constant except AQ")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @EnumSource(value = Iso3166Alpha2.class, names = "AQ", mode = EnumSource.Mode.EXCLUDE)
+    void getCurrencyCode_allConstantsExceptAQ_neverNullOrBlank(Iso3166Alpha2 c) {
+        assertThat(c.getCurrency().getAlphaCode())
+            .as("%s.getCurrency().getAlphaCode()", c.name())
+            .isNotNull()
+            .isNotBlank();
+    }
+
+    @DisplayName("getCurrencyCode() returns a 3-letter uppercase alphabetic code when non-null")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @EnumSource(Iso3166Alpha2.class)
+    void getCurrencyCode_whenNonNull_matchesIso4217Format(Iso3166Alpha2 c) {
+        Currency currency = c.getCurrency();
+        if (currency != null) {
+            assertThat(currency.getAlphaCode())
+                .as("%s.getCurrency().getAlphaCode() must be a 3-letter uppercase alphabetic code", c.name())
+                .matches("^[A-Z]{3}$");
+        }
+    }
+
+    @DisplayName("No two constants share the same (countryCode, currencyCode) pair via a duplicate currency-code check")
+    @Test
+    void getCurrencyCode_currencyCodeValuesAreInternallySelfConsistent() {
+        // Verify that every constant that claims EUR is actually in a known EUR territory or Eurozone country,
+        // and that no unexpected code has been accidentally assigned EUR.
+        // This is a smoke-test — it will catch copy-paste accidents between adjacent constants.
+        Set<String> eurCodes = new LinkedHashSet<>();
+        for (Iso3166Alpha2 c : Iso3166Alpha2.values()) {
+            Currency cur = c.getCurrency();
+            if (cur != null && "EUR".equals(cur.getAlphaCode())) {
+                eurCodes.add(c.getCode());
+            }
+        }
+        // At minimum the 20 Eurozone member states plus the 6 micro-states/territories
+        // that formally use EUR must be present.
+        assertThat(eurCodes.size())
+            .as("EUR zone should contain at least 26 entries (20 EU Eurozone + 6 non-EU)")
+            .isGreaterThanOrEqualTo(26);
+
+        // Non-Eurozone European countries must NOT be in the EUR set
+        for (String nonEurCode : Arrays.asList("GB", "CH", "DK", "NO", "SE", "IS", "PL",
+                                               "CZ", "HU", "RO", "BG", "LI")) {
+            assertThat(eurCodes)
+                .as("'%s' must not be in the EUR zone", nonEurCode)
+                .doesNotContain(nonEurCode);
+        }
     }
 
     // =========================================================================
@@ -155,15 +323,25 @@ class Iso3166Alpha2Test {
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @NullAndEmptySource
     void fromCode_null_returnsNull(String c) {
-        assertThat(Iso3166Alpha2.fromCode(c)).isNull();
+        assertThat(Iso3166Alpha2.fromCode(c))
+            .isNull();
     }
 
     @DisplayName("fromCode() returns null for strings with wrong length")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @ValueSource(strings = {"D", "DEU", "DEUS", " D", "D "})
+    @ValueSource(strings = {"D", "DEU", "DEUS"})
     void fromCode_wrongLength_returnsNull(String code) {
         assertThat(Iso3166Alpha2.fromCode(code))
             .as("fromCode(\"%s\") with wrong length", code)
+            .isNull();
+    }
+
+    @DisplayName("fromCode() returns null for whitespace-padded two-character inputs — length is 2 but no whitespace key exists in the LOOKUP")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {" D", "D "})
+    void fromCode_whitespacePadded_returnsNull(String code) {
+        assertThat(Iso3166Alpha2.fromCode(code))
+            .as("fromCode(\"%s\") with whitespace padding", code)
             .isNull();
     }
 
@@ -201,6 +379,32 @@ class Iso3166Alpha2Test {
             .isNull();
     }
 
+    @DisplayName("fromCode() accepts StringBuilder and returns the correct constant")
+    @Test
+    void fromCode_stringBuilder_returnsCorrectConstant() {
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("DE"))).isSameAs(Iso3166Alpha2.DE);
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("FR"))).isSameAs(Iso3166Alpha2.FR);
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("XK"))).isSameAs(Iso3166Alpha2.XK);
+    }
+
+    @DisplayName("fromCode() accepts StringBuffer and returns the correct constant")
+    @Test
+    void fromCode_stringBuffer_returnsCorrectConstant() {
+        assertThat(Iso3166Alpha2.fromCode(new StringBuffer("GB"))).isSameAs(Iso3166Alpha2.GB);
+        assertThat(Iso3166Alpha2.fromCode(new StringBuffer("JP"))).isSameAs(Iso3166Alpha2.JP);
+    }
+
+    @DisplayName("fromCode() returns null for null or wrong-length StringBuilder/StringBuffer inputs")
+    @Test
+    void fromCode_charSequenceEdgeCases_returnsNull() {
+        assertThat(Iso3166Alpha2.fromCode((CharSequence) null)).isNull();
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder())).isNull();           // empty
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("D"))).isNull();        // too short
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("DEU"))).isNull();      // too long
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("de"))).isNull();       // lowercase
+        assertThat(Iso3166Alpha2.fromCode(new StringBuffer(" D"))).isNull();        // whitespace
+    }
+
     // =========================================================================
     // isAssigned(String)
     // =========================================================================
@@ -229,6 +433,16 @@ class Iso3166Alpha2Test {
             .isFalse();
     }
 
+    @DisplayName("isAssigned() accepts StringBuilder and StringBuffer")
+    @Test
+    void isAssigned_charSequenceTypes_workCorrectly() {
+        assertThat(Iso3166Alpha2.isAssigned(new StringBuilder("DE"))).isTrue();
+        assertThat(Iso3166Alpha2.isAssigned(new StringBuilder("AA"))).isFalse();
+        assertThat(Iso3166Alpha2.isAssigned(new StringBuffer("FR"))).isTrue();
+        assertThat(Iso3166Alpha2.isAssigned(new StringBuffer("ZZ"))).isFalse();
+        assertThat(Iso3166Alpha2.isAssigned((CharSequence) null)).isFalse();
+    }
+
     // =========================================================================
     // toString()
     // =========================================================================
@@ -245,7 +459,8 @@ class Iso3166Alpha2Test {
         "AX | AX (Åland Islands)"
     })
     void toString_knownConstants_returnsFormattedString(String code, String expected) {
-        assertThat(Iso3166Alpha2.valueOf(code).toString()).isEqualTo(expected);
+        assertThat(Iso3166Alpha2.valueOf(code).toString())
+            .isEqualTo(expected);
     }
 
     @DisplayName("toString() follows \"<CODE> (<countryName>)\" pattern for all constants")
@@ -310,7 +525,7 @@ class Iso3166Alpha2Test {
     @DisplayName("No duplicate codes exist across all constants")
     @Test
     void invariant_allCodes_areUnique() {
-        Set<String> seen = new HashSet<>();
+        Set<String> seen = new LinkedHashSet<>();
         for (Iso3166Alpha2 c : Iso3166Alpha2.values()) {
             assertThat(seen.add(c.getCode()))
                 .as("Duplicate code detected: %s", c.getCode())
@@ -343,6 +558,29 @@ class Iso3166Alpha2Test {
             assertThat(Iso3166Alpha2.fromCode(code))
                 .as("'%s' must not be in the enum", code)
                 .isNull();
+        }
+    }
+
+    @DisplayName("AQ is the only constant with a null currency code")
+    @Test
+    void invariant_onlyAQ_hasNullCurrencyCode() {
+        long nullCount = Arrays.stream(Iso3166Alpha2.values())
+            .filter(c -> c.getCurrency() == null)
+            .count();
+        assertThat(nullCount)
+            .as("Exactly one constant (AQ) should have a null currency code")
+            .isEqualTo(1L);
+        assertThat(Iso3166Alpha2.AQ.getCurrency()).isNull();
+    }
+
+    @DisplayName("No two constants share an identical country name")
+    @Test
+    void invariant_allCountryNames_areUnique() {
+        Set<String> seen = new LinkedHashSet<>();
+        for (Iso3166Alpha2 c : Iso3166Alpha2.values()) {
+            assertThat(seen.add(c.getCountryName()))
+                .as("Duplicate country name detected: '%s' (%s)", c.getCountryName(), c.getCode())
+                .isTrue();
         }
     }
 

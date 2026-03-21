@@ -1,4 +1,7 @@
-package de.speedbanking.util;
+package de.speedbanking.test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,6 +10,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -276,7 +282,7 @@ public final class TestUtil {
      * @param stream the serialized byte array to search
      * @return the index of the {@code TC_BLOCKDATA} byte, or {@code -1} if not found
      */
-    private static int findBlockDataWithVersionMarker(final byte[] stream) {
+    static int findBlockDataWithVersionMarker(final byte[] stream) {
         // needle: TC_BLOCKDATA (0x77), skip 1 byte (block length), then STREAM_VERSION=1L
         byte[] versionLong = {0, 0, 0, 0, 0, 0, 0, 1};
         int result = -1;
@@ -299,16 +305,12 @@ public final class TestUtil {
     /**
      * Returns the index of the first occurrence of {@code needle} in {@code haystack},
      * or {@code -1} if not found.
-     * <p>
-     * Uses a straightforward two-pointer scan. The inner loop sets a {@code match} flag
-     * rather than branching out of the loop directly, avoiding the PMD
-     * {@code AvoidBranchingStatementAsLastInLoop} warning.
      *
      * @param haystack the byte array to search in; must not be {@code null}
      * @param needle   the byte sequence to search for; must not be {@code null}
      * @return the zero-based start index of the first match, or {@code -1} if none
      */
-    public static int indexOf(final byte[] haystack, final byte[] needle) {
+    static int indexOf(final byte[] haystack, final byte[] needle) {
         int result = -1;
         for (int i = 0; result == -1 && i <= haystack.length - needle.length; i++) {
             boolean match = true;
@@ -320,6 +322,66 @@ public final class TestUtil {
             }
         }
         return result;
+    }
+
+    /**
+     * Invokes a private serialization guard method (readObject or readObjectNoData)
+     * via reflection and returns the cause of the occurring InvocationTargetException.
+     * <p>
+     * This is used to achieve 100% code coverage for methods that are
+     * unreachable during normal serialization due to the Memento proxy pattern.
+     *
+     * @param instance the object instance to invoke the method on
+     * @param methodName the name of the method (e.g., "readObject")
+     * @param parameterTypes the parameter types of the method
+     * @param args the actual arguments to pass
+     * @return the causing exception thrown by the invoked method
+     * @throws Exception if reflection access fails
+     */
+    public static Throwable invokeSerializationGuard(Object instance, String methodName, Class<?>[] parameterTypes, Object... args) throws Exception {
+        java.lang.reflect.Method m = instance.getClass().getDeclaredMethod(methodName, parameterTypes);
+        m.setAccessible(true);
+        try {
+            m.invoke(instance, args);
+            return null;
+        } catch (InvocationTargetException ex) {
+            return ex.getTargetException();
+        }
+    }
+
+    /**
+     * Asserts that a class has a private default constructor and throwing an
+     * {@link UnsupportedOperationException} on instantiation.
+     * <p>
+     * Useful for utility classes to ensure 100% code coverage.
+     *
+     * @param <T> the type of the class
+     * @param clazz the class to be tested
+     * @return the private constructor
+     * @throws AssertionError if any assertion fails
+     */
+    public static <T> Constructor<T> assertConstructorIsPrivate(Class<T> clazz) {
+        assertThat(clazz).isNotNull();
+
+        Constructor<T> constructor = null;
+        try {
+            constructor = clazz.getDeclaredConstructor();
+        } catch (NoSuchMethodException | SecurityException ex) {
+            throw new AssertionError("Private default constructor not found for " + clazz.getSimpleName(), ex);
+        }
+
+        assertThat(Modifier.isPrivate(constructor.getModifiers()))
+            .as("Constructor of utility class must be private")
+            .isTrue();
+
+        constructor.setAccessible(true);
+
+        assertThatThrownBy(constructor::newInstance)
+            .isInstanceOf(InvocationTargetException.class)
+            .hasCauseInstanceOf(UnsupportedOperationException.class)
+            .hasStackTraceContaining("cannot be instantiated");
+
+        return constructor;
     }
 
 }

@@ -17,6 +17,7 @@ package de.speedbanking.iban;
 
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
+import de.speedbanking.util.IndexRange;
 
 import java.util.List;
 import java.util.Objects;
@@ -71,7 +72,7 @@ public final class RandomIban {
      * @return a valid, randomly generated IBAN as an {@code Iban} object
      */
     public static Iban of() {
-        return of(ThreadLocalRandom.current());
+        return of((Random) null);
     }
 
     /**
@@ -82,31 +83,29 @@ public final class RandomIban {
      * @return a valid, randomly generated IBAN from a SEPA country
      */
     public static Iban ofSepa() {
-        return ofSepa(ThreadLocalRandom.current());
+        return ofSepa(null);
     }
 
     /**
      * Generates a random, valid IBAN for the country specified by the given two-letter country code.
-     * Uses {@link ThreadLocalRandom} as the source of randomness.
      *
      * @param countryCode the two-letter country code (e.g., "DE")
      * @return a valid, randomly generated IBAN as an {@code Iban} object
      * @throws NullPointerException if the {@code countryCode} is {@code null} or not supported
      */
     public static Iban of(String countryCode) {
-        return of(countryCode, ThreadLocalRandom.current());
+        return of(countryCode, null);
     }
 
     /**
      * Generates a random, valid IBAN based on the specifications of the provided {@code IbanRegistry}.
      * Uses {@link ThreadLocalRandom} as the source of randomness.
      *
-     * @param ibanRegistry the registry entry defining the country's IBAN structure
+     * @param countryData the registry entry defining the country's IBAN structure
      * @return a valid, randomly generated IBAN as an {@code Iban} object
-     * @throws NullPointerException if {@code ibanRegistry} is {@code null}
      */
-    public static Iban of(IbanRegistry ibanRegistry) {
-        return of(ibanRegistry, ThreadLocalRandom.current());
+    public static Iban of(IbanRegistry countryData) {
+        return of(countryData, null);
     }
 
     // -------------------------------------------------------------------------
@@ -118,13 +117,11 @@ public final class RandomIban {
      * <p>
      * Passing a seeded {@code Random} makes the selection of the country and the BBAN deterministic.
      *
-     * @param random the {@link Random} instance to use; must not be {@code null}
+     * @param random the {@link Random} instance to use
      * @return a valid, randomly generated IBAN
-     * @throws NullPointerException if {@code random} is {@code null}
      */
     public static Iban of(Random random) {
-        Objects.requireNonNull(random, "Random must not be null");
-        return of(ALL_COUNTRIES[random.nextInt(ALL_COUNTRIES.length)], random);
+        return of((IbanRegistry) null, random);
     }
 
     /**
@@ -132,14 +129,13 @@ public final class RandomIban {
      * <p>
      * Passing a seeded {@code Random} makes the selection of the SEPA country and the BBAN deterministic.
      *
-     * @param random the {@link Random} instance to use; must not be {@code null}
+     * @param random the {@link Random} instance to use
      * @return a valid, randomly generated SEPA IBAN
-     * @throws NullPointerException if {@code random} is {@code null}
      */
     public static Iban ofSepa(Random random) {
-        Objects.requireNonNull(random, "Random must not be null");
+        Random rd = random != null ? random : ThreadLocalRandom.current();
         List<IbanRegistry> sepaCountries = IbanRegistry.getSepaCountries();
-        return of(sepaCountries.get(random.nextInt(sepaCountries.size())), random);
+        return of(sepaCountries.get(rd.nextInt(sepaCountries.size())), rd);
     }
 
     /**
@@ -147,17 +143,17 @@ public final class RandomIban {
      * using the provided {@link Random} instance as the source of randomness.
      * <p>
      * Passing a seeded {@code Random} (e.g. {@code new Random(42L)}) makes generation
-     * fully reproducible — the same seed always produces the same IBAN for the same country.
+     * fully reproducible — the same seed always produces the same IBAN for the same country.<br>
+     * Parameter {@code random} defaults to {@link ThreadLocalRandom} unless provided.
      *
      * @param countryCode the two-letter country code (e.g., "DE")
-     * @param random      the {@link Random} instance to use; must not be {@code null}
+     * @param random      the {@link Random} instance to use
      * @return a valid, randomly generated IBAN as an {@code Iban} object
-     * @throws NullPointerException if {@code countryCode} is not supported or {@code random} is {@code null}
+     * @throws NullPointerException if {@code countryCode} is not supported
      */
     public static Iban of(String countryCode, Random random) {
-        Objects.requireNonNull(random, "Random must not be null");
         IbanRegistry countryData = Objects.requireNonNull(IbanRegistry.getByCode(countryCode),
-                "Supported country code required");
+                "Supported iban country code required");
         return of(countryData, random);
     }
 
@@ -166,34 +162,42 @@ public final class RandomIban {
      * using the provided {@link Random} instance as the source of randomness.
      * <p>
      * The generation process involves:
-     * <ul>
+     * <ol>
      *   <li>Constructing the base IBAN string (Country Code + {@code "00"} placeholder + random BBAN).</li>
+     *   <li>Computing and writing the National Check Digit (NCD) if the country defines one
+     *       and its {@link CountryValidator} implements {@link NationalCheckDigitCalculator}.</li>
      *   <li>Calculating the correct ISO 7064 Mod 97-10 check digits using {@link IbanValidator#fixCheckDigits}.</li>
-     *   <li>Applying the calculated check digits to the IBAN string.</li>
-     * </ul>
+     *   <li>Returning the validated {@link Iban}.</li>
+     * </ol>
      * <p>
      * Passing a seeded {@code Random} (e.g. {@code new Random(42L)}) makes generation
      * fully reproducible — the same seed always produces the same IBAN for the same country.
      *
-     * @param ibanRegistry the registry entry defining the country's IBAN structure
-     * @param random       the {@link Random} instance to use; must not be {@code null}
+     * @param countryData the registry entry defining the country's IBAN structure
+     * @param random      the {@link Random} instance to use
      * @return a valid, randomly generated IBAN as an {@code Iban} object
-     * @throws NullPointerException if {@code ibanRegistry} or {@code random} is {@code null}
      */
-    public static Iban of(IbanRegistry ibanRegistry, Random random) {
-        Objects.requireNonNull(ibanRegistry, "IbanRegistry must not be null");
-        Objects.requireNonNull(random, "Random must not be null");
+    public static Iban of(IbanRegistry countryData, Random random) {
+        Random rd = random != null ? random : ThreadLocalRandom.current();
+        IbanRegistry cd = countryData != null ? countryData : ALL_COUNTRIES[rd.nextInt(ALL_COUNTRIES.length)];
 
-        // 1. Start with CC + Check Digits Placeholders ("00")
+        // 1. Start with CC + Check Digits Placeholders ("00") + random BBAN
         StringBuilder ibanBuilder = new StringBuilder()
-            .append(ibanRegistry.getCountryCode())
-            .append("00") // placeholder for check digits
-            .append(generateRandomBban(ibanRegistry.getBbanPatternStr(), random));
+            .append(cd.getCountryCode())
+            .append("00") // placeholder for ISO check digits
+            .append(generateRandomBban(cd.getBbanPatternStr(), rd));
 
-        // 2. Calculate and apply the correct check digits
+        // 2. Compute and write the National Check Digit (NCD) where applicable.
+        //    This MUST happen before fixCheckDigits(), because the ISO Mod-97 check
+        //    covers the complete IBAN including the NCD field.
+        if (IbanConfig.NCD_CALCULATE.isEnabled()) {
+            fixNationalCheckDigit(cd, ibanBuilder);
+        }
+
+        // 3. Calculate and apply the correct ISO 7064 Mod 97-10 check digits
         IbanValidator.fixCheckDigits(ibanBuilder);
 
-        // 3. Return the validated result
+        // 4. Return the validated result
         return Iban.of(ibanBuilder.toString());
     }
 
@@ -243,6 +247,48 @@ public final class RandomIban {
         }
 
         return bbanBuilder.toString();
+    }
+
+    /**
+     * Overwrites the National Check Digit field in {@code ibanBuilder} with the value
+     * computed by the country's {@link NationalCheckDigitCalculator}, if one is available.
+     *
+     * <p>The method is a no-op for countries whose {@link CountryValidator} does not also
+     * implement {@link NationalCheckDigitCalculator}, or for countries that have no NCD
+     * field ({@link IbanRegistry#getNationalCheckDigitIndexRange()} returns {@code null}).
+     *
+     * <p>For Norway's Mod-11 algorithm, certain random account numbers yield an invalid
+     * weighted sum (remainder 10).  In that case {@code calculateNationalCheckDigit}
+     * returns {@code null} and this method regenerates the digits in the NCD-adjacent
+     * field until a valid combination is found (max {@value #MAX_NCD_RETRIES} retries).
+     *
+     * @param ibanRegistry the registry entry for the country
+     * @param ibanBuilder  the mutable IBAN string with {@code "00"} ISO check-digit placeholders
+     *                     and a randomly generated BBAN; modified in-place
+     */
+    static StringBuilder fixNationalCheckDigit(IbanRegistry ibanRegistry, StringBuilder ibanBuilder) {
+
+        // only countries with a registered NCD field are relevant
+        IndexRange ncdRange = ibanRegistry.getNationalCheckDigitIndexRange();
+        if (ncdRange == null) {
+            return ibanBuilder;
+        }
+
+        // the CountryValidator must also implement NationalCheckDigitCalculator
+        CountryValidator cv = ibanRegistry.getCountryValidator();
+
+        NationalCheckDigitCalculator calc = NationalCheckDigitCalculator.class.cast(cv);
+
+        // snapshot the current IBAN as char[] for the calculator
+        char[] ibanChars = ibanBuilder.toString().toCharArray();
+        char[] ncd = calc.calculateNationalCheckDigit(ibanChars);
+
+        // write the computed NCD into the StringBuilder
+        for (int idxIban = ncdRange.getBegin(), idxNcd = 0; idxIban < ncdRange.getEnd(); idxIban++, idxNcd++) {
+            ibanBuilder.setCharAt(idxIban, ncd[idxNcd]);
+        }
+
+        return ibanBuilder;
     }
 
 }

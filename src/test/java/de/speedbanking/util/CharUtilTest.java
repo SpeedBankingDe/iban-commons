@@ -1,13 +1,12 @@
 package de.speedbanking.util;
 
+import de.speedbanking.test.TestUtil;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * JUnit test class for {@link CharUtil}.
@@ -17,16 +16,7 @@ class CharUtilTest extends Assertions {
 
     @Test
     void privateConstructor_shouldThrowException() throws Exception {
-        Constructor<CharUtil> constructor = CharUtil.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-
-        assertThatExceptionOfType(InvocationTargetException.class)
-            .isThrownBy(constructor::newInstance)
-            .withCauseInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getCause)
-            .isInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getMessage)
-            .isEqualTo("Utility class " + CharUtil.class.getSimpleName() + " cannot be instantiated");
+        TestUtil.assertConstructorIsPrivate(CharUtil.class);
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should be a digit")

@@ -18,9 +18,9 @@ package de.speedbanking.util;
 /**
  * Utility class providing functionality regarding country codes and countries.
  *
- * @see Iso3166Alpha2
- *
  * @since 1.8.0
+ *
+ * @see Iso3166Alpha2
  */
 public final class CountryUtil {
 

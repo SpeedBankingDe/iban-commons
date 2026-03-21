@@ -10,6 +10,8 @@ import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
 import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
 import static de.speedbanking.iban.IbanValidationError.UNSUPPORTED_COUNTRY;
 
+import de.speedbanking.test.TestUtil;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,8 +20,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 /**
@@ -44,19 +44,10 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         IbanValidator.setLastReason(null);
     }
 
-    @DisplayName("Private constructor should throw UnsupportedOperationException to prevent instantiation")
+    @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_shouldThrowException() throws Exception {
-        Constructor<IbanValidator> constructor = IbanValidator.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-
-        assertThatExceptionOfType(InvocationTargetException.class)
-            .isThrownBy(constructor::newInstance)
-            .withCauseInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getCause)
-            .isInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getMessage)
-            .isEqualTo("Utility class " + IbanValidator.class.getSimpleName() + " cannot be instantiated");
+    void privateConstructor_shouldThrowException() {
+        TestUtil.assertConstructorIsPrivate(IbanValidator.class);
     }
 
     @DisplayName("validateRaw should return success object for valid raw IBAN")

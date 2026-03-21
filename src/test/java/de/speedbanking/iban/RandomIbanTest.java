@@ -2,38 +2,40 @@ package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanAssertions.assertThat;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
+import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 
 /**
  * JUnit test class for the {@link RandomIban}.
  */
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 class RandomIbanTest {
 
+    @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructorShouldThrowException() throws Exception {
-        Constructor<RandomIban> constructor = RandomIban.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
+    void privateConstructor_Instantiation_ShouldThrowException() {
+        TestUtil.assertConstructorIsPrivate(RandomIban.class);
+    }
 
-        assertThatExceptionOfType(InvocationTargetException.class)
-            .isThrownBy(constructor::newInstance)
-            .withCauseInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getCause)
-            .isInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getMessage)
-            .isEqualTo("Utility class " + RandomIban.class.getSimpleName() + " cannot be instantiated");
+    /**
+     * Tests that {@link RandomIban#of()} does not throw.
+     */
+    @Test
+    void of_ShouldNotThrowException() {
+        assertThatCode(
+            () -> RandomIban.of())
+            .doesNotThrowAnyException();
     }
 
     /**
@@ -43,22 +45,22 @@ class RandomIbanTest {
     @ParameterizedTest(name = "Country code: ''{0}''")
     @NullAndEmptySource
     @ValueSource(strings = {" ", "   ", "XX", "de", "12"})
-    void shouldThrowNpeWhenCountryCodeIsInvalid(String countryCode) {
+    void of_InvalidCountryCode_ShouldThrowNpe(String countryCode) {
         assertThatNullPointerException()
             .isThrownBy(() -> RandomIban.of(countryCode))
             .withCause(null)
-            .withMessage("Supported country code required");
+            .withMessage("Supported iban country code required");
     }
 
     /**
-     * Tests that {@link RandomIban#of(String, Random)} throws {@link NullPointerException}
+     * Tests that {@link RandomIban#of(String, Random)} does not throw exceptions
      * when a null {@link Random} is passed.
      */
     @Test
-    void shouldThrowNpeWhenRandomIsNull() {
-        assertThatNullPointerException()
-            .isThrownBy(() -> RandomIban.of("DE", null))
-            .withMessage("Random must not be null");
+    void of_NullRandom_ShouldNotThrowException() {
+        assertThatCode(
+            () -> RandomIban.of("DE", null))
+            .doesNotThrowAnyException();
     }
 
     /**
@@ -66,21 +68,21 @@ class RandomIbanTest {
      * when a null {@link Random} is passed.
      */
     @Test
-    void shouldThrowNpeWhenRegistryRandomIsNull() {
-        assertThatNullPointerException()
-            .isThrownBy(() -> RandomIban.of(IbanRegistry.DE, null))
-            .withMessage("Random must not be null");
+    void of_NullRegistryRandom_ShouldNotThrowException() {
+        assertThatCode(
+            () -> RandomIban.of(IbanRegistry.DE, null))
+            .doesNotThrowAnyException();
     }
 
     /**
      * Tests that for every country defined in the {@link IbanRegistry}.
      */
-    @DisplayName("Should generate a valid IBAN for every supported country")
+    @DisplayName("Should generate a valid IBAN for every supported country enum")
     @ParameterizedTest(name = "Generation for country: {0}")
-    @EnumSource(IbanRegistry.class)
-    void shouldGenerateValidIbanForCountry(IbanRegistry registry) {
+    @IbanRegistrySource
+    void of_CountryEnum_ShouldGenerateValidIban(IbanRegistry registry) {
         IbanValidator.setLastReason(null);
-        Iban iban = RandomIban.of(registry.getCountryCode());
+        Iban iban = RandomIban.of(registry);
 
         IbanAssertions.assertThat(iban)
             .isNotNull()
@@ -104,11 +106,31 @@ class RandomIbanTest {
     }
 
     /**
+     * Tests that for every country defined in the {@link IbanRegistry}.
+     */
+    @DisplayName("Should generate a valid IBAN for every supported country code")
+    @ParameterizedTest(name = "Generation for country: {0}")
+    @IbanRegistrySource
+    void of_CountryCode_ShouldGenerateValidIban(IbanRegistry registry) {
+        IbanValidator.setLastReason(null);
+        Iban iban = RandomIban.of(registry.getCountryCode());
+
+        IbanAssertions.assertThat(iban)
+            .isNotNull()
+            .hasCountryCode(registry.getCountryCode())
+            .hasCountryFlag(registry.getCountryFlag())
+            .hasCountryName(registry.getCountryName())
+            .hasOrganisation(registry.getOrganisation());
+
+        assertThat(IbanValidator.getLastReason()).isNull();
+    }
+
+    /**
      * Tests that two calls with the same seed and the same country code produce identical IBANs.
      */
     @DisplayName("Same seed and country code should produce identical IBANs (reproducibility)")
     @Test
-    void sameSeededRandomShouldProduceSameIbanForCountryCode() {
+    void of_SameSeed_ShouldProduceIdenticalIban() {
         long seed = 42L;
         Iban first  = RandomIban.of("DE", new Random(seed));
         Iban second = RandomIban.of("DE", new Random(seed));
@@ -121,7 +143,7 @@ class RandomIbanTest {
      */
     @DisplayName("Same seed and IbanRegistry should produce identical IBANs")
     @Test
-    void sameSeededRandomShouldProduceSameIbanForRegistry() {
+    void of_SameSeedRegistry_ShouldProduceIdenticalIban() {
         long seed = 99L;
         Iban first  = RandomIban.of(IbanRegistry.FR, new Random(seed));
         Iban second = RandomIban.of(IbanRegistry.FR, new Random(seed));
@@ -135,7 +157,7 @@ class RandomIbanTest {
      */
     @DisplayName("Different seeds should produce different IBANs")
     @Test
-    void differentSeedsShouldProduceDifferentIbans() {
+    void of_DifferentSeeds_ShouldProduceDifferentIbans() {
         Iban first  = RandomIban.of("DE", new Random(1L));
         Iban second = RandomIban.of("DE", new Random(2L));
 
@@ -148,9 +170,9 @@ class RandomIbanTest {
      */
     @DisplayName("Seeded generation should produce valid IBANs for all countries")
     @ParameterizedTest(name = "Country: {0}")
-    @EnumSource(IbanRegistry.class)
-    void seededRandomShouldProduceValidIbanForAllCountries(IbanRegistry registry) {
-        Iban iban = RandomIban.of(registry, new Random(12345L));
+    @IbanRegistrySource
+    void of_SeededAllCountries_ShouldBeValid(IbanRegistry registry) {
+        Iban iban = RandomIban.of(registry, new Random(4711L));
 
         assertThat(iban).isNotNull();
         assertThat(Iban.isValid(iban.toString())).isTrue();
@@ -170,7 +192,7 @@ class RandomIbanTest {
             "PL | 42 | PL",
             "IT | 42 | IT",
     })
-    void seededGenerationProducesStableSnapshots(String countryCode, long seed, String expectedPrefix) {
+    void of_SeededSnapshot_ShouldBeStable(String countryCode, long seed, String expectedPrefix) {
         Iban iban = RandomIban.of(countryCode, new Random(seed));
 
         // Country code prefix is always deterministic
@@ -186,7 +208,7 @@ class RandomIbanTest {
      */
     @DisplayName("Should generate a valid IBAN for any country")
     @Test
-    void shouldGenerateValidIbanForAnyCountry() {
+    void of_AnyCountry_ShouldBeValid() {
         Iban iban = RandomIban.of();
 
         assertThat(iban).isNotNull();
@@ -199,7 +221,7 @@ class RandomIbanTest {
      */
     @DisplayName("Should generate only SEPA IBANs when calling ofSepa")
     @Test
-    void shouldGenerateOnlySepaIbans() {
+    void ofSepa_MultipleIbans_ShouldBeValidAndFromSepaCountry() {
         // test multiple times to increase statistical confidence in random selection
         for (int i = 0; i < 20; i++) {
             Iban iban = RandomIban.ofSepa();
@@ -217,7 +239,7 @@ class RandomIbanTest {
      */
     @DisplayName("Same seed should produce identical IBANs for any-country selection")
     @Test
-    void seededRandomShouldProduceSameIbanForAnyCountry() {
+    void of_SameSeedAnyCountry_ShouldProduceIdenticalIban() {
         long seed = 123456L;
         Iban first  = RandomIban.of(new Random(seed));
         Iban second = RandomIban.of(new Random(seed));
@@ -230,7 +252,7 @@ class RandomIbanTest {
      */
     @DisplayName("Same seed should produce identical IBANs for SEPA selection")
     @Test
-    void seededRandomShouldProduceSameIbanForSepa() {
+    void ofSepa_SameSeed_ShouldProduceIdenticalIban() {
         long seed = 789L;
         Iban first  = RandomIban.ofSepa(new Random(seed));
         Iban second = RandomIban.ofSepa(new Random(seed));
@@ -240,12 +262,16 @@ class RandomIbanTest {
     }
 
     /**
-     * Verifies that null Random is handled for the new methods.
+     * Verifies that null {@link Random} is handled for the new methods.
      */
     @Test
-    void shouldThrowNpeWhenRandomIsNullForNewMethods() {
-        assertThatNullPointerException().isThrownBy(() -> RandomIban.of((Random) null));
-        assertThatNullPointerException().isThrownBy(() -> RandomIban.ofSepa(null));
+    void of_NullRandomNewMethods_ShouldNotThrowException() {
+        assertThatCode(
+            () -> RandomIban.of((Random) null))
+            .doesNotThrowAnyException();
+        assertThatCode(
+            () -> RandomIban.ofSepa(null))
+            .doesNotThrowAnyException();
     }
 
 }

@@ -2,9 +2,10 @@ package de.speedbanking.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,9 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * JUnit tests for {@link CountryUtil}.
@@ -169,12 +167,8 @@ class CountryUtilTest {
 
     @DisplayName("Private constructor throws UnsupportedOperationException (utility class guard)")
     @Test
-    void constructor_reflectiveInstantiation_throwsUnsupportedOperationException()
-        throws NoSuchMethodException {
-        Constructor<CountryUtil> ctor = CountryUtil.class.getDeclaredConstructor();
-        ctor.setAccessible(true);
-        InvocationTargetException ex = assertThrows(InvocationTargetException.class, ctor::newInstance);
-        assertInstanceOf(UnsupportedOperationException.class, ex.getCause());
+    void constructor_reflectiveInstantiation_throwsUnsupportedOperationException() throws NoSuchMethodException {
+        TestUtil.assertConstructorIsPrivate(CountryUtil.class);
     }
 
 }

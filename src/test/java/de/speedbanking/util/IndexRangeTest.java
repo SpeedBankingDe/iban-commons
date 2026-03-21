@@ -98,18 +98,18 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
         final char[] sequence = "KLMNOPQRSTUVWXYZ".toCharArray();
         IndexRange range = IndexRange.of(4, 10); // indices 4 (incl.) to 10 (excl.) -> OPQRST
 
-        String result = range.applyTo(sequence);
+        char[] result = range.applyTo(sequence);
 
-        assertThat(result).isEqualTo("OPQRST");
+        assertThat(new String(result)).isEqualTo("OPQRST");
     }
 
     @DisplayName("Should throw IndexOutOfBoundsException when char array is too short for applyTo(char[])")
     @Test
     void shouldThrowIOOBEWhenCharArrayIsTooShort() {
-        final char[] sequence = "K".toCharArray(); // Length 1
+        final char[] sequence = "K".toCharArray(); // length 1
         IndexRange range = IndexRange.of(0, 5); // needs index 5 (exclusive)
 
-        // The underlying String constructor throws an IndexOutOfBoundsException
+        // the underlying String constructor throws an IndexOutOfBoundsException
         assertThatExceptionOfType(IndexOutOfBoundsException.class)
             .isThrownBy(() -> range.applyTo(sequence));
     }

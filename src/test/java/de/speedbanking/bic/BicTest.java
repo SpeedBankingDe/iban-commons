@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsExceptio
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-import de.speedbanking.util.TestUtil;
+import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,8 +22,6 @@ import java.io.InvalidClassException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.StreamCorruptedException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -383,7 +381,7 @@ class BicTest {
         "BHLSDEM1",
         "DEUTDEFF"
     })
-    void testSerializationRoundTrip(String bicInput) throws IOException, ClassNotFoundException {
+    void serialization_ValidBic_ShouldPreserveState(String bicInput) throws IOException, ClassNotFoundException {
         Bic original = Bic.of(bicInput);
         final Bic bic = original;
 
@@ -467,7 +465,7 @@ class BicTest {
      */
     @DisplayName("Direct deserialization of Bic bypassing Memento must be rejected")
     @Test
-    void testDirectDeserializationIsRejected() throws IOException {
+    void deserialization_DirectBic_ShouldThrowException() throws IOException {
         byte[] mementoBytes = TestUtil.serialize(Bic.of("MARKDEFF"));
         final byte[] stream = mementoBytes;
 
@@ -550,16 +548,13 @@ class BicTest {
      */
     @DisplayName("readObjectNoData() must throw InvalidObjectException")
     @Test
-    void testReadObjectNoDataThrows() throws Exception {
+    void readObjectNoData_DirectInvocation_ShouldThrowException() throws Exception {
         Bic bic = Bic.of("MARKDEFF");
 
-        Method m = Bic.class.getDeclaredMethod("readObjectNoData");
-        m.setAccessible(true);
+        Throwable cause = TestUtil.invokeSerializationGuard(bic, "readObjectNoData", new Class<?>[0]);
 
-        assertThat(catchThrowable(() -> m.invoke(bic)))
-            .as("readObjectNoData() must throw InvalidObjectException wrapped in InvocationTargetException")
-            .isInstanceOf(InvocationTargetException.class)
-            .cause()
+        assertThat(cause)
+            .as("readObjectNoData() must throw InvalidObjectException")
             .isInstanceOf(InvalidObjectException.class)
             .hasMessageContaining("must be deserialized via its Memento proxy");
     }
@@ -575,18 +570,11 @@ class BicTest {
      */
     @DisplayName("readObject() must throw InvalidObjectException when invoked directly")
     @Test
-    void testReadObjectThrows() throws Exception {
+    void readObject_DirectInvocation_ShouldThrowException() throws Exception {
         Bic bic = Bic.of("MARKDEFF");
 
-        Method m = Bic.class.getDeclaredMethod("readObject", ObjectInputStream.class);
-        m.setAccessible(true);
-
-        Throwable thrown = catchThrowable(() -> m.invoke(bic, (ObjectInputStream) null));
-
-        // InvocationTargetException wraps the actual InvalidObjectException (checked or not)
-        Throwable cause = thrown instanceof InvocationTargetException
-            ? ((InvocationTargetException) thrown).getTargetException()
-            : thrown;
+        Throwable cause = TestUtil.invokeSerializationGuard(bic, "readObject",
+            new Class<?>[] {ObjectInputStream.class}, (ObjectInputStream) null);
 
         assertThat(cause)
             .as("readObject() must throw InvalidObjectException")

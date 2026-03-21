@@ -108,6 +108,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      *
      * @param sequence the character sequence (e.g., a normalized IBAN string)
      * @return the substring covered by this range
+     * @throws NullPointerException if the sequence is null
      * @throws IndexOutOfBoundsException if the sequence is shorter than {@code end}
      */
     public String applyTo(final CharSequence sequence) {
@@ -116,19 +117,20 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
 
     /**
      * Extracts the portion of the given character array that corresponds to this index range.
-     * <p>
-     * This is equivalent to {@code new String(sequence, start(), length())}.
      *
      * @param sequence the character array to extract from
-     * @return the extracted substring
-     * @throws NullPointerException      if the sequence is {@code null}
-     * @throws IndexOutOfBoundsException if the range is outside the bounds of the sequence
+     * @return a new character array containing the extracted range
+     * @throws NullPointerException if the sequence is null
+     * @throws IndexOutOfBoundsException if the range is outside the sequence bounds
      */
-    public String applyTo(final char[] sequence) {
-        return new String(sequence, begin, length());
+    public char[] applyTo(final char[] sequence) {
+        int len = length();
+        char[] result = new char[len];
+        System.arraycopy(sequence, begin, result, 0, len);
+        return result;
     }
 
-     /**
+    /**
      * Compares this range with another based on the start index, then the end index.
      * <p>
      * This sorting order is useful for processing segments of a string in sequential order.
@@ -149,7 +151,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
         return result;
     }
 
-   /**
+    /**
      * Compares this range to the specified object. The result is {@code true}
      * if and only if the argument is not {@code null} and is an {@code IndexRange}
      * object that has the same start, and end indices.

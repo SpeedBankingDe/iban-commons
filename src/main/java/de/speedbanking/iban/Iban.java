@@ -15,6 +15,9 @@
  */
 package de.speedbanking.iban;
 
+import de.speedbanking.util.Currency;
+import de.speedbanking.util.Iso3166Alpha2;
+
 import java.io.IOException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
@@ -45,9 +48,6 @@ import java.util.stream.IntStream;
 public final class Iban implements Serializable, CharSequence, Comparable<Iban> {
 
     private static final long           serialVersionUID = 42L;
-
-    /** The starting index of the Basic Bank Account Number (BBAN) within the normalized IBAN (always 4). */
-    private static final int            INDEX_BBAN       = 4;
 
     private static final Optional<Iban> EMPTY_IBAN       = Optional.empty();
 
@@ -120,7 +120,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *
      * @since 1.8.0
      */
-    public static Iban of(CharSequence iban) {
+    public static Iban of(CharSequence iban) throws InvalidIbanException {
         return parse(iban);
     }
 
@@ -135,7 +135,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *
      * @since 1.8.0
      */
-    public static Iban ofNormalized(CharSequence iban) {
+    public static Iban ofNormalized(CharSequence iban) throws InvalidIbanException {
         IbanValidationSuccess success = IbanValidator.validateNormalized(iban);
 
         if (success == null) {
@@ -155,7 +155,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *
      * @since 1.8.0
      */
-    public static Iban parse(CharSequence iban) {
+    public static Iban parse(CharSequence iban) throws InvalidIbanException {
         IbanValidationSuccess success = IbanValidator.validate(iban);
 
         if (success == null) {
@@ -287,6 +287,40 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
+     * Returns the primary {@link Currency} used in this country.
+     * <p>
+     * The currency is resolved via {@link Iso3166Alpha2#getCurrency()}, keyed by this
+     * entry's ISO 3166-1 Alpha-2 country code.
+     * <p>
+     * Returns {@code null} for derived country codes that are not present in
+     * {@link Iso3166Alpha2} (none in the current registry, but defensively handled).
+     *
+     * @return the {@link Currency} constant for this country, or {@code null} if unresolvable
+     *
+     * @since 1.8.5
+     *
+     * @see Iso3166Alpha2#getCurrency()
+     */
+    public Currency getCurrency() {
+        return countryData.getCurrency();
+    }
+
+    /**
+     * Returns the ISO 4217 three-letter currency code for this country as a {@code String}
+     * (e.g., {@code "EUR"}, {@code "GBP"}).
+     * <p>
+     * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
+     * Returns {@code null} if {@link #getCurrency()} returns {@code null}.
+     *
+     * @return the currency code string, or {@code null} if unresolvable
+     *
+     * @since 1.8.5
+     */
+    public String getCurrencyCode() {
+        return getCurrency().getAlphaCode();
+    }
+
+    /**
      * Checks whether the country associated with this IBAN participates in the Single Euro Payments Area (SEPA).
      *
      * @return {@code true} if the country is in SEPA, {@code false} otherwise
@@ -329,7 +363,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getBban() {
         if (bban == null) {
-            bban = ibanStr.substring(INDEX_BBAN);
+            bban = ibanStr.substring(IbanRegistry.INDEX_BBAN);
         }
         return bban;
     }
@@ -408,7 +442,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.1
      */
     public String getNationalCheckDigit() {
-        if (nationalCheckDigit == null && countryData.getNationalCheckDigitIndexRange() != null) {
+        if (nationalCheckDigit == null && countryData.hasNationalCheckDigit()) {
             nationalCheckDigit = countryData.getNationalCheckDigitIndexRange().applyTo(ibanStr);
         }
         return nationalCheckDigit;
@@ -640,7 +674,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.3
      */
     private void readObject(final ObjectInputStream stream) throws InvalidObjectException {
-        readObjectNoData();
+        throw new InvalidObjectException(
+            Iban.class.getSimpleName() + " must be deserialized via its " + Memento.class.getSimpleName() + " proxy");
     }
 
     /**

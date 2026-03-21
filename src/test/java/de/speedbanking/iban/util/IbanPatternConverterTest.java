@@ -1,6 +1,7 @@
 package de.speedbanking.iban.util;
 
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
+import de.speedbanking.test.TestUtil;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +11,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -239,21 +239,10 @@ class IbanPatternConverterTest extends Assertions {
             .isNotEqualTo(segmentD);
     }
 
-    /**
-     * Ensures the private constructor correctly throws an {@link UnsupportedOperationException}
-     * when an attempt is made to instantiate the utility class via reflection.
-     */
-    @DisplayName("Private constructor prevents instantiation via reflection")
+    @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void testPrivateConstructorPreventsInstantiation() throws Exception {
-        // reflection required to test the private constructor
-        Constructor<IbanPatternConverter> constructor = IbanPatternConverter.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-
-        assertThatThrownBy(constructor::newInstance)
-            .isInstanceOf(InvocationTargetException.class)
-            .hasCauseInstanceOf(UnsupportedOperationException.class)
-            .hasRootCauseMessage("Utility class IbanPatternConverter cannot be instantiated");
+    void testPrivateConstructorPreventsInstantiation() {
+        TestUtil.assertConstructorIsPrivate(IbanPatternConverter.class);
     }
 
 }

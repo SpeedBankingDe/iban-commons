@@ -1,5 +1,7 @@
 package de.speedbanking.iban;
 
+import de.speedbanking.test.TestUtil;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -8,8 +10,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -18,19 +18,10 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("checkstyle:MethodName")
 class FormatterTest extends org.assertj.core.api.Assertions {
 
-    @DisplayName("Private constructor should throw UnsupportedOperationException to prevent instantiation")
+    @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_shouldThrowException() throws Exception {
-        Constructor<Formatter> constructor = Formatter.class.getDeclaredConstructor();
-        constructor.setAccessible(true);
-
-        assertThatExceptionOfType(InvocationTargetException.class)
-            .isThrownBy(constructor::newInstance)
-            .withCauseInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getCause)
-            .isInstanceOf(UnsupportedOperationException.class)
-            .extracting(Throwable::getMessage)
-            .isEqualTo("Utility class " + Formatter.class.getSimpleName() + " cannot be instantiated");
+    void privateConstructor_shouldThrowException() {
+        TestUtil.assertConstructorIsPrivate(Formatter.class);
     }
 
     @DisplayName("Default format should correctly insert spaces for various IBAN lengths")

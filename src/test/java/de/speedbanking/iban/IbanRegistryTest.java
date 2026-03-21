@@ -1,5 +1,6 @@
 package de.speedbanking.iban;
 
+import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Iso3166Alpha2;
 
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -20,6 +20,18 @@ import java.time.YearMonth;
 @SuppressWarnings("PMD.LinguisticNaming")
 class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
+    /**
+     * Verifies that an {@link IllegalStateException} is thrown on attempts
+     * to load a non-existing country validator class.
+     */
+    @DisplayName("loadCountryValidator() should throw IllegalStateException on non-existing class")
+    @Test
+    void loadNcdCalculatorShouldThrowIllegalStateExceptionOnNonExistingClass() {
+        assertThatThrownBy(() -> IbanRegistry.loadCountryValidator("Bogus"))
+            .isExactlyInstanceOf(IllegalStateException.class)
+            .hasMessageStartingWith("Could not class 'de.speedbanking.iban.CountryValidators$Bogus': java.lang.ClassNotFoundException");
+    }
+
     @DisplayName("Should return the correct registry entry for a valid code")
     @Test
     void getByCodeShouldReturnCorrectEntry() {
@@ -28,8 +40,8 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         assertThat(de)
             .as("DE should be found")
             .isNotNull()
-            .extracting(IbanRegistry::getCountryName, IbanRegistry::isSepa, IbanRegistry::getPrimary)
-            .containsExactly("Germany", true, null);
+            .extracting(IbanRegistry::getCountryName, IbanRegistry::isSepa, IbanRegistry::isNotSepa, IbanRegistry::getBaseCountry)
+            .containsExactly("Germany", true, false, null);
     }
 
     @DisplayName("Should return null for an unsupported country code")
@@ -63,6 +75,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .as("SEPA country list should not be null or empty")
             .isNotEmpty()
             .allMatch(IbanRegistry::isSepa)
+            .noneMatch(IbanRegistry::isNotSepa)
             .contains(IbanRegistry.DE, IbanRegistry.FR, IbanRegistry.IT)
             .hasSizeGreaterThan(35);
     }
@@ -74,10 +87,10 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             "FR | 27 | 5!n5!n11!c2!n | (null)", // Frankreich: 23 Zeichen
             "NO | 15 | 4!n6!n1!n     | (null)", // Norwegen: kürzeste IBAN
             "MT | 31 | 4!a5!n18!c    | (null)", // Malta: längste IBAN
-            "AX | 18 | 3!n11!n       | FI",     // Åland Islands: primary Finland
-            "GP | 27 | 5!n5!n11!c2!n | FR"      // Guadeloupe: primary France"
+            "AX | 18 | 3!n11!n       | FI",     // Åland Islands: base country Finland
+            "GP | 27 | 5!n5!n11!c2!n | FR"      // Guadeloupe: base country France"
     })
-    void checkIbanProperties(String code, int expectedLength, String expectedPattern, IbanRegistry expectedPrimary) {
+    void checkIbanProperties(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
         IbanRegistry entry = IbanRegistry.getByCode(code);
 
         SoftAssertions softly = new SoftAssertions();
@@ -92,7 +105,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .as("BBAN pattern string mismatch for %s", code)
             .isEqualTo(expectedPattern);
 
-        softly.assertThat(entry.getPrimary()).isEqualTo(expectedPrimary);
+        softly.assertThat(entry.getBaseCountry()).isEqualTo(expectedBaseCountry);
 
         softly.assertAll();
     }
@@ -106,8 +119,10 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryDe)
             .isNotNull()
             .isSameAs(IbanRegistry.DE)
-            .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag, IbanRegistry::isSepa, IbanRegistry::getPrimary)
-            .containsExactly("DE", "Germany", "🇩🇪", true, null);
+            .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
+                IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
+                IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
+            .containsExactly("DE", "Germany", "🇩🇪", true, null, Currency.EUR, "EUR");
 
         softly.assertThat(registryDe.getIbanLength()).isEqualTo(22);
         softly.assertThat(registryDe.getBbanLength()).isEqualTo(18);
@@ -137,7 +152,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryDe.getDepartmentTel()).isEqualTo("+ 49 3016632301");
 
         softly.assertThat(registryDe.getCountryValidator())
-            .isInstanceOf(CountryValidator.DE.class)
+            .isInstanceOf(CountryValidators.DE.class)
             .isNotNull();
 
         softly.assertThat(registryDe.getLastUpdate()).isEqualTo(YearMonth.of(2011, 1));
@@ -156,8 +171,10 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryFr)
             .isNotNull()
             .isSameAs(IbanRegistry.getByCode("FR"))
-            .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag, IbanRegistry::isSepa, IbanRegistry::getPrimary)
-            .containsExactly("FR", "France", "🇫🇷", true, null);
+            .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
+                IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
+                IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
+            .containsExactly("FR", "France", "🇫🇷", true, null, Currency.EUR, "EUR");
 
         softly.assertThat(registryFr.getIbanLength()).isEqualTo(27);
         softly.assertThat(registryFr.getBbanLength()).isEqualTo(23);
@@ -190,7 +207,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryFr.getDepartmentTel()).isEqualTo("+ 33 148005042");
 
         softly.assertThat(registryFr.getCountryValidator())
-            .isInstanceOf(CountryValidator.FR.class)
+            .isInstanceOf(CountryValidators.FR.class)
             .isNotNull();
 
         softly.assertThat(registryFr.getLastUpdate()).isEqualTo(YearMonth.of(2016, 9));
@@ -208,8 +225,10 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .as("IT entry should exist and be the static constant")
             .isNotNull()
             .isSameAs(IbanRegistry.getByCode("IT"))
-            .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag, IbanRegistry::isSepa, IbanRegistry::getPrimary)
-            .containsExactly("IT", "Italy", "🇮🇹", true, null);
+            .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
+                IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
+                IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
+            .containsExactly("IT", "Italy", "🇮🇹", true, null, Currency.EUR, "EUR");
 
         softly.assertThat(registryIt.getBankCodePatternStr()).isEqualTo("5!n");
         softly.assertThat(registryIt.getBankCodeIndexRange())
@@ -231,8 +250,8 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         assertThat(IbanRegistry.getByCode("PS"))
             .as("PS (Palestine) entry should exist")
             .isNotNull()
-            .extracting(IbanRegistry::getCountryName, IbanRegistry::isSepa, IbanRegistry::getPrimary)
-            .containsExactly("Palestine", false, null);
+            .extracting(IbanRegistry::getCountryName, IbanRegistry::isSepa, IbanRegistry::isNotSepa, IbanRegistry::getBaseCountry)
+            .containsExactly("Palestine", false, true, null);
     }
 
     @DisplayName("toString() should contain essential data for DE")
@@ -252,14 +271,14 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("All entries must exist in Iso3166Alpha2")
     @ParameterizedTest
-    @EnumSource(IbanRegistry.class)
+    @IbanRegistrySource
     void allEntriesMustExistInIso3166Alpha2(IbanRegistry entry) {
         assertThat(Iso3166Alpha2.fromCode(entry.getCountryCode())).isNotNull();
     }
 
     @DisplayName("All entries must have null or valid lastUpdate date")
     @ParameterizedTest
-    @EnumSource(IbanRegistry.class)
+    @IbanRegistrySource
     void allEntriesMustHaveLastUpdate(IbanRegistry entry) {
         YearMonth firstYearMonth = YearMonth.of(2000, 1);
         assertThat(entry.getLastUpdate())
@@ -274,7 +293,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("All entries must have a valid IBAN length (4 to 34)")
     @ParameterizedTest
-    @EnumSource(IbanRegistry.class)
+    @IbanRegistrySource
     void allEntriesMustHaveValidIbanLength(IbanRegistry entry) {
         assertThat(entry.getIbanLength())
             .as("IBAN length for %s", entry.getCountryCode())
@@ -283,7 +302,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("All entries must have a valid example IBAN")
     @ParameterizedTest
-    @EnumSource(IbanRegistry.class)
+    @IbanRegistrySource
     void allEntriesMustHaveValidIbanExample(IbanRegistry entry) {
 
         assertThat(entry.getIbanExample())

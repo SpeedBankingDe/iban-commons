@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Utility class to derive a lookup key compatible with the <b>SWIFT IBAN Plus</b> service.
+ * Utility class to derive a lookup key compatible with the <strong>SWIFT IBAN Plus</strong> service.
  * <p>
  * The IBAN Plus directory is used to facilitate BIC derivation from an IBAN by identifying
  * the routing-relevant parts of the BBAN.<br>

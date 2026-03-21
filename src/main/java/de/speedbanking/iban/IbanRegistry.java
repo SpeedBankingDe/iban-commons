@@ -17,12 +17,14 @@ package de.speedbanking.iban;
 
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.util.CountryUtil;
+import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
+import de.speedbanking.util.Iso3166Alpha2;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -2898,8 +2900,10 @@ public enum IbanRegistry {
 
     private final String                           countryFlag;
     private final Pattern                          ibanRegex;
-    private final CountryValidator                 countryValidator;
-    private IbanRegistry                           primary;
+
+    private CountryValidator                       countryValidator;
+
+    private final IbanRegistry                     baseCountry;
 
     /** The minimum required length: Country Code (2) + Check Digits (2). */
     static final int                               MIN_IBAN_BASE_LENGTH = 4;
@@ -2918,7 +2922,7 @@ public enum IbanRegistry {
     /** Index of second IBAN check digit within the full IBAN string (position 4, 0-based index 3). */
     static final int                               INDEX_CHECK_DIGIT2   = 3;
 
-    /** Begin index of BBAN within IBAN (position 5, 0-based index 4). */
+    /** Begin index of the Basic Bank Account Number (BBAN) within IBAN (position 5, 0-based index 4). */
     static final int                               INDEX_BBAN           = MIN_IBAN_BASE_LENGTH;
 
     /** Maximum length of BBAN. */
@@ -2926,6 +2930,21 @@ public enum IbanRegistry {
 
     /** The map for quick lookups by country code. */
     private static final Map<CharSequence, IbanRegistry> CODE_MAP       = buildCodeMap();
+
+    static {
+        List<String> missingCountryValidators = Arrays.stream(values())
+            .map(countryData -> {
+                countryData.countryValidator = loadCountryValidator(countryData.name());
+                return countryData.countryValidator != null ? null : countryData;
+            })
+            .filter(Objects::nonNull)
+            .map(IbanRegistry::getCountryCode)
+            .collect(Collectors.toList());
+
+        if (!missingCountryValidators.isEmpty()) {
+            throw new ExceptionInInitializerError("Country validators missing for: " + String.join(", ", missingCountryValidators));
+        }
+    }
 
     /**
      * Main constructor for {@code IbanRegistry} enum constants.
@@ -2935,46 +2954,58 @@ public enum IbanRegistry {
      * @param structureData the IBAN structure details object
      * @param metaData      the metadata object
      * @param contactData   the contact details object
+     * @param baseCountry   the base country entry
      */
     IbanRegistry(
         StructureData structureData,
         MetaData metaData,
-        ContactData contactData
+        ContactData contactData,
+        IbanRegistry baseCountry
         ) {
 
         this.structureData = Objects.requireNonNull(structureData, "structureData required");
         this.metaData = Objects.requireNonNull(metaData, "metaData required");
         this.contactData = Optional.ofNullable(contactData).orElse(ContactData.EMPTY);
+        this.baseCountry = baseCountry;
 
         this.countryFlag = CountryUtil.createFlagEmoji(name());
 
         String ibanPatternNoCountry = "2!n" + structureData.bbanPatternStr();
         this.ibanRegex = Pattern.compile('^' + name() + IbanPatternConverter.convertToRegex(ibanPatternNoCountry) + '$');
-
-        this.countryValidator = loadValidator(name());
     }
 
     /**
-     * Secondary constructor for country codes that share their registry data with a primary country.
+     * Constructor for {@code IbanRegistry} enum constants.
+     *
+     * @param structureData the IBAN structure details object
+     * @param metaData      the metadata object
+     * @param contactData   the contact details object
+     */
+    IbanRegistry(StructureData structureData, MetaData metaData, ContactData contactData) {
+        this(structureData, metaData, contactData, null);
+    }
+
+    /**
+     * Secondary constructor for country codes that share their registry data with a base country.
      * <p>
-     * Copies all structural and contact data from the specified primary entry.
+     * Copies all structural and contact data from the specified base country entry.
      *
      * @param countryName the full English name of the country
-     * @param primary     the {@code IbanRegistry} enum constant whose data is to be used
+     * @param baseCountry the {@code IbanRegistry} enum constant whose data is to be used
      */
-    IbanRegistry(String countryName, IbanRegistry primary) {
-        // delegate to the main constructor using the objects from the primary entry
+    IbanRegistry(String countryName, IbanRegistry baseCountry) {
+        // delegate to the main constructor using the objects from the base country entry
         this(
-            primary.structureData,
+            baseCountry.structureData,
             MetaData.of(
                 countryName,
-                primary.isSepa(),
-                primary.getIbanExample(),
-                primary.getLastUpdate()
+                baseCountry.isSepa(),
+                baseCountry.getIbanExample(),
+                baseCountry.getLastUpdate()
             ),
-            primary.contactData
+            baseCountry.contactData,
+            baseCountry
         );
-        this.primary = primary;
     }
 
     /**
@@ -3005,6 +3036,40 @@ public enum IbanRegistry {
     }
 
     /**
+     * Returns the primary {@link Currency} used in this country.
+     * <p>
+     * The currency is resolved via {@link Iso3166Alpha2#getCurrency()}, keyed by this
+     * entry's ISO 3166-1 Alpha-2 country code.
+     * <p>
+     * Returns {@code null} for derived country codes that are not present in
+     * {@link Iso3166Alpha2} (none in the current registry, but defensively handled).
+     *
+     * @return the {@link Currency} constant for this country, or {@code null} if unresolvable
+     *
+     * @since 1.8.5
+     *
+     * @see Iso3166Alpha2#getCurrency()
+     */
+    Currency getCurrency() {
+        return Iso3166Alpha2.fromCode(getCountryCode()).getCurrency();
+    }
+
+    /**
+     * Returns the ISO 4217 three-letter currency code for this country as a {@code String}
+     * (e.g., {@code "EUR"}, {@code "GBP"}).
+     * <p>
+     * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
+     * Returns {@code null} if {@link #getCurrency()} returns {@code null}.
+     *
+     * @return the currency code string, or {@code null} if unresolvable
+     *
+     * @since 1.8.5
+     */
+    String getCurrencyCode() {
+        return getCurrency().getAlphaCode();
+    }
+
+    /**
      * Checks whether the country participates in the Single Euro Payments Area (SEPA).
      *
      * @return {@code true} if the country is a SEPA member, {@code false} otherwise
@@ -3012,6 +3077,17 @@ public enum IbanRegistry {
      */
     boolean isSepa() {
         return metaData.isSepa();
+    }
+
+    /**
+     * Checks whether the country does not participate in the Single Euro Payments Area (SEPA).
+     * <p>
+     * This is the negation of {@link #isSepa()}.
+     * <p>
+     * @return {@code true} if the country is not a SEPA member, {@code false} if it is
+     */
+    boolean isNotSepa() {
+        return !isSepa();
     }
 
     /**
@@ -3132,6 +3208,15 @@ public enum IbanRegistry {
     }
 
     /**
+     * Returns whether the country's BBAN structure defines a National Check Digit (NCD) part.
+     *
+     * @return {@code true} if a National Check Digit (NCD) exists, {@code false} otherwise
+     */
+    boolean hasNationalCheckDigit() {
+        return structureData.hasNationalCheckDigit();
+    }
+
+    /**
      * Returns the {@link ContactData} object.
      *
      * @return contact data
@@ -3242,13 +3327,47 @@ public enum IbanRegistry {
     }
 
     /**
-     * Returns the primary {@code IbanRegistry} entry if this entry is a secondary code
-     * that shares data with another country (e.g., {@code AX} points to {@code FI}).
+     * Returns the base country {@code IbanRegistry} entry if this entry is a derived code
+     * that inherits data from another country (e.g., {@code AX} points to {@code FI}).
      *
-     * @return the primary {@code IbanRegistry} entry, or {@code null} if this is a primary entry
+     * @return the base country {@code IbanRegistry} entry, or {@code null} if this is a base country
      */
-    IbanRegistry getPrimary() {
-        return primary;
+    IbanRegistry getBaseCountry() {
+        return baseCountry;
+    }
+
+    /**
+     * Returns the {@code IbanRegistry} entries that derive their data from this base country
+     * (e.g., {@code FI} would return a list containing {@code AX}).
+     *
+     * @return a list of derived {@code IbanRegistry} entries, or an empty list
+     */
+    List<IbanRegistry> getDerivedCountries() {
+        return isBaseCountry()
+            ? Arrays.stream(values())
+                .filter(cd -> this == cd.getBaseCountry())
+                .collect(Collectors.toList())
+            : Collections.emptyList();
+    }
+
+    /**
+     * Returns {@code true} if this entry is a base country, i.e. it does not inherit data
+     * from another country (e.g., {@code FI}).
+     *
+     * @return {@code true} if this is a base country
+     */
+    boolean isBaseCountry() {
+        return baseCountry == null;
+    }
+
+    /**
+     * Returns {@code true} if this entry is a derived code that inherits its IBAN
+     * structure from another country (e.g., {@code AX} inherits from {@code FI}).
+     *
+     * @return {@code true} if this is a derived country
+     */
+    boolean isDerivedCountry() {
+        return baseCountry != null;
     }
 
     /**
@@ -3289,36 +3408,38 @@ public enum IbanRegistry {
      * @param countryCode the two-letter country code (e.g., "DE", "AD")
      * @return the instantiated {@link CountryValidator} for the given country,
      *         or {@code null} if the validator class cannot be found or instantiated
+     *
      * @see CountryValidator
+     * @see CountryValidators
      */
-    private static CountryValidator loadValidator(final String countryCode) {
-        String className = CountryValidator.class.getName() + '$' + countryCode;
+    static CountryValidator loadCountryValidator(final String countryCode) {
+        String className = CountryValidators.class.getName() + '$' + countryCode;
 
         try {
             // reflective call of the constructor of the inner static class
             Class<?> validatorClass = Class.forName(className);
-            Object instance = validatorClass.getDeclaredConstructor().newInstance();
+            Object instance = validatorClass.newInstance();
             return (CountryValidator) instance;
 
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
-               | InvocationTargetException | NoSuchMethodException ex) {
-            return null;
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+            throw new IllegalStateException("Could not class '" + className + "': " + ex);
         }
     }
 
     /**
-     * Builds the static, immutable map for quick {@code IbanRegistry} lookups by country code.
+     * Builds the private, static map for quick {@code IbanRegistry} lookups by country code.
      *
-     * @return an unmodifiable {@code Map<CharSequence, IbanRegistry>} keyed by country codes
+     * @return a {@code Map<CharSequence, IbanRegistry>} keyed by country codes
      */
     private static Map<CharSequence, IbanRegistry> buildCodeMap() {
         return Collections.unmodifiableMap(
             Arrays.stream(values())
-                .collect(Collectors.toMap(
-                    IbanRegistry::name,
-                    registry -> registry
-                ))
-        );
+            .collect(Collectors.toMap(
+                IbanRegistry::name,
+                registry -> registry,
+                (a, b) -> a,
+                () -> new LinkedHashMap<>())
+            ));
     }
 
     /**
@@ -3469,6 +3590,10 @@ public enum IbanRegistry {
             return branchCodeIndexRange;
         }
 
+        public boolean hasBranchCode() {
+            return branchCodeIndexRange != null;
+        }
+
         public IndexRange accountNumberIndexRange() {
             return accountNumberIndexRange;
         }
@@ -3477,8 +3602,8 @@ public enum IbanRegistry {
             return nationalCheckDigitIndexRange;
         }
 
-        public boolean hasBranchCode() {
-            return branchCodeIndexRange != null;
+        public boolean hasNationalCheckDigit() {
+            return nationalCheckDigitIndexRange != null;
         }
 
         public int getBbanLength() {
