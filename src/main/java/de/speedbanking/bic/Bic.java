@@ -45,7 +45,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     private static final long         serialVersionUID    = 42L;
 
     /** The mandatory "{@code XXX}" suffix for an 8-character BIC to become an 11-character BIC. */
-    private static final String       HEAD_OFFICE_SUFFIX  = "XXX";
+    static final String               HEAD_OFFICE_SUFFIX  = "XXX";
 
     /** The fixed length of a BIC without branch code (8 characters). */
     static final int                  BIC8_LENGTH         = 8;
