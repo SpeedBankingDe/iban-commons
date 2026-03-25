@@ -381,6 +381,7 @@ class Iso3166Alpha2Test {
 
     @DisplayName("fromCode() accepts StringBuilder and returns the correct constant")
     @Test
+    @SuppressWarnings("UnnecessaryStringBuilder")
     void fromCode_stringBuilder_returnsCorrectConstant() {
         assertThat(Iso3166Alpha2.fromCode(new StringBuilder("DE"))).isSameAs(Iso3166Alpha2.DE);
         assertThat(Iso3166Alpha2.fromCode(new StringBuilder("FR"))).isSameAs(Iso3166Alpha2.FR);
@@ -389,6 +390,7 @@ class Iso3166Alpha2Test {
 
     @DisplayName("fromCode() accepts StringBuffer and returns the correct constant")
     @Test
+    @SuppressWarnings("JdkObsolete")
     void fromCode_stringBuffer_returnsCorrectConstant() {
         assertThat(Iso3166Alpha2.fromCode(new StringBuffer("GB"))).isSameAs(Iso3166Alpha2.GB);
         assertThat(Iso3166Alpha2.fromCode(new StringBuffer("JP"))).isSameAs(Iso3166Alpha2.JP);
@@ -396,6 +398,7 @@ class Iso3166Alpha2Test {
 
     @DisplayName("fromCode() returns null for null or wrong-length StringBuilder/StringBuffer inputs")
     @Test
+    @SuppressWarnings({"UnnecessaryStringBuilder", "JdkObsolete"})
     void fromCode_charSequenceEdgeCases_returnsNull() {
         assertThat(Iso3166Alpha2.fromCode((CharSequence) null)).isNull();
         assertThat(Iso3166Alpha2.fromCode(new StringBuilder())).isNull();           // empty
@@ -435,6 +438,7 @@ class Iso3166Alpha2Test {
 
     @DisplayName("isAssigned() accepts StringBuilder and StringBuffer")
     @Test
+    @SuppressWarnings({"UnnecessaryStringBuilder", "JdkObsolete"})
     void isAssigned_charSequenceTypes_workCorrectly() {
         assertThat(Iso3166Alpha2.isAssigned(new StringBuilder("DE"))).isTrue();
         assertThat(Iso3166Alpha2.isAssigned(new StringBuilder("AA"))).isFalse();

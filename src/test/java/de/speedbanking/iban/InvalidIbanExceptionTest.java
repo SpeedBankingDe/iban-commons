@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 /**
  * JUnit test class for {@link InvalidIbanException}.<br>
@@ -32,18 +33,17 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
             .isEqualTo(reason);
 
         assertThat(exception.getMessage())
-            .as("Exception message must match the reason's failure text")
-            .isEqualTo(reason.getText());
+            .as("Exception message must contain the reason's failure text")
+            .isEqualTo(reason.getText() + " (" + reason + ")");
 
         assertThat(exception.toString())
-            .startsWith("InvalidIbanException: ")
-            .endsWith(" (" + reason + ")");
+            .isEqualTo("InvalidIbanException[reason=" + reason + ", input=null]");
     }
 
     @DisplayName("of(reason) should yield no input")
     @Test
     void ofWithoutInputShouldHaveNoInput() {
-        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.values()[0]);
+        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.EMPTY);
 
         assertThat(exception.getInput())
             .as("getInput() should be null when no input was supplied")
@@ -61,7 +61,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("of(reason, input) should store both reason and input")
     @Test
     void ofWithInputShouldStoreInput() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
 
         InvalidIbanException exception = InvalidIbanException.of(reason, input);
@@ -79,22 +79,14 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
 
         assertThat(exception.toString())
             .as("toString() should contain the input")
-            .endsWith(": " + input);
-    }
-
-    @DisplayName("of(reason, null) should treat null input as absent")
-    @Test
-    void ofWithNullInputShouldHaveNoInput() {
-        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.values()[0], null);
-
-        assertThat(exception.getInput()).isNull();
-        assertThat(exception.hasInput()).isFalse();
+            .endsWith("input=" + input + ']');
     }
 
     @DisplayName("of(reason, empty string) should treat empty input as absent")
-    @Test
-    void ofWithEmptyInputShouldHaveNoInput() {
-        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.values()[0], "");
+    @ParameterizedTest
+    @NullAndEmptySource
+    void ofWithNullOrBlankInputShouldHaveNoInput(String input) {
+        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.EMPTY, input);
 
         assertThat(exception.getInput()).isNull();
         assertThat(exception.hasInput())
@@ -129,7 +121,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("equals() should be true for same reason and same input")
     @Test
     void equalsShouldBeTrueForSameReasonAndInput() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
 
         InvalidIbanException a = InvalidIbanException.of(reason, input);
@@ -142,7 +134,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("equals() should be true for same reason and both inputs null")
     @Test
     void equalsShouldBeTrueForSameReasonAndNullInput() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        IbanValidationError reason = IbanValidationError.EMPTY;
 
         InvalidIbanException a = InvalidIbanException.of(reason, null);
         InvalidIbanException b = InvalidIbanException.of(reason, null);
@@ -167,7 +159,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("equals() should be false when one has input and the other does not")
     @Test
     void equalsShouldBeFalseWhenInputDiffers() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        IbanValidationError reason = IbanValidationError.EMPTY;
 
         InvalidIbanException withInput    = InvalidIbanException.of(reason, "DE00123456789012345678");
         InvalidIbanException withoutInput = InvalidIbanException.of(reason);
@@ -177,15 +169,16 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("equals() should be reflexive")
     @Test
+    @SuppressWarnings("SelfAssertion")
     void equalsShouldBeReflexive() {
-        InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.values()[0]);
+        InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.EMPTY);
         assertThat(ex).isEqualTo(ex);
     }
 
     @DisplayName("equals() should return false for null and other types")
     @Test
     void equalsShouldReturnFalseForNullAndOtherTypes() {
-        InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.values()[0]);
+        InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.EMPTY);
         assertThat(ex).isNotEqualTo(null);
         assertThat(ex).isNotEqualTo("some string");
     }
@@ -197,28 +190,24 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("toString() should include class name, message, reason and input")
     @Test
     void toStringShouldContainAllParts() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
 
         String result = InvalidIbanException.of(reason, input).toString();
 
         assertThat(result)
-            .startsWith("InvalidIbanException: ")
-            .contains("(" + reason + ")")
-            .endsWith(": " + input);
+            .isEqualTo("InvalidIbanException[reason=" + reason + ", input=" + input + "]");
     }
 
-    @DisplayName("toString() without input should not contain trailing colon segment")
+    @DisplayName("toString() without input")
     @Test
     void toStringShouldNotContainInputSegmentWhenAbsent() {
-        IbanValidationError reason = IbanValidationError.values()[0];
+        IbanValidationError reason = IbanValidationError.EMPTY;
 
         String result = InvalidIbanException.of(reason).toString();
 
         assertThat(result)
-            .startsWith("InvalidIbanException: ")
-            .endsWith("(" + reason + ")")
-            .doesNotContain(": " + reason + ":");
+            .isEqualTo("InvalidIbanException[reason=EMPTY, input=null]");
     }
 
 }

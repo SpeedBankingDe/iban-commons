@@ -142,8 +142,8 @@ public final class CharUtil {
      * @since 1.8.0
      */
     public static boolean isDigitOrUpperCase(final char c) {
-        return c >= '0' && c <= '9'
-            || c >= 'A' && c <= 'Z';
+        return (c >= '0' && c <= '9')
+            || (c >= 'A' && c <= 'Z');
     }
 
     /**
@@ -164,7 +164,7 @@ public final class CharUtil {
 
         for (int i = beginIndex; i < endIndex; i++) {
             final char c = chars[i];
-            if (!(c >= '0' && c <= '9' || c >= 'A' && c <= 'Z')) {
+            if (!((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z'))) {
                 return false;
             }
         }
@@ -173,7 +173,8 @@ public final class CharUtil {
 
     /**
      * Validates that the provided character array is not null.
-     * * @param chars the array to check
+     *
+     * @param chars the array to check
      * @throws NullPointerException if the array is null
      */
     private static void requireCharArray(final char[] chars) {

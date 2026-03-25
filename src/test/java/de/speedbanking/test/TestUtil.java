@@ -99,6 +99,7 @@ public final class TestUtil {
      * @return the serialized byte representation
      * @throws IOException if an I/O error occurs
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals")
     public static <T extends Serializable> byte[] serialize(final T object) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ObjectOutputStream oos = new ObjectOutputStream(baos)) {
@@ -116,7 +117,7 @@ public final class TestUtil {
      * @throws IOException            if an I/O error occurs
      * @throws ClassNotFoundException if the class of the serialized object cannot be found
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
     public static <T extends Serializable> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
              ObjectInputStream ois = new ObjectInputStream(bais)) {

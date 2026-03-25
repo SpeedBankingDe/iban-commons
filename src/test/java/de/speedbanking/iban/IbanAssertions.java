@@ -310,7 +310,7 @@ public class IbanAssertions extends Assertions {
          */
         public IbanAssert isSepa(boolean expectedSepaParticipation) {
             isNotNull();
-            if (!Objects.equals(actual.isSepa(), expectedSepaParticipation)) {
+            if (actual.isSepa() != expectedSepaParticipation) {
                 failWithMessage("Expected SEPA participation to be '%s' but was '%s' for IBAN '%s'",
                     expectedSepaParticipation, actual.isSepa(), actual);
             }

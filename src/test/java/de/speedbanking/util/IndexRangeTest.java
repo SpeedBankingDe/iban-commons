@@ -147,6 +147,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should satisfy equals and hashCode contract, including null names")
     @Test
+    @SuppressWarnings("SelfAssertion")
     void shouldSatisfyEqualsAndHashCodeContract() {
         IndexRange range1 = IndexRange.of(1, 5);
         IndexRange range2 = IndexRange.of(1, 5);
@@ -182,6 +183,7 @@ class IndexRangeTest extends org.assertj.core.api.Assertions {
         }
 
         @Override
+        @SuppressWarnings("StringSplitter")
         protected IndexRange convert(String source) {
             String[] parts = source.split("\\s*,\\s*");
             return IndexRange.of(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));

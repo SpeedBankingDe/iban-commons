@@ -353,10 +353,11 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         "DE | 11 | 1000000001234567890123 | 23",
         "DE | 99 | 1000000001234567890123 | 23"
     })
+    @SuppressWarnings("UnnecessaryStringBuilder")
     void testFixCheckDigits(String countryCode, String initialCheckDigits, String bban, String expectedCheckDigits) {
-        StringBuilder ibanBuilder = new StringBuilder(countryCode)
-            .append(initialCheckDigits)
-            .append(bban);
+        StringBuilder ibanBuilder = new StringBuilder(countryCode);
+        ibanBuilder.append(initialCheckDigits);
+        ibanBuilder.append(bban);
 
         StringBuilder resultBuilder1 = IbanValidator.fixCheckDigits(ibanBuilder);
 

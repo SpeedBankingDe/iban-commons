@@ -34,6 +34,7 @@ import java.io.InvalidClassException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.StreamCorruptedException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
@@ -123,14 +124,14 @@ class IbanTest {
         "DE91100000000123456780        | INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
     void of_InvalidIban_ShouldThrowException(String ibanInput, IbanValidationError expectedValidationError, String expectedMessagePattern) {
-        String ibanInputNorm = ibanInput == null ? null : ibanInput.replace(" ", "");
+        String ibanInputNorm = ibanInput == null ? "" : ibanInput.replace(" ", "");
 
         IbanValidator.setLastReason(null);
 
         assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.of(ibanInput))
             .withCause(null)
-            .withMessage(expectedMessagePattern)
+            .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm.isEmpty() ? "" : ": " + ibanInputNorm))
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
 
         assertThat(IbanValidator.getLastReason())
@@ -141,7 +142,7 @@ class IbanTest {
         assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.ofNormalized(ibanInputNorm))
             .withCause(null)
-            .withMessage(expectedMessagePattern)
+            .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm.isEmpty() ? "" : ": " + ibanInputNorm))
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
         IbanValidator.setLastReason(null);
 
@@ -192,12 +193,11 @@ class IbanTest {
     @IbanRegistrySource(countryType = CountryType.DERIVED)
     void registry_DerivedAndBase_ShouldBeConsistent(IbanRegistry country) {
         assertThat(country.getBaseCountry()).isNotNull();
-        assertThat(country.getBaseCountry().isBaseCountry());
+        assertThat(country.getBaseCountry().isBaseCountry()).isTrue();
         assertThat(country.isBaseCountry()).isFalse();
         assertThat(country.isDerivedCountry()).isTrue();
 
-        assertThat(country.getDerivedCountries())
-            .isEmpty();
+        assertThat(country.getDerivedCountries()).isEmpty();
     }
 
     /**
@@ -429,7 +429,7 @@ class IbanTest {
             assertThatInvalidIbanException()
                 .isThrownBy(() -> Iban.of(iban))
                 .withCause(null)
-                .withMessageMatching(IbanValidationError.INVALID_STRUCTURE.getText() + '|' + IbanValidationError.INVALID_CHECKSUM.getText())
+                .withMessageMatching(String.format("^(?:%s|%s) \\([A-Z].+", IbanValidationError.INVALID_STRUCTURE.getText(), IbanValidationError.INVALID_CHECKSUM.getText()))
                 .extracting("reason")
                 .isIn(IbanValidationError.INVALID_STRUCTURE, IbanValidationError.INVALID_CHECKSUM);
         }
@@ -648,8 +648,8 @@ class IbanTest {
         final Iban iban1 = iban;
         byte[] bytes = TestUtil.serialize(iban1);
 
-        // The serialized stream must contain the Memento class name, not Iban itself
-        String streamContent = new String(bytes);
+        // the serialized stream must contain the Memento class name, not Iban itself
+        String streamContent = new String(bytes, StandardCharsets.UTF_8);
         assertThat(streamContent)
             .as("Serialized stream must reference the Memento proxy class")
             .contains("Memento");

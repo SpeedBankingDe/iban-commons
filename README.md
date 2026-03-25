@@ -4,8 +4,8 @@
 
 [![Maven Central Version](https://img.shields.io/maven-central/v/de.speedbanking/iban-commons?label=Maven%20Central)](https://central.sonatype.com/artifact/de.speedbanking/iban-commons)
 [![Maven Central Last Update](https://img.shields.io/maven-central/last-update/de.speedbanking/iban-commons?label=Last%20Update)](https://central.sonatype.com/artifact/de.speedbanking/iban-commons)
-[![Build (JDK 11 Linux)](https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk11_ubuntu.yml?label=Build%20(JDK%2011%20Linux))](https://github.com/SpeedBankingDe/iban-commons/actions)
-[![Build (JDK 11 Win)](https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk11_win.yml?label=Build%20(JDK%2011%20Win))](https://github.com/SpeedBankingDe/iban-commons/actions)
+[![Build (JDK 17 Linux)](https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_ubuntu.yml?label=Build%20(JDK%2017%20Linux))](https://github.com/SpeedBankingDe/iban-commons/actions)
+[![Build (JDK 17 Win)](https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_win.yml?label=Build%20(JDK%2017%20Win))](https://github.com/SpeedBankingDe/iban-commons/actions)
 [![GitHub Repo stars](https://img.shields.io/github/stars/SpeedBankingDe/iban-commons)](https://github.com/SpeedBankingDe/iban-commons/stargazers)
 
 **[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [📚 Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**

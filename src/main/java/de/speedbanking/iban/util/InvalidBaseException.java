@@ -97,13 +97,13 @@ public abstract class InvalidBaseException extends RuntimeException {
     }
 
     /**
-     * Returns {@code true} if a non-blank input was recorded with this exception.
+     * Returns {@code true} if a non-empty input was recorded with this exception.
      *
      * @return {@code true} if {@code input} is non-{@code null}
-     *         (blank input is normalized to {@code null})
+     *         (empty input is normalized to {@code null})
      */
     public boolean hasInput() {
-        return input != null;
+        return input != null && input.length() > 0;
     }
 
     /**
@@ -118,7 +118,7 @@ public abstract class InvalidBaseException extends RuntimeException {
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        } else if (obj == null || getClass() != obj.getClass()) {
+        } else if (!(obj instanceof InvalidBaseException)) {
             return false;
         }
         InvalidBaseException other = (InvalidBaseException) obj;
@@ -137,30 +137,42 @@ public abstract class InvalidBaseException extends RuntimeException {
     }
 
     /**
-     * Returns a detailed string representation of this exception, including the
-     * simple class name, the error message, the specific validation reason, and,
-     * if present, the erroneous input.
+     * Returns the detailed error message string of this exception.
+     * <p>
+     * The message includes the base error text from the underlying {@link ValidationError},
+     * the specific reason constant in parentheses, and the erroneous input if present.
+     *
+     * @return the detailed error message, or {@code null} if no message is available
+     */
+    @Override
+    public final String getMessage() {
+        StringBuilder sb = new StringBuilder();
+        String msg = super.getMessage();
+        if (msg != null) {
+            sb.append(msg);
+        }
+        if (reason != null) {
+            if (sb.length() > 0) {
+                sb.append(" ");
+            }
+            sb.append("(").append(reason).append(")");
+        }
+        if (hasInput()) {
+            sb.append(": ").append(input);
+        }
+        return sb.length() == 0 ? null : sb.toString();
+    }
+
+    /**
+     * Returns a short string representation of this exception for debugging purposes.
+     * <p>
+     * Follows the format {@code SimpleClassName[field=value, ...]}.
      *
      * @return a string representation of the exception
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName());
-        String message = getLocalizedMessage();
-        if (message != null) {
-            sb.append(": ")
-              .append(message);
-        }
-        if (reason != null) {
-            sb.append(" (")
-              .append(reason)
-              .append(')');
-        }
-        if (hasInput()) {
-            sb.append(": ")
-              .append(input);
-        }
-        return sb.toString();
+        return getClass().getSimpleName() + "[reason=" + reason + ", input=" + input + ']';
     }
 
 }

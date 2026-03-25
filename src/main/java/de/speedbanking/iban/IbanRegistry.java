@@ -21,6 +21,7 @@ import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Iso3166Alpha2;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +58,7 @@ import java.util.stream.Collectors;
  *
  * @since 1.8.0
  */
+@SuppressWarnings("ImmutableEnumChecker")
 public enum IbanRegistry {
 
     // --- BGN: Enum Constants (generated from IBAN Registry) ---
@@ -2929,7 +2931,7 @@ public enum IbanRegistry {
     static final int                               MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
 
     /** The map for quick lookups by country code. */
-    private static final Map<CharSequence, IbanRegistry> CODE_MAP       = buildCodeMap();
+    private static final Map<String, IbanRegistry> CODE_MAP             = buildCodeMap();
 
     static {
         List<String> missingCountryValidators = Arrays.stream(values())
@@ -3418,27 +3420,27 @@ public enum IbanRegistry {
         try {
             // reflective call of the constructor of the inner static class
             Class<?> validatorClass = Class.forName(className);
-            Object instance = validatorClass.newInstance();
+            Object instance = validatorClass.getDeclaredConstructor().newInstance();
             return (CountryValidator) instance;
 
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
-            throw new IllegalStateException("Could not class '" + className + "': " + ex);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
+            throw new IllegalStateException("Could not instantiate class '" + className + "': " + ex);
         }
     }
 
     /**
      * Builds the private, static map for quick {@code IbanRegistry} lookups by country code.
      *
-     * @return a {@code Map<CharSequence, IbanRegistry>} keyed by country codes
+     * @return a {@code Map<String, IbanRegistry>} keyed by country codes
      */
-    private static Map<CharSequence, IbanRegistry> buildCodeMap() {
+    private static Map<String, IbanRegistry> buildCodeMap() {
         return Collections.unmodifiableMap(
             Arrays.stream(values())
             .collect(Collectors.toMap(
                 IbanRegistry::name,
                 registry -> registry,
                 (a, b) -> a,
-                () -> new LinkedHashMap<>())
+                LinkedHashMap::new)
             ));
     }
 
@@ -3449,7 +3451,7 @@ public enum IbanRegistry {
      * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
      */
     public static IbanRegistry getByCode(final CharSequence code) {
-        return CODE_MAP.get(code);
+        return code == null ? null : CODE_MAP.get(code.toString());
     }
 
     /**

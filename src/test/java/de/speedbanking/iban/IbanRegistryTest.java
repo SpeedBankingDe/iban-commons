@@ -13,6 +13,7 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.YearMonth;
+import java.time.ZoneId;
 
 /**
  * JUnit test class for {@link IbanRegistry}.
@@ -29,7 +30,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     void loadNcdCalculatorShouldThrowIllegalStateExceptionOnNonExistingClass() {
         assertThatThrownBy(() -> IbanRegistry.loadCountryValidator("Bogus"))
             .isExactlyInstanceOf(IllegalStateException.class)
-            .hasMessageStartingWith("Could not class 'de.speedbanking.iban.CountryValidators$Bogus': java.lang.ClassNotFoundException");
+            .hasMessageStartingWith("Could not instantiate class 'de.speedbanking.iban.CountryValidators$Bogus': java.lang.ClassNotFoundException");
     }
 
     @DisplayName("Should return the correct registry entry for a valid code")
@@ -287,7 +288,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
                 lu -> assertThat(lu).isNull(),
                 lu -> assertThat(lu)
                           .isAfter(firstYearMonth)
-                          .isBeforeOrEqualTo(YearMonth.now())
+                          .isBeforeOrEqualTo(YearMonth.now(ZoneId.systemDefault()))
             );
     }
 
@@ -329,6 +330,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should satisfy equals and hashCode for ContactData")
     @Test
+    @SuppressWarnings("SelfAssertion")
     void shouldSatisfyEqualsHashCodeForContactData() {
         IbanRegistry.ContactData contact1 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
         IbanRegistry.ContactData contact2 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");

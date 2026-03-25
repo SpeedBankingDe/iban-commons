@@ -7,6 +7,7 @@ import org.junit.jupiter.params.converter.ArgumentConverter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -40,7 +41,7 @@ public class BooleanConverter implements ArgumentConverter {
             throw new ArgumentConversionException("Source must be a String or Boolean");
         }
 
-        String input = ((String) source).toLowerCase().trim();
+        String input = ((String) source).toLowerCase(Locale.ROOT).trim();
         return POSITIVE_VALUES.contains(input);
     }
 

@@ -37,8 +37,8 @@ class BicValidationErrorTest extends Assertions {
         InvalidBicException ex = InvalidBicException.of(reason);
         assertThat(ex.toString())
             .contains(ex.getClass().getSimpleName())
-            .contains(ex.getMessage())
-            .contains("(" + ex.getReason().toString() + ")");
+            .contains(reason.toString())
+            .contains("[reason=" + ex.getReason() + ", input=null]");
     }
 
     @DisplayName("All failure texts and toString must match their expected descriptions")

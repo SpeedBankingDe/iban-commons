@@ -15,6 +15,8 @@
  */
 package de.speedbanking.iban;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * Abstract base class for {@link CountryValidator} implementations that also carry
  * a <strong>National Check Digit (NCD)</strong> algorithm.
@@ -80,10 +82,10 @@ abstract class AbstractNcdCountryValidator
 
         try {
             Class<?> validatorClass = Class.forName(className);
-            Object instance = validatorClass.newInstance();
+            Object instance = validatorClass.getDeclaredConstructor().newInstance();
             return (NationalCheckDigitCalculator) instance;
 
-        } catch (Exception ex) {
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException ex) {
             throw new ExceptionInInitializerError("Could not load ncd calculator class '" + className + "': " + ex);
         }
     }

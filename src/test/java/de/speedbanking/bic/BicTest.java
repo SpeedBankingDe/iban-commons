@@ -63,7 +63,7 @@ class BicTest {
     void of_NullOrEmpty_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC is null or empty")
+            .withMessage("BIC is null or empty (" + BicValidationError.EMPTY + ")")
             .hasFieldOrPropertyWithValue("reason", BicValidationError.EMPTY);
     }
 
@@ -79,7 +79,7 @@ class BicTest {
     void of_InvalidLength_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC has incorrect length")
+            .withMessage("BIC has incorrect length (INCORRECT_LENGTH): " + bic)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INCORRECT_LENGTH);
     }
 
@@ -92,7 +92,7 @@ class BicTest {
     void of_InvalidCountry_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC has invalid country code")
+            .withMessage("BIC has invalid country code (INVALID_COUNTRY): " + bic)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_COUNTRY);
     }
 
@@ -107,7 +107,7 @@ class BicTest {
     void of_IllegalCharacters_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC contains illegal character(s)")
+            .withMessage("BIC contains illegal character(s) (ILLEGAL_CHARACTERS): " + bic)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.ILLEGAL_CHARACTERS);
     }
 

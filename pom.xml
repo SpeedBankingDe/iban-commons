@@ -103,12 +103,6 @@
         <developer2Name>Noah Spann</developer2Name>
         <developer2Email>spannn@outlook.de</developer2Email>
 
-        <!-- NOTE: maven.compiler.release requires JDK 9+; source/target are kept
-             as fallback for strict Java-8 toolchains -->
-        <maven.compiler.release>${javaVersion}</maven.compiler.release>
-        <maven.compiler.source>${javaVersion}</maven.compiler.source>
-        <maven.compiler.target>${javaVersion}</maven.compiler.target>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
@@ -128,6 +122,8 @@
         <dep.plugin.compiler.version>3.15.0</dep.plugin.compiler.version>
         <dep.plugin.cyclonedx.version>2.9.1</dep.plugin.cyclonedx.version>
         <dep.plugin.enforcer.version>3.6.2</dep.plugin.enforcer.version>
+        <!-- last error-prone version compatible with Java 17; 2.43.0+ requires Java 21 -->
+        <dep.plugin.error-prone.version>2.42.0</dep.plugin.error-prone.version>
         <dep.plugin.exec.version>3.6.3</dep.plugin.exec.version>
         <dep.plugin.gpg.version>3.2.8</dep.plugin.gpg.version>
         <dep.plugin.jar.version>3.5.0</dep.plugin.jar.version>
@@ -182,6 +178,11 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${dep.plugin.compiler.version}</version>
                     <configuration>
+                        <!-- maven.compiler.release requires JDK 9+; source/target are kept
+                             as fallback for strict Java-8 toolchains -->
+                        <release>${javaVersion}</release>
+                        <source>${javaVersion}</source>
+                        <target>${javaVersion}</target>
                         <debug>true</debug>
                         <debuglevel>lines,vars,source</debuglevel>
                         <showWarnings>true</showWarnings>
@@ -600,6 +601,56 @@
     </build>
 
     <profiles>
+
+        <!-- profile to fail the build on Error Prone findings, active by default.
+             To disable: mvn clean compile -D check.skip-errorprone=true
+             see: https://errorprone.info/ -->
+        <profile>
+            <id>errorprone-fatal</id>
+            <activation>
+                <property>
+                    <name>!check.skip-errorprone</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <fork>true</fork>
+                            <compilerArgs combine.children="append">
+                                <arg>-Werror</arg>
+                                <arg>-XDcompilePolicy=simple</arg>
+                                <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
+
+                                <arg>--should-stop=ifError=FLOW</arg>
+
+                                <arg>-Xplugin:ErrorProne -Xep:MissingSummary:WARN -Xep:InvalidBlockTag:WARN</arg>
+
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                                <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                                <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                            </compilerArgs>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>com.google.errorprone</groupId>
+                                    <artifactId>error_prone_core</artifactId>
+                                    <version>${dep.plugin.error-prone.version}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
         <profile>
             <!-- this profile is activated for release:prepare and release:perform goals -->

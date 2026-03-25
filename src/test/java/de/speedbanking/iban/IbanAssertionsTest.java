@@ -39,7 +39,7 @@ class IbanAssertionsTest {
     @Test
     void shouldCatchInvalidIbanException() {
         assertThatInvalidIbanException().isThrownBy(() -> Iban.of("SHORT"))
-            .withMessage("IBAN has unsupported country code")
+            .withMessage("IBAN has unsupported country code (UNSUPPORTED_COUNTRY): SHORT")
             .withNoCause();
     }
 

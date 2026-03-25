@@ -47,25 +47,21 @@ abstract class AbstractCountryValidator implements CountryValidator {
     private final IbanRegistry countryData;
 
     /**
-     * Package-private constructor — only subclasses within this package may extend
-     * this class.
+     * Package-private constructor.<br>
+     * Validates the country code before completing initialization to prevent partially initialized objects.
      */
     AbstractCountryValidator() {
-        String clazzName = getClass().getSimpleName();
-        countryData = IbanRegistry.getByCode(clazzName);
-
-        if (countryData == null) {
-            throw new ExceptionInInitializerError("'" + clazzName + "' is not a supported IBAN country code");
-        }
+        this.countryData = resolveRegistryData(getClass().getSimpleName());
     }
 
-    /**
-     * Provides access to country-specific registry data of the calculator, i.e. the enum entry in {@link IbanRegistry}.
-     *
-     * @return country-specific registry data
-     *
-     * @see IbanRegistry
-     */
+    private static IbanRegistry resolveRegistryData(String clazzName) {
+        IbanRegistry data = IbanRegistry.getByCode(clazzName);
+        if (data == null) {
+            throw new ExceptionInInitializerError("'" + clazzName + "' is not a supported IBAN country code");
+        }
+        return data;
+    }
+
     final IbanRegistry getCountryData() {
         return countryData;
     }

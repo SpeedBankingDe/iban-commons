@@ -123,12 +123,13 @@ public final class IbanPatternConverter {
     }
 
     /**
-     * Creates a new list by aggregating all subsequent segments of the same character type,
+     * Creates a new unmodifiable list by aggregating all subsequent segments of the same character type,
      * adding up their lengths. This is a form of Run-Length Encoding (RLE).
      *
      * @param segments the input list of segments
      * @return a new list with consecutive segments of the same type merged
      */
+    @SuppressWarnings("MixedMutabilityReturnType")
     public static List<Segment> aggregateSegments(List<Segment> segments) {
         if (segments == null || segments.isEmpty()) {
             return Collections.emptyList();
@@ -158,7 +159,7 @@ public final class IbanPatternConverter {
         // add the last accumulated segment after the loop finishes
         aggregated.add(current);
 
-        return aggregated;
+        return Collections.unmodifiableList(aggregated);
     }
 
     /**
