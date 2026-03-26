@@ -448,7 +448,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Cape Verde ({@code CV})</strong><p>
+     * <strong>Cabo Verde ({@code CV})</strong><p>
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n13!c}<br>
@@ -742,7 +742,7 @@ public enum IbanRegistry {
     AX("Åland Islands", FI),
 
     /**
-     * <strong>Falkland Islands ({@code FK})</strong><p>
+     * <strong>Falkland Islands (Malvinas) ({@code FK})</strong><p>
      * IBAN Length: 18<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!a12!n}<br>
@@ -960,7 +960,7 @@ public enum IbanRegistry {
     PM("Saint Pierre and Miquelon", FR),
 
     /**
-     * <strong>Wallis and Futuna Islands ({@code WF})</strong><p>
+     * <strong>Wallis and Futuna ({@code WF})</strong><p>
      * IBAN Length: 27<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
@@ -970,7 +970,7 @@ public enum IbanRegistry {
      *   components:  {@code FR 14 20041 01005 0500013M026 06}
      * </pre>
      */
-    WF("Wallis and Futuna Islands", FR),
+    WF("Wallis and Futuna", FR),
 
     /**
      * <strong>Gabon ({@code GA})</strong><p>
@@ -996,7 +996,7 @@ public enum IbanRegistry {
        null),
 
     /**
-     * <strong>United Kingdom ({@code GB})</strong><p>
+     * <strong>United Kingdom of Great Britain and Northern Ireland ({@code GB})</strong><p>
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 4!a6!n8!n}<br>
@@ -1339,7 +1339,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Islamic Republic of Iran ({@code IR})</strong><p>
+     * <strong>Iran (Islamic Republic of) ({@code IR})</strong><p>
      * IBAN Length: 26<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n19!n}<br>
@@ -1716,7 +1716,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Moldova ({@code MD})</strong><p>
+     * <strong>Moldova, Republic of ({@code MD})</strong><p>
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 2!c18!c}<br>
@@ -2074,7 +2074,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Palestine ({@code PS})</strong><p>
+     * <strong>Palestine, State of ({@code PS})</strong><p>
      * IBAN Length: 29<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a21!c}<br>
@@ -2202,7 +2202,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Russia ({@code RU})</strong><p>
+     * <strong>Russian Federation ({@code RU})</strong><p>
      * IBAN Length: 33<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 9!n5!n15!c}<br>
@@ -2434,7 +2434,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>São Tomé und Príncipe ({@code ST})</strong><p>
+     * <strong>São Tomé and Príncipe ({@code ST})</strong><p>
      * IBAN Length: 25<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
@@ -2452,7 +2452,7 @@ public enum IbanRegistry {
          .withAccountNumber(IndexRange.of(12, 25))
          .build(),
        MetaData.of(
-           "São Tomé und Príncipe", false, "ST23000100010051845310146",
+           "Sao Tome and Principe", false, "ST23000100010051845310146",
            YearMonth.of(2020, 5)),
        ContactData.of(
            "Banco Central de Sao Tome e Principe", "DSP", "Avenida Marginal 12 de Julho",
@@ -2538,7 +2538,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Turkey ({@code TR})</strong><p>
+     * <strong>Türkiye ({@code TR})</strong><p>
      * IBAN Length: 26<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n1!n16!c}<br>
@@ -2589,7 +2589,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Vatican City State ({@code VA})</strong><p>
+     * <strong>Holy See ({@code VA})</strong><p>
      * IBAN Length: 22<br>
      * SEPA: Yes<br>
      * BBAN Structure: {@code 3!n15!n}<br>
@@ -2614,7 +2614,7 @@ public enum IbanRegistry {
     ),
 
     /**
-     * <strong>Virgin Islands ({@code VG})</strong><p>
+     * <strong>Virgin Islands (British) ({@code VG})</strong><p>
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 4!a16!n}<br>
