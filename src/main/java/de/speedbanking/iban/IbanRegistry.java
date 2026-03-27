@@ -25,7 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -2896,42 +2896,42 @@ public enum IbanRegistry {
 
     // --- END: Enum Constants (manually maintained) ---
 
-    private final StructureData                    structureData;
-    private final MetaData                         metaData;
-    private final ContactData                      contactData;
+    private final StructureData                     structureData;
+    private final MetaData                          metaData;
+    private final ContactData                       contactData;
 
-    private final String                           countryFlag;
-    private final Pattern                          ibanRegex;
+    private final String                            countryFlag;
+    private final Pattern                           ibanRegex;
 
-    private CountryValidator                       countryValidator;
+    private CountryValidator                        countryValidator;
 
-    private final IbanRegistry                     baseCountry;
+    private final IbanRegistry                      baseCountry;
 
     /** The minimum required length: Country Code (2) + Check Digits (2). */
-    static final int                               MIN_IBAN_BASE_LENGTH = 4;
+    static final int                                MIN_IBAN_BASE_LENGTH = 4;
 
     /** ISO 13616 standard minimum. */
-    static final int                               MIN_IBAN_LENGTH      = Arrays.stream(values())
+    static final int                                MIN_IBAN_LENGTH      = Arrays.stream(values())
         .mapToInt(IbanRegistry::getIbanLength).min().orElse(MIN_IBAN_BASE_LENGTH);
 
     /** ISO 13616 standard maximum. */
-    static final int                               MAX_IBAN_LENGTH      = Arrays.stream(values())
+    static final int                                MAX_IBAN_LENGTH      = Arrays.stream(values())
         .mapToInt(IbanRegistry::getIbanLength).max().orElse(34);
 
     /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
-    static final int                               INDEX_CHECK_DIGIT1   = 2;
+    static final int                                INDEX_CHECK_DIGIT1   = 2;
 
     /** Index of second IBAN check digit within the full IBAN string (position 4, 0-based index 3). */
-    static final int                               INDEX_CHECK_DIGIT2   = 3;
+    static final int                                INDEX_CHECK_DIGIT2   = 3;
 
     /** Begin index of the Basic Bank Account Number (BBAN) within IBAN (position 5, 0-based index 4). */
-    static final int                               INDEX_BBAN           = MIN_IBAN_BASE_LENGTH;
+    static final int                                INDEX_BBAN           = MIN_IBAN_BASE_LENGTH;
 
     /** Maximum length of BBAN. */
-    static final int                               MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
+    static final int                                MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
 
-    /** The map for quick lookups by country code. */
-    private static final Map<String, IbanRegistry> CODE_MAP             = buildCodeMap();
+    /** Map for quick lookups by packed country code. */
+    private static final Map<Integer, IbanRegistry> LOOKUP             = buildLookupMap();
 
     static {
         List<String> missingCountryValidators = Arrays.stream(values())
@@ -3429,40 +3429,49 @@ public enum IbanRegistry {
     }
 
     /**
-     * Builds the private, static map for quick {@code IbanRegistry} lookups by country code.
-     *
-     * @return a {@code Map<String, IbanRegistry>} keyed by country codes
+     * Packs two characters into a single {@code int} using bit-shifting: {@code (char1 << 16) | char2}.
      */
-    private static Map<String, IbanRegistry> buildCodeMap() {
-        return Collections.unmodifiableMap(
-            Arrays.stream(values())
-            .collect(Collectors.toMap(
-                IbanRegistry::name,
-                registry -> registry,
-                (a, b) -> a,
-                LinkedHashMap::new)
-            ));
+    private static int pack(char c1, char c2) {
+        return (c1 << 16) | c2;
+    }
+
+    /**
+     * Builds the private, static map for quick {@code IbanRegistry} lookups by packed country code.
+     *
+     * @return a {@code Map<Integer, IbanRegistry>} keyed by packed country codes
+     */
+    private static Map<Integer, IbanRegistry> buildLookupMap() {
+        IbanRegistry[] values = values();
+        int capacity = (int) (values.length / 0.75f) + 1;
+        Map<Integer, IbanRegistry> map = new HashMap<>(capacity);
+        for (IbanRegistry c : values) {
+            String name = c.name();
+            map.put(pack(name.charAt(0), name.charAt(1)), c);
+        }
+        return Collections.unmodifiableMap(map);
     }
 
     /**
      * Returns the registry entry for a given country code instantly.
      *
      * @param code the two-letter country code (e.g., "DE")
-     * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
+     * @return the matching {@link IbanRegistry} constant,
+     *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown
      */
     public static IbanRegistry getByCode(final CharSequence code) {
-        return code == null ? null : CODE_MAP.get(code.toString());
+        return code == null || code.length() != 2 ? null : LOOKUP.get(pack(code.charAt(0), code.charAt(1)));
     }
 
     /**
      * Returns the registry entry for a given country code instantly.
      *
-     * @param c0 the first character of the country code
-     * @param c1 the second character of the country code
+     * @param c1 the first character of the country code
+     * @param c2 the second character of the country code
      * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
+     * @return the matching {@link IbanRegistry} constant, or {@code null} if unknown
      */
-    public static IbanRegistry getByCode(final char c0, final char c1) {
-        return CODE_MAP.get(String.valueOf(new char[] {c0, c1}));
+    public static IbanRegistry getByCode(final char c1, final char c2) {
+        return LOOKUP.get(pack(c1, c2));
     }
 
     /**
