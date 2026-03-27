@@ -80,7 +80,7 @@ public final class BicValidationResult {
      * @return {@code true} if valid, {@code false} otherwise
      */
     public boolean isValid() {
-        return null != bic;
+        return bic != null;
     }
 
     /**

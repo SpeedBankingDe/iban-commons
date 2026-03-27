@@ -16,7 +16,7 @@
 package de.speedbanking.util;
 
 import java.util.Collections;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -667,10 +667,14 @@ public enum Iso3166Alpha2 {
     ZW("Zimbabwe",                                             Currency.ZWL);
 
     /**
-     * Unmodifiable lookup map from two-letter code string to enum constant.<br>
-     * Preserves declaration order via {@link LinkedHashMap}.
+     * Constant for length of two-letter code.
      */
-    private static final Map<String, Iso3166Alpha2> LOOKUP = buildLookup();
+    private static final int                        CODE_LEN = 2;
+
+    /**
+     * Internal unmodifiable primitive-friendly lookup map from packed two-letter code to enum constant.
+     */
+    private static final Map<Integer, Iso3166Alpha2> LOOKUP   = buildLookupMap();
 
     /** The English short country name as defined in ISO 3166-1. */
     private final String                            countryName;
@@ -688,26 +692,25 @@ public enum Iso3166Alpha2 {
     }
 
     /**
-     * Builds the lookup map at class-load time.<br>
-     * The initial capacity is sized to avoid any rehashing.
+     * Packs two characters into a single {@code int} using bit-shifting: {@code (char1 << 16) | char2}.
      */
-    private static Map<String, Iso3166Alpha2> buildLookup() {
-        Iso3166Alpha2[] values = values();
-        int capacity = (int) (values.length / 0.75f) + 1;
-        Map<String, Iso3166Alpha2> map = new LinkedHashMap<>(capacity);
-        for (final Iso3166Alpha2 c : values) {
-            map.put(c.name(), c);
-        }
-        return Collections.unmodifiableMap(map);
+    private static int pack(char c1, char c2) {
+        return (c1 << 16) | c2;
     }
 
     /**
-     * Returns the English short country name as defined in ISO 3166-1.
-     *
-     * @return the English country name (e.g., {@code "Bolivia"})
+     * Builds the lookup map at class-load time.<br>
+     * The initial capacity is sized to avoid any rehashing.
      */
-    public String getCountryName() {
-        return countryName;
+    private static Map<Integer, Iso3166Alpha2> buildLookupMap() {
+        Iso3166Alpha2[] values = values();
+        int capacity = (int) (values.length / 0.75f) + 1;
+        Map<Integer, Iso3166Alpha2> map = new HashMap<>(capacity);
+        for (final Iso3166Alpha2 c : values) {
+            String name = c.name();
+            map.put(pack(name.charAt(0), name.charAt(1)), c);
+        }
+        return Collections.unmodifiableMap(map);
     }
 
     /**
@@ -719,6 +722,15 @@ public enum Iso3166Alpha2 {
      */
     public String getCode() {
         return name();
+    }
+
+    /**
+     * Returns the English short country name as defined in ISO 3166-1.
+     *
+     * @return the English country name (e.g., {@code "Bolivia"})
+     */
+    public String getCountryName() {
+        return countryName;
     }
 
     /**
@@ -743,7 +755,7 @@ public enum Iso3166Alpha2 {
      * solely for this lookup.
      * <p>
      * The lookup is case-sensitive; only uppercase codes are recognized
-     * (e.g., {@code "LT"} matches, {@code "lt"} does not).
+     * (e.g., {@code "LT"} matches, {@code "lt"} does not).<br>
      * Leading or trailing whitespace is <em>not</em> stripped — {@code " DE"} is not
      * a valid two-letter code and returns {@code null}.
      *
@@ -753,10 +765,16 @@ public enum Iso3166Alpha2 {
      *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown
      */
     public static Iso3166Alpha2 fromCode(final CharSequence code) {
-        if (code == null || code.length() != 2) {
-            return null;
-        }
-        return LOOKUP.get(code.toString());
+        return code == null || code.length() != CODE_LEN ? null : LOOKUP.get(pack(code.charAt(0), code.charAt(1)));
+    }
+
+    /**
+     * High-performance check using primitive chars.
+     * <p>
+     * Zero-allocation, no String creation.
+     */
+    public static boolean isAssigned(char c1, char c2) {
+        return LOOKUP.containsKey(pack(c1, c2));
     }
 
     /**
@@ -774,7 +792,7 @@ public enum Iso3166Alpha2 {
      *         {@code false} otherwise
      */
     public static boolean isAssigned(final CharSequence code) {
-        return fromCode(code) != null;
+        return code != null && code.length() == 2 && isAssigned(code.charAt(0), code.charAt(1));
     }
 
     /**

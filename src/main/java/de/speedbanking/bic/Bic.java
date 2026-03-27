@@ -70,31 +70,44 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /** {@code true} if the object represents a BIC-8. */
     private final boolean             isBic8;
 
+    /**
+     * The normalized BIC-11 string.
+     */
+    private final String              bic11;
+
     // lazily derived strings — transient so they are re-derived after deserialization
-    private transient volatile String bic11;
     private transient volatile String bankCode;
     private transient volatile String countryCode;
     private transient volatile String locationCode;
-    private transient volatile String branchCode; // null for BIC-8; set eagerly in constructor for BIC-11
+
+    /**
+     * Branch code, only present on BIC-11, {@code null} for BIC-8.
+     */
+    private final String              branchCode;
 
     /**
      * Package-private constructor.
      * <p>
      * Construction is restricted to {@link BicValidator} which guarantees
-     * the input {@code bicArr} is valid, normalized, and correctly sized (8 or 11).
+     * the input character sequence {@code csBic} is valid, normalized,
+     * and correctly sized (8 or 11 characters long).
      * <p>
      * For BIC-11 input the branch code is stored eagerly so that {@link #toBic11()}
      * can reconstruct the full string without retaining the original {@code char[]}.
      *
-     * @param bicArr the normalized, validated BIC characters
+     * @param bicInput the normalized, validated sequence of BIC characters
      */
-    Bic(final char[] bicArr) {
-        this.isBic8 = bicArr.length == BIC8_LENGTH;
-        this.bic8 = new String(bicArr, 0, BIC8_LENGTH);
-        // for BIC-11 the branch code is stored now; for BIC-8 it stays null
-        if (!isBic8) {
-            this.bic11 = new String(bicArr);
-            this.branchCode = new String(bicArr, BRANCH_CODE_START, BIC11_LENGTH - BRANCH_CODE_START);
+    Bic(CharSequence bicInput) {
+        this.isBic8 = bicInput.length() == BIC8_LENGTH;
+
+        if (this.isBic8) {
+            this.bic8 = bicInput.toString();
+            this.bic11 = null;
+            this.branchCode = null;
+        } else {
+            this.bic8 = bicInput.subSequence(0, BIC8_LENGTH).toString();
+            this.bic11 = bicInput.toString();
+            this.branchCode = bicInput.subSequence(BRANCH_CODE_START, BIC11_LENGTH).toString();
         }
     }
 
@@ -279,12 +292,11 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      *   <li>For BIC {@code DEUTDEFF444}: Branch Code is {@code 500} (Specific Branch of Deutsche Bank AG Frankfurt am Main)</li>
      * </ul>
      *
-     * @return the Branch Code (e.g., {@code "XXX"}), or {@code null} if the BIC is 8 characters long
+     * @return the Branch Code (e.g., {@code "XXX"}), or {@code null} if the BIC is a BIC-8 (8 characters long)
      *
      * @since 1.8.0
      */
     public String getBranchCode() {
-        // branchCode is null for BIC-8, and set eagerly in the constructor for BIC-11
         return branchCode;
     }
 
@@ -301,7 +313,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     }
 
     /**
-     * Returns the BIC in its 11-character format.
+     * Returns the BIC in its 11-character format.<br>
      * If the original BIC is 8 characters, the <strong>{@code "XXX"}</strong>
      * (head office) suffix is appended.
      *
@@ -310,11 +322,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public String toBic11() {
-        if (bic11 == null) {
-            // can only occur for BIC-8
-            bic11 = bic8 + HEAD_OFFICE_SUFFIX;
-        }
-        return bic11;
+        return this.isBic8 ? bic8 + HEAD_OFFICE_SUFFIX : bic11;
     }
 
     /**

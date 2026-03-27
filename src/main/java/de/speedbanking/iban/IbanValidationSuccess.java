@@ -38,12 +38,4 @@ final class IbanValidationSuccess {
         this.countryData = countryData;
     }
 
-    char[] getNormIbanArr() {
-        return normIbanArr;
-    }
-
-    IbanRegistry getCountryData() {
-        return countryData;
-    }
-
 }

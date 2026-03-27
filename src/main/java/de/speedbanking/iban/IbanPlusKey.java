@@ -91,9 +91,8 @@ public final class IbanPlusKey {
      * @return the lookup code, or {@code null} if parsing fails or input is invalid
      */
     public static String of(final String ibanStr) {
-        return Iban.tryParse(ibanStr)
-            .map(IbanPlusKey::of)
-            .orElse(null);
+        Iban iban = Iban.tryParseOrNull(ibanStr);
+        return iban != null ? of(iban) : null;
     }
 
     /**

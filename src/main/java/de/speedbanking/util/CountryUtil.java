@@ -42,13 +42,13 @@ public final class CountryUtil {
      * syntactically correct codes such as {@code "AA"}, {@code "QQ"}, or {@code "ZZ"}
      * are not assigned and will therefore return {@code false}.
      *
-     * @param countryCode the string to validate (e.g., {@code "FI"}, {@code "JP"})
+     * @param countryCode the char sequence to validate (e.g., {@code "FI"}, {@code "JP"})
      * @return {@code true} if the code is an officially assigned ISO 3166-1 Alpha-2
      *         country code; {@code false} otherwise
      *
      * @since 1.8.0
      */
-    public static boolean isValidCountryCode(final String countryCode) {
+    public static boolean isValidCountryCode(final CharSequence countryCode) {
         return Iso3166Alpha2.isAssigned(countryCode);
     }
 

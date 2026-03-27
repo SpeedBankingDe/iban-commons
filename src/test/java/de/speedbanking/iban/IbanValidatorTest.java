@@ -56,7 +56,7 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         IbanValidationSuccess result = IbanValidator.validateRaw(VALID_RAW_DE);
         assertThat(result)
             .isNotNull()
-            .extracting(IbanValidationSuccess::getNormIbanArr, IbanValidationSuccess::getCountryData)
+            .extracting(t -> t.normIbanArr, t -> t.countryData)
             .containsExactly(VALID_NORM_DE.toCharArray(), IbanRegistry.DE);
         assertThat(IbanValidator.getLastReason()).isNull();
     }

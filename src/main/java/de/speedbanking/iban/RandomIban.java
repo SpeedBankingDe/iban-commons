@@ -257,11 +257,6 @@ public final class RandomIban {
      * implement {@link NationalCheckDigitCalculator}, or for countries that have no NCD
      * field ({@link IbanRegistry#getNationalCheckDigitIndexRange()} returns {@code null}).
      *
-     * <p>For Norway's Mod-11 algorithm, certain random account numbers yield an invalid
-     * weighted sum (remainder 10).  In that case {@code calculateNationalCheckDigit}
-     * returns {@code null} and this method regenerates the digits in the NCD-adjacent
-     * field until a valid combination is found (max {@value #MAX_NCD_RETRIES} retries).
-     *
      * @param ibanRegistry the registry entry for the country
      * @param ibanBuilder  the mutable IBAN string with {@code "00"} ISO check-digit placeholders
      *                     and a randomly generated BBAN; modified in-place

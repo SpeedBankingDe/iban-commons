@@ -49,8 +49,6 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
 
     private static final long           serialVersionUID = 42L;
 
-    private static final Optional<Iban> EMPTY_IBAN       = Optional.empty();
-
     /**
      * The raw, normalized IBAN string, created once in the constructor (e.g., "DE91100000000123456789").
      */
@@ -178,7 +176,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         IbanValidationSuccess success = IbanValidator.validate(iban);
 
         return success == null
-            ? EMPTY_IBAN
+            ? Optional.empty()
             : Optional.of(new Iban(success.normIbanArr, success.countryData));
     }
 
@@ -317,7 +315,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.5
      */
     public String getCurrencyCode() {
-        return getCurrency().getAlphaCode();
+        Currency c = getCurrency();
+        return c != null ? c.getAlphaCode() : null;
     }
 
     /**

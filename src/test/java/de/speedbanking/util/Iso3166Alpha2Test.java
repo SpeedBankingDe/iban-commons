@@ -52,7 +52,7 @@ class Iso3166Alpha2Test {
         "CO | CO",
         "TR | TR"
     })
-    void getCode_knownConstants_returnsEnumName(String code, String expected) {
+    void getCode_knownConstants_returnsEnumName(String code, CharSequence expected) {
         assertThat(Iso3166Alpha2.valueOf(code).getCode()).isEqualTo(expected);
     }
 
@@ -415,7 +415,7 @@ class Iso3166Alpha2Test {
     @DisplayName("isAssigned() returns true for officially assigned codes")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"KP", "SY", "IR", "CU", "VE", "RU", "NI", "BY", "DZ", "JP", "AF", "RE", "CW"})
-    void isAssigned_assignedCodes_returnsTrue(String code) {
+    void isAssigned_assignedCodes_returnsTrue(CharSequence code) {
         assertThat(Iso3166Alpha2.isAssigned(code))
             .as("'%s' should be assigned", code)
             .isTrue();
@@ -445,6 +445,23 @@ class Iso3166Alpha2Test {
         assertThat(Iso3166Alpha2.isAssigned(new StringBuffer("FR"))).isTrue();
         assertThat(Iso3166Alpha2.isAssigned(new StringBuffer("ZZ"))).isFalse();
         assertThat(Iso3166Alpha2.isAssigned((CharSequence) null)).isFalse();
+    }
+
+    @DisplayName("isAssigned(char, char) returns true for valid pairs and false for invalid ones")
+    @ParameterizedTest(name = "[{index}] {0} + {1} = {2}")
+    @CsvSource(delimiter = '|', value = {
+        "D | E | true",
+        "F | R | true",
+        "d | e | false",
+        "A | A | false",
+        "A | 1 | false",
+        "1 | A | false",
+        "0 | 0 | false",
+        "_ | _ | false"
+    })
+
+    void isAssigned_primitiveChars_worksCorrectly(char c1, char c2, boolean expectedResult) {
+        assertThat(Iso3166Alpha2.isAssigned(c1, c2)).isEqualTo(expectedResult);
     }
 
     // =========================================================================
@@ -537,7 +554,7 @@ class Iso3166Alpha2Test {
         }
     }
 
-    @DisplayName("LOOKUP round-trip: fromCode(c.getCode()) returns the identical instance")
+    @DisplayName("Lookup round-trip: fromCode(c.getCode()) returns the identical instance")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @EnumSource(Iso3166Alpha2.class)
     void invariant_lookupRoundTrip_returnsIdenticalInstance(Iso3166Alpha2 c) {

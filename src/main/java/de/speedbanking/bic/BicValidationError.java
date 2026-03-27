@@ -32,11 +32,14 @@ public enum BicValidationError implements ValidationError {
     /** The BIC string does not have the mandatory length of 8 or 11 characters (ISO 9362 requires 8 or 11). */
     INCORRECT_LENGTH("BIC has incorrect length"),
 
-    /** The BIC contains characters that are not allowed (only upper-case letters and digits are permitted). */
-    ILLEGAL_CHARACTERS("BIC contains illegal character(s)"),
+    /** The institution code (characters 1 - 4) within the BIC is not alphabetic. */
+    INVALID_BANK_CODE("Invalid bank code"),
 
     /** The country code (characters 5 and 6) within the BIC is not a valid ISO 3166-1 Alpha-2 code. */
-    INVALID_COUNTRY("BIC has invalid country code");
+    INVALID_COUNTRY("BIC has invalid country code"),
+
+    /** The BIC contains characters that are not allowed (only upper-case letters and digits are permitted). */
+    ILLEGAL_CHARACTERS("BIC contains illegal character(s)");
 
     private final String errorText;
 

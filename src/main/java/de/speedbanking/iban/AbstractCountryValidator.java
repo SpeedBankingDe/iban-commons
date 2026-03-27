@@ -19,10 +19,10 @@ package de.speedbanking.iban;
  * Abstract base class for all country-specific IBAN validators.
  *
  * <h3>Design</h3>
- * Every generated {@code CountryValidator} inner class extends this base instead of
- * implementing {@link CountryValidator} directly. Centralising shared behaviour here
- * keeps the generated subclasses minimal: they only contain a {@code validateIban}
- * implementation and nothing else.
+ * Every country-specific {@code CountryValidator} implementation (declared in {@link CountryValidators})
+ * extends this base instead of implementing {@link CountryValidator} directly.
+ * Centralising shared behaviour here keeps the generated subclasses minimal:
+ * they only contain a {@code validateIban} implementation and nothing else.
  *
  * <h3>toString</h3>
  * A final {@link #toString()} is provided that formats the validator as

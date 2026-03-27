@@ -96,13 +96,26 @@ class BicTest {
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_COUNTRY);
     }
 
+    @DisplayName("of() should throw exception for invalid bank code")
+    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ValueSource(strings = {
+        "mARKDEFF",
+        "MÄRKDEFF",
+        "____DEFF"
+    })
+    void of_InvalidBankCode_ShouldThrowException(String bic) {
+        assertThatInvalidBicException()
+            .isThrownBy(() -> Bic.of(bic))
+            .withMessage("Invalid bank code (INVALID_BANK_CODE): " + bic)
+            .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_BANK_CODE);
+    }
+
     @DisplayName("of() should throw exception for illegal characters")
     @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {
         "MARKDE 1", // space
         "MARKDE_1", // underscore
-        "markdeff", // lowercase
-        "MÄRKDEFF"  // non-ASCII
+        "MARKDEff"  // lowercase
     })
     void of_IllegalCharacters_ShouldThrowException(String bic) {
         assertThatInvalidBicException()

@@ -16,6 +16,7 @@
 package de.speedbanking.bic;
 
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
+import static de.speedbanking.util.CharUtil.isNotUpperCase;
 
 import de.speedbanking.util.Iso3166Alpha2;
 
@@ -58,28 +59,33 @@ public final class BicValidator {
             return validationFailed(BicValidationError.INCORRECT_LENGTH);
         }
 
-        char[] bicArr = new char[len];
-
         // character set check
         // BIC must only contain uppercase ASCII letters (A-Z) and digits (0-9)
         for (int i = 0; i < len; i++) {
             char c = rawBic.charAt(i);
 
-            // BIC should be all uppercase and contain only digits or letters.
-            if (!isDigitOrUpperCase(c)) {
+            if (i < Bic.COUNTRY_CODE_START) { // <4
+                if (isNotUpperCase(c)) {
+                    return validationFailed(BicValidationError.INVALID_BANK_CODE);
+                }
+            } else if (i == Bic.COUNTRY_CODE_START) { // ==4
+                if (isNotUpperCase(c)) {
+                    return validationFailed(BicValidationError.INVALID_COUNTRY);
+                }
+            } else if (i == Bic.COUNTRY_CODE_START + 1) { // ==5
+                // country code check (positions 5 and 6 / indices 4 and 5)
+                // ISO 9362 requires an officially assigned ISO 3166-1 Alpha-2 country code
+
+                if (!Iso3166Alpha2.isAssigned(rawBic.charAt(i - 1), c)) {
+                    return validationFailed(BicValidationError.INVALID_COUNTRY);
+                }
+            } else if (!isDigitOrUpperCase(c)) {
+                // BIC should be all uppercase and contain only digits or letters
                 return validationFailed(BicValidationError.ILLEGAL_CHARACTERS);
             }
-            bicArr[i] = c;
         }
 
-        // country code check (positions 5 and 6, indices 4 and 5)
-        // ISO 9362 requires an officially assigned ISO 3166-1 Alpha-2 country code
-        String countryCode = new String(bicArr, Bic.COUNTRY_CODE_START, 2);
-        if (!Iso3166Alpha2.isAssigned(countryCode)) {
-            return validationFailed(BicValidationError.INVALID_COUNTRY);
-        }
-
-        Bic bic = new Bic(bicArr);
+        Bic bic = new Bic(rawBic);
         return BicValidationResult.valid(bic);
     }
 

@@ -3,6 +3,7 @@ package de.speedbanking.bic;
 import static de.speedbanking.bic.BicValidationError.EMPTY;
 import static de.speedbanking.bic.BicValidationError.ILLEGAL_CHARACTERS;
 import static de.speedbanking.bic.BicValidationError.INCORRECT_LENGTH;
+import static de.speedbanking.bic.BicValidationError.INVALID_BANK_CODE;
 import static de.speedbanking.bic.BicValidationError.INVALID_COUNTRY;
 import static de.speedbanking.bic.BicValidationError.values;
 
@@ -63,8 +64,9 @@ class BicValidationErrorTest extends Assertions {
         assertThat(values()).containsExactly(
             EMPTY,
             INCORRECT_LENGTH,
-            ILLEGAL_CHARACTERS,
-            INVALID_COUNTRY);
+            INVALID_BANK_CODE,
+            INVALID_COUNTRY,
+            ILLEGAL_CHARACTERS);
     }
 
 }
