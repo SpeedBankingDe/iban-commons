@@ -16,6 +16,7 @@
 package de.speedbanking.iban;
 
 import de.speedbanking.util.IndexRange;
+import de.speedbanking.util.Mod97;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -825,13 +826,9 @@ final class NationalCheckDigitCalculators {
         }
 
         /**
-         * Computes the ISO 7064 MOD 97-10 remainder for a sequence of digits and/or
-         * uppercase letters, processing characters one at a time without intermediate
-         * {@code String} allocation.
-         *
-         * <p>Digit characters {@code '0'–'9'} contribute one decimal position.
-         * Letter characters {@code 'A'–'Z'} are expanded to their two-digit numeric
-         * equivalents ({@code A=10, B=11, …, Z=35}) and contribute two decimal positions.
+         * Computes the ISO 7064 MOD 97-10 remainder for a sub-sequence of a character array.
+         * <p>
+         * Delegates to {@link Mod97#calculateRange(char[], int, int)}.
          *
          * @param data   the source character array
          * @param offset start index (inclusive)
@@ -839,17 +836,7 @@ final class NationalCheckDigitCalculators {
          * @return the MOD 97 remainder in range [0, 96]
          */
         static int mod97(final char[] data, final int offset, final int length) {
-            int remainder = 0;
-            for (int i = 0; i < length; i++) {
-                char ch = data[offset + i];
-                if (ch >= '0' && ch <= '9') {
-                    remainder = (remainder * 10 + (ch - '0')) % MODULO_BASE;
-                } else if (ch >= 'A' && ch <= 'Z') {
-                    // Two-digit letter expansion: A=10 … Z=35
-                    remainder = (remainder * 100 + (ch - 'A' + 10)) % MODULO_BASE;
-                }
-            }
-            return remainder;
+            return Mod97.calculateRange(data, offset, length);
         }
 
         @Override

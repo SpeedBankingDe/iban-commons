@@ -16,6 +16,8 @@
 package de.speedbanking.bic;
 
 import de.speedbanking.util.CountryUtil;
+import de.speedbanking.util.Currency;
+import de.speedbanking.util.Iso3166Alpha2;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -35,6 +37,12 @@ import java.util.Optional;
  * all component strings (bank code, country code, location code, branch code) are derived
  * lazily on first access and then cached.
  * <p>
+ * <strong>BIC-8 and BIC-11 equality:</strong> Two {@code Bic} instances are considered equal
+ * when their 11-character representations match. This means {@code Bic.of("DEUTDEFF")} and
+ * {@code Bic.of("DEUTDEFFXXX")} are equal and produce the same {@link #hashCode()}.
+ * Consequently, a BIC-8 and a BIC-11 with the {@code XXX} head-office suffix have different
+ * {@link #length()} values but the same {@link #equals} and {@link #hashCode} result.
+ * <p>
  * For more information, see:
  * <a href="https://en.wikipedia.org/wiki/ISO_9362">Wikipedia: ISO 9362</a>
  *
@@ -44,20 +52,26 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
 
     private static final long         serialVersionUID    = 42L;
 
-    /** The mandatory "{@code XXX}" suffix for an 8-character BIC to become an 11-character BIC. */
-    static final String               HEAD_OFFICE_SUFFIX  = "XXX";
+    /** The mandatory {@code "XXX"} suffix appended to a BIC-8 to form a BIC-11. */
+    public static final String        HEAD_OFFICE_SUFFIX  = "XXX";
 
-    /** The fixed length of a BIC without branch code (8 characters). */
-    static final int                  BIC8_LENGTH         = 8;
+    /** The fixed length of a BIC without branch code ({@value} characters). */
+    public static final int           BIC8_LENGTH         = 8;
 
-    /** The fixed length of a BIC with branch code (11 characters). */
-    static final int                  BIC11_LENGTH        = BIC8_LENGTH + HEAD_OFFICE_SUFFIX.length();
+    /** The fixed length of a BIC with branch code ({@value} characters). */
+    public static final int           BIC11_LENGTH        = BIC8_LENGTH + HEAD_OFFICE_SUFFIX.length();
 
-    /** Indices for the BIC components (ISO 9362). */
-    static final int                  BANK_CODE_START     = 0;
-    static final int                  COUNTRY_CODE_START  = 4;
-    static final int                  LOCATION_CODE_START = 6;
-    static final int                  BRANCH_CODE_START   = 8; // only for BIC-11
+    /** Start index of the Institution Code (Bank Code) within a BIC string ({@value}). */
+    public static final int           BANK_CODE_START     = 0;
+
+    /** Start index of the Country Code within a BIC string ({@value}). */
+    public static final int           COUNTRY_CODE_START  = 4;
+
+    /** Start index of the Location Code within a BIC string ({@value}). */
+    public static final int           LOCATION_CODE_START = 6;
+
+    /** Start index of the Branch Code within a BIC-11 string ({@value}). */
+    public static final int           BRANCH_CODE_START   = 8;
 
     /**
      * The normalized BIC-8 string — the single source of truth for this instance.
@@ -240,6 +254,27 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     }
 
     /**
+     * Returns the full English country name associated with this BIC's country code.
+     * <p>
+     * Resolved via {@link Iso3166Alpha2#getCountryName()}.
+     * <p>
+     * Examples:
+     * <ul>
+     *   <li>For country code {@code "DE"}: {@code "Germany"}</li>
+     *   <li>For country code {@code "JP"}: {@code "Japan"}</li>
+     * </ul>
+     *
+     * @return the country name, or {@code null} if the country code cannot be resolved
+     *
+     * @since 1.8.5
+     */
+    public String getCountryName() {
+        Iso3166Alpha2 country =
+            Iso3166Alpha2.fromCode(getCountryCode());
+        return country != null ? country.getCountryName() : null;
+    }
+
+    /**
      * Returns the two-character country flag emoji corresponding to the BIC's
      * country code, based on the <strong>ISO 3166-1 Alpha-2</strong> standard.
      * <p>
@@ -298,6 +333,38 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public String getBranchCode() {
         return branchCode;
+    }
+
+    /**
+     * Returns the primary {@link Currency} used in the country
+     * associated with this BIC.
+     * <p>
+     * Resolved via {@link Iso3166Alpha2#getCurrency()}.
+     *
+     * @return the {@link Currency} constant for this country,
+     *         or {@code null} if unresolvable
+     *
+     * @since 1.8.5
+     */
+    public Currency getCurrency() {
+        Iso3166Alpha2 country = Iso3166Alpha2.fromCode(getCountryCode());
+        return country != null ? country.getCurrency() : null;
+    }
+
+    /**
+     * Returns the ISO 4217 three-letter currency code for the country associated with this BIC
+     * (e.g., {@code "EUR"}, {@code "GBP"}).
+     * <p>
+     * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
+     * Returns {@code null} if {@link #getCurrency()} returns {@code null}.
+     *
+     * @return the currency code string, or {@code null} if unresolvable
+     *
+     * @since 1.8.5
+     */
+    public String getCurrencyCode() {
+        Currency c = getCurrency();
+        return c != null ? c.getAlphaCode() : null;
     }
 
     /**

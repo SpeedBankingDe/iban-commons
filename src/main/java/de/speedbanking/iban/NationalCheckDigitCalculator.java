@@ -53,7 +53,7 @@ import de.speedbanking.util.IndexRange;
  * <h3>Implementations</h3>
  * All country-specific implementations live in {@link NationalCheckDigitCalculators} and
  * are maintained there by hand.  They are not intended to be referenced directly — use
- * {@link IbanRegistry#getNcdCalculator()} to obtain the calculator for a specific country.
+ * {@link AbstractNcdCountryValidator#getNcdCalculator()} to obtain the calculator for a specific country.
  *
  * @since 1.8.5
  *

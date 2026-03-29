@@ -3015,7 +3015,7 @@ public enum IbanRegistry {
      *
      * @return the two-letter country code
      */
-    String getCountryCode() {
+    public String getCountryCode() {
         return name();
     }
 
@@ -3024,7 +3024,7 @@ public enum IbanRegistry {
      *
      * @return the country name
      */
-    String getCountryName() {
+    public String getCountryName() {
         return metaData.getCountryName();
     }
 
@@ -3033,7 +3033,7 @@ public enum IbanRegistry {
      *
      * @return the country flag emoji string
      */
-    String getCountryFlag() {
+    public String getCountryFlag() {
         return countryFlag;
     }
 
@@ -3052,8 +3052,9 @@ public enum IbanRegistry {
      *
      * @see Iso3166Alpha2#getCurrency()
      */
-    Currency getCurrency() {
-        return Iso3166Alpha2.fromCode(getCountryCode()).getCurrency();
+    public Currency getCurrency() {
+        Iso3166Alpha2 country = Iso3166Alpha2.fromCode(getCountryCode());
+        return country != null ? country.getCurrency() : null;
     }
 
     /**
@@ -3067,8 +3068,9 @@ public enum IbanRegistry {
      *
      * @since 1.8.5
      */
-    String getCurrencyCode() {
-        return getCurrency().getAlphaCode();
+    public String getCurrencyCode() {
+        Currency c = getCurrency();
+        return c != null ? c.getAlphaCode() : null;
     }
 
     /**
@@ -3077,7 +3079,7 @@ public enum IbanRegistry {
      * @return {@code true} if the country is a SEPA member, {@code false} otherwise
      * @see <a href="https://www.europeanpaymentscouncil.eu/document-library/other/map-sepa-scheme-countries-and-territories">Map of SEPA Scheme Countries and Territories</a>
      */
-    boolean isSepa() {
+    public boolean isSepa() {
         return metaData.isSepa();
     }
 
@@ -3088,7 +3090,7 @@ public enum IbanRegistry {
      * <p>
      * @return {@code true} if the country is not a SEPA member, {@code false} if it is
      */
-    boolean isNotSepa() {
+    public boolean isNotSepa() {
         return !isSepa();
     }
 
@@ -3097,7 +3099,7 @@ public enum IbanRegistry {
      *
      * @return the total IBAN length
      */
-    int getIbanLength() {
+    public int getIbanLength() {
         return structureData.ibanLength();
     }
 
@@ -3106,7 +3108,7 @@ public enum IbanRegistry {
      *
      * @return the IBAN pattern object
      */
-    Pattern getIbanRegex() {
+    public Pattern getIbanRegex() {
         return ibanRegex;
     }
 
@@ -3115,7 +3117,7 @@ public enum IbanRegistry {
      *
      * @return structure data
      */
-    StructureData getStructureData() {
+    public StructureData getStructureData() {
         return structureData;
     }
 
@@ -3124,7 +3126,7 @@ public enum IbanRegistry {
      *
      * @return the BBAN length
      */
-    int getBbanLength() {
+    public int getBbanLength() {
         return structureData.getBbanLength();
     }
 
@@ -3133,7 +3135,7 @@ public enum IbanRegistry {
      *
      * @return the BBAN pattern string
      */
-    String getBbanPatternStr() {
+    public String getBbanPatternStr() {
         return structureData.bbanPatternStr();
     }
 
@@ -3142,7 +3144,7 @@ public enum IbanRegistry {
      *
      * @return the IBAN example string
      */
-    String getIbanExample() {
+    public String getIbanExample() {
         return metaData.getIbanExample();
     }
 
@@ -3151,7 +3153,7 @@ public enum IbanRegistry {
      *
      * @return the bank code pattern string
      */
-    String getBankCodePatternStr() {
+    public String getBankCodePatternStr() {
         return structureData.bankCodePatternStr();
     }
 
@@ -3169,7 +3171,7 @@ public enum IbanRegistry {
      *
      * @return the branch code pattern string
      */
-    String getBranchCodePattern() {
+    public String getBranchCodePattern() {
         return structureData.branchCodePatternStr();
     }
 
@@ -3187,7 +3189,7 @@ public enum IbanRegistry {
      *
      * @return {@code true} if a branch code exists, {@code false} otherwise
      */
-    boolean hasBranchCode() {
+    public boolean hasBranchCode() {
         return structureData.hasBranchCode();
     }
 
@@ -3214,7 +3216,7 @@ public enum IbanRegistry {
      *
      * @return {@code true} if a National Check Digit (NCD) exists, {@code false} otherwise
      */
-    boolean hasNationalCheckDigit() {
+    public boolean hasNationalCheckDigit() {
         return structureData.hasNationalCheckDigit();
     }
 
@@ -3223,7 +3225,7 @@ public enum IbanRegistry {
      *
      * @return contact data
      */
-    ContactData getContactData() {
+    public ContactData getContactData() {
         return contactData;
     }
 
@@ -3232,7 +3234,7 @@ public enum IbanRegistry {
      *
      * @return the organization's name
      */
-    String getOrganisation() {
+    public String getOrganisation() {
         return contactData.getOrganisation();
     }
 
@@ -3241,7 +3243,7 @@ public enum IbanRegistry {
      *
      * @return the department name
      */
-    String getDepartment() {
+    public String getDepartment() {
         return contactData.getDepartment();
     }
 
@@ -3250,7 +3252,7 @@ public enum IbanRegistry {
      *
      * @return the street address
      */
-    String getStreetAddress() {
+    public String getStreetAddress() {
         return contactData.getStreetAddress();
     }
 
@@ -3259,7 +3261,7 @@ public enum IbanRegistry {
      *
      * @return the city and postcode (zip code)
      */
-    String getCityPostcode() {
+    public String getCityPostcode() {
         return contactData.getCityPostcode();
     }
 
@@ -3268,7 +3270,7 @@ public enum IbanRegistry {
      *
      * @return the email address
      */
-    String getDepartmentGenericEmail() {
+    public String getDepartmentGenericEmail() {
         return contactData.getDepartmentGenericEmail();
     }
 
@@ -3277,7 +3279,7 @@ public enum IbanRegistry {
      *
      * @return the telephone number
      */
-    String getDepartmentTel() {
+    public String getDepartmentTel() {
         return contactData.getDepartmentTel();
     }
 
@@ -3286,7 +3288,7 @@ public enum IbanRegistry {
      *
      * @return the {@code YearMonth} of the last update
      */
-    YearMonth getLastUpdate() {
+    public YearMonth getLastUpdate() {
         return metaData.getLastUpdate();
     }
 
@@ -3300,7 +3302,7 @@ public enum IbanRegistry {
      *
      * @since 1.8.3
      */
-    int getLastUpdateYear() {
+    public int getLastUpdateYear() {
         return metaData.getLastUpdateYear();
     }
 
@@ -3315,7 +3317,7 @@ public enum IbanRegistry {
      *
      * @since 1.8.3
      */
-    int getLastUpdateMonth() {
+    public int getLastUpdateMonth() {
         return metaData.getLastUpdateMonth();
     }
 
@@ -3334,7 +3336,7 @@ public enum IbanRegistry {
      *
      * @return the base country {@code IbanRegistry} entry, or {@code null} if this is a base country
      */
-    IbanRegistry getBaseCountry() {
+    public IbanRegistry getBaseCountry() {
         return baseCountry;
     }
 
@@ -3468,7 +3470,6 @@ public enum IbanRegistry {
      * @param c1 the first character of the country code
      * @param c2 the second character of the country code
      * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
-     * @return the matching {@link IbanRegistry} constant, or {@code null} if unknown
      */
     public static IbanRegistry getByCode(final char c1, final char c2) {
         return LOOKUP.get(pack(c1, c2));
@@ -3589,7 +3590,7 @@ public enum IbanRegistry {
             return bankCodePatternStr;
         }
 
-        public IndexRange bankCodeIndexRange() {
+        IndexRange bankCodeIndexRange() {
             return bankCodeIndexRange;
         }
 
@@ -3597,7 +3598,7 @@ public enum IbanRegistry {
             return branchCodePatternStr;
         }
 
-        public IndexRange branchCodeIndexRange() {
+        IndexRange branchCodeIndexRange() {
             return branchCodeIndexRange;
         }
 
@@ -3605,11 +3606,11 @@ public enum IbanRegistry {
             return branchCodeIndexRange != null;
         }
 
-        public IndexRange accountNumberIndexRange() {
+        IndexRange accountNumberIndexRange() {
             return accountNumberIndexRange;
         }
 
-        public IndexRange nationalCheckDigitIndexRange() {
+        IndexRange nationalCheckDigitIndexRange() {
             return nationalCheckDigitIndexRange;
         }
 

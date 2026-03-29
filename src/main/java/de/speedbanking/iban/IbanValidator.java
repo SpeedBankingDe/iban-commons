@@ -15,12 +15,13 @@
  */
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanRegistry.INDEX_BBAN;
 import static de.speedbanking.iban.IbanRegistry.MAX_IBAN_LENGTH;
 import static de.speedbanking.iban.IbanRegistry.MIN_IBAN_LENGTH;
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isNotDigit;
 import static de.speedbanking.util.CharUtil.isNotUpperCase;
+
+import de.speedbanking.util.Mod97;
 
 /**
  * The core engine for **International Bank Account Number (IBAN)** validation.
@@ -33,23 +34,11 @@ import static de.speedbanking.util.CharUtil.isNotUpperCase;
 public final class IbanValidator {
 
     /**
-     * The modulus used in the ISO 7064 Mod 97-10 check (97).
-     */
-    private static final int                              MOD97         = 97;
-
-    /**
      * Return value for a failed Mod 97-10 calculation.
-     */
-    static final int                                      INVALID_MOD97 = -1;
-
-    /**
-     * A limit used to trigger the intermediate modulo operation during the
-     * Mod 97-10 calculation to prevent {@code long} overflow, set to 10^15.
      * <p>
-     * Safe upper bound: the next iteration multiplies by at most 100 and adds at most 35,
-     * so {@code 10^15 * 100 + 35 < Long.MAX_VALUE}.
+     * Delegates to {@link Mod97#INVALID_REMAINDER} for a consistent sentinel across the API.
      */
-    private static final long                             MAX           = 1_000_000_000_000_000L;
+    public static final int                               INVALID_MOD97 = Mod97.INVALID_REMAINDER;
 
     /**
      * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
@@ -377,7 +366,7 @@ public final class IbanValidator {
         normIbanArr[3] = c4;
 
         // BBAN part (from index 4 onwards): digits or uppercase only
-        for (int i = INDEX_BBAN; i < len; i++) {
+        for (int i = IbanRegistry.INDEX_BBAN; i < len; i++) {
             char ci = normalizedIban.charAt(i);
             if (!isDigitOrUpperCase(ci)) {
                 return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
@@ -420,38 +409,42 @@ public final class IbanValidator {
 
     /**
      * Returns {@code true} if the ISO 7064 Mod 97-10 remainder of the given IBAN equals {@code 1}.
+     * <p>
+     * Delegates to {@link Mod97#isValid(char[])}.
      *
      * @param iban the normalized IBAN char array (uppercase, no spaces)
      * @return {@code true} if the checksum is valid
      */
-    static boolean isMod97Valid(final char[] iban) {
-        return calculateMod97(iban) == 1;
+    public static boolean isMod97Valid(final char[] iban) {
+        return Mod97.isValid(iban);
     }
 
     /**
      * Returns {@code true} if the ISO 7064 Mod 97-10 remainder of the given IBAN equals {@code 1}.
+     * <p>
+     * Delegates to {@link Mod97#isValid(CharSequence)}.
      *
      * @param iban the normalized IBAN {@link CharSequence} (uppercase, no spaces)
      * @return {@code true} if the checksum is valid
      */
-    static boolean isMod97Valid(final CharSequence iban) {
-        return calculateMod97(iban) == 1;
+    public static boolean isMod97Valid(final CharSequence iban) {
+        return Mod97.isValid(iban);
     }
 
     /**
-     * Calculates the ISO 7064 Mod 97-10 remainder using in-place index rotation on a {@code char[]}.
+     * Calculates the ISO 7064 Mod 97-10 remainder for a normalized IBAN {@code char[]},
+     * applying the standard rearrangement step (BBAN first, then the 4-character header).
      * <p>
-     * Processes the BBAN part first (indices 4 to end) then the header (indices 0 to 3) in a single
-     * loop using manual index arithmetic — faster than {@code (i + INDEX_BBAN) % len} and avoids
-     * any object allocation. Intermediate modulo operations are performed only when
-     * {@code total >= MAX} to minimize expensive divisions.
+     * Delegates to {@link Mod97#calculate(char[])}.
+     * Returns {@link #INVALID_MOD97} for {@code null} or too-short/too-long input, and on
+     * any illegal character. IBAN length bounds ({@link IbanRegistry#MIN_IBAN_LENGTH} /
+     * {@link IbanRegistry#MAX_IBAN_LENGTH}) are checked before the call.
      *
      * @param iban the normalized IBAN array (uppercase, no spaces)
-     * @return the remainder (0–96), or {@link #INVALID_MOD97} on {@code null},
-     *         too-short input, or illegal characters
+     * @return the remainder (0–96), or {@link #INVALID_MOD97} on invalid input
      */
     @SuppressWarnings("PMD.UselessParentheses")
-    static int calculateMod97(final char[] iban) {
+    public static int calculateMod97(final char[] iban) {
         if (iban == null) {
             return INVALID_MOD97;
         }
@@ -462,45 +455,23 @@ public final class IbanValidator {
             return INVALID_MOD97;
         }
 
-        long total = 0;
-
-        for (int i = 0; i < len; i++) {
-            // in-place BBAN-first rotation: faster than (i + INDEX_BBAN) % len
-            int idx = i + INDEX_BBAN;
-            if (idx >= len) {
-                idx -= len;
-            }
-            final char c = iban[idx];
-
-            if (c >= '0' && c <= '9') {
-                total = total * 10 + (c - '0');
-            } else if (c >= 'A' && c <= 'Z') {
-                total = total * 100 + (c - 'A' + 10);
-            } else {
-                return INVALID_MOD97;
-            }
-
-            // intermediate modulo only when necessary to prevent long overflow
-            if (total >= MAX) {
-                total %= MOD97;
-            }
-        }
-        return (int) (total % MOD97);
+        int result = Mod97.calculate(iban);
+        return result == Mod97.INVALID_REMAINDER ? INVALID_MOD97 : result;
     }
 
     /**
-     * Calculates the ISO 7064 Mod 97-10 remainder using in-place index rotation on a {@link CharSequence}.
+     * Calculates the ISO 7064 Mod 97-10 remainder for a normalized IBAN {@link CharSequence},
+     * applying the standard rearrangement step (BBAN first, then the 4-character header).
      * <p>
-     * Operates directly on the {@link CharSequence} — supports {@link String}, {@link StringBuilder},
-     * and any other implementation without requiring an intermediate {@code char[]}.
-     * This enables the zero-allocation fast path in {@link #isValid}.
+     * Operates directly on the {@link CharSequence} — zero heap allocations for
+     * {@link String} and {@link StringBuilder} inputs.
+     * Delegates to {@link Mod97#calculate(CharSequence)}.
      *
      * @param iban the normalized IBAN {@link CharSequence} (uppercase, no spaces)
-     * @return the remainder (0–96), or {@link #INVALID_MOD97} on {@code null},
-     *         too-short input, or illegal characters
+     * @return the remainder (0–96), or {@link #INVALID_MOD97} on invalid input
      */
     @SuppressWarnings("PMD.UselessParentheses")
-    static int calculateMod97(final CharSequence iban) {
+    public static int calculateMod97(final CharSequence iban) {
         if (iban == null) {
             return INVALID_MOD97;
         }
@@ -511,31 +482,8 @@ public final class IbanValidator {
             return INVALID_MOD97;
         }
 
-        long total = 0;
-
-        for (int i = 0; i < len; i++) {
-            // in-place BBAN-first rotation: faster than (i + INDEX_BBAN) % len
-            int idx = i + INDEX_BBAN;
-            if (idx >= len) {
-                idx -= len;
-            }
-            final char c = iban.charAt(idx);
-
-            // fast value conversion and incremental total calculation
-            if (c >= '0' && c <= '9') {
-                total = total * 10 + (c - '0');
-            } else if (c >= 'A' && c <= 'Z') {
-                total = total * 100 + (c - 'A' + 10);
-            } else {
-                return INVALID_MOD97;
-            }
-
-            // intermediate modulo only when necessary to prevent long overflow
-            if (total >= MAX) {
-                total %= MOD97;
-            }
-        }
-        return (int) (total % MOD97);
+        int result = Mod97.calculate(iban);
+        return result == Mod97.INVALID_REMAINDER ? INVALID_MOD97 : result;
     }
 
     /**
@@ -561,7 +509,7 @@ public final class IbanValidator {
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, '0');
 
         // calculate the required check digits value (98 - modulo result)
-        final int checkDigitsValue = 98 - calculateMod97(sb);
+        final int checkDigitsValue = 98 - Mod97.calculate(sb);
 
         // manual zero-padding: faster than String.format
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, (char) ('0' + (checkDigitsValue / 10)));

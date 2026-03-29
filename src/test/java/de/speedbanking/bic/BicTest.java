@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import de.speedbanking.test.TestUtil;
+import de.speedbanking.util.Currency;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,12 @@ class BicTest {
             .hasLength(8)
             .hasToString("MARKDEFF")
             .isBic8EqualTo("MARKDEFF")
-            .isBic11NormalizedEqualTo("MARKDEFFXXX");
+            .isBic11NormalizedEqualTo("MARKDEFFXXX")
+            .hasCountryCode("DE")
+            .hasCountryName("Germany")
+            .hasCountryFlag("🇩🇪")
+            .hasCurrency(Currency.EUR)
+            .hasCurrencyCode(Currency.EUR.name());
     }
 
     @DisplayName("of() should create Bic object for a valid BIC-11")
@@ -54,7 +60,10 @@ class BicTest {
             .hasToString("MARKDEFF500")
             .isBic11NormalizedEqualTo("MARKDEFF500")
             .hasCountryCode("DE")
-            .hasCountryFlag("🇩🇪");
+            .hasCountryName("Germany")
+            .hasCountryFlag("🇩🇪")
+            .hasCurrency(Currency.EUR)
+            .hasCurrencyCode(Currency.EUR.name());
     }
 
     @DisplayName("of() should throw exception for null or empty BIC")

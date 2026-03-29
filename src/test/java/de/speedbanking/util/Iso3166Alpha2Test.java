@@ -31,7 +31,6 @@ import java.util.Set;
  * </ul>
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-@DisplayName("Iso3166Alpha2")
 class Iso3166Alpha2Test {
 
     // =========================================================================

@@ -15,6 +15,8 @@
  */
 package de.speedbanking.bic;
 
+import de.speedbanking.util.Currency;
+
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
@@ -363,6 +365,21 @@ public class BicAssertions extends Assertions {
         }
 
         /**
+         * Asserts that the full English country name associated with this BIC equals the expected value.
+         *
+         * @param expectedCountryName the expected country name, e.g. {@code "Germany"}
+         * @return {@code this} assertion object for method chaining
+         */
+        public BicAssert hasCountryName(String expectedCountryName) {
+            isNotNull();
+            if (!Objects.equals(actual.getCountryName(), expectedCountryName)) {
+                failWithMessage("Expected country name to be '%s' but was '%s' for BIC '%s'",
+                    expectedCountryName, actual.getCountryName(), actual);
+            }
+            return myself;
+        }
+
+        /**
          * Verifies that the actual BIC has the given country flag emoji.
          *
          * @param expectedCountryFlag the expected country flag emoji string (e.g., {@code "🇩🇪"})
@@ -373,6 +390,40 @@ public class BicAssertions extends Assertions {
             if (!Objects.equals(actual.getCountryFlag(), expectedCountryFlag)) {
                 failWithMessage("Expected BIC Country Flag to be <%s> but was <%s> for BIC <%s>",
                     expectedCountryFlag, actual.getCountryFlag(), actual);
+            }
+            return myself;
+        }
+
+        /**
+         * Asserts that the primary {@link Currency} of this BIC's country equals the expected value.
+         *
+         * @param expectedCurrency the expected {@link Currency} constant, e.g. {@link Currency#EUR}
+         * @return {@code this} assertion object for method chaining
+         */
+        public BicAssert hasCurrency(Currency expectedCurrency) {
+            isNotNull();
+            if (!Objects.equals(actual.getCurrency(), expectedCurrency)) {
+                failWithMessage("Expected currency to be '%s' but was '%s' for BIC '%s'",
+                    expectedCurrency, actual.getCurrency(), actual);
+            }
+            return myself;
+        }
+
+        /**
+         * Asserts that the ISO 4217 three-letter currency code of this BIC's country equals
+         * the expected value (e.g., {@code "EUR"}, {@code "GBP"}).
+         * <p>
+         * Convenience alternative to {@link #hasCurrency(Currency)} for cases where the
+         * expected value is already available as a {@code String}.
+         *
+         * @param expectedCurrencyCode the expected ISO 4217 alpha code, e.g. {@code "EUR"}
+         * @return {@code this} assertion object for method chaining
+         */
+        public BicAssert hasCurrencyCode(String expectedCurrencyCode) {
+            isNotNull();
+            if (!Objects.equals(actual.getCurrencyCode(), expectedCurrencyCode)) {
+                failWithMessage("Expected currency code to be '%s' but was '%s' for BIC '%s'",
+                    expectedCurrencyCode, actual.getCurrencyCode(), actual);
             }
             return myself;
         }

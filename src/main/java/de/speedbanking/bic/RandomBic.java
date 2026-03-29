@@ -222,10 +222,6 @@ public final class RandomBic {
         return Bic.of(generateBic11String(cc, rd));
     }
 
-    // -------------------------------------------------------------------------
-    // Internal helpers
-    // -------------------------------------------------------------------------
-
     /**
      * Resolves the effective country code for generation.
      * <p>
@@ -257,7 +253,7 @@ public final class RandomBic {
      * @param random      the {@link Random} instance to use
      * @return a BIC-8 string (8 characters)
      */
-    static String generateBic8String(String countryCode, Random random) {
+    public static String generateBic8String(String countryCode, Random random) {
         return generateBankCode(random)
             + countryCode
             + generateLocationCode(random);
@@ -273,7 +269,7 @@ public final class RandomBic {
      * @param random      the {@link Random} instance to use
      * @return a BIC-11 string (11 characters)
      */
-    static String generateBic11String(String countryCode, Random random) {
+    public static String generateBic11String(String countryCode, Random random) {
         return generateBic8String(countryCode, random)
             + generateBranchCode(random);
     }
@@ -284,7 +280,7 @@ public final class RandomBic {
      * @param random the {@link Random} instance to use
      * @return a 4-character string containing only uppercase letters
      */
-    static String generateBankCode(Random random) {
+    public static String generateBankCode(Random random) {
         return randomChars(LETTERS, 4, random);
     }
 
@@ -294,7 +290,7 @@ public final class RandomBic {
      * @param random the {@link Random} instance to use
      * @return a 2-character alphanumeric string
      */
-    static String generateLocationCode(Random random) {
+    public static String generateLocationCode(Random random) {
         return randomChars(ALPHANUMERIC, 2, random);
     }
 
@@ -304,7 +300,7 @@ public final class RandomBic {
      * @param random the {@link Random} instance to use
      * @return a 3-character alphanumeric string
      */
-    static String generateBranchCode(Random random) {
+    public static String generateBranchCode(Random random) {
         return random.nextBoolean()
             ? Bic.HEAD_OFFICE_SUFFIX
             : randomChars(ALPHANUMERIC, 3, random);

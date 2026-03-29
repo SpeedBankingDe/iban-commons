@@ -24,7 +24,7 @@ package de.speedbanking.iban;
 public final class Formatter {
 
     /** Standard group size for display formatting (as recommended by ISO) */
-    static final int DEFAULT_GROUP_SIZE = 4;
+    public static final int DEFAULT_GROUP_SIZE = 4;
 
     /**
      * Private constructor to prevent instantiation of this utility class.
