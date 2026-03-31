@@ -96,7 +96,10 @@ class IbanPlusKeyTest extends org.assertj.core.api.Assertions {
     @DisplayName("Should return null for IBAN with invalid country code")
     @Test
     void shouldReturnNullForIbanWithInvalidCountryCode() {
-        Iban iban = spy(Iban.of("MT84 MALT 0110 0001 2345 MTLC AST0 01S"));
+        Iban iban = spy(Iban.of("MT84MALT011000012345MTLCAST001S"));
+
+        IbanAssertions.assertThat(iban).hasCountryCode("MT");
+
         when(iban.getCountryCode()).thenReturn("!!");
         assertThat(IbanPlusKey.of(iban))
             .as("Input Iban '%s' (invalid country code) should result in a null key", iban)

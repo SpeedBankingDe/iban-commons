@@ -9,7 +9,7 @@
  *     Provides IBAN-style calculation with header rearrangement
  *     ({@link de.speedbanking.util.Mod97#calculate(CharSequence)}),
  *     a straight range variant for NCD sub-sequences
- *     ({@link de.speedbanking.util.Mod97#calculateRange(char[], int, int)}),
+ *     ({@link de.speedbanking.util.Mod97#calculateRange(CharSequence, int, int)}),
  *     and boolean convenience wrappers
  *     ({@link de.speedbanking.util.Mod97#isValid(CharSequence)}).
  *     Useful for any identifier based on ISO 7064, such as IBAN or the SEPA Creditor Identifier.

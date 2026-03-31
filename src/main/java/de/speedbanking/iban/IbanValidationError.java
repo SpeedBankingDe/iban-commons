@@ -35,11 +35,8 @@ public enum IbanValidationError implements ValidationError {
     /** The IBAN contains characters that are not digits (0-9) or uppercase letters (A-Z). */
     ILLEGAL_CHARACTERS("IBAN contains illegal character(s)"),
 
-    /** The country code (first two letters) is syntactically invalid or does not correspond to a known country. */
+    /** The country code (first two letters) is syntactically invalid or does not correspond to a supported country. */
     INVALID_COUNTRY("IBAN has invalid country code"),
-
-    /** The country code is valid but is not supported by the current IBAN registry. */
-    UNSUPPORTED_COUNTRY("IBAN has unsupported country code"),
 
     /** The length of the IBAN is correct overall, but incorrect for the specific country code provided. */
     INCORRECT_LENGTH_COUNTRY("IBAN has incorrect length for specified country"),

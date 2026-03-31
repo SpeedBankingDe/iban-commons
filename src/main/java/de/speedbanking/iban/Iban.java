@@ -96,11 +96,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Construction is restricted to static factory methods after validation and guarantees
      * the input {@code ibanArr} is valid, normalized, and correctly sized.
      *
-     * @param ibanArr     the normalized, validated IBAN characters
+     * @param normIban    the normalized, validated IBAN characters
      * @param countryData the metadata for the country code (format, structure)
      */
-    Iban(final char[] ibanArr, final IbanRegistry countryData) {
-        this.ibanStr = new String(ibanArr);
+    Iban(final CharSequence normIban, final IbanRegistry countryData) {
+        this.ibanStr = normIban.toString();
         this.countryData = countryData;
     }
 
@@ -123,7 +123,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
-     * Parses and validates the input character sequence that is assumed to be normalized (no spaces, all uppercase).
+     * Parses and validates the input character sequence that is assumed to be normalized (containing no spaces).
      * <p>
      * This method skips the initial normalization step but performs full validation.
      *
@@ -134,14 +134,14 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Iban ofNormalized(CharSequence iban) throws InvalidIbanException {
-        IbanValidationSuccess success = IbanValidator.validateNormalized(iban);
+        IbanValidationSuccess success = IbanValidator.validate(iban, false);
 
         if (success == null) {
             IbanValidationError error = IbanValidator.getLastReason();
             throw InvalidIbanException.of(error, iban);
         }
 
-        return new Iban(success.normIbanArr, success.countryData);
+        return new Iban(success.normIban, success.countryData);
     }
 
     /**
@@ -154,14 +154,14 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Iban parse(CharSequence iban) throws InvalidIbanException {
-        IbanValidationSuccess success = IbanValidator.validate(iban);
+        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.ALLOW_SPACE.isEnabled());
 
         if (success == null) {
             IbanValidationError error = IbanValidator.getLastReason();
             throw InvalidIbanException.of(error, iban);
         }
 
-        return new Iban(success.normIbanArr, success.countryData);
+        return new Iban(success.normIban, success.countryData);
     }
 
     /**
@@ -173,11 +173,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Optional<Iban> tryParse(CharSequence iban) {
-        IbanValidationSuccess success = IbanValidator.validate(iban);
+        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.ALLOW_SPACE.isEnabled());
 
         return success == null
             ? Optional.empty()
-            : Optional.of(new Iban(success.normIbanArr, success.countryData));
+            : Optional.of(new Iban(success.normIban, success.countryData));
     }
 
     /**
@@ -203,8 +203,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.3
      */
     public static Iban tryParseOrNull(CharSequence iban) {
-        IbanValidationSuccess success = IbanValidator.validate(iban);
-        return success == null ? null : new Iban(success.normIbanArr, success.countryData);
+        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.ALLOW_SPACE.isEnabled());
+        return success == null ? null : new Iban(success.normIban, success.countryData);
     }
 
     /**

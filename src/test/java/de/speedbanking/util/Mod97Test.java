@@ -81,7 +81,40 @@ class Mod97Test {
     @Test
     void calculateRange_nullData_throwsNullPointerException() {
         assertThatExceptionOfType(NullPointerException.class)
-            .isThrownBy(() -> Mod97.calculateRange(null, 0, 1));
+            .isThrownBy(() -> Mod97.calculateRange((char[]) null, 0, 1));
+    }
+
+    @Test
+    void calculateRange_charSequence_skipsInvalidChars() {
+        // '_' is invalid and should be skipped, 'X' would be valid (A-Z)
+        final String inputWithInvalid = "12A3_4";
+        final String inputClean = "12A34";
+
+        final int resultWithInvalid = Mod97.calculateRange(inputWithInvalid, 0, inputWithInvalid.length());
+        final int resultClean = Mod97.calculateRange(inputClean, 0, inputClean.length());
+
+        assertThat(resultWithInvalid)
+            .as("Invalid characters like '_' should be ignored in calculateRange")
+            .isEqualTo(resultClean);
+    }
+
+    @Test
+    void calculateRange_consistencyBetweenTypes() {
+        char[] data = "DE123456789".toCharArray();
+        CharArrayWrapper wrapper = new CharArrayWrapper(data);
+
+        int resultArr = Mod97.calculateRange(data, 2, 5);
+        int resultWrapper = Mod97.calculateRange(wrapper, 2, 5);
+
+        assertThat(resultWrapper).isEqualTo(resultArr);
+    }
+
+    @Test
+    void calculateRange_invalidRange_throwsException() {
+        String data = "123";
+        assertThatExceptionOfType(IndexOutOfBoundsException.class)
+            .isThrownBy(() -> Mod97.calculateRange(data, 0, 4))
+            .withMessageContaining("Invalid range");
     }
 
     @ParameterizedTest

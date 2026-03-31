@@ -1,7 +1,7 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanAssertions.assertThatIbanIsValid;
-import static de.speedbanking.iban.IbanAssertions.assertThatIbanOfNormalized;
+import static de.speedbanking.iban.IbanAssertions.assertThatIbanOf;
 import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException;
 
 import org.junit.jupiter.api.DisplayName;
@@ -14,11 +14,11 @@ import org.junit.jupiter.params.provider.CsvSource;
  */
 class IbanAssertionsTest {
 
-    @DisplayName("Should assert on normalized IBAN creation")
+    @DisplayName("Should assert on IBAN creation")
     @Test
-    void shouldAssertOnNormalizedIban() {
+    void shouldAssertOnIban() {
         // test lowercase and spaces
-        assertThatIbanOfNormalized("DE89370400440532013000")
+        assertThatIbanOf("DE89370400440532013000")
             .hasCountryCode("DE")
             .hasBankCode("37040044")
             .hasLength(22);
@@ -39,7 +39,7 @@ class IbanAssertionsTest {
     @Test
     void shouldCatchInvalidIbanException() {
         assertThatInvalidIbanException().isThrownBy(() -> Iban.of("SHORT"))
-            .withMessage("IBAN has unsupported country code (UNSUPPORTED_COUNTRY): SHORT")
+            .withMessage("IBAN has incorrect length (INCORRECT_LENGTH): SHORT")
             .withNoCause();
     }
 

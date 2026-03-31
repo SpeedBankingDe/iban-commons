@@ -24,13 +24,11 @@ import java.util.function.Function;
  * Each enum constant represents a configuration property that can be controlled
  * via System Properties or programmatically.
  * <p>
- * System properties are read once during class initialization.
- * <p>
  * This enum is thread-safe as the underlying values are marked {@code volatile}.
  *
  * @since 1.8.5
  */
-@SuppressWarnings({"ImmutableEnumChecker", "TypeParameterUnusedInFormals"}) // state is intentionally mutable via volatile field
+@SuppressWarnings({"ImmutableEnumChecker", "TypeParameterUnusedInFormals"}) // state is intentionally mutable via volatile field 'value'
 public enum IbanConfig {
 
     /**
@@ -41,7 +39,21 @@ public enum IbanConfig {
     /**
      * Whether to calculate National Check Digits (NCD) when generating IBANs.
      */
-    NCD_CALCULATE("iban.ncd.calculate", Boolean::parseBoolean, false);
+    NCD_CALCULATE("iban.ncd.calculate", Boolean::parseBoolean, false),
+
+    /**
+     * Whether to allow spaces during validation.
+     * <p>
+     * If enabled, the validator will internally remove spaces from the input.
+     */
+    ALLOW_SPACE("iban.allow.space", Boolean::parseBoolean, false),
+
+    /**
+     * Whether to allow lowercase characters during validation.
+     * <p>
+     * If enabled, the validator will internally treat the input as uppercase.
+     */
+    ALLOW_LOWERCASE("iban.allow.lowercase", Boolean::parseBoolean, false);
 
     private final String              systemProperty;
     private final Function<String, ?> parser;
@@ -140,10 +152,7 @@ public enum IbanConfig {
      */
     private Object readSystemProperty() {
         final String sysProp = System.getProperty(systemProperty);
-        if (sysProp == null) {
-            return defaultValue;
-        }
-        return parser.apply(sysProp);
+        return sysProp == null ? defaultValue : parser.apply(sysProp);
     }
 
     @Override

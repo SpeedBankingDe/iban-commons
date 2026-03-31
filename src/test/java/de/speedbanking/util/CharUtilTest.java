@@ -56,8 +56,8 @@ class CharUtilTest extends Assertions {
     void isAllDigits_ShouldThrowExceptionForInvalidInput() {
         // null array check
         assertThatNullPointerException()
-            .isThrownBy(() -> CharUtil.isAllDigits(null, 0, 1))
-            .withMessage("Character array cannot be null");
+            .isThrownBy(() -> CharUtil.isAllDigits((char[]) null, 0, 1))
+            .withMessage("Input cannot be null");
 
         // invalid index ranges check (for increased coverage)
         char[] arr = new char[] {'1', '2'};
@@ -106,8 +106,8 @@ class CharUtilTest extends Assertions {
     void isAllUpperCase_ShouldThrowExceptionForInvalidInput() {
         // null array check
         assertThatNullPointerException()
-            .isThrownBy(() -> CharUtil.isAllUpperCase(null, 0, 1))
-            .withMessage("Character array cannot be null");
+            .isThrownBy(() -> CharUtil.isAllUpperCase((char[]) null, 0, 1))
+            .withMessage("Input cannot be null");
 
         // Invalid index ranges check (for increased coverage)
         char[] arr = new char[] {'A', 'B'};
@@ -156,8 +156,8 @@ class CharUtilTest extends Assertions {
     void isAllDigitOrUpperCase_ShouldThrowExceptionForInvalidInput() {
         // Null array check
         assertThatNullPointerException()
-            .isThrownBy(() -> CharUtil.isAllDigitOrUpperCase(null, 0, 1))
-            .withMessage("Character array cannot be null");
+            .isThrownBy(() -> CharUtil.isAllDigitOrUpperCase((char[]) null, 0, 1))
+            .withMessage("Input cannot be null");
 
         char[] arr = new char[] {'1', 'A'};
         assertThatIndexOutOfBoundsException()

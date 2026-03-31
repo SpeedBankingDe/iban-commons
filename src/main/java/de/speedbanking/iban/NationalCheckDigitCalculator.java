@@ -24,35 +24,34 @@ import de.speedbanking.util.IndexRange;
  * <h3>Background</h3>
  * Several national IBAN formats embed a country-specific check digit (or check-digit pair)
  * inside the BBAN, in addition to the two ISO 7064 Mod 97-10 check digits at positions 3–4
- * of the full IBAN.  The position of this NCD is recorded in
+ * of the full IBAN. The position of this NCD is recorded in
  * {@link IbanRegistry.StructureData#nationalCheckDigitIndexRange()} and marked with
  * {@code withNationalCheckDigit(…)} in the registry builder.
  *
  * <h3>Usage</h3>
  * <ul>
  *   <li><strong>Validation</strong> – {@link CountryValidator} implementations call
- *       {@link #validateNationalCheckDigit(char[])} to verify an existing IBAN.</li>
+ *       {@link #validateNationalCheckDigit(CharSequence)} to verify an existing IBAN.</li>
  *   <li><strong>Generation</strong> – {@link RandomIban} calls
- *       {@link #calculateNationalCheckDigit(char[])} after producing a random BBAN, then
- *       writes the result back into the {@code char[]} at the index range defined by the
- *       registry.</li>
+ *       {@link #calculateNationalCheckDigit(CharSequence)} after producing a random BBAN, then
+ *       writes the result back at the index range defined by the registry.</li>
  * </ul>
  *
  * <h3>Implementation contract</h3>
  * <ul>
- *   <li>The {@code iban} parameter is always a fully assembled, normalised {@code char[]}
- *       containing the country code + placeholder check digits + BBAN.  All characters are
+ *   <li>The {@code iban} parameter is always a fully assembled, normalised {@code CharSequence}
+ *       containing the country code + placeholder check digits + BBAN. All characters are
  *       guaranteed to be digits or uppercase ASCII letters.</li>
- *   <li>{@link #calculateNationalCheckDigit(char[])} returns the NCD as a {@code String}
+ *   <li>{@link #calculateNationalCheckDigit(CharSequence)} returns the NCD as a {@link CharSequence}
  *       whose length equals the width of
  *       {@link IbanRegistry.StructureData#nationalCheckDigitIndexRange()}.</li>
- *   <li>{@link #validateNationalCheckDigit(char[])} computes the expected NCD and compares
+ *   <li>{@link #validateNationalCheckDigit(CharSequence)} computes the expected NCD and compares
  *       it with the value already present in {@code iban}.</li>
  * </ul>
  *
  * <h3>Implementations</h3>
  * All country-specific implementations live in {@link NationalCheckDigitCalculators} and
- * are maintained there by hand.  They are not intended to be referenced directly — use
+ * are maintained there by hand. They are not intended to be referenced directly — use
  * {@link AbstractNcdCountryValidator#getNcdCalculator()} to obtain the calculator for a specific country.
  *
  * @since 1.8.5
@@ -66,25 +65,25 @@ interface NationalCheckDigitCalculator {
     /**
      * Computes the expected National Check Digit for the given IBAN.
      *
-     * @param iban the normalised IBAN as a {@code char[]};
-     *             must not be {@code null} and is guaranteed to contain only
-     *             digits and uppercase ASCII letters
+     * @param iban the normalised IBAN as a {@code CharSequence};
+     * must not be {@code null} and is guaranteed to contain only
+     * digits and uppercase ASCII letters
      * @return the computed NCD as a char array (length matches the NCD field width)
      */
-    char[] calculateNationalCheckDigit(char[] iban);
+    CharSequence calculateNationalCheckDigit(CharSequence iban);
 
     /**
      * Validates the National Check Digit already present in the given IBAN.
      * <p>
      * Implementations use their own {@code COUNTRY} constant to obtain the NCD
      * {@link IndexRange} and compare the value already present in {@code iban}
-     * against the value computed by {@link #calculateNationalCheckDigit(char[])}.
+     * against the value computed by {@link #calculateNationalCheckDigit(CharSequence)}.
      *
-     * @param iban the normalised IBAN as a {@code char[]};
-     *             must not be {@code null}
+     * @param iban the normalised IBAN as a {@code CharSequence};
+     * must not be {@code null}
      * @return {@code true} if the NCD present in {@code iban} matches the computed value,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
-    boolean validateNationalCheckDigit(char[] iban);
+    boolean validateNationalCheckDigit(CharSequence iban);
 
 }

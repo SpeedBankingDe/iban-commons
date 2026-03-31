@@ -17,10 +17,12 @@ package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanRegistry.MAX_IBAN_LENGTH;
 import static de.speedbanking.iban.IbanRegistry.MIN_IBAN_LENGTH;
+import static de.speedbanking.util.CharUtil.isAllDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
+import static de.speedbanking.util.CharUtil.isLowerCase;
 import static de.speedbanking.util.CharUtil.isNotDigit;
-import static de.speedbanking.util.CharUtil.isNotUpperCase;
 
+import de.speedbanking.util.CharArrayWrapper;
 import de.speedbanking.util.Mod97;
 
 /**
@@ -46,7 +48,7 @@ public final class IbanValidator {
      * Ensures that the reason for failure is correctly associated with the calling thread
      * when using a simplified API that doesn't return the full result object.
      * <p>
-     * Only written on the {@link #validate}/{@link #validateRaw} path.
+     * Only written on the {@link #validate} path.<br>
      * {@link #isValid} never touches this field, avoiding unnecessary ThreadLocal overhead
      * on the hot validation-only path.
      */
@@ -62,35 +64,26 @@ public final class IbanValidator {
     }
 
     /**
-     * Performs a full IBAN validation and returns the required data for IBAN object creation.
+     * Performs a full IBAN validation and returns {@code true} if successful.
      * <p>
-     * This is the preferred method for factory methods (like {@code Iban.of()})
-     * as it aborts validation on failure and provides the normalized data on success.
-     *
-     * @param rawIban the IBAN character sequence to validate, potentially containing spaces
-     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
-     *
-     * @since 1.8.0
-     */
-    static IbanValidationSuccess validate(final CharSequence rawIban) {
-        return validateRaw(rawIban);
-    }
-
-    /**
-     * Performs a full IBAN validation and returns {@code true} if successful,
-     * or {@code false} if any validation step fails.
+     * The validation process includes:
+     * <ul>
+     *   <li>Normalization based on {@link IbanConfig} (handling of spaces and casing)</li>
+     *   <li>Basic length and format checks</li>
+     *   <li>Country-specific length and BBAN structure validation via {@link IbanRegistry}</li>
+     *   <li>ISO 7064 Mod 97-10 check digit verification</li>
+     * </ul>
      * <p>
-     * This method is optimized for the common case of normalized input (no spaces):
-     * it performs <strong>zero heap allocations</strong> by running the Mod 97-10 check
-     * directly on the input {@link CharSequence}.
-     * <p>
-     * For formatted input containing spaces, a single {@code char[]} is allocated for
-     * normalization. The {@link ThreadLocal} error state is intentionally never written
-     * on this path (avoiding unnecessary memory-barrier overhead).
+     * Unlike the {@code validate} methods, this path is optimized for speed and
+     * does not write to the {@link ThreadLocal} error state. It always performs
+     * a full check against the {@link IbanRegistry} to ensure the country code
+     * and length are valid.
      *
-     * @param iban the IBAN character sequence to validate (may contain spaces)
-     * @return {@code true} if the IBAN is valid, {@code false} otherwise
-     *
+     * @param iban the IBAN character sequence to validate (may be unnormalized
+     *             depending on {@link IbanConfig} settings)
+     * @return {@code true} if the IBAN is valid according to all criteria, {@code false} otherwise
+     * @see IbanConfig#ALLOW_SPACE
+     * @see IbanConfig#ALLOW_LOWERCASE
      * @since 1.8.0
      */
     public static boolean isValid(final CharSequence iban) {
@@ -103,320 +96,185 @@ public final class IbanValidator {
             return false;
         }
 
-        // country code: must be exactly 2 uppercase letters
-        final char c1 = iban.charAt(0);
-        if (isNotUpperCase(c1)) {
-            return false;
-        }
-        final char c2 = iban.charAt(1);
-        if (isNotUpperCase(c2)) {
-            return false;
-        }
+        // convert input to normalized char array based on library configuration
+        CharSequence normIban = normalize(iban, len,
+            IbanConfig.ALLOW_SPACE.isEnabled(),
+            IbanConfig.ALLOW_LOWERCASE.isEnabled());
 
-        final IbanRegistry countryData = IbanRegistry.getByCode(c1, c2);
-        if (countryData == null) {
+        if (normIban == null) {
             return false;
         }
 
-        // count spaces starting at index 2 (country code already validated above)
-        int spaces = 0;
-        for (int i = 2; i < len; i++) {
-            if (iban.charAt(i) == ' ') {
-                spaces++;
-            }
-        }
-        if ((len - spaces) != countryData.getIbanLength()) {
+        len = normIban.length();
+        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
             return false;
         }
 
-        if (spaces == 0) {
-            // Fast path: zero allocations, no ThreadLocal writes
-            // calculateMod97(CharSequence) uses in-place index rotation — no intermediate array.
-            return calculateMod97(iban) == 1;
-        }
+        // country code: lookup ensures it consists of 2 uppercase letters
+        IbanRegistry countryData = IbanRegistry.getByCode(normIban.charAt(0), normIban.charAt(1));
 
-        // Slow path: formatted input — normalize into char[] without touching ThreadLocal
-        return isValidSpaced(iban, countryData);
+        return countryData != null
+            && len == countryData.getIbanLength()
+            // BBAN structure check (country-specific) and Mod 97
+            && countryData.getCountryValidator().validateIban(normIban)
+            && calculateMod97(normIban) == 1;
     }
 
     /**
-     * Normalizes a space-containing IBAN into a {@code char[]} and validates it
-     * without writing to the {@link #LAST_REASON} thread-local.
+     * Normalizes the input to a char array by optionally removing spaces and
+     * converting lowercase characters to uppercase.
      * <p>
-     * Called exclusively from {@link #isValid} when the input contains spaces.
-     * The loop iterates over the <em>full input length</em> (not the normalized IBAN length)
-     * so that all characters, including those after the first group of spaces, are processed.
+     * This method performs a single pass over the input sequence. If invalid characters
+     * are encountered, the method returns {@code null} immediately.
      *
-     * @param iban        the raw IBAN containing spaces
-     * @param countryData the already-resolved registry entry
-     * @return {@code true} if the normalized IBAN passes all validation checks
+     * @param input      the raw character sequence to normalize
+     * @param inputLen   the length of the input sequence
+     * @param allowSpace whether to ignore space characters (' ')
+     * @param allowLower whether to convert lowercase ASCII characters (a-z) to uppercase (A-Z)
+     * @return a normalized char array, or {@code null} if an invalid character was found
+     *
+     * @since 1.8.5
      */
-    static boolean isValidSpaced(final CharSequence iban, final IbanRegistry countryData) {
-        if (iban == null || countryData == null) {
-            return false;
+    static CharSequence normalize(final CharSequence input,
+                                  final int inputLen,
+                                  final boolean allowSpace,
+                                  final boolean allowLower) {
+
+        // path 1: No space filtering, no case conversion
+        if (!allowSpace && !allowLower) {
+            for (int i = 0; i < inputLen; i++) {
+                if (!isDigitOrUpperCase(input.charAt(i))) {
+                    return null;
+                }
+            }
+            return input; // prevent new object allocation
         }
 
-        int ibanLength = countryData.getIbanLength();
-        final char[] normArr = new char[ibanLength];
-        int normIdx = 0;
+        if (isAllDigitOrUpperCase(input, 0, inputLen)) {
+            return input;
+        }
 
-        for (int i = 0, len = iban.length(); i < len; i++) {
-            final char c = iban.charAt(i);
+        // non-digit or non-uppercase chars in input
 
-            if (c == ' ') {
-                continue;
+        final char[] arr = new char[inputLen];
+
+        // path 2: No space filtering, case conversion active
+        if (!allowSpace) {
+            for (int i = 0; i < inputLen; i++) {
+                char c = input.charAt(i);
+                if (isLowerCase(c)) {
+                    arr[i] = (char) (c - 32);
+                } else if (isDigitOrUpperCase(c)) {
+                    arr[i] = c;
+                } else {
+                    return null;
+                }
             }
 
-            if (normIdx <= 1) {
-                // country code: already validated before entering this method
-                normArr[normIdx++] = c;
-            } else if (normIdx <= 3) {
-                // check digits: must be numeric
-                if (isNotDigit(c)) {
-                    return false;
-                }
-                normArr[normIdx++] = c;
-            } else {
-                // BBAN: digits and uppercase letters only
-                if (!isDigitOrUpperCase(c)) {
-                    return false;
-                } else if (normIdx >= ibanLength) {
-                    return false; // too many non-space characters
-                }
-                normArr[normIdx++] = c;
+            return new CharArrayWrapper(arr);
+        }
+
+        // path 3: space filtering and optional case conversion
+        int targetIdx = 0;
+        for (int i = 0; i < inputLen; i++) {
+            char c = input.charAt(i);
+
+            if (isLowerCase(c)) {
+                arr[targetIdx++] = (char) (c - 32);
+            } else if (isDigitOrUpperCase(c)) {
+                arr[targetIdx++] = c;
+            } else if (c != ' ') {
+                return null;
             }
         }
 
-        // BBAN structure check (country-specific)
-        final CountryValidator countryValidator = countryData.getCountryValidator();
-        if (countryValidator != null && !countryValidator.validateIban(normArr)) {
-            return false;
-        }
-
-        return calculateMod97(normArr) == 1;
+        return new CharArrayWrapper(arr, 0, targetIdx);
     }
 
     /**
-     * Performs a full IBAN validation on an **unnormalized** IBAN (i.e., may contain spaces)
-     * and returns the success data or {@code null} on failure.
+     * Validates the given IBAN using the default space configuration.
+     * <p>
+     * This is a convenience method that delegates to {@link #validate(CharSequence, boolean)}
+     * using {@link IbanConfig#ALLOW_SPACE}.
      *
-     * @param rawIban the IBAN character sequence to validate, potentially containing spaces
+     * @param rawIban the IBAN character sequence to validate
      * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
-     *
+     * @see #validate(CharSequence, boolean)
      * @since 1.8.0
      */
-    static IbanValidationSuccess validateRaw(final CharSequence rawIban) {
+    static IbanValidationSuccess validate(final CharSequence rawIban) {
+        return validate(rawIban, IbanConfig.ALLOW_SPACE.isEnabled());
+    }
 
+    /**
+     * Performs a full IBAN validation and returns the required data for IBAN object creation.
+     * <p>
+     * This is the preferred method for factory methods (like {@code Iban.of()})
+     * as it aborts validation on failure and provides the normalized data on success.
+     *
+     * @param rawIban    the IBAN character sequence to validate, potentially containing spaces
+     * @param allowSpace whether to allow spaces during validation
+     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
+     *
+     * @since 1.8.5
+     */
+    static IbanValidationSuccess validate(final CharSequence rawIban, boolean allowSpace) {
         if (rawIban == null) {
             return validationFailed(IbanValidationError.EMPTY);
         }
 
-        final int len = rawIban.length();
+        int len = rawIban.length();
         if (len == 0) {
             return validationFailed(IbanValidationError.EMPTY);
         }
 
-        // overall length of the normalized sequence
-        int normLen = 0;
+        // convert input to normalized char array based on library configuration
+        CharSequence normIban = normalize(rawIban, len,
+                                          allowSpace, IbanConfig.ALLOW_LOWERCASE.isEnabled());
 
-        // char array holding normalized (space-free) IBAN, size determined by country-specific length
-        char[] normIbanArr = null;
-
-        // first non-space character (country code position 1)
-        char c1 = 0;
-        char c;
-
-        IbanRegistry countryData = null;
-
-        // Normalization and character set check (combined single pass)
-        for (int i = 0; i < len; i++) {
-            c = rawIban.charAt(i);
-
-            if (c == ' ') {
-                continue; // skip space
-            }
-
-            normLen++;
-
-            if (normLen <= 2) {
-
-                // country code: two uppercase letters
-                if (isNotUpperCase(c)) {
-                    return validationFailed(IbanValidationError.INVALID_COUNTRY);
-                }
-
-                if (normLen == 1) {
-
-                    c1 = c;
-
-                } else {
-                    // normLen == 2: country code complete, look up registry
-                    countryData = IbanRegistry.getByCode(c1, c);
-
-                    if (countryData == null) {
-                        return validationFailed(IbanValidationError.UNSUPPORTED_COUNTRY);
-                    }
-
-                    normIbanArr = new char[countryData.getIbanLength()];
-                    normIbanArr[0] = c1;
-                    normIbanArr[1] = c;
-                }
-
-                continue;
-
-            } else if (normLen <= 4) {
-
-                // check digits: must be numeric
-                if (isNotDigit(c)) {
-                    return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
-                }
-
-            } else if (!isDigitOrUpperCase(c)) {
-
-                // BBAN: uppercase ASCII letters (A-Z) and digits (0-9) only
-                return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
-
-            }
-
-            if (normLen > normIbanArr.length) {
-                return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
-            }
-
-            normIbanArr[normLen - 1] = c;
-
+        if (normIban == null) {
+            return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
         }
 
-        // post-loop length checks
-        if (normLen == 0) {
-            return validationFailed(IbanValidationError.EMPTY);
-        }
-
+        len = normIban.length();
         // check min/max lengths
-        if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
-            return validationFailed(IbanValidationError.INCORRECT_LENGTH);
+        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
+            return len == 0
+                ? validationFailed(IbanValidationError.EMPTY)
+                : validationFailed(IbanValidationError.INCORRECT_LENGTH);
         }
 
-        // check specific length for country
-        if (normLen != countryData.getIbanLength()) {
-            return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
-        }
-
-        // shared logic validation steps
-        return validateCommon(normIbanArr, countryData);
-    }
-
-    /**
-     * Performs a full IBAN validation on an **already normalized** IBAN (must not contain spaces)
-     * and returns the success data or {@code null} on failure.
-     *
-     * @param normalizedIban the normalized IBAN character sequence to validate (no spaces)
-     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
-     *
-     * @since 1.8.0
-     */
-    static IbanValidationSuccess validateNormalized(final CharSequence normalizedIban) {
-
-        if (normalizedIban == null) {
-            return validationFailed(IbanValidationError.EMPTY);
-        }
-
-        int len = normalizedIban.length();
-
-        if (len == 0) {
-            return validationFailed(IbanValidationError.EMPTY);
-        } else if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
-            return validationFailed(IbanValidationError.INCORRECT_LENGTH);
-        }
-
-        // check country code and registry (first 2 chars)
-        char c1 = normalizedIban.charAt(0);
-        if (isNotUpperCase(c1)) {
-            return validationFailed(IbanValidationError.INVALID_COUNTRY);
-        }
-        char c2 = normalizedIban.charAt(1);
-        if (isNotUpperCase(c2)) {
-            return validationFailed(IbanValidationError.INVALID_COUNTRY);
-        }
-
-        IbanRegistry countryData = IbanRegistry.getByCode(c1, c2);
+        // country code: lookup ensures it consists of 2 uppercase letters
+        IbanRegistry countryData = IbanRegistry.getByCode(normIban.charAt(0), normIban.charAt(1));
 
         if (countryData == null) {
-            return validationFailed(IbanValidationError.UNSUPPORTED_COUNTRY);
+            return validationFailed(IbanValidationError.INVALID_COUNTRY);
         }
 
-        // check specific length for country
         if (len != countryData.getIbanLength()) {
             return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
         }
 
-        // check digit characters must be numeric
-        char c3 = normalizedIban.charAt(2);
-        if (isNotDigit(c3)) {
+        if (isNotDigit(normIban.charAt(IbanRegistry.INDEX_CHECK_DIGIT1))
+         || isNotDigit(normIban.charAt(IbanRegistry.INDEX_CHECK_DIGIT2))) {
             return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
         }
-        char c4 = normalizedIban.charAt(3);
-        if (isNotDigit(c4)) {
-            return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
-        }
-
-        char[] normIbanArr = new char[len];
-        normIbanArr[0] = c1;
-        normIbanArr[1] = c2;
-        normIbanArr[2] = c3;
-        normIbanArr[3] = c4;
-
-        // BBAN part (from index 4 onwards): digits or uppercase only
-        for (int i = IbanRegistry.INDEX_BBAN; i < len; i++) {
-            char ci = normalizedIban.charAt(i);
-            if (!isDigitOrUpperCase(ci)) {
-                return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
-            }
-            normIbanArr[i] = ci;
-        }
-
-        // shared logic validation steps
-        return validateCommon(normIbanArr, countryData);
-    }
-
-    /**
-     * Final validation steps shared by all full-validation paths: BBAN structure check and Mod 97.
-     * <p>
-     * On success, clears the thread-local error state and returns a success carrier object.
-     * On failure, stores the reason in the thread-local and returns {@code null}.
-     *
-     * @param normIbanArr the normalized IBAN as a char array
-     * @param countryData the {@link IbanRegistry} data
-     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
-     */
-    static IbanValidationSuccess validateCommon(final char[] normIbanArr, final IbanRegistry countryData) {
 
         // check BBAN structure (country-specific)
         CountryValidator countryValidator = countryData.getCountryValidator();
-        if (countryValidator != null && !countryValidator.validateIban(normIbanArr)) {
+        if (countryValidator != null && !countryValidator.validateIban(normIban)) {
             return validationFailed(IbanValidationError.INVALID_STRUCTURE);
         }
 
         // check Mod 97 (most expensive operation — performed last)
-        if (!isMod97Valid(normIbanArr)) {
+        if (!isMod97Valid(normIban)) {
             return validationFailed(IbanValidationError.INVALID_CHECKSUM);
         }
 
         // success: reset thread-local error state and return carrier object
         LAST_REASON.remove();
 
-        return new IbanValidationSuccess(normIbanArr, countryData);
-    }
-
-    /**
-     * Returns {@code true} if the ISO 7064 Mod 97-10 remainder of the given IBAN equals {@code 1}.
-     * <p>
-     * Delegates to {@link Mod97#isValid(char[])}.
-     *
-     * @param iban the normalized IBAN char array (uppercase, no spaces)
-     * @return {@code true} if the checksum is valid
-     */
-    public static boolean isMod97Valid(final char[] iban) {
-        return Mod97.isValid(iban);
+        return new IbanValidationSuccess(normIban, countryData);
     }
 
     /**
@@ -429,34 +287,6 @@ public final class IbanValidator {
      */
     public static boolean isMod97Valid(final CharSequence iban) {
         return Mod97.isValid(iban);
-    }
-
-    /**
-     * Calculates the ISO 7064 Mod 97-10 remainder for a normalized IBAN {@code char[]},
-     * applying the standard rearrangement step (BBAN first, then the 4-character header).
-     * <p>
-     * Delegates to {@link Mod97#calculate(char[])}.
-     * Returns {@link #INVALID_MOD97} for {@code null} or too-short/too-long input, and on
-     * any illegal character. IBAN length bounds ({@link IbanRegistry#MIN_IBAN_LENGTH} /
-     * {@link IbanRegistry#MAX_IBAN_LENGTH}) are checked before the call.
-     *
-     * @param iban the normalized IBAN array (uppercase, no spaces)
-     * @return the remainder (0–96), or {@link #INVALID_MOD97} on invalid input
-     */
-    @SuppressWarnings("PMD.UselessParentheses")
-    public static int calculateMod97(final char[] iban) {
-        if (iban == null) {
-            return INVALID_MOD97;
-        }
-
-        final int len = iban.length;
-
-        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
-            return INVALID_MOD97;
-        }
-
-        int result = Mod97.calculate(iban);
-        return result == Mod97.INVALID_REMAINDER ? INVALID_MOD97 : result;
     }
 
     /**

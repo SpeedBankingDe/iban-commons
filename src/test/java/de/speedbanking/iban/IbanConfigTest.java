@@ -44,10 +44,19 @@ class IbanConfigTest {
             .isFalse();
     }
 
+    @DisplayName("Should respect relaxed validation settings")
+    @Test
+    void testRelaxedSettings() {
+        IbanConfig.ALLOW_SPACE.enable();
+        IbanConfig.ALLOW_LOWERCASE.enable();
+
+        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isTrue();
+        assertThat(IbanConfig.ALLOW_LOWERCASE.isEnabled()).isTrue();
+    }
+
     @DisplayName("Should read from system properties")
     @Test
     void testReadSystemProperty() {
-        // This covers the 'sysProp != null' branch in readSystemProperty()
         System.setProperty("iban.ncd.validate", "true");
 
         IbanConfig.NCD_VALIDATE.reset();
@@ -57,14 +66,31 @@ class IbanConfigTest {
             .isTrue();
     }
 
+    @DisplayName("Should apply parser when reading system property")
+    @Test
+    void testSystemPropertyParsing() {
+        // Testet den Pfad: sysProp != null -> parser.apply(sysProp)
+        System.setProperty("iban.allow.space", "true");
+        IbanConfig.ALLOW_SPACE.reset();
+        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isTrue();
+
+        System.setProperty("iban.allow.space", "false");
+        IbanConfig.ALLOW_SPACE.reset();
+        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isFalse();
+
+        // Testet ungültigen Input für den Boolean-Parser (ergibt false)
+        System.setProperty("iban.allow.space", "not-a-boolean");
+        IbanConfig.ALLOW_SPACE.reset();
+        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isFalse();
+    }
+
     @DisplayName("Should set and get NCD validation flag")
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testSetValidateNationalCheckDigit(boolean value) {
         IbanConfig.NCD_VALIDATE.set(value);
 
-        assertThat((boolean) IbanConfig.NCD_VALIDATE.get())
-            .isEqualTo(value);
+        assertThat((boolean) IbanConfig.NCD_VALIDATE.get()).isEqualTo(value);
     }
 
     @DisplayName("Should set and get NCD calculation flag")
@@ -73,14 +99,20 @@ class IbanConfigTest {
     void testSetCalculateNationalCheckDigit(boolean value) {
         IbanConfig.NCD_CALCULATE.set(value);
 
-        assertThat(IbanConfig.NCD_CALCULATE.isEnabled())
-            .isEqualTo(value);
+        assertThat(IbanConfig.NCD_CALCULATE.isEnabled()).isEqualTo(value);
+    }
+
+    @DisplayName("IsDisabled should return inverse of isEnabled")
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsDisabled(boolean value) {
+        IbanConfig.NCD_VALIDATE.set(value);
+        assertThat(IbanConfig.NCD_VALIDATE.isDisabled()).isNotEqualTo(value);
     }
 
     @DisplayName("ToString should return formatted string")
     @Test
     void testToString() {
-        // Covers toString() method (currently at 0.0%)
         String result = IbanConfig.NCD_VALIDATE.toString();
 
         assertThat(result)
@@ -91,9 +123,11 @@ class IbanConfigTest {
 
     @DisplayName("Reset should restore default values")
     @Test
-    void testReset() {
+    void testResetAll() {
         IbanConfig.NCD_VALIDATE.enable();
         IbanConfig.NCD_CALCULATE.enable();
+        IbanConfig.ALLOW_SPACE.enable();
+        IbanConfig.ALLOW_LOWERCASE.enable();
 
         IbanConfig.resetAll();
 
@@ -102,5 +136,11 @@ class IbanConfigTest {
 
         assertThat(IbanConfig.NCD_CALCULATE.isEnabled()).isFalse();
         assertThat(IbanConfig.NCD_CALCULATE.isDisabled()).isTrue();
+
+        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isFalse();
+        assertThat(IbanConfig.ALLOW_SPACE.isDisabled()).isTrue();
+
+        assertThat(IbanConfig.ALLOW_LOWERCASE.isEnabled()).isFalse();
+        assertThat(IbanConfig.ALLOW_LOWERCASE.isDisabled()).isTrue();
     }
 }

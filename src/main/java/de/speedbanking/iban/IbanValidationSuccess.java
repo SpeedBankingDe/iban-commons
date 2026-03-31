@@ -24,17 +24,17 @@ package de.speedbanking.iban;
 @SuppressWarnings("checkstyle:VisibilityModifier")
 final class IbanValidationSuccess {
 
-    final char[]       normIbanArr;
+    final CharSequence normIban;
     final IbanRegistry countryData;
 
     /**
      * Constructs a success data object.
      *
-     * @param normIbanArr the validated, normalized IBAN characters
+     * @param normIban the validated, normalized IBAN characters
      * @param countryData the metadata for the country code (format, structure)
      */
-    IbanValidationSuccess(final char[] normIbanArr, final IbanRegistry countryData) {
-        this.normIbanArr = normIbanArr;
+    IbanValidationSuccess(final CharSequence normIban, final IbanRegistry countryData) {
+        this.normIban = normIban;
         this.countryData = countryData;
     }
 

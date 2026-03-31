@@ -32,7 +32,6 @@ class IbanValidationErrorTest extends org.assertj.core.api.Assertions {
         "INCORRECT_LENGTH         | IBAN has incorrect length",
         "ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
         "INVALID_COUNTRY          | IBAN has invalid country code",
-        "UNSUPPORTED_COUNTRY      | IBAN has unsupported country code",
         "INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
         "INVALID_STRUCTURE        | IBAN violates country-specific structure rules",
         "INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
@@ -53,7 +52,6 @@ class IbanValidationErrorTest extends org.assertj.core.api.Assertions {
                              INCORRECT_LENGTH,
                              ILLEGAL_CHARACTERS,
                              INVALID_COUNTRY,
-                             UNSUPPORTED_COUNTRY,
                              INCORRECT_LENGTH_COUNTRY,
                              INVALID_CHECK_DIGITS,
                              INVALID_STRUCTURE,

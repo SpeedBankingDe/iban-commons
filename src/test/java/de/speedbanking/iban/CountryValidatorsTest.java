@@ -40,16 +40,16 @@ public class CountryValidatorsTest {
 
         // trigger validation to cover the internal class logic
         // use a dummy IBAN that matches the country code to reach the internal validation code
-        char[] badIban = (country.name() + String.format("%" + (country.getIbanLength() - country.name().length()) + "s", "0")).toCharArray();
+        CharSequence badIban = country.name() + String.format("%" + (country.getIbanLength() - country.name().length()) + "s", "0");
 
         assertThat(validator.validateIban(badIban))
-            .as("Validation should fail for %s using bad iban '%s'", country.name(), new String(badIban))
+            .as("Validation should fail for %s using bad iban '%s'", country.name(), badIban)
             .isFalse();
 
-        char[] goodIban = country.getIbanExample().toCharArray();
+        CharSequence goodIban = country.getIbanExample();
 
         assertThat(validator.validateIban(goodIban))
-            .as("Validation should succeed for %s using good iban '%s'", country.name(), new String(goodIban))
+            .as("Validation should succeed for %s using good iban '%s'", country.name(), goodIban)
             .isTrue();
     }
 
@@ -90,7 +90,7 @@ public class CountryValidatorsTest {
 
             String goodIban = country.getIbanExample();
 
-            assertThat(validator.validateIban(goodIban.toCharArray()))
+            assertThat(validator.validateIban(goodIban))
                 .as("Validation should succeed for %s using good iban '%s'", country.name(), goodIban)
                 .isTrue();
 
@@ -104,7 +104,7 @@ public class CountryValidatorsTest {
             }
             IbanValidator.fixCheckDigits(badNcdIban);
 
-            assertThat(validator.validateIban(badNcdIban.toString().toCharArray()))
+            assertThat(validator.validateIban(badNcdIban.toString()))
                 .as("Validation should fail for %s using iban with invalid NCD '%s'", country.name(), badNcdIban)
                 .isFalse();
 

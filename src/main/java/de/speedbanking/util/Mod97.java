@@ -15,6 +15,8 @@
  */
 package de.speedbanking.util;
 
+import java.util.Objects;
+
 /**
  * Utility class implementing the <strong>ISO 7064 Mod 97-10</strong> checksum algorithm.
  * <p>
@@ -151,9 +153,9 @@ public final class Mod97 {
             final int idx = (i + HEADER_LENGTH) % len;
             final char c = iban.charAt(idx);
 
-            if (c >= '0' && c <= '9') {
+            if (CharUtil.isDigit(c)) {
                 total = total * 10 + (c - '0');
-            } else if (c >= 'A' && c <= 'Z') {
+            } else if (CharUtil.isUpperCase(c)) {
                 total = total * 100 + (c - 'A' + 10);
             } else {
                 return INVALID_REMAINDER;
@@ -219,6 +221,45 @@ public final class Mod97 {
     // -------------------------------------------------------------------------
     // General-purpose calculation (straight range, no rearrangement)
     // -------------------------------------------------------------------------
+
+    /**
+     * Calculates the ISO 7064 Mod 97-10 remainder for a contiguous sub-range of a
+     * character sequence, <em>without</em> any rearrangement step.
+     * <p>
+     * This variant is useful for computing the remainder of a BBAN sub-sequence
+     * (e.g. for National Check Digit calculation).
+     *
+     * @param data   the source character sequence; must not be {@code null}
+     * @param offset start index within {@code data} (inclusive)
+     * @param length number of characters to process
+     * @return the remainder in the range {@code [0, 96]};
+     * illegal characters are silently skipped
+     * @throws NullPointerException      if {@code data} is {@code null}
+     * @throws IndexOutOfBoundsException if {@code offset} or {@code offset + length}
+     * are outside the sequence bounds
+     *
+     * @since 1.8.5
+     */
+    public static int calculateRange(final CharSequence data, final int offset, final int length) {
+        Objects.requireNonNull(data, "Data sequence must not be null");
+        if (offset < 0 || length < 0 || offset + length > data.length()) {
+            throw new IndexOutOfBoundsException(
+                String.format("Invalid range (offset: %d, length: %d) for sequence length %d",
+                    offset, length, data.length()));
+        }
+
+        int remainder = 0;
+        for (int i = 0; i < length; i++) {
+            final char c = data.charAt(offset + i);
+            if (c >= '0' && c <= '9') {
+                remainder = (remainder * 10 + (c - '0')) % MODULUS;
+            } else if (c >= 'A' && c <= 'Z') {
+                // two-digit letter expansion: A=10 … Z=35
+                remainder = (remainder * 100 + (c - 'A' + 10)) % MODULUS;
+            }
+        }
+        return remainder;
+    }
 
     /**
      * Calculates the ISO 7064 Mod 97-10 remainder for a contiguous sub-range of a

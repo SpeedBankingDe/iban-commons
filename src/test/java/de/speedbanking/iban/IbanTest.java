@@ -3,7 +3,6 @@ package de.speedbanking.iban;
 import static de.speedbanking.iban.IbanAssertions.assertThat;
 import static de.speedbanking.iban.IbanAssertions.assertThatIbanIsValid;
 import static de.speedbanking.iban.IbanAssertions.assertThatIbanOf;
-import static de.speedbanking.iban.IbanAssertions.assertThatIbanOfNormalized;
 import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException;
 import static de.speedbanking.iban.IbanRegistry.FI;
 import static de.speedbanking.iban.IbanRegistry.FR;
@@ -23,6 +22,8 @@ import de.speedbanking.util.Iso3166Alpha2;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.ResourceLock;
+import org.junit.jupiter.api.parallel.Resources;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -58,45 +59,54 @@ class IbanTest {
         "GB33 BUKB 2020 1555 5555 55",              // United Kingdom
         "NL91 ABNA 0417 1643 00"                    // Netherlands
     })
+    @ResourceLock(value = Resources.SYSTEM_PROPERTIES)
     void of_ValidIban_ShouldReturnIban(String ibanInput) {
         String ibanInputNorm = ibanInput.replace(" ", "");
 
-        assertThatCode(
-            () -> Iban.of(ibanInput))
-            .as("IBAN '%s' is valid and should be instantiable", ibanInput)
-            .doesNotThrowAnyException();
+        try {
+            IbanConfig.ALLOW_SPACE.enable();
 
-        Iban iban1 = assertThatIbanOf(ibanInput)
-            .as("IBAN instance 1 must not be null and match input string")
-            .isNotNull()
-            .hasToString(ibanInputNorm)
-            .actual();
+            assertThatCode(
+                () -> Iban.of(ibanInput))
+                .as("IBAN '%s' is valid and should be instantiable", ibanInput)
+                .doesNotThrowAnyException();
 
-        assertThatCode(
-            () -> Iban.ofNormalized(ibanInputNorm))
-            .as("Normalized IBAN '%s' is valid and should be instantiable", ibanInput)
-            .doesNotThrowAnyException();
+            Iban iban1 = assertThatIbanOf(ibanInput)
+                .as("IBAN instance 1 must not be null and match input string")
+                .isNotNull()
+                .hasToString(ibanInputNorm)
+                .actual();
 
-        Iban iban2 = assertThatIbanOfNormalized(ibanInputNorm)
-            .as("IBAN instance 2 must not be null and match input string")
-            .isNotNull()
-            .hasToString(ibanInputNorm)
-            .isEqualTo(iban1)
-            .actual();
+            assertThatCode(
+                () -> Iban.of(ibanInputNorm))
+                .as("Normalized IBAN '%s' is valid and should be instantiable", ibanInput)
+                .doesNotThrowAnyException();
 
-        assertThatComparable(iban1).isEqualTo(iban2);
+            Iban iban2 = assertThatIbanOf(ibanInputNorm)
+                .as("IBAN instance 2 must not be null and match input string")
+                .isNotNull()
+                .hasToString(ibanInputNorm)
+                .isEqualTo(iban1)
+                .actual();
 
-        assertThat(Iban.tryParse(ibanInput))
-            .isPresent()
-            .contains(iban1);
+            assertThatComparable(iban1).isEqualTo(iban2);
 
-        assertThat(Iban.tryParseOrNull(ibanInput))
-            .isEqualTo(iban1);
+            assertThat(Iban.tryParse(ibanInput))
+                .isPresent()
+                .contains(iban1);
 
-        assertThatIbanIsValid(ibanInputNorm);
+            assertThat(Iban.tryParseOrNull(ibanInput))
+                .isEqualTo(iban1);
 
-        String invalidIban = ibanInput.substring(0, ibanInput.length() - 1) + "X";
-        assertThat(Iban.isValid(invalidIban)).isFalse();
+            assertThatIbanIsValid(ibanInputNorm);
+
+            String invalidIban = ibanInput.substring(0, ibanInput.length() - 1) + "X";
+            assertThat(Iban.isValid(invalidIban)).isFalse();
+
+        } finally {
+            IbanConfig.ALLOW_SPACE.reset();
+        }
+
     }
 
     /**
@@ -112,11 +122,10 @@ class IbanTest {
         // IBAN (Input)                | ValidationError (Enum)   | Expected Message Pattern
         "(null)                        | EMPTY                    | IBAN is null or empty",
         "''                            | EMPTY                    | IBAN is null or empty",
-        "'   '                         | EMPTY                    | IBAN is null or empty",
         "PS92pals000000000400123456702 | ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
-        "ps92pals000000000400123456702 | INVALID_COUNTRY          | IBAN has invalid country code",
-        "Ps92pals000000000400123456702 | INVALID_COUNTRY          | IBAN has invalid country code",
-        "XX12345678901234567890        | UNSUPPORTED_COUNTRY      | IBAN has unsupported country code",
+        "ps92pals000000000400123456702 | ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
+        "Ps92pals000000000400123456702 | ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
+        "XX12345678901234567890        | INVALID_COUNTRY          | IBAN has invalid country code",
         "DE123                         | INCORRECT_LENGTH         | IBAN has incorrect length",
         "DE91BHLSDEM1123456789         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
         "GB33BUKB2020155555567         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
@@ -129,7 +138,7 @@ class IbanTest {
         IbanValidator.setLastReason(null);
 
         assertThatInvalidIbanException()
-            .isThrownBy(() -> Iban.of(ibanInput))
+            .isThrownBy(() -> Iban.ofNormalized(ibanInput))
             .withCause(null)
             .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm.isEmpty() ? "" : ": " + ibanInputNorm))
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
@@ -140,7 +149,7 @@ class IbanTest {
             .isEqualTo(expectedMessagePattern);
 
         assertThatInvalidIbanException()
-            .isThrownBy(() -> Iban.ofNormalized(ibanInputNorm))
+            .isThrownBy(() -> Iban.of(ibanInputNorm))
             .withCause(null)
             .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm.isEmpty() ? "" : ": " + ibanInputNorm))
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
@@ -447,7 +456,7 @@ class IbanTest {
         randomAscii[IbanRegistry.INDEX_BBAN] = '_';
         randomAscii[IbanRegistry.INDEX_BBAN + 1] = 'x';
 
-        assertThat(entry.getCountryValidator().validateIban(randomAscii))
+        assertThat(entry.getCountryValidator().validateIban(new String(randomAscii)))
             .as("Expected validation of random ascii array to fail for '%s' with data: '%s'", entry.getCountryCode(), new String(randomAscii))
             .isFalse();
     }
@@ -465,7 +474,7 @@ class IbanTest {
         String ibanStr3 = "DE62370400440532013001";
 
         Iban iban1 = Iban.of(ibanStr1);
-        Iban iban2 = Iban.ofNormalized(ibanStr2);
+        Iban iban2 = Iban.of(ibanStr2);
         Iban iban3 = Iban.of(ibanStr3);
 
         assertThat(iban1)

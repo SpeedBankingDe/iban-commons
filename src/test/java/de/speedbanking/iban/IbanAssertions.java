@@ -56,19 +56,6 @@ public class IbanAssertions extends Assertions {
     }
 
     /**
-     * Creates an {@link IbanAssert} by parsing the given pre-normalized IBAN string
-     * via {@link Iban#ofNormalized(CharSequence)}.
-     * The input is expected to be uppercase and free of spaces.
-     *
-     * @param ibanValue the normalized IBAN character sequence to parse
-     * @return the custom assertion object
-     * @throws InvalidIbanException if the IBAN is invalid
-     */
-    public static IbanAssert assertThatIbanOfNormalized(CharSequence ibanValue) {
-        return assertThat(Iban.ofNormalized(ibanValue));
-    }
-
-    /**
      * Creates an {@link IbanAssert} by parsing the given IBAN string via {@link Iban#parse(CharSequence)}.
      * Functionally equivalent to {@link #assertThatIbanOf(CharSequence)}; provided for symmetry
      * with the {@code Iban} API.

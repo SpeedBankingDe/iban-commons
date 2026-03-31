@@ -27,7 +27,7 @@ import de.speedbanking.util.CharUtil;
  * Validators for countries that embed a National Check Digit (NCD) in their BBAN extend
  * {@link AbstractNcdCountryValidator}, which additionally implements
  * {@link NationalCheckDigitCalculator}.  The {@code validateIban} implementation of such
- * validators calls {@link NationalCheckDigitCalculator#validateNationalCheckDigit(char[])}
+ * validators calls {@link NationalCheckDigitCalculator#validateNationalCheckDigit(CharSequence)}
  * as part of its boolean expression.
  *
  * <h3>Implementations</h3>
@@ -54,9 +54,9 @@ interface CountryValidator {
      * and uppercase ASCII letters — no {@code null} check, length check, or
      * {@link CharUtil#isDigitOrUpperCase(char)} check is needed inside this method.
      *
-     * @param iban the fully assembled, normalised IBAN as a {@code char[]}
+     * @param iban the fully assembled, normalised IBAN character sequence
      * @return {@code true} if the IBAN conforms to the country's structural rules,
      *         {@code false} otherwise
      */
-    boolean validateIban(char[] iban);
+    boolean validateIban(CharSequence iban);
 }

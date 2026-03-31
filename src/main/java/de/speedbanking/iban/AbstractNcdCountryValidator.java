@@ -40,13 +40,13 @@ import java.lang.reflect.InvocationTargetException;
  * <h3>Inheritance contract</h3>
  * Subclasses must:
  * <ol>
- *   <li>implement {@link CountryValidator#validateIban(char[])};</li>
+ *   <li>implement {@link CountryValidator#validateIban(CharSequence)};</li>
  *   <li>extend a concrete {@link NationalCheckDigitCalculator} inner class to supply
- *       {@link NationalCheckDigitCalculator#calculateNationalCheckDigit(char[])} and
- *       {@link NationalCheckDigitCalculator#validateNationalCheckDigit(char[])}.</li>
+ *       {@link NationalCheckDigitCalculator#calculateNationalCheckDigit(CharSequence)} and
+ *       {@link NationalCheckDigitCalculator#validateNationalCheckDigit(CharSequence)}.</li>
  * </ol>
- * The {@link #validateNationalCheckDigit(char[])} and
- * {@link #calculateNationalCheckDigit(char[])} methods in this class are {@code final}
+ * The {@link #validateNationalCheckDigit(CharSequence)} and
+ * {@link #calculateNationalCheckDigit(CharSequence)} methods in this class are {@code final}
  * and delegate to the captured {@code ncdCalculator} — subclasses must not override them.
  *
  * @since 1.8.5
@@ -96,7 +96,7 @@ abstract class AbstractNcdCountryValidator
      * Delegates to the {@link NationalCheckDigitCalculator} captured at construction.
      */
     @Override
-    public final boolean validateNationalCheckDigit(char[] iban) {
+    public final boolean validateNationalCheckDigit(CharSequence iban) {
         return ncdCalculator == null
             || IbanConfig.NCD_VALIDATE.isDisabled()
             || ncdCalculator.validateNationalCheckDigit(iban);
@@ -108,7 +108,7 @@ abstract class AbstractNcdCountryValidator
      * Delegates to the {@link NationalCheckDigitCalculator} captured at construction.
      */
     @Override
-    public final char[] calculateNationalCheckDigit(char[] iban) {
+    public final CharSequence calculateNationalCheckDigit(CharSequence iban) {
         return ncdCalculator == null
             || IbanConfig.NCD_CALCULATE.isDisabled()
             ? getCountryData().getNationalCheckDigitIndexRange().applyTo(iban)

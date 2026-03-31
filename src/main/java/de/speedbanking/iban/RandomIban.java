@@ -274,13 +274,11 @@ public final class RandomIban {
 
         NationalCheckDigitCalculator calc = NationalCheckDigitCalculator.class.cast(cv);
 
-        // snapshot the current IBAN as char[] for the calculator
-        char[] ibanChars = ibanBuilder.toString().toCharArray();
-        char[] ncd = calc.calculateNationalCheckDigit(ibanChars);
+        CharSequence ncd = calc.calculateNationalCheckDigit(ibanBuilder);
 
         // write the computed NCD into the StringBuilder
         for (int idxIban = ncdRange.getBegin(), idxNcd = 0; idxIban < ncdRange.getEnd(); idxIban++, idxNcd++) {
-            ibanBuilder.setCharAt(idxIban, ncd[idxNcd]);
+            ibanBuilder.setCharAt(idxIban, ncd.charAt(idxNcd));
         }
 
         return ibanBuilder;
