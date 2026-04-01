@@ -255,9 +255,9 @@ class Iso3166Alpha2Test {
         }
         // At minimum the 20 Eurozone member states plus the 6 micro-states/territories
         // that formally use EUR must be present.
-        assertThat(eurCodes.size())
+        assertThat(eurCodes)
             .as("EUR zone should contain at least 26 entries (20 EU Eurozone + 6 non-EU)")
-            .isGreaterThanOrEqualTo(26);
+            .hasSizeGreaterThanOrEqualTo(26);
 
         // Non-Eurozone European countries must NOT be in the EUR set
         for (String nonEurCode : Arrays.asList("GB", "CH", "DK", "NO", "SE", "IS", "PL",
@@ -479,8 +479,7 @@ class Iso3166Alpha2Test {
         "AX | AX (Åland Islands)"
     })
     void toString_knownConstants_returnsFormattedString(String code, String expected) {
-        assertThat(Iso3166Alpha2.valueOf(code).toString())
-            .isEqualTo(expected);
+        assertThat(Iso3166Alpha2.valueOf(code)).hasToString(expected);
     }
 
     @DisplayName("toString() follows \"<CODE> (<countryName>)\" pattern for all constants")

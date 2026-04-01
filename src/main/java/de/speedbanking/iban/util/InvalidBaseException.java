@@ -103,7 +103,7 @@ public abstract class InvalidBaseException extends RuntimeException {
      *         (empty input is normalized to {@code null})
      */
     public boolean hasInput() {
-        return input != null && input.length() > 0;
+        return input != null && !input.isEmpty();
     }
 
     /**

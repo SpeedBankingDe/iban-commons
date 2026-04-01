@@ -26,18 +26,14 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
 
         assertThat(exception)
             .isNotNull()
-            .isInstanceOf(RuntimeException.class);
+            .isInstanceOf(RuntimeException.class)
+            .as("Exception message must contain the reason's failure text")
+            .hasMessage(reason.getText() + " (" + reason + ")")
+            .hasToString("InvalidIbanException[reason=" + reason + ", input=null]");
 
         assertThat(exception.getReason())
             .as("getReason() should return the original ValidationError")
             .isEqualTo(reason);
-
-        assertThat(exception.getMessage())
-            .as("Exception message must contain the reason's failure text")
-            .isEqualTo(reason.getText() + " (" + reason + ")");
-
-        assertThat(exception.toString())
-            .isEqualTo("InvalidIbanException[reason=" + reason + ", input=null]");
     }
 
     @DisplayName("of(reason) should yield no input")
@@ -127,8 +123,9 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
         InvalidIbanException a = InvalidIbanException.of(reason, input);
         InvalidIbanException b = InvalidIbanException.of(reason, input);
 
-        assertThat(a).isEqualTo(b);
-        assertThat(a.hashCode()).isEqualTo(b.hashCode());
+        assertThat(a)
+            .isEqualTo(b)
+            .hasSameHashCodeAs(b);
     }
 
     @DisplayName("equals() should be true for same reason and both inputs null")
@@ -139,8 +136,9 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
         InvalidIbanException a = InvalidIbanException.of(reason, null);
         InvalidIbanException b = InvalidIbanException.of(reason, null);
 
-        assertThat(a).isEqualTo(b);
-        assertThat(a.hashCode()).isEqualTo(b.hashCode());
+        assertThat(a)
+            .isEqualTo(b)
+            .hasSameHashCodeAs(b);
     }
 
     @DisplayName("equals() should be false for different reasons")
@@ -161,7 +159,7 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     void equalsShouldBeFalseWhenInputDiffers() {
         IbanValidationError reason = IbanValidationError.EMPTY;
 
-        InvalidIbanException withInput    = InvalidIbanException.of(reason, "DE00123456789012345678");
+        InvalidIbanException withInput = InvalidIbanException.of(reason, "DE00123456789012345678");
         InvalidIbanException withoutInput = InvalidIbanException.of(reason);
 
         assertThat(withInput).isNotEqualTo(withoutInput);
@@ -179,8 +177,9 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     void equalsShouldReturnFalseForNullAndOtherTypes() {
         InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.EMPTY);
-        assertThat(ex).isNotEqualTo(null);
-        assertThat(ex).isNotEqualTo("some string");
+        assertThat(ex)
+            .isNotEqualTo(null)
+            .isNotEqualTo("some string");
     }
 
     // -------------------------------------------------------------------------

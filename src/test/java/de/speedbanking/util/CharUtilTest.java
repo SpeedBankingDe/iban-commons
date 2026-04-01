@@ -15,7 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 class CharUtilTest extends Assertions {
 
     @Test
-    void privateConstructor_shouldThrowException() throws Exception {
+    void privateConstructor_shouldThrowException() {
         TestUtil.assertConstructorIsPrivate(CharUtil.class);
     }
 

@@ -200,8 +200,7 @@ class CurrencyTest {
         "XAF | XAF (CFA Franc BEAC)"
     })
     void toString_knownConstants_returnsFormattedString(String code, String expected) {
-        assertThat(Currency.valueOf(code).toString())
-            .isEqualTo(expected);
+        assertThat(Currency.valueOf(code)).hasToString(expected);
     }
 
     // =========================================================================

@@ -40,8 +40,9 @@ class CharArrayWrapperTest {
         final char[] data = "ABCDE".toCharArray();
         final CharArrayWrapper wrapper = new CharArrayWrapper(data, offset, length);
 
-        assertThat(wrapper.length()).isEqualTo(length);
-        assertThat(wrapper.toString()).isEqualTo(expected);
+        assertThat(wrapper)
+            .hasSize(length)
+            .hasToString(expected);
     }
 
     @DisplayName("Constructor should throw IndexOutOfBoundsException for invalid ranges")

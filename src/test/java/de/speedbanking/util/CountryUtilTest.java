@@ -161,13 +161,9 @@ class CountryUtilTest {
             () -> "createFlagEmoji(\"" + countryCode + "\") should throw IllegalArgumentException");
     }
 
-    // =========================================================================
-    // Constructor guard
-    // =========================================================================
-
     @DisplayName("Private constructor throws UnsupportedOperationException (utility class guard)")
     @Test
-    void constructor_reflectiveInstantiation_throwsUnsupportedOperationException() throws NoSuchMethodException {
+    void constructor_reflectiveInstantiation_throwsUnsupportedOperationException() {
         TestUtil.assertConstructorIsPrivate(CountryUtil.class);
     }
 

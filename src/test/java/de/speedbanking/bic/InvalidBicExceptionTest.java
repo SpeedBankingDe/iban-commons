@@ -37,8 +37,8 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
             .as("Exception message must match the reason's failure text")
             .isEqualTo(reason.getText() + " (" + reason + ")");
 
-        assertThat(exception.toString())
-            .isEqualTo("InvalidBicException[reason=" + reason + ", input=null]");
+        assertThat(exception)
+            .hasToString("InvalidBicException[reason=" + reason + ", input=null]");
     }
 
     @DisplayName("of(reason) should yield no input")
@@ -136,8 +136,9 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         InvalidBicException a = InvalidBicException.of(reason, input);
         InvalidBicException b = InvalidBicException.of(reason, input);
 
-        assertThat(a).isEqualTo(b);
-        assertThat(a.hashCode()).isEqualTo(b.hashCode());
+        assertThat(a)
+            .isEqualTo(b)
+            .hasSameHashCodeAs(b);
     }
 
     @DisplayName("equals() should be true for same reason and both inputs null")
@@ -148,8 +149,9 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         InvalidBicException a = InvalidBicException.of(reason, null);
         InvalidBicException b = InvalidBicException.of(reason, null);
 
-        assertThat(a).isEqualTo(b);
-        assertThat(a.hashCode()).isEqualTo(b.hashCode());
+        assertThat(a)
+            .isEqualTo(b)
+            .hasSameHashCodeAs(b);
     }
 
     @DisplayName("equals() should be false for different reasons")
@@ -188,8 +190,9 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
     @Test
     void equalsShouldReturnFalseForNullAndOtherTypes() {
         InvalidBicException ex = InvalidBicException.of(BicValidationError.EMPTY);
-        assertThat(ex).isNotEqualTo(null);
-        assertThat(ex).isNotEqualTo("some string");
+        assertThat(ex)
+            .isNotEqualTo(null)
+            .isNotEqualTo("some string");
     }
 
     // -------------------------------------------------------------------------

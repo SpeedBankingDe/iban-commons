@@ -33,8 +33,7 @@ class RandomIbanTest {
      */
     @Test
     void of_ShouldNotThrowException() {
-        assertThatCode(
-            () -> RandomIban.of())
+        assertThatCode(RandomIban::of)
             .doesNotThrowAnyException();
     }
 
@@ -135,7 +134,7 @@ class RandomIbanTest {
         Iban first  = RandomIban.of("DE", new Random(seed));
         Iban second = RandomIban.of("DE", new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
     }
 
     /**
@@ -148,7 +147,7 @@ class RandomIbanTest {
         Iban first  = RandomIban.of(IbanRegistry.FR, new Random(seed));
         Iban second = RandomIban.of(IbanRegistry.FR, new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
     }
 
     /**
@@ -174,9 +173,10 @@ class RandomIbanTest {
     void of_SeededAllCountries_ShouldBeValid(IbanRegistry registry) {
         Iban iban = RandomIban.of(registry, new Random(4711L));
 
-        assertThat(iban).isNotNull();
+        assertThat(iban)
+            .isNotNull()
+            .hasCountryCode(registry.getCountryCode());
         assertThat(Iban.isValid(iban.toString())).isTrue();
-        assertThat(iban.getCountryCode()).isEqualTo(registry.getCountryCode());
     }
 
     /**
@@ -244,7 +244,7 @@ class RandomIbanTest {
         Iban first  = RandomIban.of(new Random(seed));
         Iban second = RandomIban.of(new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
     }
 
     /**
@@ -257,7 +257,7 @@ class RandomIbanTest {
         Iban first  = RandomIban.ofSepa(new Random(seed));
         Iban second = RandomIban.ofSepa(new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
         assertThat(IbanRegistry.getByCode(first.getCountryCode()).isSepa()).isTrue();
     }
 

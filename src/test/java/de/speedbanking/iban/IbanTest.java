@@ -661,8 +661,7 @@ class IbanTest {
         String streamContent = new String(bytes, StandardCharsets.UTF_8);
         assertThat(streamContent)
             .as("Serialized stream must reference the Memento proxy class")
-            .contains("Memento");
-        assertThat(streamContent)
+            .contains("Memento")
             .as("Serialized stream must not reference Iban directly as the top-level type")
             .doesNotContain("de.speedbanking.iban.Iban\n");
     }

@@ -36,9 +36,10 @@ class RandomBicTest {
     void of_NoArgs_ShouldReturnValidBic8() {
         Bic bic = RandomBic.of();
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic8();
-        assertThat(bic.length()).isEqualTo(Bic.BIC8_LENGTH);
+        assertThat(bic)
+            .isNotNull()
+            .isBic8()
+            .hasLength(Bic.BIC8_LENGTH);
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -59,8 +60,9 @@ class RandomBicTest {
     void of_WithRandom_ShouldReturnValidBic8() {
         Bic bic = RandomBic.of(new Random(1L));
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic8();
+        assertThat(bic)
+            .isNotNull()
+            .isBic8();
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -85,9 +87,10 @@ class RandomBicTest {
     void of_ValidCountryCode_ShouldReturnBic8WithCountry(String countryCode) {
         Bic bic = RandomBic.of(countryCode);
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic8();
-        assertThat(bic.getCountryCode()).isEqualTo(countryCode);
+        assertThat(bic)
+            .isNotNull()
+            .isBic8()
+            .hasCountryCode(countryCode);
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -96,9 +99,10 @@ class RandomBicTest {
     void ofBic11_NoArgs_ShouldReturnValidBic11() {
         Bic bic = RandomBic.ofBic11();
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic11();
-        assertThat(bic.length()).isEqualTo(Bic.BIC11_LENGTH);
+        assertThat(bic)
+            .isNotNull()
+            .isBic11()
+            .hasLength(Bic.BIC11_LENGTH);
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -119,8 +123,9 @@ class RandomBicTest {
     void ofBic11_WithRandom_ShouldReturnValidBic11() {
         Bic bic = RandomBic.ofBic11(new Random(99L));
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic11();
+        assertThat(bic)
+            .isNotNull()
+            .isBic11();
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -145,9 +150,10 @@ class RandomBicTest {
     void ofBic11_ValidCountryCode_ShouldReturnBic11WithCountry(String countryCode) {
         Bic bic = RandomBic.ofBic11(countryCode);
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic11();
-        assertThat(bic.getCountryCode()).isEqualTo(countryCode);
+        assertThat(bic)
+            .isNotNull()
+            .isBic11()
+            .hasCountryCode(countryCode);
         assertThat(Bic.isValid(bic.toString())).isTrue();
         assertThat(bic.getBranchCode()).isNotNull().hasSize(3);
     }
@@ -159,7 +165,7 @@ class RandomBicTest {
         Bic first  = RandomBic.of("DE", new Random(seed));
         Bic second = RandomBic.of("DE", new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
     }
 
     @DisplayName("Same seed and country code should produce identical BIC-11 (reproducibility)")
@@ -169,7 +175,7 @@ class RandomBicTest {
         Bic first  = RandomBic.ofBic11("FR", new Random(seed));
         Bic second = RandomBic.ofBic11("FR", new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
     }
 
     @DisplayName("Same seed should produce identical BIC-8 for any-country selection")
@@ -179,7 +185,7 @@ class RandomBicTest {
         Bic first  = RandomBic.of(new Random(seed));
         Bic second = RandomBic.of(new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
     }
 
     @DisplayName("Same seed should produce identical BIC-11 for any-country selection")
@@ -189,7 +195,7 @@ class RandomBicTest {
         Bic first  = RandomBic.ofBic11(new Random(seed));
         Bic second = RandomBic.ofBic11(new Random(seed));
 
-        assertThat(first.toString()).isEqualTo(second.toString());
+        assertThat(first).hasToString(second.toString());
     }
 
     @DisplayName("Different seeds should produce different BIC-8 values")
@@ -221,9 +227,10 @@ class RandomBicTest {
     void of_AllIsoCountries_ShouldGenerateValidBic8(Iso3166Alpha2 country) {
         Bic bic = RandomBic.of(country.getCode(), new Random(4711L));
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic8();
-        assertThat(bic.getCountryCode()).isEqualTo(country.getCode());
+        assertThat(bic)
+            .isNotNull()
+            .isBic8()
+            .hasCountryCode(country.getCode());
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -233,9 +240,10 @@ class RandomBicTest {
     void ofBic11_AllIsoCountries_ShouldGenerateValidBic11(Iso3166Alpha2 country) {
         Bic bic = RandomBic.ofBic11(country.getCode(), new Random(4711L));
 
-        assertThat(bic).isNotNull();
-        assertThat(bic).isBic11();
-        assertThat(bic.getCountryCode()).isEqualTo(country.getCode());
+        assertThat(bic)
+            .isNotNull()
+            .isBic11()
+            .hasCountryCode(country.getCode());
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -246,9 +254,9 @@ class RandomBicTest {
     @DisplayName("Seeded BIC-8 generation should produce stable snapshot values")
     @ParameterizedTest(name = "[{index}] {0} seed={1}")
     @CsvSource(delimiter = '|', value = {
-        "DE | 0",
-        "GB | 0",
-        "FR | 0",
+        "DE |  0",
+        "GB |  0",
+        "FR |  0",
         "US | 42",
         "JP | 42",
         "CH | 99",
@@ -256,8 +264,9 @@ class RandomBicTest {
     void of_SeededSnapshot_ShouldHaveCorrectCountryAndBeValid(String countryCode, long seed) {
         Bic bic = RandomBic.of(countryCode, new Random(seed));
 
-        assertThat(bic.getCountryCode()).isEqualTo(countryCode);
-        assertThat(bic).isBic8();
+        assertThat(bic)
+            .hasCountryCode(countryCode)
+            .isBic8();
         assertThat(Bic.isValid(bic.toString())).isTrue();
     }
 
@@ -268,9 +277,9 @@ class RandomBicTest {
     @DisplayName("Seeded BIC-11 generation should produce stable snapshot values")
     @ParameterizedTest(name = "[{index}] {0} seed={1}")
     @CsvSource(delimiter = '|', value = {
-        "DE | 0",
-        "GB | 0",
-        "FR | 0",
+        "DE |  0",
+        "GB |  0",
+        "FR |  0",
         "US | 42",
         "JP | 42",
         "CH | 99",
@@ -278,8 +287,9 @@ class RandomBicTest {
     void ofBic11_SeededSnapshot_ShouldHaveCorrectCountryAndBeValid(String countryCode, long seed) {
         Bic bic = RandomBic.ofBic11(countryCode, new Random(seed));
 
-        assertThat(bic.getCountryCode()).isEqualTo(countryCode);
-        assertThat(bic).isBic11();
+        assertThat(bic)
+            .hasCountryCode(countryCode)
+            .isBic11();
         assertThat(Bic.isValid(bic.toString())).isTrue();
         assertThat(bic.getBranchCode()).isNotNull().hasSize(3);
     }
@@ -289,7 +299,9 @@ class RandomBicTest {
     void of_MultipleInvocations_ShouldAlwaysReturnBic8() {
         for (int i = 0; i < 50; i++) {
             Bic bic = RandomBic.of();
-            assertThat(bic.isBic8()).withFailMessage("Expected BIC-8 but got BIC-11: %s", bic).isTrue();
+            assertThat(bic)
+                .withFailMessage("Expected BIC-8 but got BIC-11: %s", bic)
+                .isBic8();
         }
     }
 
@@ -298,7 +310,9 @@ class RandomBicTest {
     void ofBic11_MultipleInvocations_ShouldAlwaysReturnBic11() {
         for (int i = 0; i < 50; i++) {
             Bic bic = RandomBic.ofBic11();
-            assertThat(bic.isBic11()).withFailMessage("Expected BIC-11 but got BIC-8: %s", bic).isTrue();
+            assertThat(bic)
+                .withFailMessage("Expected BIC-11 but got BIC-8: %s", bic)
+                .isBic11();
         }
     }
 
@@ -338,9 +352,10 @@ class RandomBicTest {
         Random rnd = new Random(42L);
         String bic8 = RandomBic.generateBic8String("DE", rnd);
 
-        assertThat(bic8).hasSize(8);
+        assertThat(bic8)
+            .hasSize(8)
+            .matches("[A-Z]{4}DE[A-Z0-9]{2}");
         assertThat(bic8.substring(4, 6)).isEqualTo("DE");
-        assertThat(bic8).matches("[A-Z]{4}DE[A-Z0-9]{2}");
     }
 
     @DisplayName("generateBic11String should return an 11-character string with the given country code")
@@ -349,9 +364,10 @@ class RandomBicTest {
         Random rnd = new Random(42L);
         String bic11 = RandomBic.generateBic11String("DE", rnd);
 
-        assertThat(bic11).hasSize(11);
+        assertThat(bic11)
+            .hasSize(11)
+            .matches("[A-Z]{4}DE[A-Z0-9]{5}");
         assertThat(bic11.substring(4, 6)).isEqualTo("DE");
-        assertThat(bic11).matches("[A-Z]{4}DE[A-Z0-9]{5}");
     }
 
     @DisplayName("Generated BIC-8 should expose correct component lengths")

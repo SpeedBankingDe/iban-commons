@@ -469,8 +469,7 @@ class BicTest {
 
         assertThat(streamContent)
             .as("Serialized stream must reference the Memento proxy class")
-            .contains("Memento");
-        assertThat(streamContent)
+            .contains("Memento")
             .as("Serialized stream must not reference Bic directly as the top-level type")
             .doesNotContain("de.speedbanking.bic.Bic\n");
     }

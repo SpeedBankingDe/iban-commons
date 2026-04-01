@@ -62,8 +62,7 @@ class AbstractCountryValidatorTest {
         // expected format: DE[Germany]
         String expected = "DE[" + IbanRegistry.DE.getCountryName() + "]";
 
-        assertThat(validator.toString())
-            .isEqualTo(expected);
+        assertThat(validator).hasToString(expected);
     }
 
     @DisplayName("getCountryData should return the same instance as resolved at construction")

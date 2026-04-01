@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 /**
  * Unit tests for {@link CountryValidators}.
  */
-public class CountryValidatorsTest {
+class CountryValidatorsTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
