@@ -121,70 +121,68 @@ public final class IbanValidator {
     }
 
     /**
-     * Normalizes the input to a char array by optionally removing spaces and
-     * converting lowercase characters to uppercase.
+     * Normalizes the input sequence by optionally removing spaces and converting
+     * lowercase characters to uppercase.
      * <p>
-     * This method performs a single pass over the input sequence. If invalid characters
-     * are encountered, the method returns {@code null} immediately.
+     * This method follows a dual-path strategy: it returns the original input
+     * immediately if it is already normalized (zero allocation). Otherwise,
+     * it performs a single-pass transformation into a {@link CharArrayWrapper}.
+     * <p>
+     * If an invalid character is encountered (not a digit, not a letter, or
+     * a space when {@code allowSpace} is {@code false}), the method returns
+     * {@code null} immediately.
      *
-     * @param input      the raw character sequence to normalize
-     * @param inputLen   the length of the input sequence
-     * @param allowSpace whether to ignore space characters (' ')
-     * @param allowLower whether to convert lowercase ASCII characters (a-z) to uppercase (A-Z)
-     * @return a normalized char array, or {@code null} if an invalid character was found
+     * @param input      the raw character sequence to normalize, may be {@code null}
+     * @param inputLen   the length of the input sequence to process
+     * @param allowSpace whether to ignore and strip space characters (' ')
+     * @param allowLower whether to accept and convert lowercase ASCII characters (a-z)
+     * @return a normalized character sequence, or {@code null} if an invalid character was found
      *
      * @since 1.8.5
      */
-    static CharSequence normalize(final CharSequence input,
-                                  final int inputLen,
-                                  final boolean allowSpace,
-                                  final boolean allowLower) {
+    static CharSequence normalize(final CharSequence input, final int inputLen,
+                                  final boolean allowSpace, final boolean allowLower) {
 
-        // path 1: No space filtering, no case conversion
-        if (!allowSpace && !allowLower) {
-            for (int i = 0; i < inputLen; i++) {
-                if (!isDigitOrUpperCase(input.charAt(i))) {
-                    return null;
-                }
-            }
-            return input; // prevent new object allocation
-        }
-
-        if (isAllDigitOrUpperCase(input, 0, inputLen)) {
+        if (input == null || inputLen == 0 || isAllDigitOrUpperCase(input, 0, inputLen)) {
+            // fast path: return input if no normalization is required to avoid allocations
             return input;
         }
 
-        // non-digit or non-uppercase chars in input
+        // transformation required: allocation is now unavoidable
+        return normalizeImpl(input, inputLen, allowSpace, allowLower);
+    }
 
-        final char[] arr = new char[inputLen];
-
-        // path 2: No space filtering, case conversion active
-        if (!allowSpace) {
-            for (int i = 0; i < inputLen; i++) {
-                char c = input.charAt(i);
-                if (isLowerCase(c)) {
-                    arr[i] = (char) (c - 32);
-                } else if (isDigitOrUpperCase(c)) {
-                    arr[i] = c;
-                } else {
-                    return null;
-                }
-            }
-
-            return new CharArrayWrapper(arr);
-        }
-
-        // path 3: space filtering and optional case conversion
+    /**
+     * Internal implementation for the transformation path of normalization.
+     * <p>
+     * Iterates through the input and builds a new character array while
+     * applying case conversion and space filtering.
+     *
+     * @param input      the sequence to transform
+     * @param len        the length of the sequence
+     * @param allowSpace whether spaces are allowed (and thus ignored)
+     * @param allowLower whether lowercase letters are allowed (and thus converted)
+     * @return a new {@link CharArrayWrapper} containing the normalized data, or {@code null}
+     *
+     * @since 1.8.5
+     */
+    private static CharSequence normalizeImpl(final CharSequence input, final int len,
+                                              final boolean allowSpace, final boolean allowLower) {
+        final char[] arr = new char[len];
         int targetIdx = 0;
-        for (int i = 0; i < inputLen; i++) {
-            char c = input.charAt(i);
+
+        for (int i = 0; i < len; i++) {
+            final char c = input.charAt(i);
 
             if (isLowerCase(c)) {
-                arr[targetIdx++] = (char) (c - 32);
+                if (!allowLower) {
+                    return null; // lowercase not permitted
+                }
+                arr[targetIdx++] = (char) (c - 32); // fast ascii uppercase conversion
             } else if (isDigitOrUpperCase(c)) {
                 arr[targetIdx++] = c;
-            } else if (c != ' ') {
-                return null;
+            } else if (c != ' ' || !allowSpace) {
+                return null; // illegal character or disallowed space
             }
         }
 

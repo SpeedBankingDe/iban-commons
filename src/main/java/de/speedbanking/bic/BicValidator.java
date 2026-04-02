@@ -59,34 +59,45 @@ public final class BicValidator {
             return validationFailed(BicValidationError.INCORRECT_LENGTH);
         }
 
-        // character set check
-        // BIC must only contain uppercase ASCII letters (A-Z) and digits (0-9)
+        BicValidationError error = validateCharacters(rawBic, len);
+
+        return error == null ? BicValidationResult.valid(new Bic(rawBic)) : validationFailed(error);
+    }
+
+    /**
+     * Internal character-by-character validation based on position-specific requirements.
+     * <p>
+     * This method assumes that null-checks and length-checks have already been performed.
+     * It evaluates bank code, country code (ISO 3166), and location/branch codes.
+     *
+     * @since 1.8.5
+     *
+     * @param rawBic the character sequence to validate
+     * @param len the pre-calculated length of the sequence
+     * @return the first encountered {@link BicValidationError}, or {@code null} if all characters are valid
+     */
+    private static BicValidationError validateCharacters(final CharSequence rawBic, final int len) {
         for (int i = 0; i < len; i++) {
             char c = rawBic.charAt(i);
 
+            // Strategy: Guard clauses or dedicated methods for position-based logic
             if (i < Bic.COUNTRY_CODE_START) { // <4
                 if (isNotUpperCase(c)) {
-                    return validationFailed(BicValidationError.INVALID_BANK_CODE);
+                    return BicValidationError.INVALID_BANK_CODE;
                 }
-            } else if (i == Bic.COUNTRY_CODE_START) { // ==4
+            } else if (i == Bic.COUNTRY_CODE_START) { // ==4 (country code part 1)
                 if (isNotUpperCase(c)) {
-                    return validationFailed(BicValidationError.INVALID_COUNTRY);
+                    return BicValidationError.INVALID_COUNTRY;
                 }
-            } else if (i == Bic.COUNTRY_CODE_START + 1) { // ==5
-                // country code check (positions 5 and 6 / indices 4 and 5)
-                // ISO 9362 requires an officially assigned ISO 3166-1 Alpha-2 country code
-
+            } else if (i == Bic.COUNTRY_CODE_START + 1) { // country code part 2 & full ISO check
                 if (!Iso3166Alpha2.isAssigned(rawBic.charAt(i - 1), c)) {
-                    return validationFailed(BicValidationError.INVALID_COUNTRY);
+                    return BicValidationError.INVALID_COUNTRY;
                 }
-            } else if (!isDigitOrUpperCase(c)) {
-                // BIC should be all uppercase and contain only digits or letters
-                return validationFailed(BicValidationError.ILLEGAL_CHARACTERS);
+            } else if (!isDigitOrUpperCase(c)) { // Location & Branch Code
+                return BicValidationError.ILLEGAL_CHARACTERS;
             }
         }
-
-        Bic bic = new Bic(rawBic);
-        return BicValidationResult.valid(bic);
+        return null;
     }
 
     /**
