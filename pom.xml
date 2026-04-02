@@ -126,6 +126,7 @@
         <dep.plugin.error-prone.version>2.42.0</dep.plugin.error-prone.version>
         <dep.plugin.exec.version>3.6.3</dep.plugin.exec.version>
         <dep.plugin.gpg.version>3.2.8</dep.plugin.gpg.version>
+        <dep.plugin.jacoco.version>0.8.14</dep.plugin.jacoco.version>
         <dep.plugin.jar.version>3.5.0</dep.plugin.jar.version>
         <dep.plugin.javadoc.version>3.12.0</dep.plugin.javadoc.version>
         <dep.plugin.license.version>4.6</dep.plugin.license.version> <!-- latest Java 8-compatible version, see https://mathieu.carbou.me/license-maven-plugin -->
@@ -136,6 +137,8 @@
         <dep.plugin.source.version>3.4.0</dep.plugin.source.version>
         <dep.plugin.surefire.version>3.5.5</dep.plugin.surefire.version>
         <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
+
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencies>
@@ -206,8 +209,35 @@
                         <reuseForks>true</reuseForks>
                         <forkedProcessTimeoutInSeconds>180</forkedProcessTimeoutInSeconds>
 
-                        <argLine>-Xmx2048m</argLine>
+                        <argLine>${argLine} -Xmx2048m</argLine>
                     </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${dep.plugin.jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <id>jacoco-prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>jacoco-report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                            <configuration>
+                                <formats>
+                                    <format>XML</format>
+                                    <format>HTML</format>
+                                </formats>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
 
                 <plugin>
@@ -594,6 +624,11 @@
             <plugin>
                 <groupId>org.cyclonedx</groupId>
                 <artifactId>cyclonedx-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
 
         </plugins>
