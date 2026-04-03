@@ -257,20 +257,20 @@ public final class RandomIban {
      * implement {@link NationalCheckDigitCalculator}, or for countries that have no NCD
      * field ({@link IbanRegistry#getNationalCheckDigitIndexRange()} returns {@code null}).
      *
-     * @param ibanRegistry the registry entry for the country
-     * @param ibanBuilder  the mutable IBAN string with {@code "00"} ISO check-digit placeholders
-     *                     and a randomly generated BBAN; modified in-place
+     * @param countryData the registry entry for the country
+     * @param ibanBuilder the mutable IBAN string with {@code "00"} ISO check-digit placeholders
+     *                    and a randomly generated BBAN; modified in-place
      */
-    static StringBuilder fixNationalCheckDigit(IbanRegistry ibanRegistry, StringBuilder ibanBuilder) {
+    static StringBuilder fixNationalCheckDigit(IbanRegistry countryData, StringBuilder ibanBuilder) {
 
         // only countries with a registered NCD field are relevant
-        IndexRange ncdRange = ibanRegistry.getNationalCheckDigitIndexRange();
+        IndexRange ncdRange = countryData.getNationalCheckDigitIndexRange();
         if (ncdRange == null) {
             return ibanBuilder;
         }
 
         // the CountryValidator must also implement NationalCheckDigitCalculator
-        CountryValidator cv = ibanRegistry.getCountryValidator();
+        CountryValidator cv = IbanValidator.getCountryValidator(countryData);
 
         NationalCheckDigitCalculator calc = NationalCheckDigitCalculator.class.cast(cv);
 

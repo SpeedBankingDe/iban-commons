@@ -21,7 +21,6 @@ import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Iso3166Alpha2;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2903,8 +2902,6 @@ public enum IbanRegistry {
     private final String                            countryFlag;
     private final Pattern                           ibanRegex;
 
-    private CountryValidator                        countryValidator;
-
     private final IbanRegistry                      baseCountry;
 
     /** The minimum required length: Country Code (2) + Check Digits (2). */
@@ -2932,21 +2929,6 @@ public enum IbanRegistry {
 
     /** Map for quick lookups by packed country code. */
     private static final Map<Integer, IbanRegistry> LOOKUP             = buildLookupMap();
-
-    static {
-        List<String> missingCountryValidators = Arrays.stream(values())
-            .map(countryData -> {
-                countryData.countryValidator = loadCountryValidator(countryData.name());
-                return countryData.countryValidator != null ? null : countryData;
-            })
-            .filter(Objects::nonNull)
-            .map(IbanRegistry::getCountryCode)
-            .collect(Collectors.toList());
-
-        if (!missingCountryValidators.isEmpty()) {
-            throw new ExceptionInInitializerError("Country validators missing for: " + String.join(", ", missingCountryValidators));
-        }
-    }
 
     /**
      * Main constructor for {@code IbanRegistry} enum constants.
@@ -3322,15 +3304,6 @@ public enum IbanRegistry {
     }
 
     /**
-     * Returns the optional {@link CountryValidator} instance used for country-specific structure validation.
-     *
-     * @return the country validator implementation, or {@code null} if one is not found
-     */
-    CountryValidator getCountryValidator() {
-        return countryValidator;
-    }
-
-    /**
      * Returns the base country {@code IbanRegistry} entry if this entry is a derived code
      * that inherits data from another country (e.g., {@code AX} points to {@code FI}).
      *
@@ -3396,38 +3369,6 @@ public enum IbanRegistry {
             .add("Organization: " + getOrganisation())
             .add("Last Update: " + getLastUpdate())
             .toString();
-    }
-
-    /**
-     * Dynamically loads and instantiates the country-specific IBAN validator
-     * using reflection based on the two-letter country code.
-     * <p>
-     * This method expects the validator implementation to be defined as a public
-     * nested static class within the {@code CountryValidator} interface,
-     * named after the country code (e.g., {@code CountryValidator.AD} for "AD").
-     * <p>
-     * <strong>Note:</strong> This method uses reflection and may fail silently
-     * if the validator class is not found.
-     *
-     * @param countryCode the two-letter country code (e.g., "DE", "AD")
-     * @return the instantiated {@link CountryValidator} for the given country,
-     *         or {@code null} if the validator class cannot be found or instantiated
-     *
-     * @see CountryValidator
-     * @see CountryValidators
-     */
-    static CountryValidator loadCountryValidator(final String countryCode) {
-        String className = CountryValidators.class.getName() + '$' + countryCode;
-
-        try {
-            // reflective call of the constructor of the inner static class
-            Class<?> validatorClass = Class.forName(className);
-            Object instance = validatorClass.getDeclaredConstructor().newInstance();
-            return (CountryValidator) instance;
-
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ex) {
-            throw new IllegalStateException("Could not instantiate class '" + className + "': " + ex);
-        }
     }
 
     /**

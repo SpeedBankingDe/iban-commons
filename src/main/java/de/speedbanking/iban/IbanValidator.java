@@ -25,11 +25,18 @@ import static de.speedbanking.util.CharUtil.isNotDigit;
 import de.speedbanking.util.CharArrayWrapper;
 import de.speedbanking.util.Mod97;
 
+import java.util.Arrays;
+
 /**
  * The core engine for **International Bank Account Number (IBAN)** validation.
  * <p>
- * Validation is designed to fail fast, aborting at the first error detected.<br>
- * This class is only responsible for validation and does not create {@link Iban} objects.
+ * Validation is designed to fail fast, aborting at the first error detected.
+ * <p>
+ * This class is thread-safe as it uses a {@link ThreadLocal} for error state
+ * tracking and otherwise consists of stateless utility methods.
+ * <p>
+ * Performance is a key goal: the validator minimizes heap allocations by
+ * operating on {@link CharSequence} and using a fast-path normalization strategy.
  *
  * @since 1.8.0
  */
@@ -41,6 +48,19 @@ public final class IbanValidator {
      * Delegates to {@link Mod97#INVALID_REMAINDER} for a consistent sentinel across the API.
      */
     public static final int                               INVALID_MOD97 = Mod97.INVALID_REMAINDER;
+
+    /**
+     * Internal cache of all country-specific validators, indexed by the ordinal
+     * of the {@link IbanRegistry} enumeration.
+     * <p>
+     * This field is thread-safe as the array and the contained {@link CountryValidator}
+     * instances are effectively immutable.
+     */
+    private static final CountryValidator[]               VALIDATORS    =
+        Arrays.stream(IbanRegistry.values())
+            .map(IbanRegistry::name)
+            .map(IbanValidator::loadCountryValidator)
+            .toArray(CountryValidator[]::new);
 
     /**
      * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
@@ -61,6 +81,39 @@ public final class IbanValidator {
     private IbanValidator() {
         throw new UnsupportedOperationException(
             "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+    }
+
+    /**
+     * Dynamically loads and instantiates the country-specific IBAN validator
+     * using reflection based on the two-letter country code.
+     * <p>
+     * This method expects the validator implementation to be defined as a public
+     * nested static class within the {@code CountryValidator} interface,
+     * named after the country code (e.g., {@code CountryValidator.AD} for "AD").
+     * <p>
+     * <strong>Note:</strong> This method uses reflection and may fail silently
+     * if the validator class is not found.
+     *
+     * @param countryCode the two-letter country code (e.g., "DE", "AD")
+     * @return the instantiated {@link CountryValidator} for the given country,
+     *         or {@code null} if the validator class cannot be found or instantiated
+     *
+     * @see CountryValidator
+     * @see CountryValidators
+     */
+    static CountryValidator loadCountryValidator(final String countryCode) {
+        String className = CountryValidators.class.getName() + '$' + countryCode;
+        try {
+            Class<?> cls = Class.forName(className);
+            return (CountryValidator) cls.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException("Could not instantiate class '" + className + "': " + ex);
+        }
+    }
+
+    @SuppressWarnings("EnumOrdinal")
+    static CountryValidator getCountryValidator(IbanRegistry entry) {
+        return VALIDATORS[entry.ordinal()];
     }
 
     /**
@@ -116,7 +169,7 @@ public final class IbanValidator {
         return countryData != null
             && len == countryData.getIbanLength()
             // BBAN structure check (country-specific) and Mod 97
-            && countryData.getCountryValidator().validateIban(normIban)
+            && getCountryValidator(countryData).validateIban(normIban)
             && calculateMod97(normIban) == 1;
     }
 
@@ -136,7 +189,8 @@ public final class IbanValidator {
      * @param inputLen   the length of the input sequence to process
      * @param allowSpace whether to ignore and strip space characters (' ')
      * @param allowLower whether to accept and convert lowercase ASCII characters (a-z)
-     * @return a normalized character sequence, or {@code null} if an invalid character was found
+     * @return a normalized character sequence, or {@code null} if an invalid character
+     *         was found or the input was {@code null}
      *
      * @since 1.8.5
      */
@@ -209,10 +263,14 @@ public final class IbanValidator {
      * <p>
      * This is the preferred method for factory methods (like {@code Iban.of()})
      * as it aborts validation on failure and provides the normalized data on success.
+     * <p>
+     * In case of failure, the specific reason is stored in a {@link ThreadLocal}
+     * and can be retrieved via {@link #getLastReason()}.
      *
      * @param rawIban    the IBAN character sequence to validate, potentially containing spaces
      * @param allowSpace whether to allow spaces during validation
      * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
+     * @see #getLastReason()
      *
      * @since 1.8.5
      */
@@ -259,7 +317,7 @@ public final class IbanValidator {
         }
 
         // check BBAN structure (country-specific)
-        CountryValidator countryValidator = countryData.getCountryValidator();
+        CountryValidator countryValidator = getCountryValidator(countryData);
         if (countryValidator != null && !countryValidator.validateIban(normIban)) {
             return validationFailed(IbanValidationError.INVALID_STRUCTURE);
         }

@@ -443,7 +443,7 @@ class IbanTest {
                 .isIn(IbanValidationError.INVALID_STRUCTURE, IbanValidationError.INVALID_CHECKSUM);
         }
 
-        assumeThat(entry.getCountryValidator())
+        assumeThat(IbanValidator.getCountryValidator(entry))
             .as("Assuming that country validator for %s is present", entry.getCountryCode())
             .isNotNull();
 
@@ -456,7 +456,7 @@ class IbanTest {
         randomAscii[IbanRegistry.INDEX_BBAN] = '_';
         randomAscii[IbanRegistry.INDEX_BBAN + 1] = 'x';
 
-        assertThat(entry.getCountryValidator().validateIban(new String(randomAscii)))
+        assertThat(IbanValidator.getCountryValidator(entry).validateIban(new String(randomAscii)))
             .as("Expected validation of random ascii array to fail for '%s' with data: '%s'", entry.getCountryCode(), new String(randomAscii))
             .isFalse();
     }

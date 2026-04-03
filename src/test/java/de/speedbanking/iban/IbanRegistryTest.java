@@ -21,18 +21,6 @@ import java.time.ZoneId;
 @SuppressWarnings("PMD.LinguisticNaming")
 class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
-    /**
-     * Verifies that an {@link IllegalStateException} is thrown on attempts
-     * to load a non-existing country validator class.
-     */
-    @DisplayName("loadCountryValidator() should throw IllegalStateException on non-existing class")
-    @Test
-    void loadNcdCalculatorShouldThrowIllegalStateExceptionOnNonExistingClass() {
-        assertThatThrownBy(() -> IbanRegistry.loadCountryValidator("Bogus"))
-            .isExactlyInstanceOf(IllegalStateException.class)
-            .hasMessageStartingWith("Could not instantiate class 'de.speedbanking.iban.CountryValidators$Bogus': java.lang.ClassNotFoundException");
-    }
-
     @DisplayName("Should return the correct registry entry for a valid code")
     @Test
     void getByCodeShouldReturnCorrectEntry() {
@@ -152,10 +140,6 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryDe.getDepartmentGenericEmail()).isEqualTo("iban@bdb.de");
         softly.assertThat(registryDe.getDepartmentTel()).isEqualTo("+ 49 3016632301");
 
-        softly.assertThat(registryDe.getCountryValidator())
-            .isInstanceOf(CountryValidators.DE.class)
-            .isNotNull();
-
         softly.assertThat(registryDe.getLastUpdate()).isEqualTo(YearMonth.of(2011, 1));
         softly.assertThat(registryDe.getLastUpdateYear()).isEqualTo(2011);
         softly.assertThat(registryDe.getLastUpdateMonth()).isEqualTo(1);
@@ -206,10 +190,6 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryFr.getCityPostcode()).isEqualTo("75009 Paris");
         softly.assertThat(registryFr.getDepartmentGenericEmail()).isEqualTo("cfonb@cfonb.fr");
         softly.assertThat(registryFr.getDepartmentTel()).isEqualTo("+ 33 148005042");
-
-        softly.assertThat(registryFr.getCountryValidator())
-            .isInstanceOf(CountryValidators.FR.class)
-            .isNotNull();
 
         softly.assertThat(registryFr.getLastUpdate()).isEqualTo(YearMonth.of(2016, 9));
 

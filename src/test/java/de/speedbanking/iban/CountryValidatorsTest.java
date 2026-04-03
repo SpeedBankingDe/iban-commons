@@ -32,7 +32,7 @@ class CountryValidatorsTest {
     @ParameterizedTest
     @IbanRegistrySource
     void testAllValidators(IbanRegistry country) {
-        CountryValidator validator = country.getCountryValidator();
+        CountryValidator validator = IbanValidator.getCountryValidator(country);
 
         assertThat(validator)
             .as("Validator for %s should not be null", country)
@@ -57,7 +57,7 @@ class CountryValidatorsTest {
     @ParameterizedTest
     @IbanRegistrySource
     void testToString(IbanRegistry country) {
-        CountryValidator validator = country.getCountryValidator();
+        CountryValidator validator = IbanValidator.getCountryValidator(country);
 
         assertThat(validator.toString())
             .as("toString for %s should follow the pattern getClass().getSimpleName() + [...]", country.name())
@@ -81,12 +81,12 @@ class CountryValidatorsTest {
 
         try {
 
-            assertThat(country.getCountryValidator())
+            assertThat(IbanValidator.getCountryValidator(country))
                 .as("Validator for %s should be an NCD calculator", country)
                 .isInstanceOf(NationalCheckDigitCalculator.class)
                 .isInstanceOf(AbstractNcdCountryValidator.class);
 
-            AbstractNcdCountryValidator validator = (AbstractNcdCountryValidator) country.getCountryValidator();
+            AbstractNcdCountryValidator validator = (AbstractNcdCountryValidator) IbanValidator.getCountryValidator(country);
 
             String goodIban = country.getIbanExample();
 
