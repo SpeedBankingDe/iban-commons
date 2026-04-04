@@ -98,7 +98,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 * **Java 8 compatibility**
 
-  Built with and compiled for Java 8 for maximum reach, tested on recent LTS versions
+  Targeting Java 8 for maximum reach, built and verified using JDK 17+ with the `--release 8` flag to ensure full binary compatibility
 
 * **Comprehensive Coverage**
 
@@ -358,7 +358,7 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 ## ❓ FAQ
 
 <details>
-<summary><b>Which countries are supported?</summary>
+<summary>Which countries are supported?</summary>
 
 120 countries including all from the SWIFT IBAN Registry Release 100 (October 2025):
 - All SEPA countries including major economies: Germany, UK, Switzerland, Norway, etc.
@@ -412,14 +412,14 @@ public @interface ValidIban {
 </details>
 
 <details>
-<summary><b>Where can I find the full API documentation?</b></summary>
+<summary>Where can I find the full API documentation?</summary>
 
 The complete Javadoc is hosted on [javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/).
 It covers all public classes and methods including `Iban`, `Bic`, `IbanRegistry`, and the validation API.
 </details>
 
 <details>
-<summary><b>Can I use this library on Android?</b></summary>
+<summary>Can I use this library on Android?</summary>
 
 Yes. `iban-commons` is Android-compatible from API level 21 (Android 5.0) onwards.
 
@@ -436,14 +436,15 @@ The library has zero compile or runtime dependencies and does not use `java.time
 </details>
 
 <details>
-<summary><b>Is the library thread-safe?</b></summary>
+<summary>Is the library thread-safe?</summary>
 
 Yes. Both `Iban` and `Bic` are immutable value objects — all fields are `final` and set in the constructor.
 They can be safely shared across threads without synchronization.
 The validation and registry classes are stateless and equally safe for concurrent use.
 </details>
 
-
+<details>
+<summary>What's the difference between IBAN validation and checksum validation?</summary>
 
 `iban-commons` performs **complete validation**:
 1. Format validation: Country code, length, character set
@@ -467,6 +468,10 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 - Submit pull requests
 
 **Development Setup:**
+
+* **JDK 17** or higher required to build the project
+* Maven 3.9+ required
+
 ```bash
 git clone https://github.com/SpeedBankingDe/iban-commons.git
 cd iban-commons
@@ -482,7 +487,7 @@ mvn clean verify
 - 📚 API Reference: [Javadoc on javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/)
 - 🌐 Website: [www.speedbanking.de](https://www.speedbanking.de/)
 
-**Please star this repo if you find it useful!** ⭐
+** Please star this repo if you find it useful! **
 
 -----
 
@@ -501,7 +506,21 @@ into `Iban` and `Bic`, see [SECURITY.md](SECURITY.md).
 
 This project is licensed under the **Apache License, Version 2.0**. You can find the full text of the license [here](https://www.apache.org/licenses/LICENSE-2.0).
 
------
+<p style="height: 20px;">&nbsp;</p>
+
+<div align="center">
+<table style="border-collapse: collapse;">
+  <tr>
+    <td style="padding: 40px; border: 2px solid #3a82c2;">
+      <strong>Enjoying 
+        <a href="https://github.com/SpeedBankingDe/iban-commons" style="color: #3a82c2; text-decoration: none;">iban-commons</a>?
+      </strong><br>
+      <strong>Please leave a 🌟 to support the project!</strong><br>
+      <small>Your stars help to keep open source development visible and going.</small>
+    </td>
+  </tr>
+</table>
+</div>
 
 <!-- SEO: common search terms for this project -->
 <!-- java iban validation | iban validator java | bic validation java | swift code validator java -->

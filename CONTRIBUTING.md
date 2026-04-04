@@ -64,9 +64,10 @@ Add support for new country XY
 ## 🏗️ Development Setup
 
 ### Prerequisites
-- **Java 8+** (we build with Java 8 for compatibility)
-- **Maven 3.9+**
+- **JDK 17** or higher required to build the project
+- Maven 3.9+
 - Git
+- Spare Time
 
 ### Building
 ```bash

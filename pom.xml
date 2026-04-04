@@ -110,14 +110,14 @@
 
         <deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</deploy.snapshot.url>
 
-        <dep.checkstyle.version>9.3</dep.checkstyle.version> <!-- latest Java 8-compatible checkstyle version -->
+        <dep.checkstyle.version>12.3.1</dep.checkstyle.version>
         <check.checkstyle.ruleset>src/test/resources/team/checkstyle-rules.xml</check.checkstyle.ruleset>
 
-        <dep.pmd.version>7.22.0</dep.pmd.version>
+        <dep.pmd.version>7.23.0</dep.pmd.version>
         <check.pmd.ruleset>src/test/resources/team/pmd-rules.xml</check.pmd.ruleset>
 
         <!-- Plugin versions (alphabetically) -->
-        <dep.plugin.central-publishing.version>0.9.0</dep.plugin.central-publishing.version>
+        <dep.plugin.central-publishing.version>0.10.0</dep.plugin.central-publishing.version>
         <dep.plugin.checkstyle.version>3.6.0</dep.plugin.checkstyle.version>
         <dep.plugin.compiler.version>3.15.0</dep.plugin.compiler.version>
         <dep.plugin.cyclonedx.version>2.9.1</dep.plugin.cyclonedx.version>
@@ -129,11 +129,11 @@
         <dep.plugin.jacoco.version>0.8.14</dep.plugin.jacoco.version>
         <dep.plugin.jar.version>3.5.0</dep.plugin.jar.version>
         <dep.plugin.javadoc.version>3.12.0</dep.plugin.javadoc.version>
-        <dep.plugin.license.version>4.6</dep.plugin.license.version> <!-- latest Java 8-compatible version, see https://mathieu.carbou.me/license-maven-plugin -->
-        <dep.plugin.pitest.version>1.22.1</dep.plugin.pitest.version>
+        <dep.plugin.license.version>5.0.0</dep.plugin.license.version> <!-- see https://mathieu.carbou.me/license-maven-plugin -->
+        <dep.plugin.pitest.version>1.23.0</dep.plugin.pitest.version>
         <dep.plugin.pmd.version>3.28.0</dep.plugin.pmd.version>
         <dep.plugin.release.version>3.3.1</dep.plugin.release.version>
-        <dep.plugin.sortpom.version>3.0.1</dep.plugin.sortpom.version> <!-- latest Java 8-compatible version, see https://github.com/Ekryd/sortpom/releases -->
+        <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version> <!-- see https://github.com/Ekryd/sortpom/releases -->
         <dep.plugin.source.version>3.4.0</dep.plugin.source.version>
         <dep.plugin.surefire.version>3.5.5</dep.plugin.surefire.version>
         <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
@@ -466,7 +466,7 @@
                                 <version>[3.9.0,)</version>
                             </requireMavenVersion>
                             <requireJavaVersion>
-                                <version>[${javaVersion},)</version>
+                                <version>[17,)</version>
                             </requireJavaVersion>
 
                             <requirePluginVersions>
