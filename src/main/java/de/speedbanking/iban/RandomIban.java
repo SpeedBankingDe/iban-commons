@@ -179,11 +179,15 @@ public final class RandomIban {
      */
     public static Iban of(IbanRegistry countryData, Random random) {
         Random rd = random != null ? random : ThreadLocalRandom.current();
-        IbanRegistry cd = countryData != null ? countryData : ALL_COUNTRIES[rd.nextInt(ALL_COUNTRIES.length)];
+        final IbanRegistry cd = countryData != null ? countryData : ALL_COUNTRIES[rd.nextInt(ALL_COUNTRIES.length)];
+
+        String countryCode = cd.isBaseCountry()
+            ? cd.getCountryCode()
+            : cd.getBaseCountry().getCountryCode();
 
         // 1. Start with CC + Check Digits Placeholders ("00") + random BBAN
         StringBuilder ibanBuilder = new StringBuilder()
-            .append(cd.getCountryCode())
+            .append(countryCode)
             .append("00") // placeholder for ISO check digits
             .append(generateRandomBban(cd.getBbanPatternStr(), rd));
 

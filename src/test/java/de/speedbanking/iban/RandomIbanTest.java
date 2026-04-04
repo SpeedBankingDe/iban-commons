@@ -79,16 +79,20 @@ class RandomIbanTest {
     @DisplayName("Should generate a valid IBAN for every supported country enum")
     @ParameterizedTest(name = "Generation for country: {0}")
     @IbanRegistrySource
-    void of_CountryEnum_ShouldGenerateValidIban(IbanRegistry registry) {
+    void of_CountryEnum_ShouldGenerateValidIban(IbanRegistry countryData) {
         IbanValidator.setLastReason(null);
-        Iban iban = RandomIban.of(registry);
+        Iban iban = RandomIban.of(countryData);
+
+        IbanRegistry actualCountryData = countryData.isBaseCountry()
+            ? countryData
+            : countryData.getBaseCountry();
 
         IbanAssertions.assertThat(iban)
             .isNotNull()
-            .hasCountryCode(registry.getCountryCode())
-            .hasCountryFlag(registry.getCountryFlag())
-            .hasCountryName(registry.getCountryName())
-            .hasOrganisation(registry.getOrganisation());
+            .hasCountryCode(actualCountryData.getCountryCode())
+            .hasCountryFlag(actualCountryData.getCountryFlag())
+            .hasCountryName(actualCountryData.getCountryName())
+            .hasOrganisation(actualCountryData.getOrganisation());
 
         assertThat(IbanValidator.getLastReason()).isNull();
 
@@ -110,16 +114,20 @@ class RandomIbanTest {
     @DisplayName("Should generate a valid IBAN for every supported country code")
     @ParameterizedTest(name = "Generation for country: {0}")
     @IbanRegistrySource
-    void of_CountryCode_ShouldGenerateValidIban(IbanRegistry registry) {
+    void of_CountryCode_ShouldGenerateValidIban(IbanRegistry countryData) {
         IbanValidator.setLastReason(null);
-        Iban iban = RandomIban.of(registry.getCountryCode());
+        Iban iban = RandomIban.of(countryData.getCountryCode());
+
+        IbanRegistry actualCountryData = countryData.isBaseCountry()
+            ? countryData
+            : countryData.getBaseCountry();
 
         IbanAssertions.assertThat(iban)
             .isNotNull()
-            .hasCountryCode(registry.getCountryCode())
-            .hasCountryFlag(registry.getCountryFlag())
-            .hasCountryName(registry.getCountryName())
-            .hasOrganisation(registry.getOrganisation());
+            .hasCountryCode(actualCountryData.getCountryCode())
+            .hasCountryFlag(actualCountryData.getCountryFlag())
+            .hasCountryName(actualCountryData.getCountryName())
+            .hasOrganisation(actualCountryData.getOrganisation());
 
         assertThat(IbanValidator.getLastReason()).isNull();
     }
@@ -170,12 +178,15 @@ class RandomIbanTest {
     @DisplayName("Seeded generation should produce valid IBANs for all countries")
     @ParameterizedTest(name = "Country: {0}")
     @IbanRegistrySource
-    void of_SeededAllCountries_ShouldBeValid(IbanRegistry registry) {
-        Iban iban = RandomIban.of(registry, new Random(4711L));
+    void of_SeededAllCountries_ShouldBeValid(IbanRegistry countryData) {
+        Iban iban = RandomIban.of(countryData, new Random(4711L));
+        String countryCode = countryData.isBaseCountry()
+            ? countryData.getCountryCode()
+            : countryData.getBaseCountry().getCountryCode();
 
         assertThat(iban)
             .isNotNull()
-            .hasCountryCode(registry.getCountryCode());
+            .hasCountryCode(countryCode);
         assertThat(Iban.isValid(iban.toString())).isTrue();
     }
 

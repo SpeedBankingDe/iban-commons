@@ -112,8 +112,8 @@ public final class IbanValidator {
     }
 
     @SuppressWarnings("EnumOrdinal")
-    static CountryValidator getCountryValidator(IbanRegistry entry) {
-        return VALIDATORS[entry.ordinal()];
+    static CountryValidator getCountryValidator(IbanRegistry countryData) {
+        return VALIDATORS[countryData.ordinal()];
     }
 
     /**
@@ -164,7 +164,7 @@ public final class IbanValidator {
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
-        IbanRegistry countryData = IbanRegistry.getByCode(normIban.charAt(0), normIban.charAt(1));
+        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban.charAt(0), normIban.charAt(1));
 
         return countryData != null
             && len == countryData.getIbanLength()
@@ -220,8 +220,8 @@ public final class IbanValidator {
      *
      * @since 1.8.5
      */
-    private static CharSequence normalizeImpl(final CharSequence input, final int len,
-                                              final boolean allowSpace, final boolean allowLower) {
+    static CharSequence normalizeImpl(final CharSequence input, final int len,
+                                      final boolean allowSpace, final boolean allowLower) {
         final char[] arr = new char[len];
         int targetIdx = 0;
 
@@ -301,7 +301,7 @@ public final class IbanValidator {
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
-        IbanRegistry countryData = IbanRegistry.getByCode(normIban.charAt(0), normIban.charAt(1));
+        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban.charAt(0), normIban.charAt(1));
 
         if (countryData == null) {
             return validationFailed(IbanValidationError.INVALID_COUNTRY);

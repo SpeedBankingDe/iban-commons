@@ -2,6 +2,8 @@ package de.speedbanking.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import de.speedbanking.iban.IbanRegistry;
 import de.speedbanking.iban.IbanRegistrySource;
@@ -119,8 +121,8 @@ class Mod97Test {
 
     @ParameterizedTest
     @IbanRegistrySource
-    void isValid_charSequence_validIbans_returnTrue(IbanRegistry country) {
-        assertThat(Mod97.isValid(country.getIbanExample())).isTrue();
+    void isValid_charSequence_validIbans_returnTrue(IbanRegistry countryData) {
+        assertThat(Mod97.isValid(countryData.getIbanExample())).isTrue();
     }
 
     @Test
@@ -141,6 +143,49 @@ class Mod97Test {
         String largeInput = sb.toString();
 
         assertThat(Mod97.calculate(largeInput)).isBetween(0, 96);
+    }
+
+    @Test
+    void calculate_charArray_edgeCases() {
+        assertThat(Mod97.calculate((char[]) null)).isEqualTo(Mod97.INVALID_REMAINDER);
+        assertThat(Mod97.calculate(new char[0])).isEqualTo(Mod97.INVALID_REMAINDER);
+    }
+
+    @Test
+    void calculate_triggerOverflowGuard() {
+        String longInput = "999999999999999999999999"; // 24 mal '9'
+        int result = Mod97.calculate(longInput);
+
+        assertThat(result).isBetween(0, 96);
+        assertThat(Mod97.calculate(longInput.toCharArray()))
+            .isEqualTo(result);
+    }
+
+    @Test
+    void calculateRange_charArray_null_throwsException() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> Mod97.calculateRange((char[]) null, 0, 1));
+    }
+
+    @Test
+    void calculateRange_charArray_skipsInvalidChars() {
+        char[] data = {'1', '2', '_', 'A'};
+        int result = Mod97.calculateRange(data, 0, 4);
+        int expected = Mod97.calculateRange("12A", 0, 3);
+
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        "123 | -1 |  2", // negative offset
+        "123 |  5 |  2", // offset too large
+        "123 |  0 |  4"  // length too long
+    })
+    void calculateRange_charArray_invalidRange_throwsException(String input, int offset, int len) {
+        char[] data = input.toCharArray();
+        assertThatIndexOutOfBoundsException()
+            .isThrownBy(() -> Mod97.calculateRange(data, offset, len));
     }
 
 }

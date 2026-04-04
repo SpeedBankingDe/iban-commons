@@ -82,6 +82,11 @@ class IbanTest {
                 .as("Normalized IBAN '%s' is valid and should be instantiable", ibanInput)
                 .doesNotThrowAnyException();
 
+            assertThatCode(
+                () -> Iban.ofNormalized(ibanInputNorm))
+                .as("IBAN '%s' is valid and should be instantiable", ibanInput)
+                .doesNotThrowAnyException();
+
             Iban iban2 = assertThatIbanOf(ibanInputNorm)
                 .as("IBAN instance 2 must not be null and match input string")
                 .isNotNull()
@@ -129,7 +134,7 @@ class IbanTest {
         "DE123                         | INCORRECT_LENGTH         | IBAN has incorrect length",
         "DE91BHLSDEM1123456789         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
         "GB33BUKB2020155555567         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
-        "GP464Q85KW3RR7JWATF3TGAZ6JNI  | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
+        "GP464Q85KW3RR7JWATF3TGAZ6JNI  | INVALID_COUNTRY          | IBAN has invalid country code",
         "DE91100000000123456780        | INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
     void of_InvalidIban_ShouldThrowException(String ibanInput, IbanValidationError expectedValidationError, String expectedMessagePattern) {
@@ -178,20 +183,20 @@ class IbanTest {
      * <li>Maintains bidirectional consistency (derived countries point back to this base)</li>
      * </ul>
      *
-     * @param country the {@link IbanRegistry} entry to test as a base
+     * @param countryData the {@link IbanRegistry} entry to test as a base
      */
     @DisplayName("Base/derived registry relationship")
     @ParameterizedTest(name = "[{index}] {0} — base/derived relationship")
     @IbanRegistrySource({FI, FR, GB})
-    void registry_BaseAndDerived_ShouldBeConsistent(IbanRegistry country) {
-        assertThat(country.getBaseCountry()).isNull();
-        assertThat(country.isBaseCountry()).isTrue();
+    void registry_BaseAndDerived_ShouldBeConsistent(IbanRegistry countryData) {
+        assertThat(countryData.getBaseCountry()).isNull();
+        assertThat(countryData.isBaseCountry()).isTrue();
 
-        assertThat(country.getDerivedCountries())
-            .as("Derived countries for %s", country)
+        assertThat(countryData.getDerivedCountries())
+            .as("Derived countries for %s", countryData)
             .isNotEmpty()
             .allSatisfy(derived -> {
-                assertThat(derived.getBaseCountry()).isEqualTo(country);
+                assertThat(derived.getBaseCountry()).isEqualTo(countryData);
                 assertThat(derived.isBaseCountry()).isFalse();
                 assertThat(derived.isDerivedCountry()).isTrue();
             });
@@ -200,13 +205,13 @@ class IbanTest {
     @DisplayName("Derived/base registry relationship")
     @ParameterizedTest(name = "[{index}] {0} — derived/base relationship")
     @IbanRegistrySource(countryType = CountryType.DERIVED)
-    void registry_DerivedAndBase_ShouldBeConsistent(IbanRegistry country) {
-        assertThat(country.getBaseCountry()).isNotNull();
-        assertThat(country.getBaseCountry().isBaseCountry()).isTrue();
-        assertThat(country.isBaseCountry()).isFalse();
-        assertThat(country.isDerivedCountry()).isTrue();
+    void registry_DerivedAndBase_ShouldBeConsistent(IbanRegistry countryData) {
+        assertThat(countryData.getBaseCountry()).isNotNull();
+        assertThat(countryData.getBaseCountry().isBaseCountry()).isTrue();
+        assertThat(countryData.isBaseCountry()).isFalse();
+        assertThat(countryData.isDerivedCountry()).isTrue();
 
-        assertThat(country.getDerivedCountries()).isEmpty();
+        assertThat(countryData.getDerivedCountries()).isEmpty();
     }
 
     /**
@@ -425,14 +430,15 @@ class IbanTest {
     /**
      * Tests various invalid IBANs for all supported countries, expecting structure or checksum errors.
      *
-     * @param entry the {@link IbanRegistry} entry to test
+     * @param countryData the {@link IbanRegistry} entry to test
      */
     @DisplayName("Invalid IBAN rejected — all countries")
     @ParameterizedTest
     @EnumSource(IbanRegistry.class)
-    void of_InvalidIbanAllCountries_ShouldThrowException(IbanRegistry entry) {
-        String ibanStr1 = entry.getCountryCode() + "00" + "999999999999999999999999999999".substring(0, entry.getBbanLength());
-        String ibanStr2 = entry.getCountryCode() + "00" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX".substring(0, entry.getBbanLength());
+    void of_InvalidIbanAllCountries_ShouldThrowException(IbanRegistry countryData) {
+        String countryCode = countryData.isBaseCountry() ? countryData.getCountryCode() : countryData.getBaseCountry().getCountryCode();
+        String ibanStr1 = countryCode + "00" + "999999999999999999999999999999".substring(0, countryData.getBbanLength());
+        String ibanStr2 = countryCode + "00" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX".substring(0, countryData.getBbanLength());
 
         for (String iban : Arrays.asList(ibanStr1, ibanStr2)) {
             assertThatInvalidIbanException()
@@ -443,11 +449,11 @@ class IbanTest {
                 .isIn(IbanValidationError.INVALID_STRUCTURE, IbanValidationError.INVALID_CHECKSUM);
         }
 
-        assumeThat(IbanValidator.getCountryValidator(entry))
-            .as("Assuming that country validator for %s is present", entry.getCountryCode())
+        assumeThat(IbanValidator.getCountryValidator(countryData))
+            .as("Assuming that country validator for %s is present", countryData.getCountryCode())
             .isNotNull();
 
-        char[] randomAscii = new Random().ints(entry.getIbanLength(), 32, 127)
+        char[] randomAscii = new Random().ints(countryData.getIbanLength(), 32, 127)
             .mapToObj(i -> (char) i)
             .map(Character::toLowerCase)
             .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
@@ -456,8 +462,8 @@ class IbanTest {
         randomAscii[IbanRegistry.INDEX_BBAN] = '_';
         randomAscii[IbanRegistry.INDEX_BBAN + 1] = 'x';
 
-        assertThat(IbanValidator.getCountryValidator(entry).validateIban(new String(randomAscii)))
-            .as("Expected validation of random ascii array to fail for '%s' with data: '%s'", entry.getCountryCode(), new String(randomAscii))
+        assertThat(IbanValidator.getCountryValidator(countryData).validateIban(new String(randomAscii)))
+            .as("Expected validation of random ascii array to fail for '%s' with data: '%s'", countryData.getCountryCode(), new String(randomAscii))
             .isFalse();
     }
 
@@ -910,19 +916,19 @@ class IbanTest {
     @DisplayName("getCurrencyCode() is consistent with getCurrency().getAlphaCode() — all countries")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
-    void getCurrencyCode_allCountries_consistentWithGetCurrency(IbanRegistry entry) {
-        Iban iban = Iban.of(entry.getIbanExample());
+    void getCurrencyCode_allCountries_consistentWithGetCurrency(IbanRegistry countryData) {
+        Iban iban = Iban.of(countryData.getIbanExample());
 
         de.speedbanking.util.Currency currency = iban.getCurrency();
         String currencyCode = iban.getCurrencyCode();
 
         if (currency != null) {
             assertThat(currencyCode)
-                .as("getCurrencyCode() must equal getCurrency().getAlphaCode() for '%s'", entry)
+                .as("getCurrencyCode() must equal getCurrency().getAlphaCode() for '%s'", countryData)
                 .isEqualTo(currency.getAlphaCode());
         } else {
             assertThat(currencyCode)
-                .as("getCurrencyCode() must be null when getCurrency() is null for '%s'", entry)
+                .as("getCurrencyCode() must be null when getCurrency() is null for '%s'", countryData)
                 .isNull();
         }
     }
@@ -935,15 +941,15 @@ class IbanTest {
     @DisplayName("getCurrency() is non-null for all IbanRegistry entries")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
-    void getCurrency_allCountries_neverNull(IbanRegistry entry) {
-        Iban iban = Iban.of(entry.getIbanExample());
+    void getCurrency_allCountries_neverNull(IbanRegistry countryData) {
+        Iban iban = Iban.of(countryData.getIbanExample());
 
         assertThat(iban.getCurrency())
-            .as("getCurrency() must not be null for entry '%s'", entry)
+            .as("getCurrency() must not be null for entry '%s'", countryData)
             .isNotNull();
 
         assertThat(iban.getCurrencyCode())
-            .as("getCurrencyCode() must not be null or blank for entry '%s'", entry)
+            .as("getCurrencyCode() must not be null or blank for entry '%s'", countryData)
             .isNotNull()
             .isNotBlank();
     }

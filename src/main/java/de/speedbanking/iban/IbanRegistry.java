@@ -2927,8 +2927,11 @@ public enum IbanRegistry {
     /** Maximum length of BBAN. */
     static final int                                MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
 
-    /** Map for quick lookups by packed country code. */
-    private static final Map<Integer, IbanRegistry> LOOKUP             = buildLookupMap();
+    /** Map for quick lookups of all registry entries by packed country code. */
+    private static final Map<Integer, IbanRegistry> ALL_ENTRIES          = buildLookupMap(false);
+
+    /** Map for quick lookups of base country registry entries by packed country code. */
+    private static final Map<Integer, IbanRegistry> BASE_ENTRIES         = buildLookupMap(true);
 
     /**
      * Main constructor for {@code IbanRegistry} enum constants.
@@ -3379,41 +3382,62 @@ public enum IbanRegistry {
     }
 
     /**
-     * Builds the private, static map for quick {@code IbanRegistry} lookups by packed country code.
+     * Builds the private, static map for quick {@code IbanRegistry} lookups.
+     * <p>
+     * The capacity is calculated based on the number of constants to avoid resizing.
      *
-     * @return a {@code Map<Integer, IbanRegistry>} keyed by packed country codes
+     * @param baseCountriesOnly if {@code true}, only entries with {@code isBaseCountry()} are included
+     * @return an unmodifiable map keyed by packed country codes
      */
-    private static Map<Integer, IbanRegistry> buildLookupMap() {
+    private static Map<Integer, IbanRegistry> buildLookupMap(boolean baseCountriesOnly) {
         IbanRegistry[] values = values();
         int capacity = (int) (values.length / 0.75f) + 1;
         Map<Integer, IbanRegistry> map = new HashMap<>(capacity);
         for (IbanRegistry c : values) {
-            String name = c.name();
-            map.put(pack(name.charAt(0), name.charAt(1)), c);
+            if (!baseCountriesOnly || c.isBaseCountry()) {
+                String name = c.name();
+                map.put(pack(name.charAt(0), name.charAt(1)), c);
+            }
         }
         return Collections.unmodifiableMap(map);
     }
 
     /**
-     * Returns the registry entry for a given country code instantly.
+     * Returns the registry entry for a given ISO 3166-1 Alpha-2 country code instantly.
      *
      * @param code the two-letter country code (e.g., "DE")
      * @return the matching {@link IbanRegistry} constant,
      *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown
      */
     public static IbanRegistry getByCode(final CharSequence code) {
-        return code == null || code.length() != 2 ? null : LOOKUP.get(pack(code.charAt(0), code.charAt(1)));
+        return code == null || code.length() != 2 ? null : ALL_ENTRIES.get(pack(code.charAt(0), code.charAt(1)));
     }
 
     /**
-     * Returns the registry entry for a given country code instantly.
+     * Returns the registry entry for a given ISO 3166-1 Alpha-2 country code.
+     * <p>
+     * This lookup includes all known codes, including derived ones.
      *
      * @param c1 the first character of the country code
      * @param c2 the second character of the country code
-     * @return the {@code IbanRegistry} entry, or {@code null} if the country code is unsupported
+     * @return the {@code IbanRegistry} entry, or {@code null} if unknown
      */
     public static IbanRegistry getByCode(final char c1, final char c2) {
-        return LOOKUP.get(pack(c1, c2));
+        return ALL_ENTRIES.get(pack(c1, c2));
+    }
+
+    /**
+     * Returns the registry entry only if it is a base country.
+     * <p>
+     * Use this method for standard IBAN validation to ensure that derived
+     * territories (like GF, GP) are not treated as independent IBAN nations.
+     *
+     * @param c1 the first character of the country code
+     * @param c2 the second character of the country code
+     * @return the base {@code IbanRegistry} entry, or {@code null} if derived or unknown
+     */
+    public static IbanRegistry getBaseEntryByCode(final char c1, final char c2) {
+        return BASE_ENTRIES.get(pack(c1, c2));
     }
 
     /**

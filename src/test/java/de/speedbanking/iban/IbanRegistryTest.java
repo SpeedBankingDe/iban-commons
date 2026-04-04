@@ -108,6 +108,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryDe)
             .isNotNull()
             .isSameAs(IbanRegistry.DE)
+            .isSameAs(IbanRegistry.getByCode('D', 'E'))
             .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
                 IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
@@ -156,6 +157,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
         softly.assertThat(registryFr)
             .isNotNull()
             .isSameAs(IbanRegistry.getByCode("FR"))
+            .isSameAs(IbanRegistry.getByCode('F', 'R'))
             .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
                 IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
@@ -206,6 +208,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .as("IT entry should exist and be the static constant")
             .isNotNull()
             .isSameAs(IbanRegistry.getByCode("IT"))
+            .isSameAs(IbanRegistry.getByCode('I', 'T'))
             .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
                 IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)

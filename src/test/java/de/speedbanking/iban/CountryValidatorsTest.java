@@ -31,36 +31,36 @@ class CountryValidatorsTest {
     @DisplayName("Should instantiate and invoke validator for each registry entry")
     @ParameterizedTest
     @IbanRegistrySource
-    void testAllValidators(IbanRegistry country) {
-        CountryValidator validator = IbanValidator.getCountryValidator(country);
+    void testAllValidators(IbanRegistry countryData) {
+        CountryValidator validator = IbanValidator.getCountryValidator(countryData);
 
         assertThat(validator)
-            .as("Validator for %s should not be null", country)
+            .as("Validator for %s should not be null", countryData)
             .isNotNull();
 
         // trigger validation to cover the internal class logic
         // use a dummy IBAN that matches the country code to reach the internal validation code
-        CharSequence badIban = country.name() + String.format("%" + (country.getIbanLength() - country.name().length()) + "s", "0");
+        CharSequence badIban = countryData.name() + String.format("%" + (countryData.getIbanLength() - countryData.name().length()) + "s", "0");
 
         assertThat(validator.validateIban(badIban))
-            .as("Validation should fail for %s using bad iban '%s'", country.name(), badIban)
+            .as("Validation should fail for %s using bad iban '%s'", countryData.name(), badIban)
             .isFalse();
 
-        CharSequence goodIban = country.getIbanExample();
+        CharSequence goodIban = countryData.getIbanExample();
 
         assertThat(validator.validateIban(goodIban))
-            .as("Validation should succeed for %s using good iban '%s'", country.name(), goodIban)
+            .as("Validation should succeed for %s using good iban '%s'", countryData.name(), goodIban)
             .isTrue();
     }
 
     @DisplayName("Should provide correct toString implementation")
     @ParameterizedTest
     @IbanRegistrySource
-    void testToString(IbanRegistry country) {
-        CountryValidator validator = IbanValidator.getCountryValidator(country);
+    void testToString(IbanRegistry countryData) {
+        CountryValidator validator = IbanValidator.getCountryValidator(countryData);
 
         assertThat(validator.toString())
-            .as("toString for %s should follow the pattern getClass().getSimpleName() + [...]", country.name())
+            .as("toString for %s should follow the pattern getClass().getSimpleName() + [...]", countryData.name())
             .contains(validator.getClass().getSimpleName())
             .contains("[")
             .contains("]");
@@ -75,29 +75,29 @@ class CountryValidatorsTest {
     @ParameterizedTest
     @MethodSource("allNcdIbanRegistryEntries")
     @ResourceLock(value = Resources.SYSTEM_PROPERTIES)
-    void testAllNcdValidators(IbanRegistry country) {
+    void testAllNcdValidators(IbanRegistry countryData) {
         IbanConfig.NCD_VALIDATE.enable();
         IbanConfig.NCD_CALCULATE.enable();
 
         try {
 
-            assertThat(IbanValidator.getCountryValidator(country))
-                .as("Validator for %s should be an NCD calculator", country)
+            assertThat(IbanValidator.getCountryValidator(countryData))
+                .as("Validator for %s should be an NCD calculator", countryData)
                 .isInstanceOf(NationalCheckDigitCalculator.class)
                 .isInstanceOf(AbstractNcdCountryValidator.class);
 
-            AbstractNcdCountryValidator validator = (AbstractNcdCountryValidator) IbanValidator.getCountryValidator(country);
+            AbstractNcdCountryValidator validator = (AbstractNcdCountryValidator) IbanValidator.getCountryValidator(countryData);
 
-            String goodIban = country.getIbanExample();
+            String goodIban = countryData.getIbanExample();
 
             assertThat(validator.validateIban(goodIban))
-                .as("Validation should succeed for %s using good iban '%s'", country.name(), goodIban)
+                .as("Validation should succeed for %s using good iban '%s'", countryData.name(), goodIban)
                 .isTrue();
 
             Assumptions.assumeFalse(validator.getNcdCalculator() instanceof NoOpNcdCalculatorBase);
 
-            StringBuilder badNcdIban = new StringBuilder(country.getIbanExample());
-            IndexRange ncdIndexRange = country.getNationalCheckDigitIndexRange();
+            StringBuilder badNcdIban = new StringBuilder(countryData.getIbanExample());
+            IndexRange ncdIndexRange = countryData.getNationalCheckDigitIndexRange();
             for (int idx = ncdIndexRange.getBegin(); idx < ncdIndexRange.getEnd(); idx++) {
                 char c = badNcdIban.charAt(idx);
                 badNcdIban.setCharAt(idx, c == '0' ? '1' : '0');
@@ -105,7 +105,7 @@ class CountryValidatorsTest {
             IbanValidator.fixCheckDigits(badNcdIban);
 
             assertThat(validator.validateIban(badNcdIban.toString()))
-                .as("Validation should fail for %s using iban with invalid NCD '%s'", country.name(), badNcdIban)
+                .as("Validation should fail for %s using iban with invalid NCD '%s'", countryData.name(), badNcdIban)
                 .isFalse();
 
         } finally {
