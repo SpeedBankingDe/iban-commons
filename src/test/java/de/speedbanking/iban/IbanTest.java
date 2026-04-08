@@ -434,7 +434,7 @@ class IbanTest {
      */
     @DisplayName("Invalid IBAN rejected — all countries")
     @ParameterizedTest
-    @EnumSource(IbanRegistry.class)
+    @IbanRegistrySource
     void of_InvalidIbanAllCountries_ShouldThrowException(IbanRegistry countryData) {
         String countryCode = countryData.isBaseCountry() ? countryData.getCountryCode() : countryData.getBaseCountry().getCountryCode();
         String ibanStr1 = countryCode + "00" + "999999999999999999999999999999".substring(0, countryData.getBbanLength());
@@ -915,7 +915,7 @@ class IbanTest {
      */
     @DisplayName("getCurrencyCode() is consistent with getCurrency().getAlphaCode() — all countries")
     @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(IbanRegistry.class)
+    @IbanRegistrySource
     void getCurrencyCode_allCountries_consistentWithGetCurrency(IbanRegistry countryData) {
         Iban iban = Iban.of(countryData.getIbanExample());
 

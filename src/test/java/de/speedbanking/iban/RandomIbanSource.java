@@ -232,7 +232,10 @@ public @interface RandomIbanSource {
          */
         private static String generateIban(List<IbanRegistry> pool, int invalidPercent, ThreadLocalRandom random) {
             IbanRegistry country = pool.get(random.nextInt(pool.size()));
-            String iban = RandomIban.of(country).toString();
+            String iban = RandomIban.builder()
+                .country(country)
+                .random(random)
+                .build().toString();
 
             // corrupt the IBAN with the requested probability
             if (invalidPercent > 0 && random.nextInt(100) < invalidPercent) {
