@@ -20,22 +20,22 @@ import java.util.Optional;
 /**
  * An immutable container that holds the result of an BIC validation attempt.
  * <p>
- * The object contains either a valid {@link Bic} object or a {@link BicValidationError}, never both.
+ * The object contains either a valid BIC or a {@link BicValidationError}, never both.
  *
  * @since 1.8.0
  */
 public final class BicValidationResult {
 
-    private final Bic                bic;
+    private final CharSequence       bic;
     private final BicValidationError validationError;
 
     /**
      * Private constructor: enforce creation through static factory methods
      *
-     * @param bic             the successfully created {@link Bic} instance (must not be {@code null})
+     * @param bic             the successfully validated BIC (must not be {@code null})
      * @param validationError the single reason for validation failure (must not be {@code null})
      */
-    private BicValidationResult(Bic bic, BicValidationError validationError) {
+    private BicValidationResult(CharSequence bic, BicValidationError validationError) {
         // sanity check to ensure the "either-or" invariant is maintained
         if (bic == null && validationError == null) {
             throw new IllegalArgumentException("BIC result must contain either a valid BIC or a validation error");
@@ -50,14 +50,14 @@ public final class BicValidationResult {
     /**
      * Factory method for a successful validation.
      *
-     * @param bic the successfully created {@link Bic} instance (must not be {@code null})
+     * @param bic the successfully validated BIC (must not be {@code null})
      * @return a valid result has the BIC present and no error reason
      */
-    public static BicValidationResult valid(Bic bic) {
+    static BicValidationResult valid(CharSequence bic) {
         if (bic == null) {
-            throw new IllegalArgumentException("Valid result requires a Bic object");
+            throw new IllegalArgumentException("Valid result requires a BIC");
         }
-        // valid result: Bic present, validationError is null
+        // valid result: BIC present, validationError is null
         return new BicValidationResult(bic, null);
     }
 
@@ -67,7 +67,7 @@ public final class BicValidationResult {
      * @param validationError the single reason for validation failure (must not be {@code null})
      * @return an invalid result has no BIC and the specific error reason present
      */
-    public static BicValidationResult invalid(BicValidationError validationError) {
+    static BicValidationResult invalid(BicValidationError validationError) {
         if (validationError == null) {
             throw new IllegalArgumentException("Invalid result requires a validation error object");
         }
@@ -84,11 +84,11 @@ public final class BicValidationResult {
     }
 
     /**
-     * Returns the validated {@code Bic} instance if available.
+     * Returns a validated BIC if available.
      *
-     * @return an {@code Optional} containing the {@link Bic} object, or empty if validation failed
+     * @return an {@code Optional} containing the BIC, or empty if validation failed
      */
-    public Optional<Bic> getBic() {
+    public Optional<CharSequence> getBic() {
         return Optional.ofNullable(bic);
     }
 

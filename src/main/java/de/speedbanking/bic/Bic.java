@@ -136,7 +136,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public static Bic of(CharSequence bic) throws InvalidBicException {
         BicValidationResult result = BicValidator.validate(bic);
-        return result.getBic().orElseThrow(() -> InvalidBicException.of(result.getError().get(), bic));
+        return result.getBic().map(Bic::new).orElseThrow(() -> InvalidBicException.of(result.getError().get(), bic));
     }
 
     /**
@@ -148,7 +148,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public static Optional<Bic> tryParse(CharSequence bic) {
-        return BicValidator.validate(bic).getBic();
+        return BicValidator.validate(bic).getBic().map(Bic::new);
     }
 
     /**
@@ -174,7 +174,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.3
      */
     public static Bic tryParseOrNull(CharSequence bic) {
-        return BicValidator.validate(bic).getBic().orElse(null);
+        return BicValidator.validate(bic).getBic().map(Bic::new).orElse(null);
     }
 
     /**

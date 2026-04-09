@@ -61,7 +61,7 @@ public final class BicValidator {
 
         BicValidationError error = validateCharacters(rawBic, len);
 
-        return error == null ? BicValidationResult.valid(new Bic(rawBic)) : validationFailed(error);
+        return error == null ? BicValidationResult.valid(rawBic) : validationFailed(error);
     }
 
     /**

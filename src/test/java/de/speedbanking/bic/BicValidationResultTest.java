@@ -17,7 +17,7 @@ class BicValidationResultTest extends Assertions {
 
     private Constructor<BicValidationResult> getPrivateConstructor() throws NoSuchMethodException {
         Constructor<BicValidationResult> constructor =
-            BicValidationResult.class.getDeclaredConstructor(Bic.class, BicValidationError.class);
+            BicValidationResult.class.getDeclaredConstructor(CharSequence.class, BicValidationError.class);
         constructor.setAccessible(true);
         return constructor;
     }
@@ -53,7 +53,7 @@ class BicValidationResultTest extends Assertions {
     void testInstantiationFailures() {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> BicValidationResult.valid(null))
-            .withMessage("Valid result requires a Bic object");
+            .withMessage("Valid result requires a BIC");
 
         assertThatIllegalArgumentException()
             .isThrownBy(() -> BicValidationResult.invalid(null))
