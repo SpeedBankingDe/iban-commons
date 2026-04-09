@@ -15,14 +15,14 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 
 ## Why IBAN Commons?
 
-| Feature                    | iban-commons  | Apache Commons |  iban4j   | garvelink java-iban |
-|----------------------------|:-------------:|:--------------:|:---------:|:-------------------:|
-| **Throughput (ops/s)**     | **7,700,000** |   4,100,000    | 1,800,000 |      1,600,000      |
-| **Memory (B/op)**          |    **106**    |      319       |   1,114   |         882         |
-| **Dependencies**           |       0       |       5        |     0     |          0          |
-| **Java Version**           |      8+       |       8+       |    11+    |         8+          |
-| **Android (API 21+)**      |       ✅       |       ?        |     ?     |          ✅          |
-| **Countries**              |      120      |  regex-based   |    111    |         111         |
+| Feature                    | iban-commons  | jbanking  | Apache Commons |  iban4j   | garvelink |
+|----------------------------|:-------------:|:---------:|:--------------:|:---------:|:---------:|
+| **Throughput (ops/s)**     | **7,207,452** | 6,108,009 |   5,243,764    | 1,948,100 | 1,292,532 |
+| **Memory (B/op)**          |    **48**     |    255    |      281       |   1,341   |   1,063   |
+| **Dependencies**           |       0       |     0     |       5        |     0     |     0     |
+| **Java Version**           |      8+       |    8+     |       8+       |    11+    |    8+     |
+| **Android (API 21+)**      |       ✅       |     ?     |       ?        |     ?     |     ✅     |
+| **Countries**              |      120      |    82     |      n/a       |    111    |    111    |
 
 -----
 
@@ -76,37 +76,34 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 ## ✨ Key Features
 
-* **Zero Dependencies**
+* **Zero Dependencies & Small Footprint**
 
   Keep your build clean and avoid dependency conflicts
 
 * **High Performance**
 
-  Optimized for throughput and minimal memory footprint. Validates 7,700,000 IBANs per second — **4.3x faster** than iban4j, **10x lower** memory allocation (106 B/op vs. 1,114 B/op).
-
-* **Small Footprint**
-
-  ~100 kB JAR
+  Optimized for throughput and minimal memory footprint. Validates 7,207,452 IBANs per second — **3.7× faster** than iban4j, **28× lower** memory allocation (48 B/op vs. 1,341 B/op).
 
 * **Simple, intuitive API**
 
-  Intuitive factory methods (`Iban.of()`, `Bic.tryParse()`), clear component accessors
+  Intuitive factory methods (`Iban.of()`, `Bic.tryParse()`), Android-compatible
 
 * **Immutability**
 
-  Both `Iban` and `Bic` classes are immutable and thread-safe
+  `Iban`, `Bic`, `IbanRegistry` classes are immutable and thread-safe
 
 * **Java 8 compatibility**
 
-  Targeting Java 8 for maximum reach, built and verified using JDK 17+ with the `--release 8` flag to ensure full binary compatibility
+  Targeting Java 8 for maximum reach, built and verified using JDK 17+ ensuring full binary compatibility
 
 * **Comprehensive Coverage**
 
-  Full support for IBAN and BIC validation per ISO 13616 and ISO 9362. Covers **120 countries** including all from the SWIFT IBAN Registry — more than any comparable Java IBAN validation library.
+  Full support for IBAN and BIC validation per ISO 13616 and ISO 9362.
+  Covers **120 countries** including all from the SWIFT IBAN Registry — more than any comparable Java IBAN validation library.
 
 * **Rich Metadata**
 
-  Access country names, flags, bank codes, SEPA status, and regulatory organization details
+  Access country names, flags, bank codes, SEPA status, currency information, and regulatory organization details
 
 -----
 
@@ -194,9 +191,9 @@ Use `RandomIban` to generate syntactically correct, structurally valid IBANs wit
 ```java
 import de.speedbanking.iban.RandomIban;
 
-Iban iban     = RandomIban.of();         // random country
-Iban deIban   = RandomIban.of("DE");     // specific country
-Iban sepaIban = RandomIban.ofSepa();     // random SEPA country
+Iban rdIban   = RandomIban.of();     // random country
+Iban deIban   = RandomIban.of("DE"); // specific country
+Iban sepaIban = RandomIban.ofSepa(); // random SEPA country
 ```
 
 **Reproducible generation with a seeded `Random`:**
@@ -206,25 +203,21 @@ Pass a seeded `java.util.Random` to get deterministic output — the same seed a
 ```java
 import java.util.Random;
 
-// Always produces the same IBAN for seed 42 + country "DE"
-Iban iban = RandomIban.of("DE", new Random(42L));
-
-// Reproducible across any supported country
-Iban anyIban = RandomIban.of(new Random(42L));
+// Always produces the same IBAN for seed 42 + country "IT"
+Iban itIban = RandomIban.builder()
+    .country("IT")
+    .random(new Random(42L))
+    .build();
 
 // Reproducible SEPA IBAN
-Iban sepaIban = RandomIban.ofSepa(new Random(42L));
+Iban sepaIban = RandomIban.builder()
+    .sepaOnly() // random SEPA country
+    .random(new Random(42L))
+    .build();
 ```
 
-**Using an `IbanRegistry` entry directly:**
-```java
-import de.speedbanking.iban.IbanRegistry;
-
-Iban iban = RandomIban.of(IbanRegistry.DE);
-Iban reproducible = RandomIban.of(IbanRegistry.FR, new Random(123L));
-```
-
-> **Note:** Generated IBANs are syntactically and structurally valid but do **not** correspond to real bank accounts. Do not use them for actual financial transactions.
+> **Note:** Generated IBANs are syntactically and structurally valid but do **not** correspond to real bank accounts. 
+>           Do not use them for actual financial transactions.
 
 -----
 
@@ -317,7 +310,7 @@ Iban iban = Iban.of("GB82WEST12345698765432");
 
 `iban-commons` is designed for **high throughput** and **minimal overhead**.
 
-We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries: [iban4j](http://www.iban4j.org/), [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/), and [garvelink java-iban](https://github.com/barend/java-iban).
+We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries: [iban4j](http://www.iban4j.org/), [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/), [garvelink java-iban](https://github.com/barend/java-iban), and [jbanking](https://github.com/marcwrobel/jbanking).
 
 Measured on **Intel Core i7-1165G7 @ 2.80GHz**, OpenJDK 21.0.7, Linux, single core (`taskset -c 0`),
 Generational ZGC, `-XX:-StackTraceInThrowable`.
@@ -327,25 +320,29 @@ Generational ZGC, `-XX:-StackTraceInThrowable`.
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| 🌟 **iban-commons**     |      **7,700,000** |       **106** | baseline         |
-| Apache Commons          |          4,100,000 |           319 | 1.9× slower      |
-| iban4j                  |          1,800,000 |         1,114 | 4.3× slower      |
-| garvelink java-iban     |          1,600,000 |           882 | 4.8× slower      |
+| 🌟 **iban-commons**     |      **7,207,452** |        **48** | baseline         |
+| jbanking                |          6,108,009 |           255 | 1.2× slower      |
+| Apache Commons          |          5,243,764 |           281 | 1.4× slower      |
+| iban4j                  |          1,948,100 |         1,341 | 3.7× slower      |
+| garvelink java-iban     |          1,292,532 |         1,063 | 5.6× slower      |
 
 ### Invalid IBANs (rejection path)
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| 🌟 **iban-commons**     |     **11,000,000** |        **78** | baseline         |
-| Apache Commons          |          9,200,000 |           165 | 1.2× slower      |
-| garvelink java-iban     |          1,700,000 |           689 | 6.4× slower      |
-| iban4j                  |          1,500,000 |           999 | 7.3× slower      |
+| 🌟 **iban-commons**     |     **11,986,711** |        **40** | baseline         |
+| jbanking                |         10,080,195 |           153 | 1.2× slower      |
+| Apache Commons          |          9,853,673 |           171 | 1.2× slower      |
+| iban4j                  |          1,992,301 |         1,099 | 6.0× slower      |
+| garvelink java-iban     |          1,508,470 |           814 | 7.9× slower      |
+
+Each invalid IBAN is derived from a valid one by applying one of six sabotage strategies with equal probability: incrementing a check digit (triggering a Mod-97 failure), replacing the country code with the non-registered code `XY`, substituting a valid but mismatched ISO 3166 country code, injecting a letter into the numeric BBAN section, swapping two adjacent characters (transposition), or truncating the string below the minimum structural length.
 
 ### Key Observations
 
-1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input — reaching **7,700,000 ops/s** on the accept path and **11,000,000 ops/s** on early rejection.
+1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input — reaching **7,207,452 ops/s** on the accept path and **11,986,711 ops/s** on early rejection.
 2. **Fast Rejection:** Invalid IBANs are rejected faster than valid ones because many fail length or country-code checks before the full Mod-97 computation is reached.
-3. **Minimal GC Pressure:** Memory allocation is **3×–10× lower** than competing libraries, thanks to an ASCII-math Mod-97 approach that avoids intermediate `String` and `BigInteger` allocations.
+3. **Minimal GC Pressure:** Memory allocation is **6×–28× lower** than competing libraries, thanks to an ASCII-math Mod-97 approach that avoids intermediate `String` and `BigInteger` allocations.
 
 > **Note on `-XX:-StackTraceInThrowable`:** All forks run with this JVM flag, which suppresses stack trace generation to isolate pure algorithmic cost. This makes the comparison fair for libraries using exceptions for control flow (notably `iban4j`). For production-realistic measurements, remove the flag and re-run.
 
