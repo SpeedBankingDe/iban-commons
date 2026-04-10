@@ -77,6 +77,9 @@ class CharUtilTest extends Assertions {
     void isUpperCase_ShouldReturnTrueForUpperCaseLetters(char c) {
         assertThat(CharUtil.isUpperCase(c)).isTrue();
         assertThat(CharUtil.isNotUpperCase(c)).isFalse();
+
+        assertThat(CharUtil.isLowerCase(c)).isFalse();
+        assertThat(CharUtil.isNotLowerCase(c)).isTrue();
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should not be uppercase")
@@ -84,6 +87,20 @@ class CharUtilTest extends Assertions {
     void isUpperCase_ShouldReturnFalseForNonUpperCase(char c) {
         assertThat(CharUtil.isUpperCase(c)).isFalse();
         assertThat(CharUtil.isNotUpperCase(c)).isTrue();
+    }
+
+    @ParameterizedTest(name = "Char ''{0}'' should be lowercase")
+    @ValueSource(chars = {'j', 'a', 'p', 'a', 'n'})
+    void isLowerCase_ShouldReturnTrueForLowerCaseLetters(char c) {
+        assertThat(CharUtil.isLowerCase(c)).isTrue();
+        assertThat(CharUtil.isNotLowerCase(c)).isFalse();
+    }
+
+    @ParameterizedTest(name = "Char ''{0}'' should not be uppercase")
+    @ValueSource(chars = {'A', '5', '!', '@', '[', '`', '{'})
+    void isLowerCase_ShouldReturnFalseForNonLowerCaseLetters(char c) {
+        assertThat(CharUtil.isLowerCase(c)).isFalse();
+        assertThat(CharUtil.isNotLowerCase(c)).isTrue();
     }
 
     @Test
@@ -143,13 +160,17 @@ class CharUtilTest extends Assertions {
 
     @Test
     void isAllDigitOrUpperCase_ShouldReturnFalseWhenInvalidCharFound() {
-        char[] arr = {'1', 'A', 'b', 'Z', '*'};
-        // Contains 'b' (lowercase)
-        assertThat(CharUtil.isAllDigitOrUpperCase(arr, 0, 4)).isFalse();
-        // Contains '*'
-        assertThat(CharUtil.isAllDigitOrUpperCase(arr, 0, 5)).isFalse();
-        // Invalid at start
-        assertThat(CharUtil.isAllDigitOrUpperCase(new char[] {'@', 'A'}, 0, 2)).isFalse();
+        char[] arr1 = {'1', 'A', 'b', 'Z', '*'};
+        // contains 'b' (lowercase)
+        assertThat(CharUtil.isAllDigitOrUpperCase(arr1, 0, 4)).isFalse();
+        assertThat(CharUtil.isAllDigitOrUpperCase(String.valueOf(arr1, 0, 4))).isFalse();
+        // contains '*'
+        assertThat(CharUtil.isAllDigitOrUpperCase(arr1, 0, 5)).isFalse();
+        assertThat(CharUtil.isAllDigitOrUpperCase(String.valueOf(arr1, 0, 5))).isFalse();
+        // invalid at start
+        char[] arr2 = new char[] {'@', 'A'};
+        assertThat(CharUtil.isAllDigitOrUpperCase(arr2, 0, 2)).isFalse();
+        assertThat(CharUtil.isAllDigitOrUpperCase(String.valueOf(arr2, 0, 2))).isFalse();
     }
 
     @Test

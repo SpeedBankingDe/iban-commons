@@ -20,12 +20,10 @@ import de.speedbanking.util.Currency;
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.OptionalAssert;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.ThrowableTypeAssert;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -98,50 +96,6 @@ public class BicAssertions extends Assertions {
      */
     public static BicAssert assertThatBicOf(CharSequence bicValue) {
         return assertThat(Bic.of(bicValue));
-    }
-
-    /**
-     * Creates an {@link OptionalAssert} for the {@link Optional} returned by
-     * {@link Bic#tryParse(CharSequence)}, allowing assertions on the Optional itself
-     * (e.g. {@code isPresent()}, {@code isEmpty()}, {@code hasValueSatisfying(…)}).
-     *
-     * @param bicValue the BIC character sequence to parse
-     * @return an Optional assertion object
-     */
-    public static OptionalAssert<Bic> assertThatBicTryParse(CharSequence bicValue) {
-        return assertThat(Bic.tryParse(bicValue));
-    }
-
-    /**
-     * Creates a {@link BicAssert} for a valid BIC parsed via {@link Bic#tryParse(CharSequence)}.
-     * The {@link Optional} must be present; if it is empty the assertion fails immediately.
-     *
-     * @param bicValue the BIC character sequence to parse
-     * @return the custom assertion object
-     */
-    public static BicAssert assertThatBicTryParseValue(CharSequence bicValue) {
-        Optional<Bic> result = Bic.tryParse(bicValue);
-        if (!result.isPresent()) {
-            throw new AssertionError(
-                "Expected Bic.tryParse(\"" + bicValue + "\") to return a non-empty Optional, but it was empty.");
-        }
-        return assertThat(result.get());
-    }
-
-    /**
-     * Creates a {@link BicAssert} for a valid BIC parsed via {@link Bic#tryParseOrNull(CharSequence)}.
-     * The result must be non-null; if it is {@code null} the assertion fails immediately.
-     *
-     * @param bicValue the BIC character sequence to parse
-     * @return the custom assertion object
-     */
-    public static BicAssert assertThatBicTryParseOrNull(CharSequence bicValue) {
-        Bic result = Bic.tryParseOrNull(bicValue);
-        if (result == null) {
-            throw new AssertionError(
-                "Expected Bic.tryParseOrNull(\"" + bicValue + "\") to return a non-null Bic, but it returned null.");
-        }
-        return assertThat(result);
     }
 
     /**

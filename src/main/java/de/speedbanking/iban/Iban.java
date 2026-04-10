@@ -308,15 +308,13 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * (e.g., {@code "EUR"}, {@code "GBP"}).
      * <p>
      * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
-     * Returns {@code null} if {@link #getCurrency()} returns {@code null}.
      *
-     * @return the currency code string, or {@code null} if unresolvable
+     * @return the currency code string
      *
      * @since 1.8.5
      */
     public String getCurrencyCode() {
-        Currency c = getCurrency();
-        return c != null ? c.getAlphaCode() : null;
+        return getCurrency().getAlphaCode();
     }
 
     /**

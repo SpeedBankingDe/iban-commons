@@ -3027,19 +3027,15 @@ public enum IbanRegistry {
      * <p>
      * The currency is resolved via {@link Iso3166Alpha2#getCurrency()}, keyed by this
      * entry's ISO 3166-1 Alpha-2 country code.
-     * <p>
-     * Returns {@code null} for derived country codes that are not present in
-     * {@link Iso3166Alpha2} (none in the current registry, but defensively handled).
      *
-     * @return the {@link Currency} constant for this country, or {@code null} if unresolvable
+     * @return the {@link Currency} constant for this country
      *
      * @since 1.8.5
      *
      * @see Iso3166Alpha2#getCurrency()
      */
     public Currency getCurrency() {
-        Iso3166Alpha2 country = Iso3166Alpha2.fromCode(getCountryCode());
-        return country != null ? country.getCurrency() : null;
+        return Iso3166Alpha2.fromCode(getCountryCode()).getCurrency();
     }
 
     /**
@@ -3047,15 +3043,13 @@ public enum IbanRegistry {
      * (e.g., {@code "EUR"}, {@code "GBP"}).
      * <p>
      * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
-     * Returns {@code null} if {@link #getCurrency()} returns {@code null}.
      *
-     * @return the currency code string, or {@code null} if unresolvable
+     * @return the currency code string
      *
      * @since 1.8.5
      */
     public String getCurrencyCode() {
-        Currency c = getCurrency();
-        return c != null ? c.getAlphaCode() : null;
+        return getCurrency().getAlphaCode();
     }
 
     /**

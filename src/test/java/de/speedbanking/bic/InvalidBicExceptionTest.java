@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 /**
  * JUnit test class for {@link InvalidBicException}.<br>
@@ -49,10 +50,6 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
         assertThat(exception.getInput())
             .as("getInput() should be null when no input was supplied")
             .isNull();
-
-        assertThat(exception.hasInput())
-            .as("hasInput() should be false when no input was supplied")
-            .isFalse();
     }
 
     // -------------------------------------------------------------------------
@@ -74,33 +71,18 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
             .as("getInput() should return the supplied input")
             .isEqualTo(input);
 
-        assertThat(exception.hasInput())
-            .as("hasInput() should be true when input is supplied")
-            .isTrue();
-
         assertThat(exception.toString())
             .as("toString() should contain the input")
             .endsWith("input=" + input + "]");
     }
 
-    @DisplayName("of(reason, null) should treat null input as absent")
-    @Test
-    void ofWithNullInputShouldHaveNoInput() {
-        InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY, null);
+    @DisplayName("of(reason, <empty>) should keep input")
+    @ParameterizedTest(name = "input ''{0}''")
+    @NullAndEmptySource
+    void ofWithNullInputShouldKeepInput(String input) {
+        InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY, input);
 
-        assertThat(exception.getInput()).isNull();
-        assertThat(exception.hasInput()).isFalse();
-    }
-
-    @DisplayName("of(reason, empty string) should treat empty input as absent")
-    @Test
-    void ofWithEmptyInputShouldHaveNoInput() {
-        InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY, "");
-
-        assertThat(exception.getInput()).isNull();
-        assertThat(exception.hasInput())
-            .as("hasInput() should be false for an empty input string")
-            .isFalse();
+        assertThat(exception.getInput()).isEqualTo(input);
     }
 
     // -------------------------------------------------------------------------

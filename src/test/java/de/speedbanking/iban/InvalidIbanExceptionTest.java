@@ -44,10 +44,6 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
         assertThat(exception.getInput())
             .as("getInput() should be null when no input was supplied")
             .isNull();
-
-        assertThat(exception.hasInput())
-            .as("hasInput() should be false when no input was supplied")
-            .isFalse();
     }
 
     // -------------------------------------------------------------------------
@@ -69,10 +65,6 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
             .as("getInput() should return the supplied input")
             .isEqualTo(input);
 
-        assertThat(exception.hasInput())
-            .as("hasInput() should be true when input is supplied")
-            .isTrue();
-
         assertThat(exception.toString())
             .as("toString() should contain the input")
             .endsWith("input=" + input + ']');
@@ -81,13 +73,10 @@ class InvalidIbanExceptionTest extends org.assertj.core.api.Assertions {
     @DisplayName("of(reason, empty string) should treat empty input as absent")
     @ParameterizedTest
     @NullAndEmptySource
-    void ofWithNullOrBlankInputShouldHaveNoInput(String input) {
+    void ofWithNullOrBlankInputShouldKeepInput(String input) {
         InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.EMPTY, input);
 
-        assertThat(exception.getInput()).isNull();
-        assertThat(exception.hasInput())
-            .as("hasInput() should be false for an empty input string")
-            .isFalse();
+        assertThat(exception.getInput()).isEqualTo(input);
     }
 
     // -------------------------------------------------------------------------

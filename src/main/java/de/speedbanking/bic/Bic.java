@@ -264,14 +264,12 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      *   <li>For country code {@code "JP"}: {@code "Japan"}</li>
      * </ul>
      *
-     * @return the country name, or {@code null} if the country code cannot be resolved
+     * @return the country name
      *
      * @since 1.8.5
      */
     public String getCountryName() {
-        Iso3166Alpha2 country =
-            Iso3166Alpha2.fromCode(getCountryCode());
-        return country != null ? country.getCountryName() : null;
+        return Iso3166Alpha2.fromCode(getCountryCode()).getCountryName();
     }
 
     /**
@@ -341,14 +339,12 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * <p>
      * Resolved via {@link Iso3166Alpha2#getCurrency()}.
      *
-     * @return the {@link Currency} constant for this country,
-     *         or {@code null} if unresolvable
+     * @return the {@link Currency} constant for this country
      *
      * @since 1.8.5
      */
     public Currency getCurrency() {
-        Iso3166Alpha2 country = Iso3166Alpha2.fromCode(getCountryCode());
-        return country != null ? country.getCurrency() : null;
+        return Iso3166Alpha2.fromCode(getCountryCode()).getCurrency();
     }
 
     /**
@@ -356,15 +352,13 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * (e.g., {@code "EUR"}, {@code "GBP"}).
      * <p>
      * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
-     * Returns {@code null} if {@link #getCurrency()} returns {@code null}.
      *
-     * @return the currency code string, or {@code null} if unresolvable
+     * @return the currency code string
      *
      * @since 1.8.5
      */
     public String getCurrencyCode() {
-        Currency c = getCurrency();
-        return c != null ? c.getAlphaCode() : null;
+        return getCurrency().getAlphaCode();
     }
 
     /**

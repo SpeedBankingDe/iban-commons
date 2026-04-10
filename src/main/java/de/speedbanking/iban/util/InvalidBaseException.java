@@ -50,28 +50,12 @@ public abstract class InvalidBaseException extends RuntimeException {
      * The exception message is derived from the reason's text.
      *
      * @param reason the specific {@code ValidationError} that occurred, must not be {@code null}
-     * @param input  the input string that caused the error, may be {@code null};
-     *               blank values are normalized to {@code null}
+     * @param input  the input string that caused the error, may be {@code null}
      */
     protected InvalidBaseException(ValidationError reason, CharSequence input) {
-        super(Objects.requireNonNull(reason, "reason required").getText());
+        super(Objects.requireNonNull(Objects.requireNonNull(reason, "reason required").getText(), "reason text required"));
         this.reason = reason;
-        this.input  = trimToNull(input);
-    }
-
-    /**
-     * Returns the trimmed string value of {@code cs}, or {@code null} if the
-     * sequence is {@code null} or consists of whitespace characters only.
-     *
-     * @param cs the character sequence to trim, may be {@code null}
-     * @return trimmed string, or {@code null}
-     */
-    private static String trimToNull(CharSequence cs) {
-        if (cs == null) {
-            return null;
-        }
-        String trimmed = cs.toString().trim();
-        return trimmed.isEmpty() ? null : trimmed;
+        this.input = input == null ? null : input.toString();
     }
 
     /**
@@ -92,18 +76,8 @@ public abstract class InvalidBaseException extends RuntimeException {
      *
      * @return the invalid input, or {@code null} if not set or blank
      */
-    public CharSequence getInput() {
+    public final CharSequence getInput() {
         return input;
-    }
-
-    /**
-     * Returns {@code true} if a non-empty input was recorded with this exception.
-     *
-     * @return {@code true} if {@code input} is non-{@code null}
-     *         (empty input is normalized to {@code null})
-     */
-    public boolean hasInput() {
-        return input != null && !input.isEmpty();
     }
 
     /**
@@ -142,25 +116,17 @@ public abstract class InvalidBaseException extends RuntimeException {
      * The message includes the base error text from the underlying {@link ValidationError},
      * the specific reason constant in parentheses, and the erroneous input if present.
      *
-     * @return the detailed error message, or {@code null} if no message is available
+     * @return the detailed error message
      */
     @Override
     public final String getMessage() {
-        StringBuilder sb = new StringBuilder();
-        String msg = super.getMessage();
-        if (msg != null) {
-            sb.append(msg);
+        StringBuilder sb = new StringBuilder(super.getMessage())
+            .append(' ')
+            .append('(').append(reason).append(')');
+        if (input != null && !input.isEmpty()) {
+            sb.append(": ").append('\'').append(input).append('\'');
         }
-        if (reason != null) {
-            if (sb.length() > 0) {
-                sb.append(" ");
-            }
-            sb.append("(").append(reason).append(")");
-        }
-        if (hasInput()) {
-            sb.append(": ").append(input);
-        }
-        return sb.length() == 0 ? null : sb.toString();
+        return sb.toString();
     }
 
     /**

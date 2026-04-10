@@ -39,7 +39,7 @@ class IbanAssertionsTest {
     @Test
     void shouldCatchInvalidIbanException() {
         assertThatInvalidIbanException().isThrownBy(() -> Iban.of("SHORT"))
-            .withMessage("IBAN has incorrect length (INCORRECT_LENGTH): SHORT")
+            .withMessage("IBAN has incorrect length (INCORRECT_LENGTH): 'SHORT'")
             .withNoCause();
     }
 

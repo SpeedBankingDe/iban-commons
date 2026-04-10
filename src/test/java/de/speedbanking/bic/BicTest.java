@@ -1,6 +1,8 @@
 package de.speedbanking.bic;
 
 import static de.speedbanking.bic.BicAssertions.assertThat;
+import static de.speedbanking.bic.BicAssertions.assertThatBicIsValid;
+import static de.speedbanking.bic.BicAssertions.assertThatBicOf;
 import static de.speedbanking.bic.BicAssertions.assertThatInvalidBicException;
 
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
@@ -34,7 +36,7 @@ class BicTest {
     @DisplayName("of() should create Bic object for a valid BIC-8")
     @Test
     void of_ValidBic8_ShouldReturnBic() {
-        assertThat(Bic.of("MARKDEFF"))
+        assertThatBicOf("MARKDEFF")
             .as("Check properties for BIC-8")
             .isBic8()
             .isNotBic11()
@@ -52,7 +54,7 @@ class BicTest {
     @DisplayName("of() should create Bic object for a valid BIC-11")
     @Test
     void of_ValidBic11_ShouldReturnBic() {
-        assertThat(Bic.of("MARKDEFF500"))
+        assertThatBicOf("MARKDEFF500")
             .as("Check properties for BIC-11")
             .isBic11()
             .isNotBic8()
@@ -79,16 +81,16 @@ class BicTest {
     @DisplayName("of() should throw exception for incorrect length")
     @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {
-        "SHORT12",      // 7 chars
+        "SHORT12",      //  7 chars
         "LONG12345678", // 12 chars
-        "INVALID99",    // 9 chars
-        "MARKDEFFX",    // 9 chars
+        "INVALID99",    //  9 chars
+        "MARKDEFFX",    //  9 chars
         "DEUTDEFF1234"  // 12 chars
     })
-    void of_InvalidLength_ShouldThrowException(String bic) {
+    void of_InvalidLength_ShouldThrowException(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC has incorrect length (INCORRECT_LENGTH): " + bic)
+            .withMessage("BIC has incorrect length (INCORRECT_LENGTH): '" + bic + "'")
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INCORRECT_LENGTH);
     }
 
@@ -98,10 +100,10 @@ class BicTest {
         "MARK99FF", // 99 is not a valid ISO country
         "MARKXXFF"  // XX is not a valid ISO country
     })
-    void of_InvalidCountry_ShouldThrowException(String bic) {
+    void of_InvalidCountry_ShouldThrowException(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC has invalid country code (INVALID_COUNTRY): " + bic)
+            .withMessage("BIC has invalid country code (INVALID_COUNTRY): '" + bic + "'")
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_COUNTRY);
     }
 
@@ -112,10 +114,10 @@ class BicTest {
         "MÄRKDEFF",
         "____DEFF"
     })
-    void of_InvalidBankCode_ShouldThrowException(String bic) {
+    void of_InvalidBankCode_ShouldThrowException(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("Invalid bank code (INVALID_BANK_CODE): " + bic)
+            .withMessage("Invalid bank code (INVALID_BANK_CODE): '" + bic + "'")
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_BANK_CODE);
     }
 
@@ -129,7 +131,7 @@ class BicTest {
     void of_IllegalCharacters_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC contains illegal character(s) (ILLEGAL_CHARACTERS): " + bic)
+            .withMessage("BIC contains illegal character(s) (ILLEGAL_CHARACTERS): '" + bic + "'")
             .hasFieldOrPropertyWithValue("reason", BicValidationError.ILLEGAL_CHARACTERS);
     }
 
@@ -180,6 +182,9 @@ class BicTest {
     })
     void isValid_ShouldReflectValidationResult(String bic, boolean expectedResult) {
         assertThat(Bic.isValid(bic)).isEqualTo(expectedResult);
+        if (expectedResult) {
+            assertThatBicIsValid(bic);
+        }
     }
 
     @DisplayName("Component getters should return correct parts")
@@ -209,7 +214,7 @@ class BicTest {
             .hasBranchCode(expectedBranchCode);
 
         // the isSameAs checks are implementation details (caching) and must remain separate
-        // to verify instance identity, as they do not return BicAssert.
+        // to verify instance identity, as they do not return BicAssert
         assertThat(bic.getBankCode()).isSameAs(bic.getBankCode());
         assertThat(bic.getCountryCode()).isSameAs(bic.getCountryCode());
         assertThat(bic.getLocationCode()).isSameAs(bic.getLocationCode());
@@ -224,7 +229,7 @@ class BicTest {
         "DBABDEFF500   | DBABDEFF500     | DBABDEFF       | DBABDEFF500"
     })
     void toBicFormats_ShouldReturnCorrectNormalizedStrings(String inputBic, String expectedBic11, String expectedBic8, String expectedToString) {
-        assertThat(Bic.of(inputBic))
+        assertThatBicOf(inputBic)
             .as("Format check for BIC %s", inputBic)
             .isBic11NormalizedEqualTo(expectedBic11)
             .isBic8EqualTo(expectedBic8)

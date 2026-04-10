@@ -138,14 +138,14 @@ class IbanTest {
         "DE91100000000123456780        | INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
     void of_InvalidIban_ShouldThrowException(String ibanInput, IbanValidationError expectedValidationError, String expectedMessagePattern) {
-        String ibanInputNorm = ibanInput == null ? "" : ibanInput.replace(" ", "");
+        String ibanInputNorm = ibanInput == null ? null : ibanInput.replace(" ", "");
 
         IbanValidator.setLastReason(null);
 
         assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.ofNormalized(ibanInput))
             .withCause(null)
-            .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm.isEmpty() ? "" : ": " + ibanInputNorm))
+            .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'"))
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
 
         assertThat(IbanValidator.getLastReason())
@@ -156,7 +156,7 @@ class IbanTest {
         assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.of(ibanInputNorm))
             .withCause(null)
-            .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm.isEmpty() ? "" : ": " + ibanInputNorm))
+            .withMessage(expectedMessagePattern + " (" + expectedValidationError + ")" + (ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'"))
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
         IbanValidator.setLastReason(null);
 
