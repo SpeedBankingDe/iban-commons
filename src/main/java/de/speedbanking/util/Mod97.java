@@ -173,8 +173,8 @@ public final class Mod97 {
      * applying the standard <em>rearrangement step</em> (first {@value #HEADER_LENGTH}
      * characters processed last).
      * <p>
-     * Equivalent to {@link #calculate(CharSequence)} but operates on a {@code char[]}
-     * directly, avoiding the overhead of {@link CharSequence#charAt(int)} dispatch.
+     * Delegates to {@link #calculate(CharSequence)} via an internal {@code CharArrayWrapper};
+     * semantically equivalent and allocation-free for callers.
      *
      * @param iban the normalized IBAN character array (uppercase, no spaces);
      *             may be {@code null}
@@ -183,39 +183,12 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    @SuppressWarnings("PMD.UselessParentheses")
     public static int calculate(final char[] iban) {
-        if (iban == null) {
+        if (iban == null || iban.length == 0) {
             return INVALID_REMAINDER;
         }
 
-        final int len = iban.length;
-        if (len == 0) {
-            return INVALID_REMAINDER;
-        }
-
-        long total = 0;
-
-        for (int i = 0; i < len; i++) {
-            int idx = i + HEADER_LENGTH;
-            if (idx >= len) {
-                idx -= len;
-            }
-            final char c = iban[idx];
-
-            if (c >= '0' && c <= '9') {
-                total = total * 10 + (c - '0');
-            } else if (c >= 'A' && c <= 'Z') {
-                total = total * 100 + (c - 'A' + 10);
-            } else {
-                return INVALID_REMAINDER;
-            }
-
-            if (total >= OVERFLOW_GUARD) {
-                total %= MODULUS;
-            }
-        }
-        return (int) (total % MODULUS);
+        return calculate(new CharArrayWrapper(iban));
     }
 
     // -------------------------------------------------------------------------
@@ -233,15 +206,15 @@ public final class Mod97 {
      * @param offset start index within {@code data} (inclusive)
      * @param length number of characters to process
      * @return the remainder in the range {@code [0, 96]};
-     * illegal characters are silently skipped
+     *         or {@link #INVALID_REMAINDER} if an illegal character is encountered
      * @throws NullPointerException      if {@code data} is {@code null}
      * @throws IndexOutOfBoundsException if {@code offset} or {@code offset + length}
-     * are outside the sequence bounds
+     *                                   are outside the sequence bounds
      *
      * @since 1.8.5
      */
     public static int calculateRange(final CharSequence data, final int offset, final int length) {
-        Objects.requireNonNull(data, "Data sequence must not be null");
+        Objects.requireNonNull(data, "Data must not be null");
         if (offset < 0 || length < 0 || offset + length > data.length()) {
             throw new IndexOutOfBoundsException(
                 String.format("Invalid range (offset: %d, length: %d) for sequence length %d",
@@ -251,11 +224,13 @@ public final class Mod97 {
         int remainder = 0;
         for (int i = 0; i < length; i++) {
             final char c = data.charAt(offset + i);
-            if (c >= '0' && c <= '9') {
+            if (CharUtil.isDigit(c)) {
                 remainder = (remainder * 10 + (c - '0')) % MODULUS;
-            } else if (c >= 'A' && c <= 'Z') {
+            } else if (CharUtil.isUpperCase(c)) {
                 // two-digit letter expansion: A=10 … Z=35
                 remainder = (remainder * 100 + (c - 'A' + 10)) % MODULUS;
+            } else {
+                return INVALID_REMAINDER;
             }
         }
         return remainder;
@@ -273,7 +248,7 @@ public final class Mod97 {
      * @param offset start index within {@code data} (inclusive)
      * @param length number of characters to process
      * @return the remainder in the range {@code [0, 96]};
-     *         illegal characters are silently skipped (consistent with NCD calculator behaviour)
+     *         or {@link #INVALID_REMAINDER} if an illegal character is encountered
      * @throws NullPointerException      if {@code data} is {@code null}
      * @throws IndexOutOfBoundsException if {@code offset} or {@code offset + length}
      *                                   are outside the array bounds
@@ -281,17 +256,14 @@ public final class Mod97 {
      * @since 1.8.5
      */
     public static int calculateRange(final char[] data, final int offset, final int length) {
-        int remainder = 0;
-        for (int i = 0; i < length; i++) {
-            final char c = data[offset + i];
-            if (c >= '0' && c <= '9') {
-                remainder = (remainder * 10 + (c - '0')) % MODULUS;
-            } else if (c >= 'A' && c <= 'Z') {
-                // two-digit letter expansion: A=10 … Z=35
-                remainder = (remainder * 100 + (c - 'A' + 10)) % MODULUS;
-            }
+        Objects.requireNonNull(data, "Data must not be null");
+        if (offset < 0 || length < 0 || offset + length > data.length) {
+            throw new IndexOutOfBoundsException(
+                String.format("Invalid range (offset: %d, length: %d) for sequence length %d",
+                    offset, length, data.length));
         }
-        return remainder;
+
+        return calculateRange(new CharArrayWrapper(data), offset, length);
     }
 
     // -------------------------------------------------------------------------

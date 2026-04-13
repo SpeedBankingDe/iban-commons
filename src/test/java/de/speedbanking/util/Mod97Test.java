@@ -87,20 +87,6 @@ class Mod97Test {
     }
 
     @Test
-    void calculateRange_charSequence_skipsInvalidChars() {
-        // '_' is invalid and should be skipped, 'X' would be valid (A-Z)
-        final String inputWithInvalid = "12A3_4";
-        final String inputClean = "12A34";
-
-        final int resultWithInvalid = Mod97.calculateRange(inputWithInvalid, 0, inputWithInvalid.length());
-        final int resultClean = Mod97.calculateRange(inputClean, 0, inputClean.length());
-
-        assertThat(resultWithInvalid)
-            .as("Invalid characters like '_' should be ignored in calculateRange")
-            .isEqualTo(resultClean);
-    }
-
-    @Test
     void calculateRange_consistencyBetweenTypes() {
         char[] data = "DE123456789".toCharArray();
         CharArrayWrapper wrapper = new CharArrayWrapper(data);
@@ -168,12 +154,11 @@ class Mod97Test {
     }
 
     @Test
-    void calculateRange_charArray_skipsInvalidChars() {
+    void calculateRange_charArray_invalidChars() {
         char[] data = {'1', '2', '_', 'A'};
         int result = Mod97.calculateRange(data, 0, 4);
-        int expected = Mod97.calculateRange("12A", 0, 3);
 
-        assertThat(result).isEqualTo(expected);
+        assertThat(result).isEqualTo(Mod97.INVALID_REMAINDER);
     }
 
     @ParameterizedTest
