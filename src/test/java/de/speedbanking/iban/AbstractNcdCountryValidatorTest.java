@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.Resources;
 
 /**
  * Tests for {@link AbstractNcdCountryValidator}.
@@ -18,7 +17,7 @@ import org.junit.jupiter.api.parallel.Resources;
  * ensures correct delegation to the NCD calculator and reflection-based loading.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-@ResourceLock(value = Resources.SYSTEM_PROPERTIES)
+@ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
 class AbstractNcdCountryValidatorTest {
 
     /**
@@ -44,12 +43,13 @@ class AbstractNcdCountryValidatorTest {
     }
 
     @BeforeEach
+    void prepareConfig() {
+        IbanConfig.reset(IbanConfig.builder().validateNcd(true).calculateNcd(true).build());
+    }
+
     @AfterEach
     void resetConfig() {
-        IbanConfig.resetAll();
-
-        IbanConfig.NCD_VALIDATE.enable();
-        IbanConfig.NCD_CALCULATE.enable();
+        IbanConfig.reset();
     }
 
     /**
@@ -76,7 +76,7 @@ class AbstractNcdCountryValidatorTest {
     @DisplayName("validateNationalCheckDigit should return true when validation is disabled")
     @Test
     void validateNationalCheckDigit_ShouldReturnTrue_WhenDisabled() {
-        IbanConfig.NCD_VALIDATE.disable();
+        IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
 
         AbstractNcdCountryValidator validator = new PT();
         assertThat(validator.validateNationalCheckDigit(new String(new char[0]))).isTrue();
@@ -85,14 +85,11 @@ class AbstractNcdCountryValidatorTest {
     @DisplayName("calculateNationalCheckDigit should return range when calculation is disabled")
     @Test
     void calculateNationalCheckDigit_ShouldReturnRange_WhenDisabled() {
-        IbanConfig.NCD_CALCULATE.set(false);
-        try {
-            AbstractNcdCountryValidator validator = new PT();
-            CharSequence iban = "PT50002700000001234567833";
-            assertThat(validator.calculateNationalCheckDigit(iban)).contains("3", "3");
-        } finally {
-            IbanConfig.NCD_CALCULATE.enable();
-        }
+        IbanConfig.reset(IbanConfig.builder().calculateNcd(false).build());
+
+        AbstractNcdCountryValidator validator = new PT();
+        CharSequence iban = "PT50002700000001234567833";
+        assertThat(validator.calculateNationalCheckDigit(iban)).contains("3", "3");
     }
 
     @DisplayName("calculateNationalCheckDigit should return calculated value when enabled")

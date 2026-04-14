@@ -314,7 +314,7 @@ public final class RandomIban {
         // 2. Compute and write the National Check Digit (NCD) where applicable.
         //    This MUST happen before fixCheckDigits(), because the ISO Mod-97 check
         //    covers the complete IBAN including the NCD field.
-        if (IbanConfig.NCD_CALCULATE.isEnabled()) {
+        if (IbanConfig.isCalculateNcd()) {
             fixNationalCheckDigit(countryData, ibanBuilder);
         }
 

@@ -135,8 +135,8 @@ public final class IbanValidator {
      * @param iban the IBAN character sequence to validate (may be unnormalized
      *             depending on {@link IbanConfig} settings)
      * @return {@code true} if the IBAN is valid according to all criteria, {@code false} otherwise
-     * @see IbanConfig#ALLOW_SPACE
-     * @see IbanConfig#ALLOW_LOWERCASE
+     * @see IbanConfig#isAllowSpace()
+     * @see IbanConfig#isAllowLowercase()
      * @since 1.8.0
      */
     public static boolean isValid(final CharSequence iban) {
@@ -151,8 +151,8 @@ public final class IbanValidator {
 
         // convert input to normalized char array based on library configuration
         CharSequence normIban = normalize(iban, len,
-            IbanConfig.ALLOW_SPACE.isEnabled(),
-            IbanConfig.ALLOW_LOWERCASE.isEnabled());
+            IbanConfig.isAllowSpace(),
+            IbanConfig.isAllowLowercase());
 
         if (normIban == null) {
             return false;
@@ -247,7 +247,7 @@ public final class IbanValidator {
      * Validates the given IBAN using the default space configuration.
      * <p>
      * This is a convenience method that delegates to {@link #validate(CharSequence, boolean)}
-     * using {@link IbanConfig#ALLOW_SPACE}.
+     * using {@link IbanConfig#isAllowSpace()}.
      *
      * @param rawIban the IBAN character sequence to validate
      * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
@@ -255,7 +255,7 @@ public final class IbanValidator {
      * @since 1.8.0
      */
     static IbanValidationSuccess validate(final CharSequence rawIban) {
-        return validate(rawIban, IbanConfig.ALLOW_SPACE.isEnabled());
+        return validate(rawIban, IbanConfig.isAllowSpace());
     }
 
     /**
@@ -285,8 +285,7 @@ public final class IbanValidator {
         }
 
         // convert input to normalized char array based on library configuration
-        CharSequence normIban = normalize(rawIban, len,
-                                          allowSpace, IbanConfig.ALLOW_LOWERCASE.isEnabled());
+        CharSequence normIban = normalize(rawIban, len, allowSpace, IbanConfig.isAllowLowercase());
 
         if (normIban == null) {
             return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);

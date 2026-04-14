@@ -15,7 +15,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.Resources;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -256,16 +255,17 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         "PL 61 10 90 10 14 00 00 07 12 19 81 28 74"
     })
     @DisplayName("isValid should return true for valid formatted (spaced) IBANs")
-    @ResourceLock(value = Resources.SYSTEM_PROPERTIES)
+    @ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
     void isValid_shouldReturnTrueForFormattedIban(String formattedIban) {
         try {
-            IbanConfig.ALLOW_SPACE.enable();
+            IbanConfig.reset(IbanConfig.builder()
+                .allowSpace(true)
+                .allowLowercase(true)
+                .build());
 
             assertThat(IbanValidator.isValid(formattedIban))
                 .as("IBAN %s should be recognized as valid", formattedIban)
                 .isTrue();
-
-            IbanConfig.ALLOW_LOWERCASE.enable();
 
             String lowercaseIban = formattedIban.toLowerCase(Locale.ROOT);
 
@@ -274,8 +274,7 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
                 .isTrue();
 
         } finally {
-            IbanConfig.ALLOW_SPACE.reset();
-            IbanConfig.ALLOW_LOWERCASE.reset();
+            IbanConfig.reset();
         }
     }
 
@@ -378,12 +377,12 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
     @NullAndEmptySource
     void isValidSpaced_shouldReturnFalseForInvalidCasesWithSpacing(String input) {
         try {
-            IbanConfig.ALLOW_SPACE.enable();
+            IbanConfig.reset(IbanConfig.builder().allowSpace(true).build());
 
             assertThat(IbanValidator.isValid(input)).isFalse();
 
         } finally {
-            IbanConfig.ALLOW_SPACE.reset();
+            IbanConfig.reset();
         }
     }
 

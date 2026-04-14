@@ -20,10 +20,11 @@ import de.speedbanking.test.BooleanConverter;
 import de.speedbanking.test.TestUtil;
 import de.speedbanking.util.Iso3166Alpha2;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.Resources;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.ConvertWith;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -44,7 +45,20 @@ import java.util.Random;
  * Unit tests for the new immutable {@link Iban} class, covering IBAN validation and component extraction.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
 class IbanTest {
+
+    @BeforeAll
+    static void prepareIbanConfig() {
+        IbanConfig.reset(IbanConfig.builder()
+            .validateNcd(true)
+            .calculateNcd(true).build());
+    }
+
+    @AfterAll
+    static void resetIbanConfig() {
+        IbanConfig.reset();
+    }
 
     /**
      * Tests {@link Iban#of(CharSequence)} with various valid IBANs.
@@ -59,12 +73,12 @@ class IbanTest {
         "GB33 BUKB 2020 1555 5555 55",              // United Kingdom
         "NL91 ABNA 0417 1643 00"                    // Netherlands
     })
-    @ResourceLock(value = Resources.SYSTEM_PROPERTIES)
+    @ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
     void of_ValidIban_ShouldReturnIban(String ibanInput) {
         String ibanInputNorm = ibanInput.replace(" ", "");
 
         try {
-            IbanConfig.ALLOW_SPACE.enable();
+            IbanConfig.reset(IbanConfig.builder().allowSpace(true).build());
 
             assertThatCode(
                 () -> Iban.of(ibanInput))
@@ -109,7 +123,7 @@ class IbanTest {
             assertThat(Iban.isValid(invalidIban)).isFalse();
 
         } finally {
-            IbanConfig.ALLOW_SPACE.reset();
+            IbanConfig.reset();
         }
 
     }

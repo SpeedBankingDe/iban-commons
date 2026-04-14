@@ -154,7 +154,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Iban parse(CharSequence iban) throws InvalidIbanException {
-        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.ALLOW_SPACE.isEnabled());
+        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
 
         if (success == null) {
             IbanValidationError error = IbanValidator.getLastReason();
@@ -173,7 +173,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Optional<Iban> tryParse(CharSequence iban) {
-        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.ALLOW_SPACE.isEnabled());
+        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
 
         return success == null
             ? Optional.empty()
@@ -203,7 +203,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.3
      */
     public static Iban tryParseOrNull(CharSequence iban) {
-        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.ALLOW_SPACE.isEnabled());
+        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
         return success == null ? null : new Iban(success.normIban, success.countryData);
     }
 

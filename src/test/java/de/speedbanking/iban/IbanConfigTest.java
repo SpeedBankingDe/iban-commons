@@ -1,146 +1,142 @@
 package de.speedbanking.iban;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.Resources;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Unit tests for {@link IbanConfig}.
  */
-@ResourceLock(value = Resources.SYSTEM_PROPERTIES)
+@ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
 class IbanConfigTest {
 
+    static final String RESOURCE_NAME = "IbanConfig";
+
     @BeforeEach
-    void setup() {
-        IbanConfig.resetAll();
+    void prepareIbanConfig() {
+        IbanConfig.reset();
     }
 
-    @AfterEach
-    void tearDown() {
-        // ensure a clean state for the next test
-        IbanConfig.NCD_VALIDATE.disable();
-        IbanConfig.NCD_CALCULATE.disable();
-        IbanConfig.resetAll();
-        System.clearProperty("iban.ncd.validate");
-        System.clearProperty("iban.ncd.calculate");
+    @AfterAll
+    static void resetIbanConfig() {
+        IbanConfig.reset();
     }
 
-    @DisplayName("Default values should be false")
+    // -------------------------------------------------------------------------
+    // Default state
+    // -------------------------------------------------------------------------
+
+    @DisplayName("Default instance should have all options disabled")
     @Test
     void testDefaultValues() {
-        assertThat((boolean) IbanConfig.NCD_VALIDATE.get())
-            .as("Default national check digit (NCD) validation")
-            .isFalse();
-
-        assertThat((boolean) IbanConfig.NCD_CALCULATE.get())
-            .as("Default national check digit (NCD) calculation")
-            .isFalse();
+        assertThat(IbanConfig.isValidateNcd()).isFalse();
+        assertThat(IbanConfig.isCalculateNcd()).isFalse();
+        assertThat(IbanConfig.isAllowSpace()).isFalse();
+        assertThat(IbanConfig.isAllowLowercase()).isFalse();
     }
 
-    @DisplayName("Should respect relaxed validation settings")
+    @DisplayName("get() without configure() should return DEFAULT instance")
     @Test
-    void testRelaxedSettings() {
-        IbanConfig.ALLOW_SPACE.enable();
-        IbanConfig.ALLOW_LOWERCASE.enable();
-
-        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isTrue();
-        assertThat(IbanConfig.ALLOW_LOWERCASE.isEnabled()).isTrue();
+    void testGetReturnsDefault() {
+        assertThat(IbanConfig.get()).isSameAs(IbanConfig.DEFAULT);
     }
 
-    @DisplayName("Should read from system properties")
+    // -------------------------------------------------------------------------
+    // configure() + get()
+    // -------------------------------------------------------------------------
+
+    @DisplayName("configure() should install the provided instance")
     @Test
-    void testReadSystemProperty() {
-        System.setProperty("iban.ncd.validate", "true");
+    void testConfigure() {
+        IbanConfig custom = IbanConfig.builder()
+            .allowSpace(true)
+            .allowLowercase(true)
+            .build();
 
-        IbanConfig.NCD_VALIDATE.reset();
+        IbanConfig.configure(custom);
 
-        assertThat(IbanConfig.NCD_VALIDATE.isEnabled())
-            .as("Value after reading system property")
-            .isTrue();
+        assertThat(IbanConfig.get()).isSameAs(custom);
+        assertThat(IbanConfig.isAllowSpace()).isTrue();
+        assertThat(IbanConfig.isAllowLowercase()).isTrue();
     }
 
-    @DisplayName("Should apply parser when reading system property")
+    @DisplayName("configure() should reject null")
     @Test
-    void testSystemPropertyParsing() {
-        // Testet den Pfad: sysProp != null -> parser.apply(sysProp)
-        System.setProperty("iban.allow.space", "true");
-        IbanConfig.ALLOW_SPACE.reset();
-        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isTrue();
-
-        System.setProperty("iban.allow.space", "false");
-        IbanConfig.ALLOW_SPACE.reset();
-        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isFalse();
-
-        // Testet ungültigen Input für den Boolean-Parser (ergibt false)
-        System.setProperty("iban.allow.space", "not-a-boolean");
-        IbanConfig.ALLOW_SPACE.reset();
-        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isFalse();
+    void testConfigureRejectsNull() {
+        assertThatThrownBy(() -> IbanConfig.configure(null))
+            .isInstanceOf(NullPointerException.class);
     }
 
-    @DisplayName("Should set and get NCD validation flag")
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testSetValidateNationalCheckDigit(boolean value) {
-        IbanConfig.NCD_VALIDATE.set(value);
+    @DisplayName("configure() after get() should throw IllegalStateException")
+    @Test
+    void testConfigureAfterFreezeThrows() {
+        IbanConfig.get(); // freezes
 
-        assertThat((boolean) IbanConfig.NCD_VALIDATE.get()).isEqualTo(value);
+        assertThatThrownBy(() -> IbanConfig.configure(IbanConfig.DEFAULT))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("already in use");
     }
 
-    @DisplayName("Should set and get NCD calculation flag")
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testSetCalculateNationalCheckDigit(boolean value) {
-        IbanConfig.NCD_CALCULATE.set(value);
+    @DisplayName("configure() before get() should succeed")
+    @Test
+    void testConfigureBeforeGetSucceeds() {
+        IbanConfig custom = IbanConfig.builder().validateNcd(true).build();
 
-        assertThat(IbanConfig.NCD_CALCULATE.isEnabled()).isEqualTo(value);
+        IbanConfig.configure(custom); // must not throw
+
+        assertThat(IbanConfig.isValidateNcd()).isTrue();
     }
 
-    @DisplayName("IsDisabled should return inverse of isEnabled")
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testIsDisabled(boolean value) {
-        IbanConfig.NCD_VALIDATE.set(value);
-        assertThat(IbanConfig.NCD_VALIDATE.isDisabled()).isNotEqualTo(value);
+    // -------------------------------------------------------------------------
+    // Builder
+    // -------------------------------------------------------------------------
+
+    @DisplayName("Builder should set each property independently")
+    @Test
+    void testBuilderProperties() {
+        IbanConfig config = IbanConfig.builder()
+            .validateNcd(true)
+            .calculateNcd(true)
+            .allowSpace(false)
+            .allowLowercase(false)
+            .build();
+
+        // validate state using toString to avoid using the static global methods
+        assertThat(config.toString())
+            .contains("validateNcd=true")
+            .contains("calculateNcd=true")
+            .contains("allowSpace=false")
+            .contains("allowLowercase=false");
     }
 
-    @DisplayName("ToString should return formatted string")
+    @DisplayName("Builder defaults should match DEFAULT instance")
+    @Test
+    void testBuilderDefaultsMatchDefault() {
+        IbanConfig fromBuilder = IbanConfig.builder().build();
+
+        assertThat(fromBuilder).hasToString(IbanConfig.DEFAULT.toString());
+    }
+
+    // -------------------------------------------------------------------------
+    // toString
+    // -------------------------------------------------------------------------
+
+    @DisplayName("toString should contain class name and all property values")
     @Test
     void testToString() {
-        String result = IbanConfig.NCD_VALIDATE.toString();
+        String result = IbanConfig.DEFAULT.toString();
 
         assertThat(result)
             .contains("IbanConfig")
-            .contains("NCD_VALIDATE")
-            .contains("false");
-    }
-
-    @DisplayName("Reset should restore default values")
-    @Test
-    void testResetAll() {
-        IbanConfig.NCD_VALIDATE.enable();
-        IbanConfig.NCD_CALCULATE.enable();
-        IbanConfig.ALLOW_SPACE.enable();
-        IbanConfig.ALLOW_LOWERCASE.enable();
-
-        IbanConfig.resetAll();
-
-        assertThat(IbanConfig.NCD_VALIDATE.isEnabled()).isFalse();
-        assertThat(IbanConfig.NCD_VALIDATE.isDisabled()).isTrue();
-
-        assertThat(IbanConfig.NCD_CALCULATE.isEnabled()).isFalse();
-        assertThat(IbanConfig.NCD_CALCULATE.isDisabled()).isTrue();
-
-        assertThat(IbanConfig.ALLOW_SPACE.isEnabled()).isFalse();
-        assertThat(IbanConfig.ALLOW_SPACE.isDisabled()).isTrue();
-
-        assertThat(IbanConfig.ALLOW_LOWERCASE.isEnabled()).isFalse();
-        assertThat(IbanConfig.ALLOW_LOWERCASE.isDisabled()).isTrue();
+            .contains("validateNcd=false")
+            .contains("calculateNcd=false")
+            .contains("allowSpace=false")
+            .contains("allowLowercase=false");
     }
 }
+

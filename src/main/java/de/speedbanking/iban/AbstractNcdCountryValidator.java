@@ -98,7 +98,7 @@ abstract class AbstractNcdCountryValidator
     @Override
     public final boolean validateNationalCheckDigit(CharSequence iban) {
         return ncdCalculator == null
-            || IbanConfig.NCD_VALIDATE.isDisabled()
+            || !IbanConfig.isValidateNcd()
             || ncdCalculator.validateNationalCheckDigit(iban);
     }
 
@@ -110,7 +110,7 @@ abstract class AbstractNcdCountryValidator
     @Override
     public final CharSequence calculateNationalCheckDigit(CharSequence iban) {
         return ncdCalculator == null
-            || IbanConfig.NCD_CALCULATE.isDisabled()
+            || !IbanConfig.isCalculateNcd()
             ? getCountryData().getNationalCheckDigitIndexRange().applyTo(iban)
             : ncdCalculator.calculateNationalCheckDigit(iban);
     }

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
-import org.junit.jupiter.api.parallel.Resources;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -74,10 +73,9 @@ class CountryValidatorsTest {
     @DisplayName("Should instantiate and invoke all NCD validators")
     @ParameterizedTest
     @MethodSource("allNcdIbanRegistryEntries")
-    @ResourceLock(value = Resources.SYSTEM_PROPERTIES)
+    @ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
     void testAllNcdValidators(IbanRegistry countryData) {
-        IbanConfig.NCD_VALIDATE.enable();
-        IbanConfig.NCD_CALCULATE.enable();
+        IbanConfig.reset(IbanConfig.builder().validateNcd(true).calculateNcd(true).build());
 
         try {
 
@@ -109,7 +107,7 @@ class CountryValidatorsTest {
                 .isFalse();
 
         } finally {
-            IbanConfig.resetAll();
+            IbanConfig.reset();
         }
 
     }

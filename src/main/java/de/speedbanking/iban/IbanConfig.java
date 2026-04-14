@@ -16,159 +16,302 @@
 package de.speedbanking.iban;
 
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Global configuration settings for the IBAN engine.
+ * Immutable global configuration for the IBAN engine.
  * <p>
- * Each enum constant represents a configuration property that can be controlled
- * via System Properties or programmatically.
+ * Configuration follows an <em>initialize-once</em> pattern:
+ * <ol>
+ *   <li>Optionally call {@link #configure(IbanConfig)} once at application startup
+ *       (e.g. in a {@code @PostConstruct} method or {@code main()}) to supply a
+ *       custom configuration built via {@link Builder}.</li>
+ *   <li>The first call to {@link #get()} or any of the static accessors (e.g., {@link #isAllowSpace()})
+ *       freezes the configuration permanently.
+ *       Any subsequent call to {@link #configure(IbanConfig)} will throw an
+ *       {@link IllegalStateException}.</li>
+ * </ol>
  * <p>
- * This enum is thread-safe as the underlying values are marked {@code volatile}.
+ * If {@link #configure(IbanConfig)} is never called, the {@link #DEFAULT} instance
+ * is used automatically.
+ * <p>
+ * This class is thread-safe.
+ *
+ * <h3>Example</h3>
+ * <pre>{@code
+ * // at startup — before any IBAN operation:
+ * IbanConfig.configure(IbanConfig.builder()
+ *     .allowSpace(true)
+ *     .allowLowercase(true)
+ *     .build());
+ *
+ * // anywhere in the application:
+ * if (IbanConfig.get().isAllowLowercase()) { ... }
+ * }</pre>
  *
  * @since 1.8.5
  */
-@SuppressWarnings({"ImmutableEnumChecker", "TypeParameterUnusedInFormals"}) // state is intentionally mutable via volatile field 'value'
-public enum IbanConfig {
+public final class IbanConfig {
 
     /**
-     * Whether to validate National Check Digits (NCD) for supported countries.
+     * Default configuration with all options <strong>disabled</strong>.
      */
-    NCD_VALIDATE("iban.ncd.validate", Boolean::parseBoolean, false),
+    public static final IbanConfig              DEFAULT = new IbanConfig(new Builder());
+
+    private static final AtomicReference<State> STATE   = new AtomicReference<>(new State(DEFAULT, false));
 
     /**
-     * Whether to calculate National Check Digits (NCD) when generating IBANs.
-     */
-    NCD_CALCULATE("iban.ncd.calculate", Boolean::parseBoolean, false),
-
-    /**
-     * Whether to allow spaces during validation.
+     * Fast-path cache: populated the first time the configuration is frozen.
      * <p>
-     * If enabled, the validator will internally remove spaces from the input.
-     */
-    ALLOW_SPACE("iban.allow.space", Boolean::parseBoolean, false),
-
-    /**
-     * Whether to allow lowercase characters during validation.
+     * A plain volatile read is an order of magnitude cheaper than an
+     * {@link AtomicReference#updateAndGet} CAS loop, so this field allows
+     * {@link #get()} — which is called on every IBAN operation — to bypass
+     * the slow path entirely once the configuration has been frozen.
      * <p>
-     * If enabled, the validator will internally treat the input as uppercase.
+     * {@code null} means "not yet frozen"; any non-null value is the active,
+     * immutable {@link IbanConfig} instance. Concurrent writes are safe because
+     * the value is always the same immutable object (idempotent assignment).
      */
-    ALLOW_LOWERCASE("iban.allow.lowercase", Boolean::parseBoolean, false);
+    private static volatile IbanConfig          activeConfig;
 
-    private final String              systemProperty;
-    private final Function<String, ?> parser;
-    private final Object              defaultValue;
-    private volatile Object           value;
+    private final boolean                       validateNcd;
+    private final boolean                       calculateNcd;
+    private final boolean                       allowSpace;
+    private final boolean                       allowLowercase;
 
-    <T> IbanConfig(final String systemProperty, final Function<String, T> parser, final T defaultValue) {
-        this.systemProperty = Objects.requireNonNull(systemProperty);
-        this.parser = Objects.requireNonNull(parser);
-        this.defaultValue = defaultValue;
-        this.value = readSystemProperty();
+    private IbanConfig(final Builder builder) {
+        this.validateNcd    = builder.validateNcd;
+        this.calculateNcd   = builder.calculateNcd;
+        this.allowSpace     = builder.allowSpace;
+        this.allowLowercase = builder.allowLowercase;
     }
 
     /**
-     * Resets the configuration value to its initial state.
+     * Returns whether National Check Digit (NCD) validation is enabled in the global configuration.
      * <p>
-     * Re-reads the System Property or falls back to the hardcoded default.
-     */
-    public void reset() {
-        this.value = readSystemProperty();
-    }
-
-    /**
-     * Returns the current value of this configuration in a type-safe manner.
-     * <p>
-     * Note: Use this method when the expected type is known at the call site.
+     * Calling this method freezes the configuration.
      *
-     * @param <T> the expected return type
-     * @return the current value
+     * @return {@code true} if enabled
      */
-    @SuppressWarnings("unchecked")
-    public <T> T get() {
-        return (T) value;
+    public static boolean isValidateNcd() {
+        return get().validateNcd;
     }
 
     /**
-     * Checks if the configuration is enabled (true).
+     * Returns whether National Check Digit (NCD) calculation is enabled in the global configuration.
      * <p>
-     * This is a convenience method for boolean properties to avoid type casting or inference issues.
+     * Calling this method freezes the configuration.
      *
-     * @return true if the value is {@link Boolean#TRUE}
+     * @return {@code true} if enabled
      */
-    public boolean isEnabled() {
-        return Boolean.TRUE.equals(value);
+    public static boolean isCalculateNcd() {
+        return get().calculateNcd;
     }
 
     /**
-     * Checks if the configuration is disabled (false).
-     *
-     * @return true if the value is {@link Boolean#FALSE}
-     */
-    public boolean isDisabled() {
-        return Boolean.FALSE.equals(value);
-    }
-
-    /**
-     * Programmatically overrides the configuration value.
+     * Returns whether space-tolerance is enabled in the global configuration.
      * <p>
-     * The value is updated immediately for all threads.
+     * Calling this method freezes the configuration.
      *
-     * @param <T>      the type of the value
-     * @param newValue the new value to set
+     * @return {@code true} if enabled
      */
-    public <T> void set(final T newValue) {
-        this.value = newValue;
+    public static boolean isAllowSpace() {
+        return get().allowSpace;
     }
 
     /**
-     * Enables this configuration setting if it is of type {@link Boolean}.
+     * Returns whether case-insensitivity is enabled in the global configuration.
+     * <p>
+     * Calling this method freezes the configuration.
      *
-     * @throws UnsupportedOperationException if the configuration is not a boolean type
+     * @return {@code true} if enabled
      */
-    public void enable() {
-        if (!(defaultValue instanceof Boolean)) {
-            throw new UnsupportedOperationException("Method enable() is only supported for boolean properties");
+    public static boolean isAllowLowercase() {
+        return get().allowLowercase;
+    }
+
+    /**
+     * Installs a custom global configuration.
+     * <p>
+     * Must be called before the first invocation of {@link #get()} or any static
+     * accessor. Once the configuration is frozen, this method throws an
+     * {@link IllegalStateException}.
+     *
+     * @param config the configuration to install; must not be {@code null}
+     * @return the newly installed configuration instance
+     * @throws IllegalStateException if the configuration has already been frozen
+     */
+    public static IbanConfig configure(final IbanConfig config) {
+        Objects.requireNonNull(config, "Config must not be null");
+
+        IbanConfig result = STATE.updateAndGet(current -> {
+            if (current.frozen) {
+                throw new IllegalStateException(
+                    "IbanConfig is already in use and cannot be changed. "
+                  + "Call configure() before the first get() or accessor invocation.");
+            }
+            return new State(config, false);
+        }).config;
+
+        activeConfig = null; // invalidate fast-path cache
+        return result;
+    }
+
+    /**
+     * Returns the global configuration instance and freezes it.
+     * <p>
+     * Uses a volatile fast-path to avoid a CAS operation on every call once the
+     * configuration has been frozen. After this method has been called, any
+     * subsequent call to {@link #configure(IbanConfig)} will throw an
+     * {@link IllegalStateException}.
+     *
+     * @return the active {@link IbanConfig} instance; never {@code null}
+     */
+    static IbanConfig get() {
+        // fast path: single volatile read — no CAS, no lambda, no allocation
+        // this is the common case for every IBAN operation after startup
+        IbanConfig cfg = activeConfig;
+        if (cfg != null) {
+            return cfg;
         }
-        set(true);
+
+        // Slow path: freeze the config via CAS, then promote it to the fast-path
+        // cache. Safe without further synchronization: the assigned value is always
+        // the same immutable object, so concurrent writes are idempotent.
+        cfg = STATE.updateAndGet(current -> current.frozen
+                ? current
+                : new State(current.config, true)).config;
+        activeConfig = cfg;
+        return cfg;
     }
 
     /**
-     * Disables this configuration setting if it is of type {@link Boolean}.
+     * Resets the global configuration to {@link #DEFAULT} and clears the frozen flag.
+     * <p>
+     * Intended exclusively for test tear-down.
      *
-     * @throws UnsupportedOperationException if the configuration is not a boolean type
+     * @return the newly installed configuration instance
      */
-    public void disable() {
-        if (!(defaultValue instanceof Boolean)) {
-            throw new UnsupportedOperationException("Method disable() is only supported for boolean properties");
-        }
-        set(false);
+    static IbanConfig reset() {
+        return reset(DEFAULT);
     }
 
     /**
-     * Reads the value from the configured System Property.
+     * Resets the global configuration to the specified instance and clears the frozen flag.
+     * <p>
+     * Intended exclusively for test tear-down.
      *
-     * @return the parsed value from the system property, or the default value if not set
+     * @param config the configuration instance to install; must not be {@code null}
+     * @return the newly installed configuration instance
      */
-    private Object readSystemProperty() {
-        final String sysProp = System.getProperty(systemProperty);
-        return sysProp == null ? defaultValue : parser.apply(sysProp);
+    static IbanConfig reset(final IbanConfig config) {
+        Objects.requireNonNull(config, "Config must not be null");
+        activeConfig = null; // invalidate fast-path cache
+        return STATE.updateAndGet(current -> new State(config, false)).config;
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '[' + name() + "=" + value + ']';
+        return getClass().getSimpleName()
+               + '['
+               + "validateNcd="    + validateNcd + ", "
+               + "calculateNcd="   + calculateNcd + ", "
+               + "allowSpace="     + allowSpace + ", "
+               + "allowLowercase=" + allowLowercase
+               + ']';
     }
 
     /**
-     * Resets all configuration constants to their default state.
-     * <p>
-     * Useful for clearing state in test suites.
+     * Returns a new {@link Builder} with all options set to their defaults ({@code false}).
+     *
+     * @return a fresh builder instance
      */
-    public static void resetAll() {
-        for (IbanConfig config : values()) {
-            config.reset();
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /**
+     * Builder for {@link IbanConfig}.
+     * <p>
+     * All options default to {@code false}. Only properties that deviate from
+     * the default need to be set explicitly.
+     */
+    public static final class Builder {
+
+        private boolean validateNcd;
+        private boolean calculateNcd;
+        private boolean allowSpace;
+        private boolean allowLowercase;
+
+        private Builder() {
+        }
+
+        /**
+         * Enables or disables National Check Digit (NCD) validation.
+         *
+         * @param value {@code true} to enable
+         * @return this builder
+         */
+        public Builder validateNcd(final boolean value) {
+            this.validateNcd = value;
+            return this;
+        }
+
+        /**
+         * Enables or disables National Check Digit (NCD) calculation.
+         *
+         * @param value {@code true} to enable
+         * @return this builder
+         */
+        public Builder calculateNcd(final boolean value) {
+            this.calculateNcd = value;
+            return this;
+        }
+
+        /**
+         * Enables or disables space-tolerant IBAN validation.
+         *
+         * @param value {@code true} to enable
+         * @return this builder
+         */
+        public Builder allowSpace(final boolean value) {
+            this.allowSpace = value;
+            return this;
+        }
+
+        /**
+         * Enables or disables case-insensitive IBAN validation.
+         *
+         * @param value {@code true} to enable
+         * @return this builder
+         */
+        public Builder allowLowercase(final boolean value) {
+            this.allowLowercase = value;
+            return this;
+        }
+
+        /**
+         * Builds and returns the configured {@link IbanConfig} instance.
+         *
+         * @return a new immutable {@link IbanConfig}
+         */
+        public IbanConfig build() {
+            return new IbanConfig(this);
+        }
+    }
+
+    /**
+     * Internal state container to ensure atomic updates of config and frozen flag.
+     */
+    private static final class State {
+        private final IbanConfig config;
+        private final boolean    frozen;
+
+        private State(final IbanConfig config, final boolean frozen) {
+            this.config = config;
+            this.frozen = frozen;
         }
     }
 
 }
+
