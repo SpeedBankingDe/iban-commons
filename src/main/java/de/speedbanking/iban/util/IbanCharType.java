@@ -40,7 +40,7 @@ public enum IbanCharType {
      * <p>
      * Corresponds to the ISO 13616 code {@code 'n'}.
      */
-    NUMERIC('n', "\\d"),
+    NUMERIC('n', "[0-9]"),
 
     /**
      * Alphanumeric characters (A-Z, 0-9).
