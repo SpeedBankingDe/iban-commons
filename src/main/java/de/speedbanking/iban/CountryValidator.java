@@ -15,6 +15,8 @@
  */
 package de.speedbanking.iban;
 
+import static de.speedbanking.util.CharUtil.toCharArray;
+
 import de.speedbanking.util.CharUtil;
 
 /**
@@ -27,13 +29,13 @@ import de.speedbanking.util.CharUtil;
  * Validators for countries that embed a National Check Digit (NCD) in their BBAN extend
  * {@link AbstractNcdCountryValidator}, which additionally implements
  * {@link NationalCheckDigitCalculator}.  The {@code validateIban} implementation of such
- * validators calls {@link NationalCheckDigitCalculator#validateNationalCheckDigit(CharSequence)}
+ * validators calls {@link NationalCheckDigitCalculator#validateNationalCheckDigit(char[])}
  * as part of its boolean expression.
  *
  * <h3>Implementations</h3>
  * All country-specific implementations live in {@link CountryValidators} and are generated
  * by {@code CountryValidatorCodeGenerator}.  They are not intended to be referenced
- * directly — use {@link IbanRegistry#getCountryValidator()} to obtain the validator for
+ * directly — use {@link IbanValidator#getCountryValidator(IbanRegistry)} to obtain the validator for
  * a specific country.
  *
  * @since 1.8.0
@@ -54,9 +56,23 @@ interface CountryValidator {
      * and uppercase ASCII letters — no {@code null} check, length check, or
      * {@link CharUtil#isDigitOrUpperCase(char)} check is needed inside this method.
      *
-     * @param iban the fully assembled, normalised IBAN character sequence
+     * @param iban the fully assembled, normalized IBAN as a {@code char[]}
      * @return {@code true} if the IBAN conforms to the country's structural rules,
      *         {@code false} otherwise
      */
-    boolean validateIban(CharSequence iban);
+    boolean validateIban(char[] iban);
+
+    /**
+     * Validates the BBAN structure of the given character sequence.
+     * <p>
+     * This default method converts the sequence to a char array before calling
+     * the primary validation logic.
+     *
+     * @param iban the IBAN character sequence to validate
+     * @return true if valid, false otherwise
+     */
+    default boolean validateIban(final CharSequence iban) {
+        return validateIban(toCharArray(iban));
+    }
+
 }

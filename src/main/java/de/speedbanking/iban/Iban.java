@@ -123,6 +123,19 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
+     * {@link String}-optimized overload of {@link #of(CharSequence)}.
+     *
+     * @param iban the IBAN string
+     * @return a valid, immutable {@code Iban} instance
+     * @throws InvalidIbanException if the IBAN is invalid
+     * @see #of(CharSequence)
+     * @since 1.8.5
+     */
+    public static Iban of(final String iban) throws InvalidIbanException {
+        return parse(iban);
+    }
+
+    /**
      * Parses and validates the input character sequence that is assumed to be normalized (containing no spaces).
      * <p>
      * This method skips the initial normalization step but performs full validation.
@@ -217,6 +230,22 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static boolean isValid(final CharSequence iban) {
+        return IbanValidator.isValid(iban);
+    }
+
+    /**
+     * {@link String}-optimized overload of {@link #isValid(CharSequence)}.
+     * <p>
+     * Resolved statically by the Java compiler when the caller passes a {@link String},
+     * routing through {@link IbanValidator#isValid(String)} and its optimized
+     * normalization path.
+     *
+     * @param iban the IBAN string to validate
+     * @return {@code true} if the IBAN is valid, {@code false} otherwise
+     * @see #isValid(CharSequence)
+     * @since 1.8.5
+     */
+    public static boolean isValid(final String iban) {
         return IbanValidator.isValid(iban);
     }
 

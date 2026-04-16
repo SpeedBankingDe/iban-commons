@@ -27,7 +27,7 @@ class AbstractNcdCountryValidatorTest {
      */
     static final class PT extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return true;
         }
     }
@@ -37,7 +37,7 @@ class AbstractNcdCountryValidatorTest {
      */
     static final class XYZ extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return false;
         }
     }
@@ -68,7 +68,7 @@ class AbstractNcdCountryValidatorTest {
     @Test
     void validateNationalCheckDigit_ShouldDelegate_WhenEnabled() {
         AbstractNcdCountryValidator validator = new PT();
-        CharSequence iban = "PT50000201231234567890154";
+        char[] iban = "PT50000201231234567890154".toCharArray();
 
         assertThat(validator.validateNationalCheckDigit(iban)).isTrue();
     }
@@ -79,7 +79,7 @@ class AbstractNcdCountryValidatorTest {
         IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
 
         AbstractNcdCountryValidator validator = new PT();
-        assertThat(validator.validateNationalCheckDigit(new String(new char[0]))).isTrue();
+        assertThat(validator.validateNationalCheckDigit(new char[0])).isTrue();
     }
 
     @DisplayName("calculateNationalCheckDigit should return range when calculation is disabled")
@@ -88,8 +88,8 @@ class AbstractNcdCountryValidatorTest {
         IbanConfig.reset(IbanConfig.builder().calculateNcd(false).build());
 
         AbstractNcdCountryValidator validator = new PT();
-        CharSequence iban = "PT50002700000001234567833";
-        assertThat(validator.calculateNationalCheckDigit(iban)).contains("3", "3");
+        String iban = "PT50002700000001234567833";
+        assertThat(validator.calculateNationalCheckDigit(iban)).contains('3', '3');
     }
 
     @DisplayName("calculateNationalCheckDigit should return calculated value when enabled")
@@ -98,7 +98,7 @@ class AbstractNcdCountryValidatorTest {
         AbstractNcdCountryValidator validator = new PT();
         CharSequence iban = "PT50002700000001234567833";
 
-        CharSequence result = validator.calculateNationalCheckDigit(iban);
+        char[] result = validator.calculateNationalCheckDigit(iban);
 
         assertThat(result).isNotNull();
     }

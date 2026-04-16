@@ -15,6 +15,7 @@
  */
 package de.speedbanking.iban;
 
+import de.speedbanking.util.CharUtil;
 import de.speedbanking.util.IndexRange;
 
 /**
@@ -39,7 +40,7 @@ import de.speedbanking.util.IndexRange;
  *
  * <h3>Implementation contract</h3>
  * <ul>
- *   <li>The {@code iban} parameter is always a fully assembled, normalised {@code CharSequence}
+ *   <li>The {@code iban} parameter is always a fully assembled, normalized {@code CharSequence}
  *       containing the country code + placeholder check digits + BBAN. All characters are
  *       guaranteed to be digits or uppercase ASCII letters.</li>
  *   <li>{@link #calculateNationalCheckDigit(CharSequence)} returns the NCD as a {@link CharSequence}
@@ -63,27 +64,55 @@ import de.speedbanking.util.IndexRange;
 interface NationalCheckDigitCalculator {
 
     /**
-     * Computes the expected National Check Digit for the given IBAN.
-     *
-     * @param iban the normalised IBAN as a {@code CharSequence};
-     * must not be {@code null} and is guaranteed to contain only
-     * digits and uppercase ASCII letters
-     * @return the computed NCD as a char array (length matches the NCD field width)
-     */
-    CharSequence calculateNationalCheckDigit(CharSequence iban);
-
-    /**
      * Validates the National Check Digit already present in the given IBAN.
      * <p>
      * Implementations use their own {@code COUNTRY} constant to obtain the NCD
      * {@link IndexRange} and compare the value already present in {@code iban}
-     * against the value computed by {@link #calculateNationalCheckDigit(CharSequence)}.
+     * against the value computed by {@link #calculateNationalCheckDigit(char[])}.
      *
-     * @param iban the normalised IBAN as a {@code CharSequence};
+     * @param iban the normalized IBAN as a {@code char[]};
      * must not be {@code null}
      * @return {@code true} if the NCD present in {@code iban} matches the computed value,
      * {@code false} otherwise
      */
-    boolean validateNationalCheckDigit(CharSequence iban);
+    boolean validateNationalCheckDigit(char[] iban);
+
+    /**
+     * Validates the National Check Digit of the given character sequence.
+     * <p>
+     * This default method converts the sequence to a {@code char[]} before calling
+     * the primary validation logic. Note that this involves an array allocation.
+     *
+     * @param iban the IBAN character sequence to validate;
+     * must not be {@code null}
+     * @return {@code true} if valid, {@code false} otherwise
+     */
+    default boolean validateNationalCheckDigit(CharSequence iban) {
+        return validateNationalCheckDigit(CharUtil.toCharArray(iban));
+    }
+
+    /**
+     * Computes the expected National Check Digit for the given IBAN.
+     *
+     * @param iban the normalized IBAN as a {@code char[]};
+     * must not be {@code null} and is guaranteed to contain only
+     * digits and uppercase ASCII letters
+     * @return the computed NCD as a char array (length matches the NCD field width)
+     */
+    char[] calculateNationalCheckDigit(char[] iban);
+
+    /**
+     * Computes the expected National Check Digit for the given character sequence.
+     * <p>
+     * This default method converts the sequence to a {@code char[]} before calling
+     * the primary calculation logic. Note that this involves an array allocation.
+     *
+     * @param iban the IBAN character sequence to compute the NCD for;
+     * must not be {@code null}
+     * @return the computed NCD as a char array
+     */
+    default char[] calculateNationalCheckDigit(CharSequence iban) {
+        return calculateNationalCheckDigit(CharUtil.toCharArray(iban));
+    }
 
 }

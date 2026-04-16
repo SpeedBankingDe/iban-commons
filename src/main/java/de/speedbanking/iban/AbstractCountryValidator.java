@@ -30,7 +30,7 @@ package de.speedbanking.iban;
  * equals the simple class name. Subclasses must not override it.
  *
  * <h3>Inheritance contract</h3>
- * Subclasses must implement {@link CountryValidator#validateIban(CharSequence)}.
+ * Subclasses must implement {@link CountryValidator#validateIban(char[])}.
  * Their simple class name must match a valid {@link IbanRegistry} constant
  * (e.g. class {@code DE} → {@code IbanRegistry.DE}) so that {@link #toString()}
  * and any registry lookups work correctly.

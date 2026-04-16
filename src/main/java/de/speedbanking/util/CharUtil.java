@@ -109,6 +109,11 @@ public final class CharUtil {
         return true;
     }
 
+    public static boolean isAllDigits(final CharSequence chars) {
+        requireInput(chars);
+        return isAllDigits(chars, 0, chars.length());
+    }
+
     /**
      * Checks if a character is a lowercase ASCII letter ('a'-'z').
      *
@@ -206,6 +211,11 @@ public final class CharUtil {
         return true;
     }
 
+    public static boolean isAllUpperCase(final CharSequence chars) {
+        requireInput(chars);
+        return isAllUpperCase(chars, 0, chars.length());
+    }
+
     /**
      * Checks if a character is either a numeric digit ('0'-'9') or an uppercase ASCII letter ('A'-'Z').
      *
@@ -280,6 +290,43 @@ public final class CharUtil {
     public static boolean isAllDigitOrUpperCase(final CharSequence chars) {
         requireInput(chars);
         return isAllDigitOrUpperCase(chars, 0, chars.length());
+    }
+
+    /**
+     * Converts a {@link CharSequence} to a primitive character array.
+     * <p>
+     * This method is a performance-optimized alternative to {@code toString().toCharArray()},
+     * as it avoids the creation of an intermediate {@code String} object and its
+     * internal array copy.
+     * <p>
+     * If the specified length is negative, the full length of the sequence is used.
+     *
+     * @param chars the character sequence to convert, must not be null
+     * @param charsLen the number of characters to copy, or -1 to copy the entire sequence
+     * @return a new character array containing the characters
+     * @throws IllegalArgumentException if {@code chars} is null
+     */
+    public static char[] toCharArray(final CharSequence chars, final int charsLen) {
+        requireInput(chars);
+        final int len = charsLen < 0 ? chars.length() : charsLen;
+        final char[] arr = new char[len];
+        for (int i = 0; i < len; i++) {
+            arr[i] = chars.charAt(i);
+        }
+        return arr;
+    }
+
+    /**
+     * Converts the entire {@link CharSequence} to a primitive character array.
+     * <p>
+     * Effectively a shorthand for {@code toCharArray(chars, -1)}.
+     *
+     * @param chars the character sequence to convert, must not be null
+     * @return a new character array containing all characters
+     * @throws IllegalArgumentException if {@code chars} is null
+     */
+    public static char[] toCharArray(final CharSequence chars) {
+        return toCharArray(chars, -1);
     }
 
     /**

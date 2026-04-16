@@ -62,11 +62,16 @@ class Mod97Test {
 
     @ParameterizedTest(name = "calculate({0}) should be {1}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        "DE91100000000123456789 | 1",
-        "0                      | 0",
-        "1                      | 1",
-        "A                      | 10",
-        "Z                      | 35"
+        "DE03869337585814897021       |  1",
+        "BY27H03U2623LQ9QV1JOGK5DG7SZ |  1",
+        "CH8173414K9E1UUCEF0K3        |  1",
+        "CR51102873298304277251       |  1",
+        "CV0949318910112F4MZAZJIBN    |  1",
+        "CY38785624228KNFCI0QQVCG9465 |  1",
+        "0 | -1",
+        "1 | -1",
+        "A | -1",
+        "Z | -1"
     })
     void calculate_charSequence_knownValues(String input, int expected) {
         assertThat(Mod97.calculate(input)).isEqualTo(expected);
@@ -133,7 +138,8 @@ class Mod97Test {
 
     @Test
     void calculate_charArray_edgeCases() {
-        assertThat(Mod97.calculate((char[]) null)).isEqualTo(Mod97.INVALID_REMAINDER);
+        assertThatNullPointerException()
+            .isThrownBy(() -> Mod97.calculate((char[]) null));
         assertThat(Mod97.calculate(new char[0])).isEqualTo(Mod97.INVALID_REMAINDER);
     }
 

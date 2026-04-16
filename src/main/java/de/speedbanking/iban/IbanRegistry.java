@@ -24,9 +24,7 @@ import de.speedbanking.util.Iso3166Alpha2;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -2895,43 +2893,54 @@ public enum IbanRegistry {
 
     // --- END: Enum Constants (manually maintained) ---
 
-    private final StructureData                     structureData;
-    private final MetaData                          metaData;
-    private final ContactData                       contactData;
+    private final StructureData         structureData;
+    private final MetaData              metaData;
+    private final ContactData           contactData;
 
-    private final String                            countryFlag;
-    private final Pattern                           ibanRegex;
+    private final String                countryFlag;
+    private final Pattern               ibanRegex;
 
-    private final IbanRegistry                      baseCountry;
+    private final IbanRegistry          baseCountry;
 
     /** The minimum required length: Country Code (2) + Check Digits (2). */
-    static final int                                MIN_IBAN_BASE_LENGTH = 4;
+    static final int                    MIN_IBAN_BASE_LENGTH = 4;
 
     /** ISO 13616 standard minimum. */
-    static final int                                MIN_IBAN_LENGTH      = Arrays.stream(values())
+    static final int                    MIN_IBAN_LENGTH      = Arrays.stream(values())
         .mapToInt(IbanRegistry::getIbanLength).min().orElse(MIN_IBAN_BASE_LENGTH);
 
     /** ISO 13616 standard maximum. */
-    static final int                                MAX_IBAN_LENGTH      = Arrays.stream(values())
+    static final int                    MAX_IBAN_LENGTH      = Arrays.stream(values())
         .mapToInt(IbanRegistry::getIbanLength).max().orElse(34);
 
     /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
-    static final int                                INDEX_CHECK_DIGIT1   = 2;
+    static final int                    INDEX_CHECK_DIGIT1   = 2;
 
     /** Index of second IBAN check digit within the full IBAN string (position 4, 0-based index 3). */
-    static final int                                INDEX_CHECK_DIGIT2   = 3;
+    static final int                    INDEX_CHECK_DIGIT2   = 3;
 
     /** Begin index of the Basic Bank Account Number (BBAN) within IBAN (position 5, 0-based index 4). */
-    static final int                                INDEX_BBAN           = MIN_IBAN_BASE_LENGTH;
+    static final int                    INDEX_BBAN           = MIN_IBAN_BASE_LENGTH;
 
     /** Maximum length of BBAN. */
-    static final int                                MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
+    static final int                    MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
 
-    /** Map for quick lookups of all registry entries by packed country code. */
-    private static final Map<Integer, IbanRegistry> ALL_ENTRIES          = buildLookupMap(false);
+    /**
+     * Fixed-size lookup array covering all 676 possible two-letter combinations
+     * ({@code AA}–{@code ZZ}) of ISO 3166-1 Alpha-2 country codes.
+     * <p>
+     * Each slot is addressed directly via {@link #calcLookupIndex(char, char)};
+     * slots with no registered country remain {@code null}.
+     * Most of the 676 slots are unused – this sparseness is intentional:
+     * it enables a direct array access with no hashing, no autoboxing,
+     * and no {@link java.util.HashMap} overhead on every lookup call.
+     */
+    private static final IbanRegistry[] ALL_ENTRIES          = buildLookupArray(false);
 
-    /** Map for quick lookups of base country registry entries by packed country code. */
-    private static final Map<Integer, IbanRegistry> BASE_ENTRIES         = buildLookupMap(true);
+    /**
+     * Lookup array for base country registry entries only, indexed by country code via {@link #calcLookupIndex(char, char)}.
+     */
+    private static final IbanRegistry[] BASE_ENTRIES         = buildLookupArray(true);
 
     /**
      * Main constructor for {@code IbanRegistry} enum constants.
@@ -3066,7 +3075,7 @@ public enum IbanRegistry {
      * Checks whether the country does not participate in the Single Euro Payments Area (SEPA).
      * <p>
      * This is the negation of {@link #isSepa()}.
-     * <p>
+     *
      * @return {@code true} if the country is not a SEPA member, {@code false} if it is
      */
     public boolean isNotSepa() {
@@ -3369,31 +3378,47 @@ public enum IbanRegistry {
     }
 
     /**
-     * Packs two characters into a single {@code int} using bit-shifting: {@code (char1 << 16) | char2}.
+     * Computes a unique array index for a two-letter ISO 3166-1 Alpha-2 country code.
+     * <p>
+     * The computation assumes both characters are ASCII uppercase letters ('A' through 'Z').
+     * The resulting index is mapped into a range of 0 to 675 (inclusive), representing
+     * all possible 26 &times; 26 letter combinations.
+     * <p>
+     * If either character is outside the 'A'–'Z' range, the method returns -1
+     * to indicate an invalid input.
+     *
+     * @param c1 the first character of the ISO country code (expected 'A'–'Z')
+     * @param c2 the second character of the ISO country code (expected 'A'–'Z')
+     * @return a zero-based index in the range [0, 675], or -1 if input is invalid
      */
-    private static int pack(char c1, char c2) {
-        return (c1 << 16) | c2;
+    private static int calcLookupIndex(char c1, char c2) {
+        int i1 = c1 - 'A';
+        int i2 = c2 - 'A';
+        if (i1 < 0 || i1 > 25 || i2 < 0 || i2 > 25) {
+            return -1;
+        }
+        return i1 * 26 + i2;
     }
 
     /**
-     * Builds the private, static map for quick {@code IbanRegistry} lookups.
+     * Builds the private, static lookup array for {@code IbanRegistry} entries.
      * <p>
-     * The capacity is calculated based on the number of constants to avoid resizing.
+     * The array has a fixed size of 676 (26 × 26), covering all possible two-letter
+     * ISO 3166-1 Alpha-2 country codes. Each entry is indexed via
+     * {@link #calcLookupIndex(char, char)}; positions with no registered country remain {@code null}.
      *
-     * @param baseCountriesOnly if {@code true}, only entries with {@code isBaseCountry()} are included
-     * @return an unmodifiable map keyed by packed country codes
+     * @param baseCountriesOnly if {@code true}, only entries where {@link #isBaseCountry()} holds are included
+     * @return the populated lookup array
      */
-    private static Map<Integer, IbanRegistry> buildLookupMap(boolean baseCountriesOnly) {
-        IbanRegistry[] values = values();
-        int capacity = (int) (values.length / 0.75f) + 1;
-        Map<Integer, IbanRegistry> map = new HashMap<>(capacity);
-        for (IbanRegistry c : values) {
-            if (!baseCountriesOnly || c.isBaseCountry()) {
-                String name = c.name();
-                map.put(pack(name.charAt(0), name.charAt(1)), c);
+    private static IbanRegistry[] buildLookupArray(boolean baseCountriesOnly) {
+        IbanRegistry[] array = new IbanRegistry[26 * 26]; // 676 Einträge, alle null
+        for (IbanRegistry entry : values()) {
+            if (!baseCountriesOnly || entry.isBaseCountry()) {
+                String name = entry.name();
+                array[calcLookupIndex(name.charAt(0), name.charAt(1))] = entry;
             }
         }
-        return Collections.unmodifiableMap(map);
+        return array;
     }
 
     /**
@@ -3401,10 +3426,10 @@ public enum IbanRegistry {
      *
      * @param code the two-letter country code (e.g., "DE")
      * @return the matching {@link IbanRegistry} constant,
-     *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown
+     *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown in this registry
      */
     public static IbanRegistry getByCode(final CharSequence code) {
-        return code == null || code.length() != 2 ? null : ALL_ENTRIES.get(pack(code.charAt(0), code.charAt(1)));
+        return code == null || code.length() != 2 ? null : getByCode(code.charAt(0), code.charAt(1));
     }
 
     /**
@@ -3414,10 +3439,11 @@ public enum IbanRegistry {
      *
      * @param c1 the first character of the country code
      * @param c2 the second character of the country code
-     * @return the {@code IbanRegistry} entry, or {@code null} if unknown
+     * @return the {@code IbanRegistry} entry, or {@code null} if unknown in this registry
      */
     public static IbanRegistry getByCode(final char c1, final char c2) {
-        return ALL_ENTRIES.get(pack(c1, c2));
+        int idx = calcLookupIndex(c1, c2);
+        return idx < 0 ? null : ALL_ENTRIES[idx];
     }
 
     /**
@@ -3428,10 +3454,11 @@ public enum IbanRegistry {
      *
      * @param c1 the first character of the country code
      * @param c2 the second character of the country code
-     * @return the base {@code IbanRegistry} entry, or {@code null} if derived or unknown
+     * @return the base {@code IbanRegistry} entry, or {@code null} if derived or unknown in this registry
      */
     public static IbanRegistry getBaseEntryByCode(final char c1, final char c2) {
-        return BASE_ENTRIES.get(pack(c1, c2));
+        int idx = calcLookupIndex(c1, c2);
+        return idx < 0 ? null : BASE_ENTRIES[idx];
     }
 
     /**

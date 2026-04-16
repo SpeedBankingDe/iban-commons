@@ -102,7 +102,7 @@ class CountryValidatorsTest {
             }
             IbanValidator.fixCheckDigits(badNcdIban);
 
-            assertThat(validator.validateIban(badNcdIban.toString()))
+            assertThat(validator.validateIban(badNcdIban))
                 .as("Validation should fail for %s using iban with invalid NCD '%s'", countryData.name(), badNcdIban)
                 .isFalse();
 

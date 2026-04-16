@@ -54,7 +54,7 @@ final class CountryValidators {
     /** Validator for Andorra (AD), IBAN length: 24, BBAN pattern: {@code 4!n4!n12!c} */
     static final class AD extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 12);
         }
     }
@@ -62,7 +62,7 @@ final class CountryValidators {
     /** Validator for United Arab Emirates (AE), IBAN length: 23, BBAN pattern: {@code 3!n16!n} */
     static final class AE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 23);
         }
     }
@@ -70,7 +70,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Albania (AL), IBAN length: 28, BBAN pattern: {@code 8!n16!c} */
     static final class AL extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 12)
                 && validateNationalCheckDigit(iban);
         }
@@ -79,7 +79,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Angola (AO), IBAN length: 25, BBAN pattern: {@code 4!n4!n11!n2!n} */
     static final class AO extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 25)
                 && validateNationalCheckDigit(iban);
         }
@@ -88,7 +88,7 @@ final class CountryValidators {
     /** Validator for Austria (AT), IBAN length: 20, BBAN pattern: {@code 5!n11!n} */
     static final class AT extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 20);
         }
     }
@@ -96,7 +96,7 @@ final class CountryValidators {
     /** Validator for Azerbaijan (AZ), IBAN length: 28, BBAN pattern: {@code 4!a20!c} */
     static final class AZ extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -104,7 +104,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Bosnia and Herzegovina (BA), IBAN length: 20, BBAN pattern: {@code 3!n3!n8!n2!n} */
     static final class BA extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 20)
                 && validateNationalCheckDigit(iban);
         }
@@ -113,7 +113,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Belgium (BE), IBAN length: 16, BBAN pattern: {@code 3!n7!n2!n} */
     static final class BE extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 16)
                 && validateNationalCheckDigit(iban);
         }
@@ -122,7 +122,7 @@ final class CountryValidators {
     /** Validator for Bulgaria (BG), IBAN length: 22, BBAN pattern: {@code 4!a4!n2!n8!c} */
     static final class BG extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 14);
         }
@@ -131,7 +131,7 @@ final class CountryValidators {
     /** Validator for Bahrain (BH), IBAN length: 22, BBAN pattern: {@code 4!a14!c} */
     static final class BH extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -139,7 +139,7 @@ final class CountryValidators {
     /** Validator for Burundi (BI), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
     static final class BI extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27);
         }
     }
@@ -147,7 +147,7 @@ final class CountryValidators {
     /** Validator for Brazil (BR), IBAN length: 29, BBAN pattern: {@code 8!n5!n10!n1!a1!c} */
     static final class BR extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27)
                 && isAllUpperCase(iban, 27, 28);
         }
@@ -156,7 +156,7 @@ final class CountryValidators {
     /** Validator for Belarus (BY), IBAN length: 28, BBAN pattern: {@code 4!c4!n16!c} */
     static final class BY extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 8, 12);
         }
     }
@@ -164,7 +164,7 @@ final class CountryValidators {
     /** Validator for Switzerland (CH), IBAN length: 21, BBAN pattern: {@code 5!n12!c} */
     static final class CH extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 9);
         }
     }
@@ -172,7 +172,7 @@ final class CountryValidators {
     /** Validator for Costa Rica (CR), IBAN length: 22, BBAN pattern: {@code 4!n14!n} */
     static final class CR extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 22);
         }
     }
@@ -180,7 +180,7 @@ final class CountryValidators {
     /** Validator for Cape Verde (CV), IBAN length: 25, BBAN pattern: {@code 4!n4!n13!c} */
     static final class CV extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 12);
         }
     }
@@ -188,7 +188,7 @@ final class CountryValidators {
     /** Validator for Cyprus (CY), IBAN length: 28, BBAN pattern: {@code 3!n5!n16!c} */
     static final class CY extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 12);
         }
     }
@@ -196,7 +196,7 @@ final class CountryValidators {
     /** Validator for Czechia (CZ), IBAN length: 24, BBAN pattern: {@code 4!n16!n} */
     static final class CZ extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 24);
         }
     }
@@ -204,7 +204,7 @@ final class CountryValidators {
     /** Validator for Germany (DE), IBAN length: 22, BBAN pattern: {@code 8!n10!n} */
     static final class DE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 22);
         }
     }
@@ -212,7 +212,7 @@ final class CountryValidators {
     /** Validator for Djibouti (DJ), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
     static final class DJ extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27);
         }
     }
@@ -220,7 +220,7 @@ final class CountryValidators {
     /** Validator for Denmark (DK), IBAN length: 18, BBAN pattern: {@code 4!n9!n1!n} */
     static final class DK extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 18);
         }
     }
@@ -228,7 +228,7 @@ final class CountryValidators {
     /** Validator for Dominican Republic (DO), IBAN length: 28, BBAN pattern: {@code 4!c20!n} */
     static final class DO extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 8, 28);
         }
     }
@@ -236,7 +236,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Estonia (EE), IBAN length: 20, BBAN pattern: {@code 2!n14!n} */
     static final class EE extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 20)
                 && validateNationalCheckDigit(iban);
         }
@@ -245,7 +245,7 @@ final class CountryValidators {
     /** Validator for Egypt (EG), IBAN length: 29, BBAN pattern: {@code 4!n4!n17!n} */
     static final class EG extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 29);
         }
     }
@@ -253,7 +253,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Spain (ES), IBAN length: 24, BBAN pattern: {@code 4!n4!n1!n1!n10!n} */
     static final class ES extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 24)
                 && validateNationalCheckDigit(iban);
         }
@@ -262,7 +262,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Finland (FI), IBAN length: 18, BBAN pattern: {@code 3!n11!n} */
     static final class FI extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 18)
                 && validateNationalCheckDigit(iban);
         }
@@ -271,7 +271,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Åland Islands (AX), IBAN length: 18, BBAN pattern: {@code 3!n11!n} */
     static final class AX extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 18)
                 && validateNationalCheckDigit(iban);
         }
@@ -280,7 +280,7 @@ final class CountryValidators {
     /** Validator for Falkland Islands (FK), IBAN length: 18, BBAN pattern: {@code 2!a12!n} */
     static final class FK extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 6)
                 && isAllDigits(iban, 6, 18);
         }
@@ -289,7 +289,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Faroe Islands (FO), IBAN length: 18, BBAN pattern: {@code 4!n9!n1!n} */
     static final class FO extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 18)
                 && validateNationalCheckDigit(iban);
         }
@@ -298,7 +298,7 @@ final class CountryValidators {
     /** NCD-aware Validator for France (FR), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class FR extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -308,7 +308,7 @@ final class CountryValidators {
     /** NCD-aware Validator for French Guiana (GF), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class GF extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -318,7 +318,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Guadeloupe (GP), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class GP extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -328,7 +328,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Martinique (MQ), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class MQ extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -338,7 +338,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Réunion (RE), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class RE extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -348,7 +348,7 @@ final class CountryValidators {
     /** NCD-aware Validator for French Polynesia (PF), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class PF extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -358,7 +358,7 @@ final class CountryValidators {
     /** NCD-aware Validator for French Southern Territories (TF), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class TF extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -368,7 +368,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Mayotte (YT), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class YT extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -378,7 +378,7 @@ final class CountryValidators {
     /** NCD-aware Validator for New Caledonia (NC), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class NC extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -388,7 +388,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Saint Barthélemy (BL), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class BL extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -398,7 +398,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Saint Martin (French part) (MF), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class MF extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -408,7 +408,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Saint Pierre and Miquelon (PM), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class PM extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -418,7 +418,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Wallis and Futuna Islands (WF), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class WF extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -428,7 +428,7 @@ final class CountryValidators {
     /** Validator for Gabon (GA), IBAN length: 27, BBAN pattern: {@code 5!n5!n13!c} */
     static final class GA extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14);
         }
     }
@@ -436,7 +436,7 @@ final class CountryValidators {
     /** Validator for United Kingdom (GB), IBAN length: 22, BBAN pattern: {@code 4!a6!n8!n} */
     static final class GB extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 22);
         }
@@ -445,7 +445,7 @@ final class CountryValidators {
     /** Validator for Isle of Man (IM), IBAN length: 22, BBAN pattern: {@code 4!a6!n8!n} */
     static final class IM extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 22);
         }
@@ -454,7 +454,7 @@ final class CountryValidators {
     /** Validator for Jersey (JE), IBAN length: 22, BBAN pattern: {@code 4!a6!n8!n} */
     static final class JE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 22);
         }
@@ -463,7 +463,7 @@ final class CountryValidators {
     /** Validator for Guernsey (GG), IBAN length: 22, BBAN pattern: {@code 4!a6!n8!n} */
     static final class GG extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 22);
         }
@@ -472,7 +472,7 @@ final class CountryValidators {
     /** Validator for Georgia (GE), IBAN length: 22, BBAN pattern: {@code 2!a16!n} */
     static final class GE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 6)
                 && isAllDigits(iban, 6, 22);
         }
@@ -481,7 +481,7 @@ final class CountryValidators {
     /** Validator for Gibraltar (GI), IBAN length: 23, BBAN pattern: {@code 4!a15!c} */
     static final class GI extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -489,7 +489,7 @@ final class CountryValidators {
     /** Validator for Greenland (GL), IBAN length: 18, BBAN pattern: {@code 4!n9!n1!n} */
     static final class GL extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 18);
         }
     }
@@ -497,7 +497,7 @@ final class CountryValidators {
     /** Validator for Greece (GR), IBAN length: 27, BBAN pattern: {@code 3!n4!n16!c} */
     static final class GR extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 11);
         }
     }
@@ -505,7 +505,7 @@ final class CountryValidators {
     /** Validator for Guatemala (GT), IBAN length: 28, BBAN pattern: {@code 4!c20!c} */
     static final class GT extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigitOrUpperCase(iban, 4, 28);
         }
     }
@@ -513,7 +513,7 @@ final class CountryValidators {
     /** Validator for Honduras (HN), IBAN length: 28, BBAN pattern: {@code 4!a20!n} */
     static final class HN extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 28);
         }
@@ -522,7 +522,7 @@ final class CountryValidators {
     /** Validator for Croatia (HR), IBAN length: 21, BBAN pattern: {@code 7!n10!n} */
     static final class HR extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 21);
         }
     }
@@ -530,7 +530,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Hungary (HU), IBAN length: 28, BBAN pattern: {@code 3!n4!n1!n15!n1!n} */
     static final class HU extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 28)
                 && validateNationalCheckDigit(iban);
         }
@@ -539,7 +539,7 @@ final class CountryValidators {
     /** Validator for Ireland (IE), IBAN length: 22, BBAN pattern: {@code 4!a6!n8!n} */
     static final class IE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 22);
         }
@@ -548,7 +548,7 @@ final class CountryValidators {
     /** Validator for Israel (IL), IBAN length: 23, BBAN pattern: {@code 3!n3!n13!n} */
     static final class IL extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 23);
         }
     }
@@ -556,7 +556,7 @@ final class CountryValidators {
     /** Validator for Iraq (IQ), IBAN length: 23, BBAN pattern: {@code 4!a3!n12!n} */
     static final class IQ extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 23);
         }
@@ -565,7 +565,7 @@ final class CountryValidators {
     /** Validator for Islamic Republic of Iran (IR), IBAN length: 26, BBAN pattern: {@code 3!n19!n} */
     static final class IR extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 26);
         }
     }
@@ -573,7 +573,7 @@ final class CountryValidators {
     /** Validator for Iceland (IS), IBAN length: 26, BBAN pattern: {@code 4!n2!n6!n10!n} */
     static final class IS extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 26);
         }
     }
@@ -581,7 +581,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Italy (IT), IBAN length: 27, BBAN pattern: {@code 1!a5!n5!n12!c} */
     static final class IT extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 5)
                 && isAllDigits(iban, 5, 15)
                 && validateNationalCheckDigit(iban);
@@ -591,7 +591,7 @@ final class CountryValidators {
     /** Validator for Jordan (JO), IBAN length: 30, BBAN pattern: {@code 4!a4!n18!c} */
     static final class JO extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 12);
         }
@@ -600,7 +600,7 @@ final class CountryValidators {
     /** Validator for Kuwait (KW), IBAN length: 30, BBAN pattern: {@code 4!a22!c} */
     static final class KW extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -608,7 +608,7 @@ final class CountryValidators {
     /** Validator for Kazakhstan (KZ), IBAN length: 20, BBAN pattern: {@code 3!n13!c} */
     static final class KZ extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 7);
         }
     }
@@ -616,7 +616,7 @@ final class CountryValidators {
     /** Validator for Lebanon (LB), IBAN length: 28, BBAN pattern: {@code 4!n20!c} */
     static final class LB extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 8);
         }
     }
@@ -624,7 +624,7 @@ final class CountryValidators {
     /** Validator for Saint Lucia (LC), IBAN length: 32, BBAN pattern: {@code 4!a24!c} */
     static final class LC extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -632,7 +632,7 @@ final class CountryValidators {
     /** Validator for Liechtenstein (LI), IBAN length: 21, BBAN pattern: {@code 5!n12!c} */
     static final class LI extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 9);
         }
     }
@@ -640,7 +640,7 @@ final class CountryValidators {
     /** Validator for Lithuania (LT), IBAN length: 20, BBAN pattern: {@code 5!n11!n} */
     static final class LT extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 20);
         }
     }
@@ -648,7 +648,7 @@ final class CountryValidators {
     /** Validator for Luxembourg (LU), IBAN length: 20, BBAN pattern: {@code 3!n13!c} */
     static final class LU extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 7);
         }
     }
@@ -656,7 +656,7 @@ final class CountryValidators {
     /** Validator for Latvia (LV), IBAN length: 21, BBAN pattern: {@code 4!a13!c} */
     static final class LV extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -664,7 +664,7 @@ final class CountryValidators {
     /** Validator for Libya (LY), IBAN length: 25, BBAN pattern: {@code 3!n3!n15!n} */
     static final class LY extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 25);
         }
     }
@@ -672,7 +672,7 @@ final class CountryValidators {
     /** Validator for Morocco (MA), IBAN length: 28, BBAN pattern: {@code 3!n5!n16!n} */
     static final class MA extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 28);
         }
     }
@@ -680,7 +680,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Monaco (MC), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!c2!n} */
     static final class MC extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 14)
                 && isAllDigits(iban, 25, 27)
                 && validateNationalCheckDigit(iban);
@@ -690,7 +690,7 @@ final class CountryValidators {
     /** Validator for Moldova (MD), IBAN length: 24, BBAN pattern: {@code 2!c18!c} */
     static final class MD extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigitOrUpperCase(iban, 4, 24);
         }
     }
@@ -698,7 +698,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Montenegro (ME), IBAN length: 22, BBAN pattern: {@code 3!n13!n2!n} */
     static final class ME extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 22)
                 && validateNationalCheckDigit(iban);
         }
@@ -707,7 +707,7 @@ final class CountryValidators {
     /** NCD-aware Validator for North Macedonia (MK), IBAN length: 19, BBAN pattern: {@code 3!n10!c2!n} */
     static final class MK extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 7)
                 && isAllDigits(iban, 17, 19)
                 && validateNationalCheckDigit(iban);
@@ -717,7 +717,7 @@ final class CountryValidators {
     /** Validator for Mongolia (MN), IBAN length: 20, BBAN pattern: {@code 4!n12!n} */
     static final class MN extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 20);
         }
     }
@@ -725,7 +725,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Mauritania (MR), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
     static final class MR extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27)
                 && validateNationalCheckDigit(iban);
         }
@@ -734,7 +734,7 @@ final class CountryValidators {
     /** Validator for Malta (MT), IBAN length: 31, BBAN pattern: {@code 4!a5!n18!c} */
     static final class MT extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 13);
         }
@@ -743,7 +743,7 @@ final class CountryValidators {
     /** Validator for Mauritius (MU), IBAN length: 30, BBAN pattern: {@code 4!a2!n2!n12!n3!n3!a} */
     static final class MU extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 8, 27)
                 && isAllUpperCase(iban, 4, 8)
                 && isAllUpperCase(iban, 27, 30);
@@ -753,7 +753,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Mozambique (MZ), IBAN length: 25, BBAN pattern: {@code 4!n4!n11!n2!n} */
     static final class MZ extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 25)
                 && validateNationalCheckDigit(iban);
         }
@@ -762,7 +762,7 @@ final class CountryValidators {
     /** Validator for Nicaragua (NI), IBAN length: 28, BBAN pattern: {@code 4!a20!n} */
     static final class NI extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 28);
         }
@@ -771,7 +771,7 @@ final class CountryValidators {
     /** Validator for Netherlands (NL), IBAN length: 18, BBAN pattern: {@code 4!a10!n} */
     static final class NL extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 18);
         }
@@ -780,7 +780,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Norway (NO), IBAN length: 15, BBAN pattern: {@code 4!n6!n1!n} */
     static final class NO extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 15)
                 && validateNationalCheckDigit(iban);
         }
@@ -789,7 +789,7 @@ final class CountryValidators {
     /** Validator for Oman (OM), IBAN length: 23, BBAN pattern: {@code 3!n16!c} */
     static final class OM extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 7);
         }
     }
@@ -797,7 +797,7 @@ final class CountryValidators {
     /** Validator for Pakistan (PK), IBAN length: 24, BBAN pattern: {@code 4!a16!c} */
     static final class PK extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -805,7 +805,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Poland (PL), IBAN length: 28, BBAN pattern: {@code 8!n16!n} */
     static final class PL extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 28)
                 && validateNationalCheckDigit(iban);
         }
@@ -814,7 +814,7 @@ final class CountryValidators {
     /** Validator for Palestine (PS), IBAN length: 29, BBAN pattern: {@code 4!a21!c} */
     static final class PS extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -822,7 +822,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Portugal (PT), IBAN length: 25, BBAN pattern: {@code 4!n4!n11!n2!n} */
     static final class PT extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 25)
                 && validateNationalCheckDigit(iban);
         }
@@ -831,7 +831,7 @@ final class CountryValidators {
     /** Validator for Qatar (QA), IBAN length: 29, BBAN pattern: {@code 4!a21!c} */
     static final class QA extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -839,7 +839,7 @@ final class CountryValidators {
     /** Validator for Romania (RO), IBAN length: 24, BBAN pattern: {@code 4!a16!c} */
     static final class RO extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8);
         }
     }
@@ -847,7 +847,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Serbia (RS), IBAN length: 22, BBAN pattern: {@code 3!n13!n2!n} */
     static final class RS extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 22)
                 && validateNationalCheckDigit(iban);
         }
@@ -856,7 +856,7 @@ final class CountryValidators {
     /** Validator for Russia (RU), IBAN length: 33, BBAN pattern: {@code 9!n5!n15!c} */
     static final class RU extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 18);
         }
     }
@@ -864,7 +864,7 @@ final class CountryValidators {
     /** Validator for Saudi Arabia (SA), IBAN length: 24, BBAN pattern: {@code 2!n18!c} */
     static final class SA extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 6);
         }
     }
@@ -872,7 +872,7 @@ final class CountryValidators {
     /** Validator for Seychelles (SC), IBAN length: 31, BBAN pattern: {@code 4!a2!n2!n16!n3!a} */
     static final class SC extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 8, 28)
                 && isAllUpperCase(iban, 4, 8)
                 && isAllUpperCase(iban, 28, 31);
@@ -882,7 +882,7 @@ final class CountryValidators {
     /** Validator for Sudan (SD), IBAN length: 18, BBAN pattern: {@code 2!n12!n} */
     static final class SD extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 18);
         }
     }
@@ -890,7 +890,7 @@ final class CountryValidators {
     /** Validator for Sweden (SE), IBAN length: 24, BBAN pattern: {@code 3!n16!n1!n} */
     static final class SE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 24);
         }
     }
@@ -898,7 +898,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Slovenia (SI), IBAN length: 19, BBAN pattern: {@code 2!n3!n8!n2!n} */
     static final class SI extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 19)
                 && validateNationalCheckDigit(iban);
         }
@@ -907,7 +907,7 @@ final class CountryValidators {
     /** Validator for Slovakia (SK), IBAN length: 24, BBAN pattern: {@code 4!n6!n10!n} */
     static final class SK extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 24);
         }
     }
@@ -915,7 +915,7 @@ final class CountryValidators {
     /** NCD-aware Validator for San Marino (SM), IBAN length: 27, BBAN pattern: {@code 1!a5!n5!n12!c} */
     static final class SM extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 5)
                 && isAllDigits(iban, 5, 15)
                 && validateNationalCheckDigit(iban);
@@ -925,7 +925,7 @@ final class CountryValidators {
     /** Validator for Somalia (SO), IBAN length: 23, BBAN pattern: {@code 4!n3!n12!n} */
     static final class SO extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 23);
         }
     }
@@ -933,7 +933,7 @@ final class CountryValidators {
     /** Validator for São Tomé und Príncipe (ST), IBAN length: 25, BBAN pattern: {@code 4!n4!n11!n2!n} */
     static final class ST extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 25);
         }
     }
@@ -941,7 +941,7 @@ final class CountryValidators {
     /** Validator for El Salvador (SV), IBAN length: 28, BBAN pattern: {@code 4!a20!n} */
     static final class SV extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 28);
         }
@@ -950,7 +950,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Timor-Leste (TL), IBAN length: 23, BBAN pattern: {@code 3!n14!n2!n} */
     static final class TL extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 23)
                 && validateNationalCheckDigit(iban);
         }
@@ -959,7 +959,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Tunisia (TN), IBAN length: 24, BBAN pattern: {@code 2!n3!n13!n2!n} */
     static final class TN extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 24)
                 && validateNationalCheckDigit(iban);
         }
@@ -968,7 +968,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Turkey (TR), IBAN length: 26, BBAN pattern: {@code 5!n1!n16!c} */
     static final class TR extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 10)
                 && validateNationalCheckDigit(iban);
         }
@@ -977,7 +977,7 @@ final class CountryValidators {
     /** Validator for Ukraine (UA), IBAN length: 29, BBAN pattern: {@code 6!n19!c} */
     static final class UA extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 10);
         }
     }
@@ -985,7 +985,7 @@ final class CountryValidators {
     /** Validator for Vatican City State (VA), IBAN length: 22, BBAN pattern: {@code 3!n15!n} */
     static final class VA extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 22);
         }
     }
@@ -993,7 +993,7 @@ final class CountryValidators {
     /** Validator for Virgin Islands (VG), IBAN length: 24, BBAN pattern: {@code 4!a16!n} */
     static final class VG extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 24);
         }
@@ -1002,7 +1002,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Kosovo (XK), IBAN length: 20, BBAN pattern: {@code 4!n10!n2!n} */
     static final class XK extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 20)
                 && validateNationalCheckDigit(iban);
         }
@@ -1011,7 +1011,7 @@ final class CountryValidators {
     /** Validator for Yemen (YE), IBAN length: 30, BBAN pattern: {@code 4!a4!n18!c} */
     static final class YE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 12);
         }
@@ -1020,7 +1020,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Burkina Faso (BF), IBAN length: 27, BBAN pattern: {@code 5!c5!n11!n2!n} */
     static final class BF extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 9, 27)
                 && validateNationalCheckDigit(iban);
         }
@@ -1029,7 +1029,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Benin (BJ), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
     static final class BJ extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 9, 28)
                 && validateNationalCheckDigit(iban);
         }
@@ -1038,7 +1038,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Central African Republic (CF), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
     static final class CF extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27)
                 && validateNationalCheckDigit(iban);
         }
@@ -1047,7 +1047,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Cameroon (CM), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
     static final class CM extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27)
                 && validateNationalCheckDigit(iban);
         }
@@ -1056,7 +1056,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Algeria (DZ), IBAN length: 24, BBAN pattern: {@code 3!n5!n10!n2!n} */
     static final class DZ extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 24)
                 && validateNationalCheckDigit(iban);
         }
@@ -1065,7 +1065,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Equatorial Guinea (GQ), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
     static final class GQ extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27)
                 && validateNationalCheckDigit(iban);
         }
@@ -1074,7 +1074,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Comoros (KM), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
     static final class KM extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 27)
                 && validateNationalCheckDigit(iban);
         }
@@ -1083,7 +1083,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Senegal (SN), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
     static final class SN extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 9, 28)
                 && validateNationalCheckDigit(iban);
         }
@@ -1092,7 +1092,7 @@ final class CountryValidators {
     /** NCD-aware Validator for Togo (TG), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
     static final class TG extends AbstractNcdCountryValidator {
         @Override
-        public boolean validateIban(final CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 9, 28)
                 && validateNationalCheckDigit(iban);
         }

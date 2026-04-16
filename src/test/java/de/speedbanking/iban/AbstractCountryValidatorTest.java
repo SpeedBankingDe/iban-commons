@@ -21,7 +21,7 @@ class AbstractCountryValidatorTest {
      */
     static final class DE extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(CharSequence iban) {
+        public boolean validateIban(char[] iban) {
             return true;
         }
     }
@@ -31,7 +31,7 @@ class AbstractCountryValidatorTest {
      */
     static final class INVALID extends AbstractCountryValidator {
         @Override
-        public boolean validateIban(CharSequence iban) {
+        public boolean validateIban(final char[] iban) {
             return true;
         }
     }

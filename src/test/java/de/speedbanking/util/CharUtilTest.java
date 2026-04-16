@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * JUnit test class for {@link CharUtil}.
  */
-@SuppressWarnings({"checkstyle:MethodName"})
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 class CharUtilTest extends Assertions {
 
     @Test
@@ -24,6 +24,8 @@ class CharUtilTest extends Assertions {
     void isDigit_ShouldReturnTrueForDigits(char c) {
         assertThat(CharUtil.isDigit(c)).isTrue();
         assertThat(CharUtil.isNotDigit(c)).isFalse();
+        assertThat(CharUtil.isAllDigits(String.valueOf(c))).isTrue();
+        assertThat(CharUtil.isAllDigits(String.valueOf(c), 0, 1)).isTrue();
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should not be a digit")
@@ -31,17 +33,19 @@ class CharUtilTest extends Assertions {
     void isDigit_ShouldReturnFalseForNonDigits(char c) {
         assertThat(CharUtil.isDigit(c)).isFalse();
         assertThat(CharUtil.isNotDigit(c)).isTrue();
+        assertThat(CharUtil.isAllDigits(String.valueOf(c))).isFalse();
+        assertThat(CharUtil.isAllDigits(String.valueOf(c), 0, 1)).isFalse();
     }
 
     @ParameterizedTest
-    @CsvSource({
+    @CsvSource(delimiter = '|', value = {
         // input, beginIndex, endIndex, expected result
-        "'123',   0, 3, true",  // full array (0 to 3 exclusive)
-        "'12A45', 0, 2, true",  // sub-range '1', '2'
-        "'12A45', 2, 2, true",  // empty range (2 to 2)
-        "'12A4',  0, 4, false", // 'A' in the middle (index 2)
-        "'12A4',  2, 4, false", // 'A', '4' (boundary/end)
-        "'12A4',  2, 3, false"  // just 'A' (index 2 to 3 exclusive)
+        "'123'   | 0 | 3 | true",  // full array (0 to 3 exclusive)
+        "'12A45' | 0 | 2 | true",  // sub-range '1', '2'
+        "'12A45' | 2 | 2 | true",  // empty range (2 to 2)
+        "'12A4'  | 0 | 4 | false", // 'A' in the middle (index 2)
+        "'12A4'  | 2 | 4 | false", // 'A', '4' (boundary/end)
+        "'12A4'  | 2 | 3 | false"  // just 'A' (index 2 to 3 exclusive)
     })
     void isAllDigits_ShouldValidateDigitRanges(String input, int beginIndex, int endIndex, boolean expected) {
         char[] arr = input.toCharArray();
@@ -77,6 +81,8 @@ class CharUtilTest extends Assertions {
     void isUpperCase_ShouldReturnTrueForUpperCaseLetters(char c) {
         assertThat(CharUtil.isUpperCase(c)).isTrue();
         assertThat(CharUtil.isNotUpperCase(c)).isFalse();
+        assertThat(CharUtil.isAllUpperCase(String.valueOf(c))).isTrue();
+        assertThat(CharUtil.isAllUpperCase(String.valueOf(c), 0, 1)).isTrue();
 
         assertThat(CharUtil.isLowerCase(c)).isFalse();
         assertThat(CharUtil.isNotLowerCase(c)).isTrue();
@@ -87,6 +93,8 @@ class CharUtilTest extends Assertions {
     void isUpperCase_ShouldReturnFalseForNonUpperCase(char c) {
         assertThat(CharUtil.isUpperCase(c)).isFalse();
         assertThat(CharUtil.isNotUpperCase(c)).isTrue();
+        assertThat(CharUtil.isAllUpperCase(String.valueOf(c))).isFalse();
+        assertThat(CharUtil.isAllUpperCase(String.valueOf(c), 0, 1)).isFalse();
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should be lowercase")
@@ -187,6 +195,64 @@ class CharUtilTest extends Assertions {
         assertThatIndexOutOfBoundsException()
             .isThrownBy(() -> CharUtil.isAllDigitOrUpperCase(arr, 0, 3))
             .withMessage("Invalid range (0, 3) specified, valid range (0, 2)");
+    }
+
+    @Test
+    @SuppressWarnings("UnnecessaryStringBuilder")
+    void toCharArray_ShouldConvertEntireSequence() {
+        CharSequence cs = new StringBuilder("IBAN2026");
+        char[] expected = {'I', 'B', 'A', 'N', '2', '0', '2', '6'};
+
+        char[] result = CharUtil.toCharArray(cs);
+
+        assertThat(result).containsExactly(expected);
+        // Sicherstellen, dass es ein neues Array ist
+        assertThat(result).isNotSameAs(expected);
+    }
+
+    @Test
+    void toCharArray_ShouldConvertPartialSequence() {
+        String input = "DE8912345";
+        char[] expected = {'D', 'E', '8', '9'};
+
+        assertThat(CharUtil.toCharArray(input, 4)).containsExactly(expected);
+    }
+
+    @Test
+    void toCharArray_ShouldHandleNegativeLengthAsFullLength() {
+        String input = "TEST";
+        assertThat(CharUtil.toCharArray(input, -1)).containsExactly('T', 'E', 'S', 'T');
+        assertThat(CharUtil.toCharArray(input, -99)).containsExactly('T', 'E', 'S', 'T');
+    }
+
+    @Test
+    void toCharArray_ShouldThrowExceptionOnNullInput() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> CharUtil.toCharArray(null))
+            .withMessage("Input cannot be null");
+
+        assertThatNullPointerException()
+            .isThrownBy(() -> CharUtil.toCharArray(null, 5))
+            .withMessage("Input cannot be null");
+    }
+
+    @Test
+    @SuppressWarnings("UnnecessaryStringBuilder")
+    void toCharArray_ShouldHandleEmptySequence() {
+        assertThat(CharUtil.toCharArray("")).isEmpty();
+        assertThat(CharUtil.toCharArray(new StringBuilder(), 0)).isEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+        "ABC    | 0 | 3 | true",
+        "A1C    | 0 | 3 | true",
+        "aBC    | 0 | 3 | false",
+        "AB*    | 0 | 3 | false",
+        "' ABC' | 1 | 4 | true"
+    })
+    void isAllDigitOrUpperCase_CharSequence_ShouldValidateCorrectly(String input, int start, int end, boolean expected) {
+        assertThat(CharUtil.isAllDigitOrUpperCase(input.subSequence(start, end))).isEqualTo(expected);
     }
 
 }

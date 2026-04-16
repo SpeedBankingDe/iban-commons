@@ -17,37 +17,72 @@ package de.speedbanking.iban;
 
 import static de.speedbanking.iban.IbanRegistry.MAX_IBAN_LENGTH;
 import static de.speedbanking.iban.IbanRegistry.MIN_IBAN_LENGTH;
-import static de.speedbanking.util.CharUtil.isAllDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isLowerCase;
 import static de.speedbanking.util.CharUtil.isNotDigit;
 
-import de.speedbanking.util.CharArrayWrapper;
 import de.speedbanking.util.Mod97;
 
 import java.util.Arrays;
 
 /**
  * The core engine for **International Bank Account Number (IBAN)** validation.
+ *
+ * <h2>Validation pipeline</h2>
+ * Every validation call follows a strict fail-fast sequence that aborts at the
+ * first error detected:
+ * <ol>
+ *   <li><strong>Normalization</strong> — raw input is stripped of spaces and/or
+ *       converted to uppercase into a thread-local buffer (no heap allocation).</li>
+ *   <li><strong>Length check</strong> — overall length against ISO 13616 bounds.</li>
+ *   <li><strong>Country lookup</strong> — two-letter code resolved via
+ *       {@link IbanRegistry#getBaseEntryByCode(char, char)} using an O(1) array index.</li>
+ *   <li><strong>Country length check</strong> — normalized length against the
+ *       country-specific expected length.</li>
+ *   <li><strong>BBAN structure check</strong> — country-specific digit/letter pattern
+ *       via {@link CountryValidator#validateIban(char[])}.</li>
+ *   <li><strong>ISO 7064 Mod 97-10</strong> — check digit verification, performed last
+ *       as it is the most expensive step.</li>
+ * </ol>
+ *
+ * <h2>Performance design</h2>
+ * The hot validation path ({@link #isValid(CharSequence)}) is deliberately separated
+ * from the diagnostic path ({@link #validate(CharSequence)}) to avoid {@link ThreadLocal}
+ * writes and object allocations on the boolean fast-path.
  * <p>
- * Validation is designed to fail fast, aborting at the first error detected.
+ * Normalization writes directly into a pre-allocated {@link ThreadLocal} {@code char[]}
+ * buffer ({@link #VALIDATION_BUFFER}), eliminating {@code char[]} allocations and GC
+ * pressure even under high concurrency.
  * <p>
- * This class is thread-safe as it uses a {@link ThreadLocal} for error state
- * tracking and otherwise consists of stateless utility methods.
+ * {@link String} inputs take a dedicated
+ * {@link #normalize(String, int, char[], boolean, boolean)} overload that uses
+ * {@link String#getChars(int, int, char[], int)} — a JVM intrinsic backed by
+ * {@code System.arraycopy} — instead of per-character virtual {@code charAt()} dispatch.
+ * The Java compiler resolves this overload statically via the {@link #isValid(String)}
+ * and {@link #validate(String)} entry points, so callers passing {@link String} literals
+ * or variables pay no runtime dispatch cost.
  * <p>
- * Performance is a key goal: the validator minimizes heap allocations by
- * operating on {@link CharSequence} and using a fast-path normalization strategy.
+ * All internal loops in {@link CountryValidator} implementations and {@link Mod97} operate
+ * directly on {@code char[]} arrays, keeping every hot callsite monomorphic and allowing
+ * the JIT to inline and auto-vectorize aggressively.
+ *
+ * <h2>Thread safety</h2>
+ * This class is thread-safe. The {@link #VALIDATION_BUFFER} and {@link #LAST_REASON}
+ * thread-locals isolate mutable state per thread. All other fields are effectively immutable.
  *
  * @since 1.8.0
  */
 public final class IbanValidator {
+
+    /** Sentinel value indicating a normalization or validation error. */
+    static final int                                      INVALID_INPUT     = -1;
 
     /**
      * Return value for a failed Mod 97-10 calculation.
      * <p>
      * Delegates to {@link Mod97#INVALID_REMAINDER} for a consistent sentinel across the API.
      */
-    public static final int                               INVALID_MOD97 = Mod97.INVALID_REMAINDER;
+    static final int                                      INVALID_MOD97     = Mod97.INVALID_REMAINDER;
 
     /**
      * Internal cache of all country-specific validators, indexed by the ordinal
@@ -61,6 +96,23 @@ public final class IbanValidator {
             .map(IbanRegistry::name)
             .map(IbanValidator::loadCountryValidator)
             .toArray(CountryValidator[]::new);
+
+    /**
+     * Internal thread-local buffer used to perform IBAN normalization and validation
+     * without heap allocations.
+     * <p>
+     * To maximize throughput in high-concurrency or batch-processing scenarios, this
+     * buffer allows the validator to copy and transform raw input (e.g., stripping spaces
+     * or upper-casing) within the same memory area. By using a {@link ThreadLocal},
+     * we ensure thread-safety while avoiding the overhead of frequent {@code char[]}
+     * allocations and the resulting garbage collection pressure.
+     * <p>
+     * The capacity is set to {@code MAX_IBAN_LENGTH * 2} to provide sufficient overhead
+     * for raw input strings that may contain a significant amount of ignorable
+     * whitespace before being normalized to the final IBAN length.
+     */
+    private static final ThreadLocal<char[]>              VALIDATION_BUFFER = ThreadLocal
+        .withInitial(() -> new char[MAX_IBAN_LENGTH * 2]);
 
     /**
      * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
@@ -149,98 +201,182 @@ public final class IbanValidator {
             return false;
         }
 
-        // convert input to normalized char array based on library configuration
-        CharSequence normIban = normalize(iban, len,
+        // normalize to shared char[] once — all downstream calls use direct array access
+        char[] normIban = VALIDATION_BUFFER.get();
+
+        len = normalize(iban, len,
+            normIban,
             IbanConfig.isAllowSpace(),
             IbanConfig.isAllowLowercase());
 
-        if (normIban == null) {
-            return false;
-        }
-
-        len = normIban.length();
-        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
+        if (len < MIN_IBAN_LENGTH) { // MIN_IBAN_LENGTH includes check for invalid input
             return false;
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
-        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban.charAt(0), normIban.charAt(1));
+        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban[0], normIban[1]);
 
         return countryData != null
             && len == countryData.getIbanLength()
-            // BBAN structure check (country-specific) and Mod 97
+            // BBAN structure check (country-specific) — wrap once so CountryValidators see a monomorphic type
             && getCountryValidator(countryData).validateIban(normIban)
-            && calculateMod97(normIban) == 1;
+            && Mod97.isValid(normIban, len);
     }
 
     /**
-     * Normalizes the input sequence by optionally removing spaces and converting
-     * lowercase characters to uppercase.
+     * {@link String}-optimized overload of {@link #isValid(CharSequence)}.
      * <p>
-     * This method follows a dual-path strategy: it returns the original input
-     * immediately if it is already normalized (zero allocation). Otherwise,
-     * it performs a single-pass transformation into a {@link CharArrayWrapper}.
-     * <p>
-     * If an invalid character is encountered (not a digit, not a letter, or
-     * a space when {@code allowSpace} is {@code false}), the method returns
-     * {@code null} immediately.
+     * Resolved statically by the Java compiler when the caller passes a {@link String},
+     * routing normalization through {@link #normalize(String, int, char[], boolean, boolean)},
+     * which uses {@link String#getChars(int, int, char[], int)} — a JVM intrinsic backed
+     * by {@code System.arraycopy} — instead of per-character virtual {@code charAt()} dispatch.
      *
-     * @param input      the raw character sequence to normalize, may be {@code null}
-     * @param inputLen   the length of the input sequence to process
-     * @param allowSpace whether to ignore and strip space characters (' ')
-     * @param allowLower whether to accept and convert lowercase ASCII characters (a-z)
-     * @return a normalized character sequence, or {@code null} if an invalid character
-     *         was found or the input was {@code null}
-     *
+     * @param iban the IBAN string to validate (may be unnormalized
+     *             depending on {@link IbanConfig} settings)
+     * @return {@code true} if the IBAN is valid according to all criteria, {@code false} otherwise
+     * @see #isValid(CharSequence)
      * @since 1.8.5
      */
-    static CharSequence normalize(final CharSequence input, final int inputLen,
-                                  final boolean allowSpace, final boolean allowLower) {
-
-        if (input == null || inputLen == 0 || isAllDigitOrUpperCase(input, 0, inputLen)) {
-            // fast path: return input if no normalization is required to avoid allocations
-            return input;
+    public static boolean isValid(final String iban) {
+        if (iban == null) {
+            return false;
         }
 
-        // transformation required: allocation is now unavoidable
-        return normalizeImpl(input, inputLen, allowSpace, allowLower);
+        int len = iban.length();
+        if (len < MIN_IBAN_LENGTH) {
+            return false;
+        }
+
+        char[] normIban = VALIDATION_BUFFER.get();
+
+        len = normalize(iban, len,
+            normIban,
+            IbanConfig.isAllowSpace(),
+            IbanConfig.isAllowLowercase());
+
+        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
+            return false;
+        }
+
+        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban[0], normIban[1]);
+
+        return countryData != null
+            && len == countryData.getIbanLength()
+            && getCountryValidator(countryData).validateIban(normIban)
+            && Mod97.isValid(normIban, len);
     }
 
     /**
-     * Internal implementation for the transformation path of normalization.
+     * Normalizes a {@link CharSequence} into the provided output buffer.
      * <p>
-     * Iterates through the input and builds a new character array while
-     * applying case conversion and space filtering.
+     * Performs two optional transformations: stripping space characters and converting
+     * lowercase ASCII letters to uppercase. By writing directly into a pre-allocated
+     * buffer, this method avoids heap allocations in the validation hot-path.
+     * <p>
+     * Characters are read via {@code charAt()} — virtual dispatch whose cost depends on
+     * the concrete type at the callsite. Prefer the {@link String} overload
+     * ({@link #normalize(String, int, char[], boolean, boolean)}) wherever possible.
      *
-     * @param input      the sequence to transform
-     * @param len        the length of the sequence
-     * @param allowSpace whether spaces are allowed (and thus ignored)
-     * @param allowLower whether lowercase letters are allowed (and thus converted)
-     * @return a new {@link CharArrayWrapper} containing the normalized data, or {@code null}
+     * @param input      the raw character sequence to normalize; must not be {@code null}
+     * @param inputLen   the number of characters to process from the input
+     * @param output     the destination array; must hold at least {@code inputLen} characters
+     * @param allowSpace if {@code true}, space characters are silently omitted from the output
+     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
+     * @return the number of characters written to {@code outputBuffer},
+     *         or {@value #INVALID_INPUT} if an illegal character was encountered
      *
      * @since 1.8.5
      */
-    static CharSequence normalizeImpl(final CharSequence input, final int len,
-                                      final boolean allowSpace, final boolean allowLower) {
-        final char[] arr = new char[len];
-        int targetIdx = 0;
+    static int normalize(final CharSequence input, final int inputLen,
+        final char[] output,
+        final boolean allowSpace, final boolean allowLower) {
 
-        for (int i = 0; i < len; i++) {
-            final char c = input.charAt(i);
-
-            if (isLowerCase(c)) {
-                if (!allowLower) {
-                    return null; // lowercase not permitted
+        if (!allowSpace && !allowLower) {
+            for (int i = 0; i < inputLen; i++) {
+                output[i] = input.charAt(i);
+                if (!isDigitOrUpperCase(output[i])) {
+                    return INVALID_INPUT;
                 }
-                arr[targetIdx++] = (char) (c - 32); // fast ascii uppercase conversion
-            } else if (isDigitOrUpperCase(c)) {
-                arr[targetIdx++] = c;
+            }
+            return inputLen;
+        }
+
+        int targetIdx = 0;
+        for (int i = 0; i < inputLen; i++) {
+            char c = input.charAt(i);
+            if (isDigitOrUpperCase(c)) {
+                output[targetIdx++] = c;
+            } else if (isLowerCase(c)) {
+                if (!allowLower) {
+                    return INVALID_INPUT;
+                }
+                output[targetIdx++] = (char) (c - 32);
             } else if (c != ' ' || !allowSpace) {
-                return null; // illegal character or disallowed space
+                return INVALID_INPUT;
             }
         }
+        return targetIdx;
+    }
 
-        return new CharArrayWrapper(arr, 0, targetIdx);
+    /**
+     * {@link String}-optimized overload of {@link #normalize(CharSequence, int, char[], boolean, boolean)}.
+     * <p>
+     * Uses {@link String#getChars(int, int, char[], int)} to bulk-copy the entire input into
+     * {@code outputBuffer} in a single JVM-intrinsic call (backed by {@code System.arraycopy}),
+     * replacing {@code inputLen} virtual {@code charAt()} dispatches with one native memory copy.
+     * The buffer is then validated — and transformed if necessary — entirely via direct array access.
+     * <p>
+     * In the transformation path ({@code allowSpace} or {@code allowLower}), in-place editing
+     * is safe because the write index {@code targetIdx} is always {@code ≤ i}, so no unread
+     * position is ever overwritten.
+     *
+     * @param input      the raw {@link String} to normalize; must not be {@code null}
+     * @param inputLen   the number of characters to process from the input
+     * @param output     the destination array; must hold at least {@code inputLen} characters
+     * @param allowSpace if {@code true}, space characters are silently omitted from the output
+     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
+     * @return the number of characters written to {@code outputBuffer},
+     *         or {@value #INVALID_INPUT} if an illegal character was encountered
+     *
+     * @since 1.8.5
+     */
+    static int normalize(final String input, final int inputLen,
+        final char[] output,
+        final boolean allowSpace, final boolean allowLower) {
+
+        if (!allowSpace && !allowLower) {
+            // Fast path: one combined pass — validate and copy simultaneously.
+            // The JIT inlines String.charAt() to direct char[] array access,
+            // and early exit on the first invalid character avoids processing
+            // the rest of the input (critical for invalid-IBAN throughput).
+            for (int i = 0; i < inputLen; i++) {
+                output[i] = input.charAt(i);
+                if (!isDigitOrUpperCase(output[i])) {
+                    return INVALID_INPUT;
+                }
+            }
+            return inputLen;
+        }
+
+        // Transformation path: spaces stripped and/or lowercase converted.
+        // getChars() uses System.arraycopy (SIMD intrinsic) to bulk-copy the
+        // entire input first; in-place editing is then safe because targetIdx <= i
+        // always holds, so no unread position is ever overwritten.
+        int targetIdx = 0;
+        for (int i = 0; i < inputLen; i++) {
+            char c = input.charAt(i);
+            if (isDigitOrUpperCase(c)) {
+                output[targetIdx++] = c;
+            } else if (isLowerCase(c)) {
+                if (!allowLower) {
+                    return INVALID_INPUT;
+                }
+                output[targetIdx++] = (char) (c - 32);
+            } else if (c != ' ' || !allowSpace) {
+                return INVALID_INPUT;
+            }
+        }
+        return targetIdx;
     }
 
     /**
@@ -279,39 +415,42 @@ public final class IbanValidator {
             return validationFailed(IbanValidationError.EMPTY);
         }
 
-        int len = rawIban.length();
-        if (len == 0) {
+        int rawLen = rawIban.length();
+        if (rawLen == 0) {
             return validationFailed(IbanValidationError.EMPTY);
         }
 
-        // convert input to normalized char array based on library configuration
-        CharSequence normIban = normalize(rawIban, len, allowSpace, IbanConfig.isAllowLowercase());
+        // normalize to char[] once — all downstream calls use direct array access
+        char[] normIban = VALIDATION_BUFFER.get();
 
-        if (normIban == null) {
+        int normLen = normalize(rawIban, rawLen,
+            normIban,
+            allowSpace, IbanConfig.isAllowLowercase());
+
+        if (normLen == INVALID_INPUT) {
             return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
         }
 
-        len = normIban.length();
         // check min/max lengths
-        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
-            return len == 0
+        if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
+            return normLen == 0
                 ? validationFailed(IbanValidationError.EMPTY)
                 : validationFailed(IbanValidationError.INCORRECT_LENGTH);
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
-        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban.charAt(0), normIban.charAt(1));
+        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban[0], normIban[1]);
 
         if (countryData == null) {
             return validationFailed(IbanValidationError.INVALID_COUNTRY);
         }
 
-        if (len != countryData.getIbanLength()) {
+        if (normLen != countryData.getIbanLength()) {
             return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
         }
 
-        if (isNotDigit(normIban.charAt(IbanRegistry.INDEX_CHECK_DIGIT1))
-         || isNotDigit(normIban.charAt(IbanRegistry.INDEX_CHECK_DIGIT2))) {
+        if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
+         || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
             return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
         }
 
@@ -322,18 +461,119 @@ public final class IbanValidator {
         }
 
         // check Mod 97 (most expensive operation — performed last)
-        if (!isMod97Valid(normIban)) {
+        if (!Mod97.isValid(normIban, normLen)) {
             return validationFailed(IbanValidationError.INVALID_CHECKSUM);
         }
 
         // success: reset thread-local error state and return carrier object
         LAST_REASON.remove();
 
-        return new IbanValidationSuccess(normIban, countryData);
+        /*
+         * Create the success result.
+         * Reuse the original input only if it was already normalized
+         * (matching length and no lowercase conversion).
+         * Otherwise, MUST create a stable copy from the transient validation buffer.
+         */
+        return new IbanValidationSuccess(
+            !allowSpace && !IbanConfig.isAllowLowercase()
+                ? rawIban
+                : String.valueOf(normIban, 0, normLen),
+            countryData);
     }
 
     /**
-     * Returns {@code true} if the ISO 7064 Mod 97-10 remainder of the given IBAN equals {@code 1}.
+     * {@link String}-optimized overload of {@link #validate(CharSequence)}.
+     * <p>
+     * Resolved statically by the Java compiler when the caller passes a {@link String},
+     * routing normalization through {@link #normalize(String, int, char[], boolean, boolean)}.
+     *
+     * @param rawIban the IBAN string to validate
+     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
+     * @see #validate(CharSequence)
+     * @since 1.8.5
+     */
+    static IbanValidationSuccess validate(final String rawIban) {
+        return validate(rawIban, IbanConfig.isAllowSpace());
+    }
+
+    /**
+     * {@link String}-optimized overload of {@link #validate(CharSequence, boolean)}.
+     * <p>
+     * Resolved statically by the Java compiler when the caller passes a {@link String},
+     * routing normalization through {@link #normalize(String, int, char[], boolean, boolean)}.
+     *
+     * @param rawIban    the IBAN string to validate, potentially containing spaces
+     * @param allowSpace whether to allow spaces during validation
+     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
+     * @see #validate(CharSequence, boolean)
+     * @since 1.8.5
+     */
+    static IbanValidationSuccess validate(final String rawIban, final boolean allowSpace) {
+        if (rawIban == null) {
+            return validationFailed(IbanValidationError.EMPTY);
+        }
+
+        int rawLen = rawIban.length();
+        if (rawLen == 0) {
+            return validationFailed(IbanValidationError.EMPTY);
+        }
+
+        char[] normIban = VALIDATION_BUFFER.get();
+
+        int normLen = normalize(rawIban, rawLen,
+            normIban,
+            allowSpace, IbanConfig.isAllowLowercase());
+
+        if (normLen == INVALID_INPUT) {
+            return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
+        }
+
+        if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
+            return normLen == 0
+                ? validationFailed(IbanValidationError.EMPTY)
+                : validationFailed(IbanValidationError.INCORRECT_LENGTH);
+        }
+
+        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban[0], normIban[1]);
+
+        if (countryData == null) {
+            return validationFailed(IbanValidationError.INVALID_COUNTRY);
+        }
+
+        if (normLen != countryData.getIbanLength()) {
+            return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
+        }
+
+        if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
+         || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
+            return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
+        }
+
+        CountryValidator countryValidator = getCountryValidator(countryData);
+        if (countryValidator != null && !countryValidator.validateIban(normIban)) {
+            return validationFailed(IbanValidationError.INVALID_STRUCTURE);
+        }
+
+        if (!Mod97.isValid(normIban, normLen)) {
+            return validationFailed(IbanValidationError.INVALID_CHECKSUM);
+        }
+
+        LAST_REASON.remove();
+
+        /*
+         * Create the success result.
+         * Reuse the original String only if no transformation was applied
+         * (no space stripping, no lowercase conversion).
+         * Otherwise, MUST create a stable copy from the transient validation buffer.
+         */
+        return new IbanValidationSuccess(
+            !allowSpace && !IbanConfig.isAllowLowercase()
+                ? rawIban
+                : String.valueOf(normIban, 0, normLen),
+            countryData);
+    }
+
+    /**
      * <p>
      * Delegates to {@link Mod97#isValid(CharSequence)}.
      *

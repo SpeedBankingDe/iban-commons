@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>
  * This class is thread-safe.
  *
- * <h3>Example</h3>
+ * <h2>Example</h2>
  * <pre>{@code
  * // at startup — before any IBAN operation:
  * IbanConfig.configure(IbanConfig.builder()

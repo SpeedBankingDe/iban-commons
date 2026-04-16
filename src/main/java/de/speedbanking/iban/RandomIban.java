@@ -114,6 +114,20 @@ public final class RandomIban {
     }
 
     /**
+     * Generates a random, valid IBAN from a randomly selected country in the registry.
+     * <p>
+     * This method serves as a convenience wrapper for the builder, picking a random
+     * country supported by the underlying {@link IbanRegistry}. It uses
+     * {@link java.util.concurrent.ThreadLocalRandom} for efficient, thread-safe
+     * generation of the random components.
+     *
+     * @return a valid, randomly generated IBAN from any supported country
+     */
+    public static Iban any() {
+        return builder().build();
+    }
+
+    /**
      * Generates a random, valid IBAN for any supported SEPA country.
      * Uses {@link ThreadLocalRandom} as the source of randomness.
      *
@@ -428,11 +442,11 @@ public final class RandomIban {
 
         // countries with NCD must have a NationalCheckDigitCalculator
         NationalCheckDigitCalculator calc = (NationalCheckDigitCalculator) IbanValidator.getCountryValidator(countryData);
-        CharSequence ncd = calc.calculateNationalCheckDigit(ibanBuilder);
+        char[] ncd = calc.calculateNationalCheckDigit(ibanBuilder);
 
         // write the computed NCD into the StringBuilder
         for (int idxIban = ncdRange.getBegin(), idxNcd = 0; idxIban < ncdRange.getEnd(); idxIban++, idxNcd++) {
-            ibanBuilder.setCharAt(idxIban, ncd.charAt(idxNcd));
+            ibanBuilder.setCharAt(idxIban, ncd[idxNcd]);
         }
 
         return ibanBuilder;

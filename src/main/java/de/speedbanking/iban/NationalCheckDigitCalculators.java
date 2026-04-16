@@ -75,10 +75,10 @@ final class NationalCheckDigitCalculators {
         private static final int[] WEIGHTS = {9, 7, 3, 1, 9, 7, 3};
 
         @Override
-        public CharSequence calculateNationalCheckDigit(CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             int s = 0;
             for (int i = 0; i < WEIGHTS.length; i++) {
-                s += (iban.charAt(BBAN_START + i) - '0') * WEIGHTS[i];
+                s += (iban[BBAN_START + i] - '0') * WEIGHTS[i];
             }
             return oneDigit((10 - s % 10) % 10);
         }
@@ -102,9 +102,9 @@ final class NationalCheckDigitCalculators {
     static final class AO extends NcdCalculatorBase {
 
         @Override
-        public CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             final int prefixLen = ncdIndexRange.getBegin() - BBAN_START;
-            final int maskedLen = iban.length() - BBAN_START;
+            final int maskedLen = countryData.getIbanLength() - BBAN_START;
 
             // virtual CharSequence view: forwards the BBAN prefix as-is, and substitutes
             // '0' for the two NCD positions — without copying any characters
@@ -117,7 +117,7 @@ final class NationalCheckDigitCalculators {
                 @Override
                 public char charAt(int index) {
                     // delegate to the original IBAN for the prefix, mask NCD positions with '0'
-                    return index < prefixLen ? iban.charAt(BBAN_START + index) : '0';
+                    return index < prefixLen ? iban[BBAN_START + index] : '0';
                 }
 
                 @Override
@@ -156,7 +156,7 @@ final class NationalCheckDigitCalculators {
     static final class BE extends NcdCalculatorBase {
 
         @Override
-        public CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START; // 10 digits for BE
 
             int remainder = mod97(iban, BBAN_START, lengthToProcess);
@@ -182,10 +182,10 @@ final class NationalCheckDigitCalculators {
         private static final int[] WEIGHTS = {7, 3, 1};
 
         @Override
-        public CharSequence calculateNationalCheckDigit(CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             int s = 0;
             for (int i = BBAN_START; i < ncdIndexRange.getBegin(); i++) {
-                s += (iban.charAt(i) - '0') * WEIGHTS[(i - BBAN_START) % WEIGHTS.length];
+                s += (iban[i] - '0') * WEIGHTS[(i - BBAN_START) % WEIGHTS.length];
             }
             return oneDigit((10 - s % 10) % 10);
         }
@@ -215,7 +215,7 @@ final class NationalCheckDigitCalculators {
         private static final int[] WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
 
         @Override
-        public CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             // DC[0]: bank (4) + branch (4), weight offset 2 simulates "00" prefix
             int firstDigit   = calculateMod11Spanish(iban, BBAN_START, 8, 2);
 
@@ -243,11 +243,11 @@ final class NationalCheckDigitCalculators {
          * @param weightOffset starting index into {@link #WEIGHTS}
          * @return a single digit in range [0, 9]
          */
-        private static int calculateMod11Spanish(final CharSequence iban, final int offset,
+        private static int calculateMod11Spanish(final char[] iban, final int offset,
                                                  final int length, final int weightOffset) {
             int sum = 0;
             for (int i = 0; i < length; i++) {
-                sum += (iban.charAt(offset + i) - '0') * WEIGHTS[weightOffset + i];
+                sum += (iban[offset + i] - '0') * WEIGHTS[weightOffset + i];
             }
 
             int remainder = 11 - (sum % 11);
@@ -282,12 +282,12 @@ final class NationalCheckDigitCalculators {
         private static final int[] WEIGHTS = {2, 1};
 
         @Override
-        public CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START;
 
             int sum = 0;
             for (int i = 0; i < lengthToProcess; i++) {
-                int digit   = iban.charAt(ncdIndexRange.getBegin() - 1 - i) - '0';
+                int digit   = iban[ncdIndexRange.getBegin() - 1 - i] - '0';
                 int product = digit * WEIGHTS[i % WEIGHTS.length];
                 if (product >= 10) {
                     product = (product / 10) + (product % 10);
@@ -351,7 +351,7 @@ final class NationalCheckDigitCalculators {
     static class FR extends NcdCalculatorBase {
 
         @Override
-        public final CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public final char[] calculateNationalCheckDigit(final char[] iban) {
             int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START;
 
             int remainder = mod97French(iban, BBAN_START, lengthToProcess);
@@ -375,10 +375,10 @@ final class NationalCheckDigitCalculators {
          * @param length number of characters to process
          * @return MOD 97 remainder in range [0, 96]
          */
-        static int mod97French(final CharSequence data, final int offset, final int length) {
+        static int mod97French(final char[] data, final int offset, final int length) {
             int remainder = 0;
             for (int i = 0; i < length; i++) {
-                remainder = (remainder * 10 + getFrenchRIBValue(data.charAt(offset + i))) % MODULO_BASE;
+                remainder = (remainder * 10 + getFrenchRIBValue(data[offset + i])) % MODULO_BASE;
             }
             return remainder;
         }
@@ -474,12 +474,12 @@ final class NationalCheckDigitCalculators {
         private static final int[] WEIGHTS = {9, 7, 3, 1};
 
         @Override
-        public CharSequence calculateNationalCheckDigit(CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             // NCD2 covers the 15-digit account number: IBAN indices 12–26
             int accountStart = BBAN_START + 8; // after 3n bank + 4n branch + 1n NCD1
             int s = 0;
             for (int i = 0; i < 15; i++) {
-                s += (iban.charAt(accountStart + i) - '0') * WEIGHTS[i % WEIGHTS.length];
+                s += (iban[accountStart + i] - '0') * WEIGHTS[i % WEIGHTS.length];
             }
             return oneDigit(s % 10);
         }
@@ -521,18 +521,18 @@ final class NationalCheckDigitCalculators {
             1, 0, 5, 7, 9, 13, 15, 17, 19, 21, // '0' – '9'
             1, 0, 5, 7, 9, 13, 15, 17, 19, 21, // 'A' – 'J'
             2, 4, 18, 20, 11, 3, 6, 8, 12, 14, // 'K' – 'T'
-            16, 10, 22, 25, 24, 23              // 'U' – 'Z'
+            16, 10, 22, 25, 24, 23             // 'U' – 'Z'
         };
 
         @Override
-        public CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             // CIN is at BBAN_START (index 4); algorithm covers indices 5 to end of BBAN
             int cinIndex = ncdIndexRange.getBegin();
             int bbanEnd  = countryData.getIbanLength();
 
             int sum = 0;
             for (int i = cinIndex + 1; i < bbanEnd; i++) {
-                char ch  = iban.charAt(i);
+                char ch  = iban[i];
                 int val  = (ch <= '9') ? ch - '0' : ch - 'A' + 10;
                 int pos  = i - (cinIndex + 1); // 0-based position after CIN
 
@@ -608,12 +608,12 @@ final class NationalCheckDigitCalculators {
         private static final int[] WEIGHTS = {5, 4, 3, 2, 7, 6, 5, 4, 3, 2};
 
         @Override
-        public CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START;
 
             int sum = 0;
             for (int i = 0; i < lengthToProcess; i++) {
-                sum += (iban.charAt(BBAN_START + i) - '0') * WEIGHTS[i];
+                sum += (iban[BBAN_START + i] - '0') * WEIGHTS[i];
             }
 
             int remainder = sum % 11;
@@ -770,7 +770,7 @@ final class NationalCheckDigitCalculators {
      *   <li>Shared constants ({@link #BBAN_START}, {@link #MODULO_BASE},
      *       {@link #CHECK_DIGIT_MAGIC_NUMBER}).</li>
      *   <li>Shared factory methods ({@link #oneDigit(int)}, {@link #twoDigits(int)}).</li>
-     *   <li>Shared utility method {@link #mod97(CharSequence, int, int)}.</li>
+     *   <li>Shared utility method {@link #mod97(char[], int, int)}.</li>
      *   <li>A {@link #toString()} that includes the country code.</li>
      * </ul>
      *
@@ -792,21 +792,26 @@ final class NationalCheckDigitCalculators {
          */
         static final int   CHECK_DIGIT_MAGIC_NUMBER = 98;
 
-        private static final CharSequence[] DIGIT_CACHE     = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+        /** Cache for single digits '0' through '9' as arrays. */
+        private static final char[][]       DIGIT_CACHE =
+            IntStream.range(0, 10)
+                .mapToObj(i -> new char[] {(char) ('0' + i)})
+                .toArray(char[][]::new);
 
-        /** Cache for two-digit strings "00" through "99". */
-        private static final CharSequence[] TWO_DIGIT_CACHE = new CharSequence[100];
+        /** Cache for two-digit character arrays "00" through "99". */
+        private static final char[][]       TWO_DIGIT_CACHE =
+            IntStream.range(0, 100)
+                .mapToObj(i -> new char[] {
+                    (char) ('0' + (i / 10)),
+                    (char) ('0' + (i % 10))
+                })
+                .toArray(char[][]::new);
 
-        static {
-            for (int i = 0; i < 100; i++) {
-                TWO_DIGIT_CACHE[i] = String.format("%02d", i);
-            }
-        }
-
-        /** Cache for single uppercase letters "A" through "Z". */
-        private static final CharSequence[] LETTER_CACHE = IntStream.range(0, 26)
-            .mapToObj(i -> String.valueOf((char) ('A' + i)))
-            .toArray(CharSequence[]::new);
+        /** Cache for single uppercase letters 'A' through 'Z' as arrays. */
+        private static final char[][]       LETTER_CACHE =
+            IntStream.range(0, 26)
+                .mapToObj(i -> new char[] {(char) ('A' + i)})
+                .toArray(char[][]::new);
 
         /** Country-specific registry data, i.e. the enum entry in {@link IbanRegistry}, resolved at construction time. */
         final IbanRegistry countryData;
@@ -827,25 +832,31 @@ final class NationalCheckDigitCalculators {
         }
 
         /**
-         * Default validation: extracts the NCD field from {@code iban} and compares it to
-         * the value returned by {@link #calculateNationalCheckDigit(CharSequence)}.
+         * Performs a high-performance validation of the National Check Digit (NCD).
          * <p>
-         * Subclasses may override this for performance or structural reasons.
+         * Instead of extracting sub-arrays, this implementation operates directly on the
+         * shared {@code iban} array using offsets. This eliminates heap allocations
+         * during the validation of country-specific checksums (e.g., Italy's CIN).
          *
-         * @param iban the normalised IBAN as a {@code CharSequence}
+         * @param iban the normalized IBAN character array
          * @return {@code true} if the stored NCD matches the computed NCD
          */
         @Override
-        public boolean validateNationalCheckDigit(final CharSequence iban) {
-            final CharSequence existingNcd = ncdIndexRange.applyTo(iban);
-            final CharSequence computedNcd = calculateNationalCheckDigit(iban);
+        public boolean validateNationalCheckDigit(final char[] iban) {
+            // use coordinates instead of allocating a new array via existingNcd.applyTo(iban)
+            final int start = ncdIndexRange.getBegin();
+            final int length = ncdIndexRange.length();
 
-            // Efficient comparison between the extracted CharSequence and the computed char array
-            if (existingNcd.length() != computedNcd.length()) {
+            // the computed NCD should ideally return a primitive or use a small cached buffer
+            final char[] computedNcd = calculateNationalCheckDigit(iban);
+
+            // perform an in-place comparison to stay within L1 cache and avoid allocation
+            if (computedNcd == null || length != computedNcd.length) {
                 return false;
             }
-            for (int i = 0; i < computedNcd.length(); i++) {
-                if (existingNcd.charAt(i) != computedNcd.charAt(i)) {
+
+            for (int i = 0; i < length; i++) {
+                if (iban[start + i] != computedNcd[i]) {
                     return false;
                 }
             }
@@ -853,55 +864,55 @@ final class NationalCheckDigitCalculators {
         }
 
         /**
-         * Returns a {@link CharSequence} containing the ASCII digit for {@code value}.
+         * Returns a character array containing the ASCII digit for {@code value}.
          * <p>
          * This implementation uses a static cache to avoid allocations.
          *
          * @param value a non-negative integer in range [0, 9]
-         * @return a cached CharSequence of length 1
+         * @return a cached character array of length 1
          * @throws ArrayIndexOutOfBoundsException if value is not in range [0, 9]
          */
-        static CharSequence oneDigit(final int value) {
+        static char[] oneDigit(final int value) {
             return DIGIT_CACHE[value];
         }
 
         /**
-         * Returns a {@link CharSequence} containing the two ASCII digit characters
+         * Returns a character array containing the two ASCII digit characters
          * of {@code value}, zero-padded (e.g. {@code 7} → {@code "07"}).
          * <p>
          * This implementation uses a static cache to avoid allocations.
          *
          * @param value a non-negative integer in range [0, 99]
-         * @return a cached CharSequence of length 2
+         * @return a cached character array of length 2
          * @throws ArrayIndexOutOfBoundsException if value is not in range [0, 99]
          */
-        static CharSequence twoDigits(final int value) {
+        static char[] twoDigits(final int value) {
             return TWO_DIGIT_CACHE[value];
         }
 
         /**
-         * Returns a {@link CharSequence} containing the uppercase ASCII letter
+         * Returns a character array containing the uppercase ASCII letter
          * corresponding to the given alphabetic index.
          *
          * @param index a value in range [0, 25] where 0 is 'A' and 25 is 'Z'
-         * @return a cached CharSequence of length 1
+         * @return a cached character array of length 1
          * @throws ArrayIndexOutOfBoundsException if index is not in range [0, 25]
          */
-        static CharSequence oneLetter(final int index) {
+        static char[] oneLetter(final int index) {
             return LETTER_CACHE[index];
         }
 
         /**
          * Computes the ISO 7064 MOD 97-10 remainder for a sub-sequence of a character sequence.
          * <p>
-         * Delegates to {@link Mod97#calculateRange(CharSequence, int, int)}.
+         * Delegates to {@link Mod97#calculateRange(char[], int, int)}.
          *
-         * @param data   the source character sequence
+         * @param data   the source character array
          * @param offset start index (inclusive)
          * @param length number of characters to process
          * @return the MOD 97 remainder in range [0, 96]
          */
-        static int mod97(final CharSequence data, final int offset, final int length) {
+        static int mod97(final char[] data, final int offset, final int length) {
             return Mod97.calculateRange(data, offset, length);
         }
 
@@ -926,11 +937,11 @@ final class NationalCheckDigitCalculators {
         /**
          * Returns the NCD value already present in {@code iban} without recomputing it.
          *
-         * @param iban the normalised IBAN
+         * @param iban the normalized IBAN
          * @return the current NCD field extracted verbatim from {@code iban}
          */
         @Override
-        public CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             return ncdIndexRange.applyTo(iban);
         }
     }
@@ -956,11 +967,11 @@ final class NationalCheckDigitCalculators {
          * Computes the two-digit NCD using the MOD 97-10 formula:
          * {@code 98 − ((prefix_remainder × 100) mod 97)}.
          *
-         * @param iban the normalised IBAN
+         * @param iban the normalized IBAN
          * @return two-element {@link CharSequence} with the zero-padded NCD (e.g. {@code {'0', '7'}})
          */
         @Override
-        public final CharSequence calculateNationalCheckDigit(final CharSequence iban) {
+        public final char[] calculateNationalCheckDigit(final char[] iban) {
             int remainder = mod97(iban, BBAN_START, ncdIndexRange.getBegin() - BBAN_START);
             remainder = (remainder * 100) % MODULO_BASE;
 
@@ -970,11 +981,11 @@ final class NationalCheckDigitCalculators {
         /**
          * Validates by verifying that {@code mod97(full_BBAN) == 1}.
          *
-         * @param iban the normalised IBAN
+         * @param iban the normalized IBAN
          * @return {@code true} if the full BBAN produces remainder {@code 1}
          */
         @Override
-        public final boolean validateNationalCheckDigit(final CharSequence iban) {
+        public final boolean validateNationalCheckDigit(final char[] iban) {
             int bbanLength = countryData.getIbanLength() - BBAN_START;
             return mod97(iban, BBAN_START, bbanLength) == 1;
         }

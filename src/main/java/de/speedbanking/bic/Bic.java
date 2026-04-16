@@ -55,10 +55,10 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /** The mandatory {@code "XXX"} suffix appended to a BIC-8 to form a BIC-11. */
     public static final String        HEAD_OFFICE_SUFFIX  = "XXX";
 
-    /** The fixed length of a BIC without branch code ({@value} characters). */
+    /** The fixed length of a BIC without branch code. */
     public static final int           BIC8_LENGTH         = 8;
 
-    /** The fixed length of a BIC with branch code ({@value} characters). */
+    /** The fixed length of a BIC with branch code. */
     public static final int           BIC11_LENGTH        = BIC8_LENGTH + HEAD_OFFICE_SUFFIX.length();
 
     /** Start index of the Institution Code (Bank Code) within a BIC string ({@value}). */
