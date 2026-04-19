@@ -1,6 +1,6 @@
 # 🏦 IBAN Commons
 
-> Ultra-fast, zero-dependency IBAN & BIC toolkit for Java 8+
+> Ultra-fast, near-zero allocation, zero-dependency IBAN & BIC toolkit for Java 8+
 
 [![Maven Central Version](https://img.shields.io/maven-central/v/de.speedbanking/iban-commons?label=Maven%20Central)](https://central.sonatype.com/artifact/de.speedbanking/iban-commons)
 [![Maven Central Last Update](https://img.shields.io/maven-central/last-update/de.speedbanking/iban-commons?label=Last%20Update)](https://central.sonatype.com/artifact/de.speedbanking/iban-commons)
@@ -17,12 +17,14 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 
 | Feature                    | iban-commons  | jbanking  | Apache Commons |  iban4j   | garvelink |
 |----------------------------|:-------------:|:---------:|:--------------:|:---------:|:---------:|
-| **Throughput (ops/s)**     | **7,207,452** | 6,108,009 |   5,243,764    | 1,948,100 | 1,292,532 |
-| **Memory (B/op)**          |    **48**     |    255    |      281       |   1,341   |   1,063   |
+| **Throughput (ops/s)**     | **5,591,566** | 4,278,475 |   3,208,846    | 2,870,107 | 2,269,465 |
+| **Memory (B/op)**          |    **~0**     |    298    |      442       |   1,133   |    867    |
 | **Dependencies**           |       0       |     0     |       5        |     0     |     0     |
 | **Java Version**           |      8+       |    8+     |       8+       |    11+    |    8+     |
 | **Android (API 21+)**      |       ✅       |     ?     |       ?        |     ?     |     ✅     |
 | **Countries**              |      120      |    82     |      n/a       |    111    |    111    |
+
+> JMH · OpenJDK 21.0.7 · Linux · single core · ParallelGC · `-XX:-StackTraceInThrowable` · 2026-04-19
 
 -----
 
@@ -35,13 +37,13 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.4</version>
+    <version>1.8.5</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.4'
+implementation 'de.speedbanking:iban-commons:1.8.5'
 ```
 
 ### 2. Validate & Parse
@@ -82,7 +84,9 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 * **High Performance**
 
-  Optimized for throughput and minimal memory footprint. Validates 7,207,452 IBANs per second — **3.7× faster** than iban4j, **28× lower** memory allocation (48 B/op vs. 1,341 B/op).
+  Near-zero allocation validation pipeline — `char[]`-based processing eliminates heap pressure throughout.
+  Validates **5,591,566 IBANs/s** on the accept path and **10,740,280 IBANs/s** on early rejection;
+  allocation is effectively zero (< 0.001 B/op), against 154–1,133 B/op for competing libraries.
 
 * **Simple, intuitive API**
 
@@ -313,42 +317,82 @@ Iban iban = Iban.of("GB82WEST12345698765432");
 We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries: [iban4j](http://www.iban4j.org/), [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/), [garvelink java-iban](https://github.com/barend/java-iban), and [jbanking](https://github.com/marcwrobel/jbanking).
 
 Measured on **Intel Core i7-1165G7 @ 2.80GHz**, OpenJDK 21.0.7, Linux, single core (`taskset -c 0`),
-Generational ZGC, `-XX:-StackTraceInThrowable`.
-30 measurement iterations (3 forks × 10 iterations × 2 s each).
+ParallelGC (`-XX:+UseParallelGC`), `-XX:-StackTraceInThrowable`, `-Xms2G -Xmx2G`.
+5 warmup iterations × 2 s, then 2 forks × 4–5 measurement iterations × 2 s.
 
 ### Valid IBANs (accept path)
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| 🌟 **iban-commons**     |      **7,207,452** |        **48** | baseline         |
-| jbanking                |          6,108,009 |           255 | 1.2× slower      |
-| Apache Commons          |          5,243,764 |           281 | 1.4× slower      |
-| iban4j                  |          1,948,100 |         1,341 | 3.7× slower      |
-| garvelink java-iban     |          1,292,532 |         1,063 | 5.6× slower      |
+| 🌟 **iban-commons**     |      **5,591,566** |       **~0**  | baseline         |
+| jbanking                |          4,278,475 |           298 | 1.3× slower      |
+| Apache Commons          |          3,208,846 |           442 | 1.7× slower      |
+| iban4j                  |          2,870,107 |         1,133 | 1.9× slower      |
+| garvelink java-iban     |          2,269,465 |           867 | 2.5× slower      |
 
 ### Invalid IBANs (rejection path)
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| 🌟 **iban-commons**     |     **11,986,711** |        **40** | baseline         |
-| jbanking                |         10,080,195 |           153 | 1.2× slower      |
-| Apache Commons          |          9,853,673 |           171 | 1.2× slower      |
-| iban4j                  |          1,992,301 |         1,099 | 6.0× slower      |
-| garvelink java-iban     |          1,508,470 |           814 | 7.9× slower      |
+| 🌟 **iban-commons**     |     **10,740,280** |       **~0**  | baseline         |
+| jbanking                |          7,880,633 |           154 | 1.4× slower      |
+| Apache Commons          |          6,531,841 |           247 | 1.6× slower      |
+| garvelink java-iban     |          2,250,043 |           647 | 4.8× slower      |
+| iban4j                  |          1,801,759 |         1,156 | 6.0× slower      |
 
 Each invalid IBAN is derived from a valid one by applying one of six sabotage strategies with equal probability: incrementing a check digit (triggering a Mod-97 failure), replacing the country code with the non-registered code `XY`, substituting a valid but mismatched ISO 3166 country code, injecting a letter into the numeric BBAN section, swapping two adjacent characters (transposition), or truncating the string below the minimum structural length.
 
 ### Key Observations
 
-1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input — reaching **7,207,452 ops/s** on the accept path and **11,986,711 ops/s** on early rejection.
+1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input — reaching **5,591,566 ops/s** on the accept path and **10,740,280 ops/s** on early rejection.
 2. **Fast Rejection:** Invalid IBANs are rejected faster than valid ones because many fail length or country-code checks before the full Mod-97 computation is reached.
-3. **Minimal GC Pressure:** Memory allocation is **6×–28× lower** than competing libraries, thanks to an ASCII-math Mod-97 approach that avoids intermediate `String` and `BigInteger` allocations.
+3. **Near-Zero GC Pressure:** Memory allocation is effectively **zero (< 0.001 B/op)** — the `char[]` processing pipeline introduced in 1.8.5 eliminates all transient heap allocation during validation. Competing libraries allocate 154–1,133 B/op.
 
 > **Note on `-XX:-StackTraceInThrowable`:** All forks run with this JVM flag, which suppresses stack trace generation to isolate pure algorithmic cost. This makes the comparison fair for libraries using exceptions for control flow (notably `iban4j`). For production-realistic measurements, remove the flag and re-run.
 
 ### Benchmark Suite Repository
 
 All performance tests are fully open and available in the [SpeedBankingDe/iban-commons-benchmarks](https://github.com/SpeedBankingDe/iban-commons-benchmarks) repository.
+
+-----
+
+## 🆕 What's New in 1.8.5
+
+### Near-Zero Allocation Validation Pipeline (`perf(core)`)
+
+The internal validation API has been migrated from `CharSequence` to `char[]` throughout the entire pipeline — across all 80+ country validators, `NationalCheckDigitCalculator`, and `AbstractNcdCountryValidator`. This eliminates virtual dispatch on `charAt()` and lets the JIT apply scalar replacement and loop vectorization, reducing measured heap allocation to effectively **zero** (< 0.001 B/op).
+
+Backward compatibility is preserved: the `CountryValidator` interface retains a `default` `CharSequence` overload that converts via `CharUtil.toCharArray()` at the public boundary.
+
+> **Migration note (SPI implementors):** Custom `NationalCheckDigitCalculator` implementations must update their method signatures from `CharSequence` to `char[]`.
+
+### Expanded Public API (`feat(api)`)
+
+Previously package-private or internal classes are now part of the stable public API: `Bic`, `IbanRegistry`, `RandomBic`, and the `Formatter` type. Javadoc is available at [javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/).
+
+### Immutable `IbanConfig` via Freeze Pattern (`refactor(iban-config)`)
+
+`IbanConfig` has been redesigned from a mutable enum to an immutable class following the freeze pattern. Configuration is set once before use and then locked — concurrent reads require no synchronization and the object can never be mutated after the freeze point.
+
+> **Migration note:** Existing code using the enum-based `IbanConfig` API must be updated to the new class-based `IbanConfig.freeze()` approach.
+
+### `RandomIban` Fluent Builder (`refactor(RandomIban)`)
+
+The overloaded `RandomIban.of(…)` factory methods have been replaced by a fluent builder:
+
+```java
+// 1.8.5+
+Iban iban = RandomIban.builder()
+    .country("DE")
+    .random(new Random(42L))
+    .build();
+```
+
+> **Migration note:** Direct calls to the old `of(String)` / `of(IbanRegistry)` overloads must be migrated to the builder.
+
+### Build Requirement: JDK 17+ (`build`)
+
+The project now requires **JDK 17 or higher** to build. The compiled artifact remains fully binary-compatible with **Java 8** runtime environments.
 
 -----
 
