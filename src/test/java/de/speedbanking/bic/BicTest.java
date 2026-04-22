@@ -6,8 +6,10 @@ import static de.speedbanking.bic.BicAssertions.assertThatBicOf;
 import static de.speedbanking.bic.BicAssertions.assertThatInvalidBicException;
 
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
-import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import de.speedbanking.test.TestUtil;
 import de.speedbanking.util.Currency;
@@ -25,13 +27,12 @@ import java.io.InvalidClassException;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.StreamCorruptedException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * JUnit tests for the new immutable {@link Bic} class.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-class BicTest {
+final class BicTest {
 
     @DisplayName("of() should create Bic object for a valid BIC-8")
     @Test
@@ -74,7 +75,7 @@ class BicTest {
     void of_NullOrEmpty_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC is null or empty (" + BicValidationError.EMPTY + ")")
+            .withMessage("BIC is null or empty (%s)", BicValidationError.EMPTY)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.EMPTY);
     }
 
@@ -90,7 +91,7 @@ class BicTest {
     void of_InvalidLength_ShouldThrowException(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC has incorrect length (INCORRECT_LENGTH): '" + bic + "'")
+            .withMessage("BIC has incorrect length (INCORRECT_LENGTH): '%s'", bic)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INCORRECT_LENGTH);
     }
 
@@ -103,7 +104,7 @@ class BicTest {
     void of_InvalidCountry_ShouldThrowException(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC has invalid country code (INVALID_COUNTRY): '" + bic + "'")
+            .withMessage("BIC has invalid country code (INVALID_COUNTRY): '%s'", bic)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_COUNTRY);
     }
 
@@ -117,7 +118,7 @@ class BicTest {
     void of_InvalidBankCode_ShouldThrowException(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("Invalid bank code (INVALID_BANK_CODE): '" + bic + "'")
+            .withMessage("Invalid bank code (INVALID_BANK_CODE): '%s'", bic)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.INVALID_BANK_CODE);
     }
 
@@ -131,7 +132,7 @@ class BicTest {
     void of_IllegalCharacters_ShouldThrowException(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
-            .withMessage("BIC contains illegal character(s) (ILLEGAL_CHARACTERS): '" + bic + "'")
+            .withMessage("BIC contains illegal character(s) (ILLEGAL_CHARACTERS): '%s'", bic)
             .hasFieldOrPropertyWithValue("reason", BicValidationError.ILLEGAL_CHARACTERS);
     }
 
@@ -140,7 +141,6 @@ class BicTest {
     @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
     void tryParse_ValidBic_ShouldReturnNonEmptyOptional(String bic) {
         assertThat(Bic.tryParse(bic))
-            .isNotEmpty()
             .hasValue(Bic.of(bic));
     }
 
@@ -291,16 +291,16 @@ class BicTest {
         Bic bicD = Bic.of("MARKUS33");    // MARKUS33XXX
 
         // first chain: equals (0) and null check
-        assertThat(bicA.compareTo(bicB)).as("BICs should be equal by comparison").isZero();
-        assertThatNullPointerException()
-            .isThrownBy(() -> bicA.compareTo(null))
-            .withMessage("Cannot compare Bic to null");
+        assertThat(bicA.compareTo(bicB)).as("BICs should be equal by comparison").isEqualTo(0);
+        assertThatThrownBy(() -> bicA.compareTo(null))
+            .isInstanceOf(NullPointerException.class)
+            .hasMessage("Cannot compare Bic to null");
 
         // second chain: greater than (positive)
-        assertThat(bicA.compareTo(bicC)).isGreaterThan(0);
+        assertThat(bicA.compareTo(bicC)).isPositive();
 
         // third chain: less than (negative)
-        assertThat(bicA.compareTo(bicD)).isLessThan(0);
+        assertThat(bicA.compareTo(bicD)).isNegative();
     }
 
     @DisplayName("charAt() should return correct character and check bounds")
@@ -439,7 +439,7 @@ class BicTest {
      */
     @DisplayName("Serialization round-trip should preserve BIC-8 / BIC-11 distinction")
     @Test
-    void testSerializationPreservesBicFormat() throws IOException, ClassNotFoundException {
+    void serializationPreservesBicFormat() throws IOException, ClassNotFoundException {
         Bic originalBic8  = Bic.of("MARKDEFF");
         Bic originalBic11 = Bic.of("MARKDEFFXXX");
         final Bic bic = originalBic8;
@@ -468,9 +468,9 @@ class BicTest {
      */
     @DisplayName("Serialized stream must reference the Memento proxy, not Bic directly")
     @Test
-    void testSerializedFormUsesMementoProxy() throws IOException {
+    void serializedFormUsesMementoProxy() throws IOException {
         byte[] bytes = TestUtil.serialize(Bic.of("MARKDEFF"));
-        String streamContent = new String(bytes, StandardCharsets.UTF_8);
+        String streamContent = new String(bytes, UTF_8);
 
         assertThat(streamContent)
             .as("Serialized stream must reference the Memento proxy class")
@@ -512,7 +512,7 @@ class BicTest {
      */
     @DisplayName("Deserialized Bic instance must be distinct from the original")
     @Test
-    void testDeserializedInstanceIsDistinct() throws ClassNotFoundException, IOException {
+    void deserializedInstanceIsDistinct() throws ClassNotFoundException, IOException {
         Bic original = Bic.of("DEUTDEFF");
         final Bic bic = original;
         Bic restored = TestUtil.deserialize(TestUtil.serialize(bic));
@@ -533,7 +533,7 @@ class BicTest {
      */
     @DisplayName("Memento.readResolve() must reject an invalid BIC stored in the stream")
     @Test
-    void testMementoReadResolveRejectsInvalidBic() throws IOException {
+    void mementoReadResolveRejectsInvalidBic() throws IOException {
         byte[] corruptStream = TestUtil.buildMementoStream(Bic.of("MARKDEFF"), "NOT_A_BIC!!");
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
@@ -553,7 +553,7 @@ class BicTest {
      */
     @DisplayName("Memento.readObject() must reject a stream with an unsupported version")
     @Test
-    void testMementoReadObjectRejectsUnknownStreamVersion() throws IOException {
+    void mementoReadObjectRejectsUnknownStreamVersion() throws IOException {
         byte[] corruptStream = TestUtil.buildMementoStream(Bic.of("MARKDEFF"), 99L, "MARKDEFF");
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))

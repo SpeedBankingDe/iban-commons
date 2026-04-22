@@ -23,7 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  */
 @SuppressWarnings("checkstyle:MethodName")
 @DisplayName("CountryUtil")
-class CountryUtilTest {
+final class CountryUtilTest {
 
     // =========================================================================
     // isValidCountryCode — valid / assigned codes

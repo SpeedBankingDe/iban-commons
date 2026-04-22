@@ -12,8 +12,9 @@ import org.junit.jupiter.api.parallel.ResourceLock;
 /**
  * Unit tests for {@link IbanConfig}.
  */
-@ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
-class IbanConfigTest {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@ResourceLock(IbanConfigTest.RESOURCE_NAME)
+final class IbanConfigTest {
 
     static final String RESOURCE_NAME = "IbanConfig";
 
@@ -33,7 +34,7 @@ class IbanConfigTest {
 
     @DisplayName("Default instance should have all options disabled")
     @Test
-    void testDefaultValues() {
+    void default_values_are_consistent() {
         assertThat(IbanConfig.isValidateNcd()).isFalse();
         assertThat(IbanConfig.isCalculateNcd()).isFalse();
         assertThat(IbanConfig.isAllowSpace()).isFalse();
@@ -42,7 +43,7 @@ class IbanConfigTest {
 
     @DisplayName("get() without configure() should return DEFAULT instance")
     @Test
-    void testGetReturnsDefault() {
+    void get_returns_default_instance() {
         assertThat(IbanConfig.get()).isSameAs(IbanConfig.DEFAULT);
     }
 
@@ -52,7 +53,7 @@ class IbanConfigTest {
 
     @DisplayName("configure() should install the provided instance")
     @Test
-    void testConfigure() {
+    void configure_updates_settings() {
         IbanConfig custom = IbanConfig.builder()
             .allowSpace(true)
             .allowLowercase(true)
@@ -67,14 +68,14 @@ class IbanConfigTest {
 
     @DisplayName("configure() should reject null")
     @Test
-    void testConfigureRejectsNull() {
+    void configure_throws_on_null_input() {
         assertThatThrownBy(() -> IbanConfig.configure(null))
             .isInstanceOf(NullPointerException.class);
     }
 
     @DisplayName("configure() after get() should throw IllegalStateException")
     @Test
-    void testConfigureAfterFreezeThrows() {
+    void configure_fails_after_instance_freeze() {
         IbanConfig.get(); // freezes
 
         assertThatThrownBy(() -> IbanConfig.configure(IbanConfig.DEFAULT))
@@ -84,7 +85,7 @@ class IbanConfigTest {
 
     @DisplayName("configure() before get() should succeed")
     @Test
-    void testConfigureBeforeGetSucceeds() {
+    void configure_succeeds_before_first_access() {
         IbanConfig custom = IbanConfig.builder().validateNcd(true).build();
 
         IbanConfig.configure(custom); // must not throw
@@ -98,7 +99,7 @@ class IbanConfigTest {
 
     @DisplayName("Builder should set each property independently")
     @Test
-    void testBuilderProperties() {
+    void builder_sets_all_properties_correctly() {
         IbanConfig config = IbanConfig.builder()
             .validateNcd(true)
             .calculateNcd(true)
@@ -116,7 +117,7 @@ class IbanConfigTest {
 
     @DisplayName("Builder defaults should match DEFAULT instance")
     @Test
-    void testBuilderDefaultsMatchDefault() {
+    void builder_defaults_align_with_global_defaults() {
         IbanConfig fromBuilder = IbanConfig.builder().build();
 
         assertThat(fromBuilder).hasToString(IbanConfig.DEFAULT.toString());
@@ -128,7 +129,7 @@ class IbanConfigTest {
 
     @DisplayName("toString should contain class name and all property values")
     @Test
-    void testToString() {
+    void to_string_contains_relevant_fields() {
         String result = IbanConfig.DEFAULT.toString();
 
         assertThat(result)

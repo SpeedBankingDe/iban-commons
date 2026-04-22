@@ -15,6 +15,9 @@
  */
 package de.speedbanking.iban.util;
 
+import static java.util.Objects.hash;
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.util.ValidationError;
 
 import java.util.Objects;
@@ -53,7 +56,7 @@ public abstract class InvalidBaseException extends RuntimeException {
      * @param input  the input string that caused the error, may be {@code null}
      */
     protected InvalidBaseException(ValidationError reason, CharSequence input) {
-        super(Objects.requireNonNull(Objects.requireNonNull(reason, "reason required").getText(), "reason text required"));
+        super(requireNonNull(requireNonNull(reason, "reason required").getText(), "reason text required"));
         this.reason = reason;
         this.input = input == null ? null : input.toString();
     }
@@ -107,7 +110,7 @@ public abstract class InvalidBaseException extends RuntimeException {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(reason, input);
+        return hash(reason, input);
     }
 
     /**

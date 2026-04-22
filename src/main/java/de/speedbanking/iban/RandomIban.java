@@ -15,13 +15,14 @@
  */
 package de.speedbanking.iban;
 
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.iban.util.IbanCharType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
 import de.speedbanking.util.IndexRange;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -203,7 +204,7 @@ public final class RandomIban {
          * @return this builder
          */
         public Builder country(IbanRegistry registry) {
-            this.countryData = Objects.requireNonNull(registry, "registry must not be null");
+            this.countryData = requireNonNull(registry, "registry must not be null");
             this.sepaOnly = false;
             return this;
         }
@@ -231,7 +232,7 @@ public final class RandomIban {
          * @return this builder
          */
         public Builder random(Random random) {
-            this.random = Objects.requireNonNull(random, "random must not be null");
+            this.random = requireNonNull(random, "random must not be null");
             return this;
         }
 
@@ -384,8 +385,8 @@ public final class RandomIban {
      * @throws IllegalStateException if an unrecognised {@code CharType} is encountered
      */
     static String generateRandomSegment(Segment segment, Random random) {
-        Objects.requireNonNull(segment, "segment must not be null");
-        Objects.requireNonNull(random, "random must not be null");
+        requireNonNull(segment, "segment must not be null");
+        requireNonNull(random, "random must not be null");
 
         String sourceChars = null;
         if (IbanCharType.NUMERIC == segment.getCharType()) {
@@ -427,8 +428,8 @@ public final class RandomIban {
      *         overwritten in-place and the same instance is returned
      */
     static StringBuilder fixNationalCheckDigit(IbanRegistry countryData, StringBuilder ibanBuilder) {
-        Objects.requireNonNull(countryData, "countryData must not be null");
-        Objects.requireNonNull(ibanBuilder, "ibanBuilder must not be null");
+        requireNonNull(countryData, "countryData must not be null");
+        requireNonNull(ibanBuilder, "ibanBuilder must not be null");
 
         if (ibanBuilder.length() != countryData.getIbanLength()) {
             throw InvalidIbanException.of(IbanValidationError.INCORRECT_LENGTH_COUNTRY, ibanBuilder);

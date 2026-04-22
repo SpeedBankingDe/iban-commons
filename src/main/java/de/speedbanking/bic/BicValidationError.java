@@ -15,9 +15,9 @@
  */
 package de.speedbanking.bic;
 
-import de.speedbanking.util.ValidationError;
+import static java.util.Objects.requireNonNull;
 
-import java.util.Objects;
+import de.speedbanking.util.ValidationError;
 
 /**
  * Specifies the reasons why a BIC string failed validation.
@@ -48,7 +48,7 @@ public enum BicValidationError implements ValidationError {
      * @param errorText the descriptive English error message
      */
     BicValidationError(String errorText) {
-        this.errorText = Objects.requireNonNull(errorText, "Error text required");
+        this.errorText = requireNonNull(errorText, "Error text required");
     }
 
     /**

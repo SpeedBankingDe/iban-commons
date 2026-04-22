@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
  * Uses a concrete mock implementation to verify the base class behavior.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-class AbstractCountryValidatorTest {
+final class AbstractCountryValidatorTest {
 
     /**
      * Concrete implementation for testing purposes.

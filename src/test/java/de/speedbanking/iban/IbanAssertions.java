@@ -1,5 +1,7 @@
 package de.speedbanking.iban;
 
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.util.Currency;
 
 import org.assertj.core.api.AbstractBooleanAssert;
@@ -464,7 +466,7 @@ public class IbanAssertions extends Assertions {
          */
         public IbanAssert isLessThan(Iban other) {
             isNotNull();
-            Objects.requireNonNull(other, "The IBAN to compare against must not be null");
+            requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) >= 0) {
                 failWithMessage("Expected IBAN '%s' to be less than '%s' but it was not",
                     actual, other);
@@ -481,7 +483,7 @@ public class IbanAssertions extends Assertions {
          */
         public IbanAssert isLessThanOrEqualTo(Iban other) {
             isNotNull();
-            Objects.requireNonNull(other, "The IBAN to compare against must not be null");
+            requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) > 0) {
                 failWithMessage("Expected IBAN '%s' to be less than or equal to '%s' but it was not",
                     actual, other);
@@ -498,7 +500,7 @@ public class IbanAssertions extends Assertions {
          */
         public IbanAssert isGreaterThan(Iban other) {
             isNotNull();
-            Objects.requireNonNull(other, "The IBAN to compare against must not be null");
+            requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) <= 0) {
                 failWithMessage("Expected IBAN '%s' to be greater than '%s' but it was not",
                     actual, other);
@@ -515,7 +517,7 @@ public class IbanAssertions extends Assertions {
          */
         public IbanAssert isGreaterThanOrEqualTo(Iban other) {
             isNotNull();
-            Objects.requireNonNull(other, "The IBAN to compare against must not be null");
+            requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) < 0) {
                 failWithMessage("Expected IBAN '%s' to be greater than or equal to '%s' but it was not",
                     actual, other);
@@ -535,7 +537,7 @@ public class IbanAssertions extends Assertions {
          */
         public IbanAssert isEqualByCompareTo(Iban other) {
             isNotNull();
-            Objects.requireNonNull(other, "The IBAN to compare against must not be null");
+            requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) != 0) {
                 failWithMessage("Expected IBAN '%s' to compare as equal to '%s' (compareTo == 0) but compareTo returned %d",
                     actual, other, actual.compareTo(other));

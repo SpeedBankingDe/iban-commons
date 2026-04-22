@@ -15,7 +15,8 @@
  */
 package de.speedbanking.util;
 
-import java.util.Collections;
+import static java.util.Collections.unmodifiableMap;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -710,7 +711,7 @@ public enum Iso3166Alpha2 {
             String name = c.name();
             map.put(pack(name.charAt(0), name.charAt(1)), c);
         }
-        return Collections.unmodifiableMap(map);
+        return unmodifiableMap(map);
     }
 
     /**

@@ -15,7 +15,8 @@
  */
 package de.speedbanking.iban;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -142,7 +143,7 @@ public final class IbanConfig {
      * @throws IllegalStateException if the configuration has already been frozen
      */
     public static IbanConfig configure(final IbanConfig config) {
-        Objects.requireNonNull(config, "Config must not be null");
+        requireNonNull(config, "Config must not be null");
 
         IbanConfig result = STATE.updateAndGet(current -> {
             if (current.frozen) {
@@ -205,7 +206,7 @@ public final class IbanConfig {
      * @return the newly installed configuration instance
      */
     static IbanConfig reset(final IbanConfig config) {
-        Objects.requireNonNull(config, "Config must not be null");
+        requireNonNull(config, "Config must not be null");
         activeConfig = null; // invalidate fast-path cache
         return STATE.updateAndGet(current -> new State(config, false)).config;
     }

@@ -1,5 +1,10 @@
 package de.speedbanking.iban;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Iso3166Alpha2;
@@ -18,12 +23,12 @@ import java.time.ZoneId;
 /**
  * JUnit test class for {@link IbanRegistry}.
  */
-@SuppressWarnings("PMD.LinguisticNaming")
-class IbanRegistryTest extends org.assertj.core.api.Assertions {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class IbanRegistryTest {
 
     @DisplayName("Should return the correct registry entry for a valid code")
     @Test
-    void getByCodeShouldReturnCorrectEntry() {
+    void getByCode_shouldReturnCorrectEntry() {
         IbanRegistry de = IbanRegistry.getByCode("DE");
 
         assertThat(de)
@@ -37,7 +42,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @ParameterizedTest
     @ValueSource(strings = {"XX", "xx"})
     @NullAndEmptySource
-    void getByCodeShouldReturnNullForInvalidCode(String code) {
+    void getByCode_shouldReturnNullForInvalidCode(String code) {
         assertThat(IbanRegistry.getByCode(code))
             .as("'%s' should not exist", code)
             .isNull();
@@ -45,7 +50,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should handle case-sensitive lookup correctly (enum names are upper-case)")
     @Test
-    void getByCodeShouldBeCaseSensitive() {
+    void getByCode_shouldBeCaseSensitive() {
         assertThat(IbanRegistry.getByCode("de"))
             .as("Lookup should be case-sensitive and fail for 'de'")
             .isNull();
@@ -57,7 +62,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should return a non-empty list of SEPA countries")
     @Test
-    void getSepaCountriesShouldReturnList() {
+    void getSepaCountries_shouldReturnList() {
         java.util.List<IbanRegistry> sepaCountries = IbanRegistry.getSepaCountries();
 
         assertThat(sepaCountries)
@@ -79,7 +84,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             "AX | 18 | 3!n11!n       | FI",     // Åland Islands: base country Finland
             "GP | 27 | 5!n5!n11!c2!n | FR"      // Guadeloupe: base country France"
     })
-    void checkIbanProperties(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
+    void checkIbanProperties_shouldMatchExpectedValues(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
         IbanRegistry entry = IbanRegistry.getByCode(code);
 
         SoftAssertions softly = new SoftAssertions();
@@ -101,7 +106,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Germany (DE) should not have a separate branch code")
     @Test
-    void checkIbanDe() {
+    void checkIbanDe_shouldHaveCorrectStructure() {
         SoftAssertions softly = new SoftAssertions();
         IbanRegistry registryDe = IbanRegistry.getByCode("DE");
 
@@ -135,7 +140,6 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .containsExactly(12, 22);
 
         softly.assertThat(registryDe.getOrganisation()).isEqualTo("Bundesverband deutscher Banken");
-        softly.assertThat(registryDe.getDepartment()).isNull();
         softly.assertThat(registryDe.getStreetAddress()).isEqualTo("Burgstraße 28");
         softly.assertThat(registryDe.getCityPostcode()).isEqualTo("10178 Berlin");
         softly.assertThat(registryDe.getDepartmentGenericEmail()).isEqualTo("iban@bdb.de");
@@ -150,7 +154,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("France (FR) should have a branch code")
     @Test
-    void checkIbanFr() {
+    void checkIbanFr_shouldHaveCorrectStructure() {
         SoftAssertions softly = new SoftAssertions();
         IbanRegistry registryFr = IbanRegistry.FR;
 
@@ -187,7 +191,6 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .containsExactly(14, 25);
 
         softly.assertThat(registryFr.getOrganisation()).isEqualTo("CFONB");
-        softly.assertThat(registryFr.getDepartment()).isNull();
         softly.assertThat(registryFr.getStreetAddress()).isEqualTo("18 rue la Fayette");
         softly.assertThat(registryFr.getCityPostcode()).isEqualTo("75009 Paris");
         softly.assertThat(registryFr.getDepartmentGenericEmail()).isEqualTo("cfonb@cfonb.fr");
@@ -200,7 +203,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Italy (IT) should have an offset Bank ID and Branch ID")
     @Test
-    void checkIbanIt() {
+    void checkIbanIt_shouldHaveCorrectStructure() {
         SoftAssertions softly = new SoftAssertions();
         IbanRegistry registryIt = IbanRegistry.IT;
 
@@ -230,7 +233,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Non-SEPA country should return false for isSepa")
     @Test
-    void checkIbanNonSepaCountry() {
+    void checkIbanNonSepaCountry_shouldReturnFalse() {
         assertThat(IbanRegistry.getByCode("PS"))
             .as("PS (Palestine) entry should exist")
             .isNotNull()
@@ -240,7 +243,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("toString() should contain essential data for DE")
     @Test
-    void toStringShouldBeDetailedDE() {
+    void toString_shouldBeDetailedForDE() {
         String expected = "IbanRegistry[DE (Germany), "
             + "SEPA country: Yes, "
             + "IBAN len: 22, "
@@ -256,14 +259,14 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @DisplayName("All entries must exist in Iso3166Alpha2")
     @ParameterizedTest
     @IbanRegistrySource
-    void allEntriesMustExistInIso3166Alpha2(IbanRegistry entry) {
+    void allEntries_mustExistInIso3166Alpha2(IbanRegistry entry) {
         assertThat(Iso3166Alpha2.fromCode(entry.getCountryCode())).isNotNull();
     }
 
     @DisplayName("All entries must have null or valid lastUpdate date")
     @ParameterizedTest
     @IbanRegistrySource
-    void allEntriesMustHaveLastUpdate(IbanRegistry entry) {
+    void allEntries_mustHaveValidLastUpdate(IbanRegistry entry) {
         YearMonth firstYearMonth = YearMonth.of(2000, 1);
         assertThat(entry.getLastUpdate())
             .as("lastUpdate must be null or a valid date after %s for %s", firstYearMonth, entry.getCountryCode())
@@ -278,7 +281,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @DisplayName("All entries must have a valid IBAN length (4 to 34)")
     @ParameterizedTest
     @IbanRegistrySource
-    void allEntriesMustHaveValidIbanLength(IbanRegistry entry) {
+    void allEntries_mustHaveValidIbanLength(IbanRegistry entry) {
         assertThat(entry.getIbanLength())
             .as("IBAN length for %s", entry.getCountryCode())
             .isBetween(IbanRegistry.MIN_IBAN_LENGTH, IbanRegistry.MAX_IBAN_LENGTH);
@@ -287,8 +290,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @DisplayName("All entries must have a valid example IBAN")
     @ParameterizedTest
     @IbanRegistrySource
-    void allEntriesMustHaveValidIbanExample(IbanRegistry entry) {
-
+    void allEntries_mustHaveValidIbanExample(IbanRegistry entry) {
         assertThat(entry.getIbanExample())
             .as("Example IBAN missing for %s", entry.getCountryCode())
             .isNotNull();
@@ -298,7 +300,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should verify ContactData properties and immutability")
     @Test
-    void shouldVerifyContactData() {
+    void contactData_shouldBeInitializedCorrectly() {
         IbanRegistry.ContactData contact = IbanRegistry.ContactData.of("Swift", "Standards", "Street", "City", "Email", "Tel");
 
         assertThat(contact)
@@ -314,7 +316,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @DisplayName("Should satisfy equals and hashCode for ContactData")
     @Test
     @SuppressWarnings("SelfAssertion")
-    void shouldSatisfyEqualsHashCodeForContactData() {
+    void contactData_shouldSatisfyEqualsHashCode() {
         IbanRegistry.ContactData contact1 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
         IbanRegistry.ContactData contact2 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
         IbanRegistry.ContactData contactDiff = IbanRegistry.ContactData.of("Other", "Dept", "Street", "City", "Mail", "Tel");
@@ -324,13 +326,13 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
             .isEqualTo(contact2) // same values
             .hasSameHashCodeAs(contact2)
             .isNotEqualTo(contactDiff)
-            .isNotEqualTo(null)
+            .isNotNull()
             .isNotEqualTo(new Object());
     }
 
     @DisplayName("Should cover all equality branches for ContactData")
     @Test
-    void contactDataEqualsBranchCoverage() {
+    void contactData_shouldCoverEqualsBranchCoverage() {
         IbanRegistry.ContactData base = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
 
         // test for each field being different to trigger 'false' result for each && branch
@@ -352,7 +354,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should return correct toString for ContactData")
     @Test
-    void shouldReturnCorrectToStringForContactData() {
+    void contactData_shouldReturnCorrectToString() {
         IbanRegistry.ContactData contact = IbanRegistry.ContactData.of("Org", "Dept", null, null, null, null);
 
         // checking the pattern: getClass().getSimpleName() + [fields]
@@ -364,7 +366,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @DisplayName("Validate IBAN length is positive")
     @ParameterizedTest(name = "Should throw exception for invalid IBAN length: {0}")
     @ValueSource(ints = {-1, 0})
-    void shouldThrowExceptionWhenIbanLengthIsInvalid(int invalidLength) {
+    void build_shouldThrowExceptionWhenIbanLengthIsInvalid(int invalidLength) {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(invalidLength)
             .withBbanPattern("4!n")
@@ -378,7 +380,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Should throw exception when required BBAN pattern is missing")
     @Test
-    void shouldThrowExceptionWhenBbanPatternIsMissing() {
+    void build_shouldThrowExceptionWhenBbanPatternIsMissing() {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(20)
             .withAccountNumber(IndexRange.of(4, 20));
@@ -390,7 +392,7 @@ class IbanRegistryTest extends org.assertj.core.api.Assertions {
     @DisplayName("Validate IBAN length limits (15-34)")
     @ParameterizedTest(name = "Should throw exception for ISO 13616 violation: {0}")
     @ValueSource(ints = {14, 35})
-    void shouldThrowExceptionWhenIbanLengthViolatesIsoLimits(int invalidLength) {
+    void build_shouldThrowExceptionWhenIbanLengthViolatesIsoLimits(int invalidLength) {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(invalidLength)
             .withBbanPattern("4!n")

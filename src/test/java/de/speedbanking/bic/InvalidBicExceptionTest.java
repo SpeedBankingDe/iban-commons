@@ -1,5 +1,8 @@
 package de.speedbanking.bic;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,8 +16,8 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
  *
  * @since 1.8.5
  */
-@SuppressWarnings("PMD.LinguisticNaming")
-class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class InvalidBicExceptionTest {
 
     // -------------------------------------------------------------------------
     // Factory method: of(reason)
@@ -36,7 +39,7 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
 
         assertThat(exception.getMessage())
             .as("Exception message must match the reason's failure text")
-            .isEqualTo(reason.getText() + " (" + reason + ")");
+            .isEqualTo("%s (%s)", reason.getText(), reason);
 
         assertThat(exception)
             .hasToString("InvalidBicException[reason=" + reason + ", input=null]");
@@ -173,7 +176,7 @@ class InvalidBicExceptionTest extends org.assertj.core.api.Assertions {
     void equalsShouldReturnFalseForNullAndOtherTypes() {
         InvalidBicException ex = InvalidBicException.of(BicValidationError.EMPTY);
         assertThat(ex)
-            .isNotEqualTo(null)
+            .isNotNull()
             .isNotEqualTo("some string");
     }
 

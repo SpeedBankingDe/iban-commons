@@ -15,6 +15,8 @@
  */
 package de.speedbanking.iban;
 
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.Iso3166Alpha2;
 
@@ -24,7 +26,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -619,7 +620,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     @Override
     public int compareTo(Iban other) {
-        Objects.requireNonNull(other, "Cannot compare Iban to null");
+        requireNonNull(other, "Cannot compare Iban to null");
         // delegate comparison to the String representation of the normalized IBAN
         return ibanStr.compareTo(other.ibanStr);
     }

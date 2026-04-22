@@ -1,5 +1,8 @@
 package de.speedbanking.iban;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
 import de.speedbanking.util.Iso3166Alpha2;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -21,7 +24,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -261,7 +263,7 @@ public @interface IbanRegistrySource {
                 stream = stream.filter(e -> !excludeFilter.contains(e));
             }
 
-            List<IbanRegistry> result = stream.collect(Collectors.toList());
+            List<IbanRegistry> result = stream.collect(toList());
 
             // Step 5: safety check — an empty result means the filters excluded everything.
             // All enum constants are valid by definition, so this can only happen when
@@ -351,10 +353,10 @@ public @interface IbanRegistrySource {
                 IbanRegistrySource.class.getSimpleName(),
                 config.value().length == 0
                     ? "*"
-                    : Arrays.stream(config.value()).map(IbanRegistry::getCountryCode).collect(Collectors.joining(", ")),
+                    : Arrays.stream(config.value()).map(IbanRegistry::getCountryCode).collect(joining(", ")),
                 config.exclude().length == 0
                     ? "-"
-                    : Arrays.stream(config.exclude()).map(IbanRegistry::getCountryCode).collect(Collectors.joining(", ")),
+                    : Arrays.stream(config.exclude()).map(IbanRegistry::getCountryCode).collect(joining(", ")),
                 config.countryType(),
                 config.sepa(),
                 config.currency().length == 0

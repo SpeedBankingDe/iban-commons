@@ -12,7 +12,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Tests for the custom AssertJ assertions.
  */
-class IbanAssertionsTest {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class IbanAssertionsTest {
 
     @DisplayName("Should assert on IBAN creation")
     @Test

@@ -15,8 +15,10 @@
  */
 package de.speedbanking.iban.util;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
@@ -132,7 +134,7 @@ public final class IbanPatternConverter {
     @SuppressWarnings("MixedMutabilityReturnType")
     public static List<Segment> aggregateSegments(List<Segment> segments) {
         if (segments == null || segments.isEmpty()) {
-            return Collections.emptyList();
+            return emptyList();
         }
 
         List<Segment> aggregated = new ArrayList<>();
@@ -159,7 +161,7 @@ public final class IbanPatternConverter {
         // add the last accumulated segment after the loop finishes
         aggregated.add(current);
 
-        return Collections.unmodifiableList(aggregated);
+        return unmodifiableList(aggregated);
     }
 
     /**

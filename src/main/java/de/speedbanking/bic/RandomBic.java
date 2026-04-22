@@ -15,9 +15,10 @@
  */
 package de.speedbanking.bic;
 
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.util.Iso3166Alpha2;
 
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -238,7 +239,7 @@ public final class RandomBic {
         if (countryCode == null) {
             return ALL_COUNTRIES[random.nextInt(ALL_COUNTRIES.length)].name();
         }
-        Objects.requireNonNull(Iso3166Alpha2.fromCode(countryCode),
+        requireNonNull(Iso3166Alpha2.fromCode(countryCode),
             "Supported ISO 3166-1 Alpha-2 country code required");
         return countryCode;
     }

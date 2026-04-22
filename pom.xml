@@ -124,6 +124,7 @@
         <dep.plugin.enforcer.version>3.6.2</dep.plugin.enforcer.version>
         <!-- last error-prone version compatible with Java 17; 2.43.0+ requires Java 21 -->
         <dep.plugin.error-prone.version>2.42.0</dep.plugin.error-prone.version>
+        <dep.plugin.error-prone-support.version>0.26.0</dep.plugin.error-prone-support.version>
         <dep.plugin.exec.version>3.6.3</dep.plugin.exec.version>
         <dep.plugin.gpg.version>3.2.8</dep.plugin.gpg.version>
         <dep.plugin.jacoco.version>0.8.14</dep.plugin.jacoco.version>
@@ -139,6 +140,8 @@
         <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
 
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+
+        <argLine></argLine>
     </properties>
 
     <dependencies>
@@ -297,10 +300,11 @@
                     <artifactId>pitest-maven</artifactId>
                     <version>${dep.plugin.pitest.version}</version>
                     <configuration>
-                        <withHistory>true</withHistory>
+                        <withHistory>false</withHistory>
 
                         <useSlf4j>true</useSlf4j>
                         <verbose>true</verbose>
+                        <argLine>-Xmx2048m</argLine>
 
                         <avoidCallsTo>
                             <avoidCallsTo>org.slf4j</avoidCallsTo>
@@ -661,7 +665,7 @@
 
                                 <arg>--should-stop=ifError=FLOW</arg>
 
-                                <arg>-Xplugin:ErrorProne -Xep:MissingSummary:WARN -Xep:InvalidBlockTag:WARN</arg>
+                                <arg>-Xplugin:ErrorProne -Xep:MissingSummary:WARN -Xep:InvalidBlockTag:WARN -Xep:CanonicalAnnotationSyntax:OFF -Xep:LexicographicalAnnotationAttributeListing:OFF -Xep:LexicographicalAnnotationListing:OFF</arg>
 
                                 <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
                                 <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
@@ -679,6 +683,12 @@
                                     <groupId>com.google.errorprone</groupId>
                                     <artifactId>error_prone_core</artifactId>
                                     <version>${dep.plugin.error-prone.version}</version>
+                                </path>
+                                <!-- Error Prone Support's additional bug checkers -->
+                                <path>
+                                    <groupId>tech.picnic.error-prone-support</groupId>
+                                    <artifactId>error-prone-contrib</artifactId>
+                                    <version>${dep.plugin.error-prone-support.version}</version>
                                 </path>
                             </annotationProcessorPaths>
                         </configuration>

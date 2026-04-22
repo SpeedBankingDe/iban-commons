@@ -15,6 +15,8 @@
  */
 package de.speedbanking.bic;
 
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.util.Currency;
 
 import org.assertj.core.api.AbstractBooleanAssert;
@@ -25,7 +27,6 @@ import org.assertj.core.api.ThrowableTypeAssert;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
-
 /**
  * Entry point for AssertJ custom assertions for the {@link Bic} class,
  * including the concrete assertion implementation {@link BicAssert}.
@@ -356,7 +357,7 @@ public class BicAssertions extends Assertions {
          */
         public BicAssert hasCurrency(Currency expectedCurrency) {
             isNotNull();
-            if (!Objects.equals(actual.getCurrency(), expectedCurrency)) {
+            if (actual.getCurrency() != expectedCurrency) {
                 failWithMessage("Expected currency to be '%s' but was '%s' for BIC '%s'",
                     expectedCurrency, actual.getCurrency(), actual);
             }
@@ -451,7 +452,7 @@ public class BicAssertions extends Assertions {
          */
         public BicAssert isLessThan(Bic other) {
             isNotNull();
-            Objects.requireNonNull(other, "The BIC to compare against must not be null");
+            requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) >= 0) {
                 failWithMessage("Expected BIC <%s> to be less than <%s> but it was not", actual, other);
             }
@@ -467,7 +468,7 @@ public class BicAssertions extends Assertions {
          */
         public BicAssert isLessThanOrEqualTo(Bic other) {
             isNotNull();
-            Objects.requireNonNull(other, "The BIC to compare against must not be null");
+            requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) > 0) {
                 failWithMessage("Expected BIC <%s> to be less than or equal to <%s> but it was not", actual, other);
             }
@@ -483,7 +484,7 @@ public class BicAssertions extends Assertions {
          */
         public BicAssert isGreaterThan(Bic other) {
             isNotNull();
-            Objects.requireNonNull(other, "The BIC to compare against must not be null");
+            requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) <= 0) {
                 failWithMessage("Expected BIC <%s> to be greater than <%s> but it was not", actual, other);
             }
@@ -499,7 +500,7 @@ public class BicAssertions extends Assertions {
          */
         public BicAssert isGreaterThanOrEqualTo(Bic other) {
             isNotNull();
-            Objects.requireNonNull(other, "The BIC to compare against must not be null");
+            requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) < 0) {
                 failWithMessage("Expected BIC <%s> to be greater than or equal to <%s> but it was not", actual, other);
             }
@@ -518,7 +519,7 @@ public class BicAssertions extends Assertions {
          */
         public BicAssert isEqualByCompareTo(Bic other) {
             isNotNull();
-            Objects.requireNonNull(other, "The BIC to compare against must not be null");
+            requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) != 0) {
                 failWithMessage(
                     "Expected BIC <%s> to compare as equal to <%s> (compareTo == 0) but compareTo returned %d",

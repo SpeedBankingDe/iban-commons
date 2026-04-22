@@ -22,7 +22,7 @@ import java.util.Random;
  * JUnit test class for the {@link RandomIban}.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-class RandomIbanTest {
+final class RandomIbanTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test

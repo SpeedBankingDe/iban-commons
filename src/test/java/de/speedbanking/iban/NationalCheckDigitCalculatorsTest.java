@@ -15,17 +15,18 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-class NationalCheckDigitCalculatorsTest {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class NationalCheckDigitCalculatorsTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructorShouldThrowException() {
+    void constructor_shouldBePrivate() {
         TestUtil.assertConstructorIsPrivate(NationalCheckDigitCalculators.class);
     }
 
     @ParameterizedTest(name = "toString for {0}")
     @MethodSource("provideNcdCalculatorClasses")
-    void testToString(Class<? extends NcdCalculatorBase> clazz) throws Exception {
+    void toString_shouldFollowCustomFormat(Class<? extends NcdCalculatorBase> clazz) throws Exception {
         Constructor<? extends NcdCalculatorBase> constructor = clazz.getDeclaredConstructor();
         constructor.setAccessible(true);
         NcdCalculatorBase calculator = constructor.newInstance();

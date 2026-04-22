@@ -1,5 +1,7 @@
 package de.speedbanking.iban;
 
+import static java.util.stream.Collectors.toList;
+
 import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -19,7 +21,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -198,7 +199,7 @@ public @interface RandomIbanSource {
                 if (includes.length > 0) {
                     List<IbanRegistry> overlap = Arrays.stream(includes)
                         .filter(excludeSet::contains)
-                        .collect(Collectors.toList());
+                        .collect(toList());
                     if (!overlap.isEmpty()) {
                         throw new IllegalStateException(
                             "@" + RandomIbanSource.class.getSimpleName() + ": the following countries appear in both include and exclude: " + overlap);
@@ -208,7 +209,7 @@ public @interface RandomIbanSource {
                 stream = stream.filter(c -> !excludeSet.contains(c));
             }
 
-            List<IbanRegistry> pool = stream.collect(Collectors.toList());
+            List<IbanRegistry> pool = stream.collect(toList());
 
             if (pool.isEmpty()) {
                 throw new IllegalStateException(

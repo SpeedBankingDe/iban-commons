@@ -12,13 +12,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Unit tests for {@link CharArrayWrapper}.
  */
-class CharArrayWrapperTest {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class CharArrayWrapperTest {
 
     @DisplayName("Should wrap full array and provide correct characters")
     @Test
-    void fullArrayWrappingShouldBeCorrect() {
-        final char[] data = "ABCDE".toCharArray();
-        final CharArrayWrapper wrapper = new CharArrayWrapper(data);
+    void constructor_shouldWrapFullArray() {
+        char[] data = "ABCDE".toCharArray();
+        CharArrayWrapper wrapper = new CharArrayWrapper(data);
 
         assertThat(wrapper)
             .hasSize(5)
@@ -36,9 +37,9 @@ class CharArrayWrapperTest {
         "4 | 1 | E",
         "5 | 0 | ''"
     })
-    void subRangeShouldMatchExpectedString(int offset, int length, String expected) {
-        final char[] data = "ABCDE".toCharArray();
-        final CharArrayWrapper wrapper = new CharArrayWrapper(data, offset, length);
+    void constructor_shouldWrapSubRange(int offset, int length, String expected) {
+        char[] data = "ABCDE".toCharArray();
+        CharArrayWrapper wrapper = new CharArrayWrapper(data, offset, length);
 
         assertThat(wrapper)
             .hasSize(length)
@@ -54,8 +55,8 @@ class CharArrayWrapperTest {
         " 3 |  2 | Offset + length exceeds array",
         " 5 |  0 | Offset outside array"
     })
-    void constructorShouldValidateBounds(int offset, int length, String reason) {
-        final char[] data = "ABCD".toCharArray(); // length 4
+    void constructor_shouldThrowOnInvalidBounds(int offset, int length, String reason) {
+        char[] data = "ABCD".toCharArray(); // length 4
 
         assertThatThrownBy(() -> new CharArrayWrapper(data, offset, length))
             .as(reason)
@@ -67,8 +68,8 @@ class CharArrayWrapperTest {
     @DisplayName("charAt should throw IndexOutOfBoundsException for invalid access")
     @ParameterizedTest(name = "index {0} should throw exception")
     @ValueSource(ints = {-1, 3, 99})
-    void charAtShouldValidateBounds(int index) {
-        final CharArrayWrapper wrapper = new CharArrayWrapper("ABC".toCharArray());
+    void charAt_shouldThrowOnInvalidIndex(int index) {
+        CharArrayWrapper wrapper = new CharArrayWrapper("ABC".toCharArray());
 
         assertThatThrownBy(() -> wrapper.charAt(index))
             .isExactlyInstanceOf(IndexOutOfBoundsException.class);
@@ -82,8 +83,8 @@ class CharArrayWrapperTest {
         " 0 |  4 | End exceeds length",
         " 2 |  5 | End far out"
     })
-    void subSequenceShouldValidateBounds(int start, int end) {
-        final CharArrayWrapper wrapper = new CharArrayWrapper("ABC".toCharArray());
+    void subSequence_shouldThrowOnInvalidRange(int start, int end) {
+        CharArrayWrapper wrapper = new CharArrayWrapper("ABC".toCharArray());
 
         assertThatThrownBy(() -> wrapper.subSequence(start, end))
             .isExactlyInstanceOf(IndexOutOfBoundsException.class)
@@ -97,13 +98,13 @@ class CharArrayWrapperTest {
         "0 | 0 | 0 | Empty range of empty wrapper",
         "0 | 5 | 5 | Full range of 5 chars"
     })
-    void subSequenceShouldReturnIdenticalInstanceForFullRange(int start, int end, int length, String reason) {
+    void subSequence_shouldReturnIdenticalInstanceOnFullRange(int start, int end, int length, String reason) {
         // given
-        final char[] data = "ABCDE".toCharArray();
-        final CharArrayWrapper wrapper = new CharArrayWrapper(data, 0, length);
+        char[] data = "ABCDE".toCharArray();
+        CharArrayWrapper wrapper = new CharArrayWrapper(data, 0, length);
 
         // when
-        final CharSequence result = wrapper.subSequence(start, end);
+        CharSequence result = wrapper.subSequence(start, end);
 
         // then
         assertThat(result)
@@ -118,15 +119,12 @@ class CharArrayWrapperTest {
         "0 | 4 | Start matches but end differs",
         "1 | 5 | End matches but start differs"
     })
-    void subSequenceShouldReturnNewInstanceForPartialRange(int start, int end, String reason) {
-        // given
-        final String content = "ABCDE";
-        final CharArrayWrapper wrapper = new CharArrayWrapper(content.toCharArray());
+    void subSequence_shouldReturnNewInstanceOnPartialRange(int start, int end, String reason) {
+        String content = "ABCDE";
+        CharArrayWrapper wrapper = new CharArrayWrapper(content.toCharArray());
 
-        // when
-        final CharSequence sub = wrapper.subSequence(start, end);
+        CharSequence sub = wrapper.subSequence(start, end);
 
-        // then
         assertThat(sub)
             .as(reason)
             .isNotSameAs(wrapper)
@@ -137,9 +135,9 @@ class CharArrayWrapperTest {
     @DisplayName("equals should handle various CharSequence types and edge cases")
     @Test
     @SuppressWarnings({"SelfAssertion", "UnnecessaryStringBuilder"})
-    void equalsShouldBeRobust() {
-        final String content = "ABC";
-        final CharArrayWrapper wrapper = new CharArrayWrapper(content.toCharArray());
+    void equals_shouldBeRobustAgainstDifferentTypes() {
+        String content = "ABC";
+        CharArrayWrapper wrapper = new CharArrayWrapper(content.toCharArray());
 
         assertThat(wrapper)
             .isEqualTo(wrapper)                    // same instance
@@ -147,24 +145,24 @@ class CharArrayWrapperTest {
             .isEqualTo(new StringBuilder(content)) // against StringBuilder
             .isNotEqualTo("ABD")                   // different content
             .isNotEqualTo("AB")                    // different length
-            .isNotEqualTo(null)                    // null check
+            .isNotNull()                           // null check
             .isNotEqualTo(42);                     // different type
     }
 
     @DisplayName("hashCode should be consistent with equals and content")
     @Test
-    void hashCodeShouldBeConsistent() {
-        final String content = "ABC";
-        final char[] data = content.toCharArray();
-        final CharArrayWrapper wrapper = new CharArrayWrapper(data);
-        final CharArrayWrapper sameContent = new CharArrayWrapper(data.clone());
-        final CharArrayWrapper subWrapper = new CharArrayWrapper("XABCY".toCharArray(), 1, 3);
+    void hashCode_shouldBeConsistentWithEquals() {
+        String content = "ABC";
+        char[] data = content.toCharArray();
+        CharArrayWrapper wrapper = new CharArrayWrapper(data);
+        CharArrayWrapper sameContent = new CharArrayWrapper(data.clone());
+        CharArrayWrapper subWrapper = new CharArrayWrapper("XABCY".toCharArray(), 1, 3);
 
         // Consistency with equals: Equal objects must have equal hash codes
         assertThat(wrapper.hashCode())
             .isEqualTo(sameContent.hashCode())
             .isEqualTo(subWrapper.hashCode())
-            .isEqualTo(content.hashCode()); // Falls du String.hashCode() imitierst
+            .isEqualTo(content.hashCode());
 
         // Self-consistency
         int initialHash = wrapper.hashCode();
@@ -173,9 +171,9 @@ class CharArrayWrapperTest {
 
     @DisplayName("hashCode should differ for different content")
     @Test
-    void hashCodeShouldDifferForDifferentContent() {
-        final CharArrayWrapper wrapper1 = new CharArrayWrapper("ABC".toCharArray());
-        final CharArrayWrapper wrapper2 = new CharArrayWrapper("ABD".toCharArray());
+    void hashCode_shouldDifferOnDifferentContent() {
+        CharArrayWrapper wrapper1 = new CharArrayWrapper("ABC".toCharArray());
+        CharArrayWrapper wrapper2 = new CharArrayWrapper("ABD".toCharArray());
 
         assertThat(wrapper1.hashCode()).isNotEqualTo(wrapper2.hashCode());
     }

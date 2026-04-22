@@ -15,6 +15,9 @@
  */
 package de.speedbanking.bic;
 
+import static java.util.Objects.hash;
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.util.CountryUtil;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.Iso3166Alpha2;
@@ -25,7 +28,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -136,7 +138,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public static Bic of(CharSequence bic) throws InvalidBicException {
         BicValidationResult result = BicValidator.validate(bic);
-        return result.getBic().map(Bic::new).orElseThrow(() -> InvalidBicException.of(result.getError().get(), bic));
+        return result.getBic().map(Bic::new).orElseThrow(() -> InvalidBicException.of(result.getError().orElse(null), bic));
     }
 
     /**
@@ -449,7 +451,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public int compareTo(Bic other) {
-        Objects.requireNonNull(other, "Cannot compare Bic to null");
+        requireNonNull(other, "Cannot compare Bic to null");
         // delegate comparison to the 11-character String representation
         return toBic11().compareTo(other.toBic11());
     }
@@ -491,7 +493,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(toBic11());
+        return hash(toBic11());
     }
 
     // -------------------------------------------------------------------------

@@ -40,7 +40,6 @@ import static de.speedbanking.util.CharUtil.isAllUpperCase;
  * @see AbstractNcdCountryValidator
  * @see NationalCheckDigitCalculators
  */
-@SuppressWarnings("checkstyle:LeftCurly")
 final class CountryValidators {
 
     /** Not instantiable. */

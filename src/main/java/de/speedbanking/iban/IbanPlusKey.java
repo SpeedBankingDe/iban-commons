@@ -15,12 +15,13 @@
  */
 package de.speedbanking.iban;
 
+import static java.util.Collections.unmodifiableMap;
+import static java.util.stream.Collectors.toMap;
+
 import de.speedbanking.util.IndexRange;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Utility class to derive a lookup key compatible with the <strong>SWIFT IBAN Plus</strong> service.
@@ -40,9 +41,9 @@ import java.util.stream.Collectors;
 public final class IbanPlusKey {
 
     /** Cache for pre-calculated extraction strategies per country code. */
-    private static final Map<String, Strategy> STRATEGY_CACHE = Collections.unmodifiableMap(
+    private static final Map<String, Strategy> STRATEGY_CACHE = unmodifiableMap(
         Arrays.stream(IbanRegistry.values())
-              .collect(Collectors.toMap(
+              .collect(toMap(
                   IbanRegistry::getCountryCode,
                   Strategy::new
               ))

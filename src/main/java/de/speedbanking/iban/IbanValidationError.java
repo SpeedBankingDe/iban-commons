@@ -15,9 +15,9 @@
  */
 package de.speedbanking.iban;
 
-import de.speedbanking.util.ValidationError;
+import static java.util.Objects.requireNonNull;
 
-import java.util.Objects;
+import de.speedbanking.util.ValidationError;
 
 /**
  * Specifies the reasons why an IBAN string failed validation.
@@ -57,7 +57,7 @@ public enum IbanValidationError implements ValidationError {
      * @param errorText the descriptive English error message
      */
     IbanValidationError(String errorText) {
-        this.errorText = Objects.requireNonNull(errorText, "Error text required");
+        this.errorText = requireNonNull(errorText, "Error text required");
     }
 
     /**

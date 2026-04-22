@@ -15,7 +15,7 @@
  */
 package de.speedbanking.util;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Utility class providing common character and character array validation methods.
@@ -339,7 +339,7 @@ public final class CharUtil {
      * @throws NullPointerException if {@code input} is {@code null}
      */
     private static <T> T requireInput(final T input) {
-        return Objects.requireNonNull(input, "Input cannot be null");
+        return requireNonNull(input, "Input cannot be null");
     }
 
     /**

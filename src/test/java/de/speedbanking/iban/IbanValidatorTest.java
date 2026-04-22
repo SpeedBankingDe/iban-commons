@@ -9,6 +9,8 @@ import static de.speedbanking.iban.IbanValidationError.INVALID_CHECK_DIGITS;
 import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
 import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +28,7 @@ import java.util.Locale;
  * JUnit test class for {@link IbanValidator}.
  */
 @SuppressWarnings("checkstyle:MethodName")
-class IbanValidatorTest extends org.assertj.core.api.Assertions {
+final class IbanValidatorTest {
 
     // A valid German IBAN for positive tests
     private static final String VALID_RAW_DE        = "DE91 1000 0000 0123 4567 89";
@@ -46,7 +48,7 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_shouldThrowException() {
+    void constructor_shouldBePrivate() {
         TestUtil.assertConstructorIsPrivate(IbanValidator.class);
     }
 
@@ -229,8 +231,8 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
 
         // Null/Empty handling (assuming isMod97Valid handles null/empty gracefully or fails early)
         "(null) | false",
-        "'' | false",  // empty string
-        "'  ' | false" // whitespace
+        "''     | false", // empty string
+        "'  '   | false"  // whitespace
     })
     void isMod97Valid_shouldHandleAllCases(String ibanString, boolean expectedValidity) {
         boolean isValid = IbanValidator.isMod97Valid(ibanString);
@@ -255,7 +257,7 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         "PL 61 10 90 10 14 00 00 07 12 19 81 28 74"
     })
     @DisplayName("isValid should return true for valid formatted (spaced) IBANs")
-    @ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
+    @ResourceLock(IbanConfigTest.RESOURCE_NAME)
     void isValid_shouldReturnTrueForFormattedIban(String formattedIban) {
         try {
             IbanConfig.reset(IbanConfig.builder()
@@ -312,7 +314,8 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         "FR0020041010050500013M02606 | 84", // result 84 -> CD 15 (FR14...)
         "TR000006100519786457841326  | 65"  // longer IBAN structure (implicitly tests intermediate modulo)
     })
-    void testCalculateMod97ValidIbanFormat(CharSequence ibanWithZeroCheckDigits, int expectedRemainder) {
+    @DisplayName("calculateMod97 should return correct remainder for valid IBAN formats")
+    void calculateMod97_shouldReturnCorrectRemainder(CharSequence ibanWithZeroCheckDigits, int expectedRemainder) {
         int mod97 = IbanValidator.calculateMod97(ibanWithZeroCheckDigits);
         assertThat(mod97).isEqualTo(expectedRemainder);
     }
@@ -330,21 +333,19 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         "DE0010000000012345678 ", // space (assuming input is normalized, but guards against it)
         "DE0010000000012345678ß"  // German specific non-alphanumeric character
     })
-    void testCalculateMod97WithIllegalCharactersShouldReturnNegativeOne(String ibanInput) {
+    @DisplayName("calculateMod97 should return INVALID_MOD97 on illegal characters")
+    void calculateMod97_shouldReturnInvalidOnIllegalCharacters(String ibanInput) {
         assertThat(IbanValidator.calculateMod97(ibanInput)).isEqualTo(IbanValidator.INVALID_MOD97);
     }
 
-    /**
-     * Tests that {@code fixCheckDigits} correctly manipulates the StringBuilder.
-     */
-    @DisplayName("Should correctly fix check digits, overwriting initial placeholders")
+    @DisplayName("fixCheckDigits should correctly overwrite initial placeholders")
     @ParameterizedTest(name = "IBAN with initial check digit ''{0}'' should result in ''{1}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         "DE | 11 | 1000000001234567890123 | 23",
         "DE | 99 | 1000000001234567890123 | 23"
     })
     @SuppressWarnings("UnnecessaryStringBuilder")
-    void testFixCheckDigits(String countryCode, String initialCheckDigits, String bban, String expectedCheckDigits) {
+    void fixCheckDigits_shouldOverwritePlaceholders(String countryCode, String initialCheckDigits, String bban, String expectedCheckDigits) {
         StringBuilder ibanBuilder = new StringBuilder(countryCode);
         ibanBuilder.append(initialCheckDigits);
         ibanBuilder.append(bban);
@@ -375,7 +376,7 @@ class IbanValidatorTest extends org.assertj.core.api.Assertions {
         "GT00 TRAJ 0102 0000 0012 1002 9690", // no country validator & invalid check digits
     })
     @NullAndEmptySource
-    void isValidSpaced_shouldReturnFalseForInvalidCasesWithSpacing(String input) {
+    void isValid_shouldReturnFalseForInvalidCasesWithSpacing(String input) {
         try {
             IbanConfig.reset(IbanConfig.builder().allowSpace(true).build());
 

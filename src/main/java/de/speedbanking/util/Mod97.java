@@ -15,7 +15,7 @@
  */
 package de.speedbanking.util;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Utility class implementing the <strong>ISO 7064 Mod 97-10</strong> checksum algorithm.
@@ -289,7 +289,7 @@ public final class Mod97 {
      * @since 1.8.5
      */
     public static int calculateRange(final char[] data, final int offset, final int length) {
-        Objects.requireNonNull(data, "Data must not be null");
+        requireNonNull(data, "Data must not be null");
 
         if (offset < 0 || length < 0 || offset + length > data.length) {
             throw new IndexOutOfBoundsException(
@@ -331,7 +331,7 @@ public final class Mod97 {
      * @since 1.8.5
      */
     public static int calculateRange(final CharSequence data, final int offset, final int length) {
-        Objects.requireNonNull(data, "Data must not be null");
+        requireNonNull(data, "Data must not be null");
 
         if (offset < 0 || length < 0 || offset + length > data.length()) {
             throw new IndexOutOfBoundsException(

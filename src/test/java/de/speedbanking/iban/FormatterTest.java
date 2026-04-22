@@ -1,5 +1,8 @@
 package de.speedbanking.iban;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
 import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;
@@ -15,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 /**
  * JUnit test class for {@link Formatter}.
  */
-@SuppressWarnings("checkstyle:MethodName")
-class FormatterTest extends org.assertj.core.api.Assertions {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class FormatterTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test

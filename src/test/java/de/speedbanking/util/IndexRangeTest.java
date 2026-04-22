@@ -1,5 +1,10 @@
 package de.speedbanking.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * JUnit test class for {@link IndexRange}.
  */
-class IndexRangeTest extends org.assertj.core.api.Assertions {
+final class IndexRangeTest {
 
     @DisplayName("Should create IndexRange and check getters for valid indices")
     @Test

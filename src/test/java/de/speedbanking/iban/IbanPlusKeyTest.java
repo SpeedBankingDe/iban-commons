@@ -1,5 +1,6 @@
 package de.speedbanking.iban;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +20,8 @@ import java.util.Optional;
  * <p>
  * Validates the extraction of routing segments required for the SWIFT IBAN Plus service.
  */
-class IbanPlusKeyTest extends org.assertj.core.api.Assertions {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class IbanPlusKeyTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test

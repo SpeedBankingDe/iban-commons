@@ -23,7 +23,7 @@ import java.util.stream.Stream;
  * JUnit 5 tests for {@link RandomBic}.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-class RandomBicTest {
+final class RandomBicTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
@@ -259,7 +259,7 @@ class RandomBicTest {
         "FR |  0",
         "US | 42",
         "JP | 42",
-        "CH | 99",
+        "CH | 99"
     })
     void of_SeededSnapshot_ShouldHaveCorrectCountryAndBeValid(String countryCode, long seed) {
         Bic bic = RandomBic.of(countryCode, new Random(seed));
@@ -282,7 +282,7 @@ class RandomBicTest {
         "FR |  0",
         "US | 42",
         "JP | 42",
-        "CH | 99",
+        "CH | 99"
     })
     void ofBic11_SeededSnapshot_ShouldHaveCorrectCountryAndBeValid(String countryCode, long seed) {
         Bic bic = RandomBic.ofBic11(countryCode, new Random(seed));

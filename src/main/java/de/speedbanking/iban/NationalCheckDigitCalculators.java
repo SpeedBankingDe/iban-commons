@@ -15,10 +15,11 @@
  */
 package de.speedbanking.iban;
 
+import static java.util.Objects.requireNonNull;
+
 import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Mod97;
 
-import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
@@ -826,7 +827,7 @@ final class NationalCheckDigitCalculators {
          */
         NcdCalculatorBase() {
             final String clazzName = getClass().getSimpleName();
-            countryData = Objects.requireNonNull(IbanRegistry.getByCode(clazzName),
+            countryData = requireNonNull(IbanRegistry.getByCode(clazzName),
                 clazzName + " is not a supported IBAN country code");
             ncdIndexRange = countryData.getNationalCheckDigitIndexRange();
         }

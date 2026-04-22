@@ -15,6 +15,11 @@
  */
 package de.speedbanking.iban;
 
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
+
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.util.CountryUtil;
 import de.speedbanking.util.Currency;
@@ -29,7 +34,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * The definitive, immutable registry for all **ISO 13616-compliant national IBAN formats**.
@@ -2959,8 +2963,8 @@ public enum IbanRegistry {
         IbanRegistry baseCountry
         ) {
 
-        this.structureData = Objects.requireNonNull(structureData, "structureData required");
-        this.metaData = Objects.requireNonNull(metaData, "metaData required");
+        this.structureData = requireNonNull(structureData, "structureData required");
+        this.metaData = requireNonNull(metaData, "metaData required");
         this.contactData = Optional.ofNullable(contactData).orElse(ContactData.EMPTY);
         this.baseCountry = baseCountry;
 
@@ -3329,8 +3333,8 @@ public enum IbanRegistry {
         return isBaseCountry()
             ? Arrays.stream(values())
                 .filter(cd -> this == cd.getBaseCountry())
-                .collect(Collectors.toList())
-            : Collections.emptyList();
+                .collect(toList())
+            : emptyList();
     }
 
     /**
@@ -3469,8 +3473,8 @@ public enum IbanRegistry {
     public static List<IbanRegistry> getSepaCountries() {
         return Arrays.stream(values())
             .filter(IbanRegistry::isSepa)
-            .collect(Collectors.collectingAndThen(
-                Collectors.toList(),
+            .collect(collectingAndThen(
+                toList(),
                 Collections::unmodifiableList
             ));
     }
@@ -3491,12 +3495,12 @@ public enum IbanRegistry {
 
         private StructureData(Builder builder) {
             this.ibanLength = builder.ibanLength;
-            this.bbanPatternStr = Objects.requireNonNull(builder.bbanPatternStr, "bbanPatternStr required");
+            this.bbanPatternStr = requireNonNull(builder.bbanPatternStr, "bbanPatternStr required");
             this.bankCodePatternStr = builder.bankCodePatternStr;
             this.bankCodeIndexRange = builder.bankCodeIndexRange;
             this.branchCodePatternStr = builder.branchCodePatternStr;
             this.branchCodeIndexRange = builder.branchCodeIndexRange;
-            this.accountNumberIndexRange = Objects.requireNonNull(builder.accountNumberIndexRange, "accountNumberIndexRange required");
+            this.accountNumberIndexRange = requireNonNull(builder.accountNumberIndexRange, "accountNumberIndexRange required");
             this.nationalCheckDigitIndexRange = builder.nationalCheckDigitIndexRange;
         }
 
@@ -3557,8 +3561,8 @@ public enum IbanRegistry {
                 } else if (ibanLength < 15 || ibanLength > 34) { // ISO 13616 limits
                     throw new IllegalStateException("IBAN length must be between 15 and 34");
                 }
-                Objects.requireNonNull(bbanPatternStr, "BBAN pattern must be set");
-                Objects.requireNonNull(accountNumberIndexRange, "Account number index range must be set");
+                requireNonNull(bbanPatternStr, "BBAN pattern must be set");
+                requireNonNull(accountNumberIndexRange, "Account number index range must be set");
 
                 return new StructureData(this);
             }
@@ -3723,9 +3727,9 @@ public enum IbanRegistry {
             boolean isSepa,
             String ibanExample,
             YearMonth lastUpdate) {
-            this.countryName = Objects.requireNonNull(countryName, "countryName required");
+            this.countryName = requireNonNull(countryName, "countryName required");
             this.isSepa = isSepa;
-            this.ibanExample = Objects.requireNonNull(ibanExample, "ibanExample required");
+            this.ibanExample = requireNonNull(ibanExample, "ibanExample required");
             this.lastUpdate = lastUpdate;
         }
 

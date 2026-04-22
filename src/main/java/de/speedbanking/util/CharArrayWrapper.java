@@ -15,7 +15,7 @@
  */
 package de.speedbanking.util;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A light-weight, immutable {@link CharSequence} wrapper for a {@code char} array.
@@ -39,7 +39,7 @@ public final class CharArrayWrapper implements CharSequence {
      * @throws NullPointerException if {@code data} is {@code null}
      */
     public CharArrayWrapper(final char[] data) {
-        this(data, 0, Objects.requireNonNull(data, "Data array must not be null").length);
+        this(data, 0, requireNonNull(data, "Data array must not be null").length);
     }
 
     /**
@@ -52,7 +52,7 @@ public final class CharArrayWrapper implements CharSequence {
      * @throws IndexOutOfBoundsException if {@code offset} or {@code length} are invalid
      */
     public CharArrayWrapper(final char[] data, final int offset, final int length) {
-        Objects.requireNonNull(data, "Data array must not be null");
+        requireNonNull(data, "Data array must not be null");
         if (offset < 0 || length < 0 || offset > data.length - length) {
             throw new IndexOutOfBoundsException(String.format(
                 "Invalid range (offset: %d, length: %d) for array length %d", offset, length, data.length));

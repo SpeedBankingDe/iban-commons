@@ -28,7 +28,7 @@ import java.util.Set;
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 @DisplayName("Currency")
-class CurrencyTest {
+final class CurrencyTest {
 
     // =========================================================================
     // getAlphaCode()

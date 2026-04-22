@@ -3,31 +3,48 @@ package de.speedbanking.iban;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Utility tool for generating IBAN test data strings based on the {@link IbanRegistry}.
+ * <p>
+ * This generator iterates through all registered countries, creates a sample IBAN,
+ * and formats the metadata into a pipe-separated string suitable for use in
+ * parameterized tests (e.g., {@code @CsvSource}).
+ */
 final class IbanTestDataGenerator {
 
+    /**
+     * Generates a list of formatted test data strings for all countries in the registry.
+     * <p>
+     * Each line contains the full IBAN, length, country details, and decomposed BBAN components.
+     * Missing bank codes or account numbers are logged to system error.
+     *
+     * @return a list of pipe-separated strings containing IBAN metadata
+     */
     List<String> createTestDatatAllCountries() {
         List<String> lines = new ArrayList<>();
+        String formatIban = "%-" + IbanRegistry.MAX_IBAN_LENGTH + "s";
+        String formatBban = "%-" + IbanRegistry.MAX_BBAN_LENGTH + "s";
         for (IbanRegistry countryData : IbanRegistry.values()) {
             Iban iban = Iban.of(countryData.getIbanExample());
             String str = iban.getBranchCode();
             String line = String.join(" | ",
-                String.format("\"%-" + IbanRegistry.MAX_IBAN_LENGTH + "s", iban),
+                "\"" + String.format(formatIban, iban),
                 String.valueOf(countryData.getIbanLength()),
                 countryData.getCountryCode(),
                 countryData.getCountryFlag(),
                 iban.getCheckDigits(),
-                String.format("%-" + IbanRegistry.MAX_BBAN_LENGTH + "s", iban.getBban()),
+                String.format(formatBban, iban.getBban()),
                 String.format("%-10s", iban.getBankCode()),
                 String.format("%-6s", str == null ? "(null)" : str),
-                String.format("%-24s\"", iban.getAccountNumber())
+                String.format("%-24s", iban.getAccountNumber()) + "\""
             );
             lines.add(line);
 
             if (iban.getBankCode() == null) {
-                System.err.println(countryData.getCountryCode() + " (" + countryData.getCountryName() + "): missing bank code");
+                System.err.printf("%s (%s): missing bank code%n", countryData.getCountryCode(), countryData.getCountryName());
             }
             if (iban.getAccountNumber() == null) {
-                System.err.println(countryData.getCountryCode() + " (" + countryData.getCountryName() + "): missing account number");
+                System.err.printf("%s (%s): missing account number%n", countryData.getCountryCode(), countryData.getCountryName());
             }
         }
         return lines;

@@ -1,6 +1,9 @@
 package de.speedbanking.bic;
 
-import org.assertj.core.api.Assertions;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -10,8 +13,8 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * JUnit test class for {@link BicValidationResult}.
  */
-@SuppressWarnings("checkstyle:MethodName")
-class BicValidationResultTest extends Assertions {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class BicValidationResultTest {
 
     private final Bic validBic = Bic.of("PALSPS22XXX");
 
@@ -50,7 +53,7 @@ class BicValidationResultTest extends Assertions {
 
     @DisplayName("Instantiation failures (factory methods)")
     @Test
-    void testInstantiationFailures() {
+    void instantiation_fails_on_invalid_input() {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> BicValidationResult.valid(null))
             .withMessage("Valid result requires a BIC");
@@ -62,7 +65,7 @@ class BicValidationResultTest extends Assertions {
 
     @DisplayName("Should correctly create a valid result")
     @Test
-    void testValidResultCreation() {
+    void valid_result_is_correctly_created() {
         BicValidationResult result = BicValidationResult.valid(validBic);
 
         assertThat(result.isValid()).isTrue();
@@ -77,7 +80,7 @@ class BicValidationResultTest extends Assertions {
 
     @DisplayName("Should correctly create an invalid result")
     @Test
-    void testInvalidResultCreation() {
+    void invalid_result_stores_error_details() {
         BicValidationError testReason = BicValidationError.EMPTY;
 
         BicValidationResult result = BicValidationResult.invalid(testReason);
@@ -94,7 +97,7 @@ class BicValidationResultTest extends Assertions {
 
     @DisplayName("toString() should be correctly formatted for a valid result")
     @Test
-    void testToStringValid() {
+    void to_string_contains_bic_when_valid() {
         BicValidationResult result = BicValidationResult.valid(validBic);
         String expected = BicValidationResult.class.getSimpleName() + "[valid: " + validBic + "]";
 
@@ -103,7 +106,7 @@ class BicValidationResultTest extends Assertions {
 
     @DisplayName("toString() should be correctly formatted for an invalid result")
     @Test
-    void testToStringInvalid() {
+    void to_string_contains_error_when_invalid() {
         BicValidationResult result = BicValidationResult.invalid(BicValidationError.INVALID_COUNTRY);
         String expected = BicValidationResult.class.getSimpleName() + "[invalid: BIC has invalid country code]";
 

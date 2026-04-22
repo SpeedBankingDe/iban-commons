@@ -1,9 +1,18 @@
 package de.speedbanking.iban.util;
 
+import static de.speedbanking.iban.util.IbanCharType.ALPHABETIC;
+import static de.speedbanking.iban.util.IbanCharType.ALPHANUMERIC;
+import static de.speedbanking.iban.util.IbanCharType.NUMERIC;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
 import de.speedbanking.test.TestUtil;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,13 +21,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * JUnit test class for {@link IbanPatternConverter}.
  */
-class IbanPatternConverterTest extends Assertions {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class IbanPatternConverterTest {
 
     /**
      * Helper method to create Segment instances via reflection for testing
@@ -44,7 +53,7 @@ class IbanPatternConverterTest extends Assertions {
         "4!a10!a      ; [A-Z]{14}",                  // only two segments of the same type
         "2!c1!a2!a3!n ; [A-Z0-9]{2}[A-Z]{3}[0-9]{3}" // all three types and aggregation
     })
-    void testConvertToRegexShouldSucceed(String input, String expected) {
+    void convertToRegex_givenValidPattern_shouldReturnCorrectRegex(String input, String expected) {
         String patternInput = (input == null) ? "" : input;
         String actual = IbanPatternConverter.convertToRegex(patternInput);
 
@@ -56,18 +65,15 @@ class IbanPatternConverterTest extends Assertions {
     /**
      * Tests that an {@link IllegalArgumentException} is thrown when an unsupported
      * character type (not a, n, or c) is found in the pattern notation.
-     * The original test logic is kept but the assertion is switched to AssertJ.
      */
     @DisplayName("Unsupported character type should throw IllegalArgumentException")
     @ParameterizedTest(name = "Type: {0}")
     @ValueSource(strings = {"x", "A", "!", "1", "@"})
-    void testUnknownCharacterTypeThrowsException(String invalidType) {
+    void convertToRegex_givenUnsupportedCharacterType_shouldThrowException(String invalidType) {
         String input = "4!" + invalidType;
         assertThatIllegalArgumentException()
             .isThrownBy(() -> IbanPatternConverter.convertToRegex(input))
-            .withMessage("Unknown character type '"
-                         + invalidType
-                         + "' at index 0, valid types are: [a, n, c, e]");
+            .withMessage("Unknown character type '%s' at index 0, valid types are: [a, n, c, e]", invalidType);
     }
 
     /**
@@ -89,8 +95,7 @@ class IbanPatternConverterTest extends Assertions {
         "''                     | Pattern notation must not be empty",
         "'  '                   | Pattern contains illegal leading/trailing whitespace"
     })
-    void testInvalidFormatThrowsException(String input, String expectedErrorSegment) {
-
+    void convertToRegex_givenInvalidFormat_shouldThrowException(String input, String expectedErrorSegment) {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> IbanPatternConverter.convertToRegex(input))
             .withMessage(expectedErrorSegment);
@@ -98,7 +103,6 @@ class IbanPatternConverterTest extends Assertions {
 
     /**
      * Tests the public utility method {@link IbanPatternConverter#isValid(String)}.
-     * This increases coverage for the public API entry point.
      */
     @DisplayName("isValid should return true for valid and false for invalid patterns")
     @ParameterizedTest(name = "Input: {0}, Expected: {1}")
@@ -112,7 +116,7 @@ class IbanPatternConverterTest extends Assertions {
         "'  '     | false", // whitespace
         "4!x      | false"  // invalid type (covered by the fallback catch)
     })
-    void testIsValid(String input, boolean expected) {
+    void isValid_givenVariousInputs_shouldReturnExpectedBoolean(String input, boolean expected) {
         assertThat(IbanPatternConverter.isValid(input))
             .as("isValid failed for input: '%s'", input)
             .isEqualTo(expected);
@@ -124,43 +128,43 @@ class IbanPatternConverterTest extends Assertions {
      */
     @DisplayName("Should merge consecutive segments of the same type")
     @Test
-    void testAggregateSegments() throws Exception {
+    void aggregateSegments_givenConsecutiveSegmentsSameType_shouldMergeThem() throws Exception {
         // 1. Case: Null or Empty input
         assertThat(IbanPatternConverter.aggregateSegments(null)).isEmpty();
-        assertThat(IbanPatternConverter.aggregateSegments(Collections.emptyList())).isEmpty();
+        assertThat(IbanPatternConverter.aggregateSegments(emptyList())).isEmpty();
 
         // 2. Case: No aggregation needed (alternating types)
         List<Segment> listA = Arrays.asList(
-            createSegment(IbanCharType.ALPHABETIC, 2),
-            createSegment(IbanCharType.NUMERIC, 3),
-            createSegment(IbanCharType.ALPHABETIC, 4)
+            createSegment(ALPHABETIC, 2),
+            createSegment(NUMERIC, 3),
+            createSegment(ALPHABETIC, 4)
         );
         assertThat(IbanPatternConverter.aggregateSegments(listA)).isEqualTo(listA);
 
         // 3. Case: Full aggregation
         List<Segment> listB = Arrays.asList(
-            createSegment(IbanCharType.ALPHABETIC, 2),
-            createSegment(IbanCharType.ALPHABETIC, 3),
-            createSegment(IbanCharType.ALPHABETIC, 4)
+            createSegment(ALPHABETIC, 2),
+            createSegment(ALPHABETIC, 3),
+            createSegment(ALPHABETIC, 4)
         );
-        List<Segment> expectedB = Collections.singletonList(
-            createSegment(IbanCharType.ALPHABETIC, 9)
+        List<Segment> expectedB = singletonList(
+            createSegment(ALPHABETIC, 9)
         );
         assertThat(IbanPatternConverter.aggregateSegments(listB)).isEqualTo(expectedB);
 
         // 4. Case: Partial aggregation (start, middle, end)
         List<Segment> listC = Arrays.asList(
-            createSegment(IbanCharType.ALPHABETIC, 1),
-            createSegment(IbanCharType.ALPHABETIC, 1),
-            createSegment(IbanCharType.NUMERIC, 1),
-            createSegment(IbanCharType.NUMERIC, 2),
-            createSegment(IbanCharType.ALPHABETIC, 3),
-            createSegment(IbanCharType.ALPHABETIC, 4)
+            createSegment(ALPHABETIC, 1),
+            createSegment(ALPHABETIC, 1),
+            createSegment(NUMERIC, 1),
+            createSegment(NUMERIC, 2),
+            createSegment(ALPHABETIC, 3),
+            createSegment(ALPHABETIC, 4)
         );
         List<Segment> expectedC = Arrays.asList(
-            createSegment(IbanCharType.ALPHABETIC, 2),
-            createSegment(IbanCharType.NUMERIC, 3),
-            createSegment(IbanCharType.ALPHABETIC, 7)
+            createSegment(ALPHABETIC, 2),
+            createSegment(NUMERIC, 3),
+            createSegment(ALPHABETIC, 7)
         );
         assertThat(IbanPatternConverter.aggregateSegments(listC)).isEqualTo(expectedC);
     }
@@ -170,39 +174,37 @@ class IbanPatternConverterTest extends Assertions {
      */
     @DisplayName("buildRegex should correctly concatenate segment patterns")
     @Test
-    void testBuildRegex() throws Exception {
-        // 1. Case: Null or Empty input
+    void buildRegex_givenSegmentList_shouldConcatenatePatterns() throws Exception {
         assertThat(IbanPatternConverter.buildRegex(null)).isNull();
-        assertThat(IbanPatternConverter.buildRegex(Collections.emptyList())).isNull();
+        assertThat(IbanPatternConverter.buildRegex(emptyList())).isNull();
 
-        // 2. Case: Mixed segments (with length 1 and > 1)
         List<Segment> segments = Arrays.asList(
-            createSegment(IbanCharType.ALPHABETIC, 4),
-            createSegment(IbanCharType.ALPHANUMERIC, 16),
-            createSegment(IbanCharType.ALPHABETIC, 1)
+            createSegment(ALPHABETIC, 4),
+            createSegment(ALPHANUMERIC, 16),
+            createSegment(ALPHABETIC, 1)
         );
 
         String expected = "[A-Z]{4}[A-Z0-9]{16}[A-Z]";
 
         assertThat(IbanPatternConverter.buildRegex(segments)).isEqualTo(expected);
 
-        assertThat(IbanPatternConverter.buildRegex(Collections.emptyList())).isNull();
+        assertThat(IbanPatternConverter.buildRegex(emptyList())).isNull();
     }
 
     /**
-     * Tests the {@link Segment#toString()} method, increasing coverage.
+     * Tests the {@link Segment#toString()} method.
      */
     @DisplayName("Segment toString() should return expected format")
     @Test
-    void testSegmentToString() throws Exception {
-        Segment segment = createSegment(IbanCharType.ALPHABETIC, 10);
+    void toString_givenSegment_shouldReturnExpectedFormat() throws Exception {
+        Segment segment = createSegment(ALPHABETIC, 10);
         assertThat(segment).hasToString("Segment[charType=ALPHABETIC, length=10]");
     }
 
     @DisplayName("Segment addLength should handle non-positive addition")
     @Test
-    void testSegmentAddLengthShouldHandleNonPositive() throws Exception {
-        Segment segment5 = createSegment(IbanCharType.ALPHABETIC, 5);
+    void addLength_givenNonPositiveValue_shouldReturnSameInstance() throws Exception {
+        Segment segment5 = createSegment(ALPHABETIC, 5);
 
         Segment resultSegment0 = segment5.addLength(0);
         assertThat(resultSegment0).isSameAs(segment5);
@@ -217,15 +219,15 @@ class IbanPatternConverterTest extends Assertions {
 
     @DisplayName("Segment equals and hashCode must be consistent")
     @Test
-    void testSegmentEqualsAndHashCodeConsistency() throws Exception {
-        Segment segmentA = createSegment(IbanCharType.ALPHABETIC, 10);
-        Segment segmentB = createSegment(IbanCharType.ALPHABETIC, 10);
-        Segment segmentC = createSegment(IbanCharType.ALPHABETIC, 5);
-        Segment segmentD = createSegment(IbanCharType.NUMERIC, 10);
+    void equalsAndHashCode_givenVariousSegments_shouldBeConsistent() throws Exception {
+        Segment segmentA = createSegment(ALPHABETIC, 10);
+        Segment segmentB = createSegment(ALPHABETIC, 10);
+        Segment segmentC = createSegment(ALPHABETIC, 5);
+        Segment segmentD = createSegment(NUMERIC, 10);
 
         assertThat(segmentA)
             // check with null and different class
-            .isNotEqualTo(null)
+            .isNotNull()
             .isNotEqualTo((Object) "Not a Segment")
 
             // check equality (A vs B)
@@ -241,7 +243,7 @@ class IbanPatternConverterTest extends Assertions {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void testPrivateConstructorPreventsInstantiation() {
+    void constructor_shouldBePrivate() {
         TestUtil.assertConstructorIsPrivate(IbanPatternConverter.class);
     }
 

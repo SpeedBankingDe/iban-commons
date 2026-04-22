@@ -1,6 +1,16 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanValidationError.*;
+import static de.speedbanking.iban.IbanValidationError.EMPTY;
+import static de.speedbanking.iban.IbanValidationError.ILLEGAL_CHARACTERS;
+import static de.speedbanking.iban.IbanValidationError.INCORRECT_LENGTH;
+import static de.speedbanking.iban.IbanValidationError.INCORRECT_LENGTH_COUNTRY;
+import static de.speedbanking.iban.IbanValidationError.INVALID_CHECKSUM;
+import static de.speedbanking.iban.IbanValidationError.INVALID_CHECK_DIGITS;
+import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
+import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
+import static de.speedbanking.iban.IbanValidationError.values;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +22,7 @@ import org.junit.jupiter.params.provider.EnumSource;
  * JUnit test class for the {@link IbanValidationError} enum.<br>
  * Ensures all constants are defined and their failure texts are correct.
  */
-class IbanValidationErrorTest extends org.assertj.core.api.Assertions {
+final class IbanValidationErrorTest {
 
     @DisplayName("Failure text should be defined for all reasons")
     @ParameterizedTest(name = "Constant {0} should have a non-empty failure text")

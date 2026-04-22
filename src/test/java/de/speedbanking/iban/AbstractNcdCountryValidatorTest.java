@@ -17,8 +17,8 @@ import org.junit.jupiter.api.parallel.ResourceLock;
  * ensures correct delegation to the NCD calculator and reflection-based loading.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-@ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
-class AbstractNcdCountryValidatorTest {
+@ResourceLock(IbanConfigTest.RESOURCE_NAME)
+final class AbstractNcdCountryValidatorTest {
 
     /**
      * Concrete implementation for testing.

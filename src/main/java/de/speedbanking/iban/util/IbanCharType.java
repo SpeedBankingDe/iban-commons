@@ -15,9 +15,10 @@
  */
 package de.speedbanking.iban.util;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Defines the character types used in the **ISO 13616 IBAN structure notation**
@@ -105,7 +106,7 @@ public enum IbanCharType {
     public static List<Character> getIbanCodes() {
         return Arrays.stream(values())
             .map(IbanCharType::getIbanCode)
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
 }

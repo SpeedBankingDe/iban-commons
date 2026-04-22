@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 /**
  * JUnit test class for {@link BicValidator}.
  */
-class BicValidatorTest {
+final class BicValidatorTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test

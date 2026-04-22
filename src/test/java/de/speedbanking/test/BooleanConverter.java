@@ -1,11 +1,12 @@
 package de.speedbanking.test;
 
+import static java.util.Collections.unmodifiableSet;
+
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.converter.ArgumentConversionException;
 import org.junit.jupiter.params.converter.ArgumentConverter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
@@ -18,7 +19,7 @@ import java.util.Set;
 public class BooleanConverter implements ArgumentConverter {
 
     private static final Set<String> POSITIVE_VALUES
-        = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList("x", "ja", "true", "1")));
+        = unmodifiableSet(new LinkedHashSet<>(Arrays.asList("x", "ja", "true", "1")));
 
     /**
      * Converts the source object to a boolean.

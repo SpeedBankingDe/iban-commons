@@ -1,7 +1,8 @@
 package de.speedbanking.test;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -13,7 +14,6 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -117,7 +117,7 @@ public final class TestUtil {
      * @throws IOException            if an I/O error occurs
      * @throws ClassNotFoundException if the class of the serialized object cannot be found
      */
-    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
+    @SuppressWarnings({"TypeParameterUnusedInFormals", "unchecked"})
     public static <T extends Serializable> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
              ObjectInputStream ois = new ObjectInputStream(bais)) {
@@ -141,8 +141,9 @@ public final class TestUtil {
      * @return a new byte array with the class name replaced, or the original array if no match was found
      */
     public static byte[] replaceClassName(final byte[] stream, final String oldName, final String newName) {
-        byte[] oldBytes = oldName.getBytes(StandardCharsets.UTF_8);
-        byte[] newBytes = newName.getBytes(StandardCharsets.UTF_8);
+
+        byte[] oldBytes = oldName.getBytes(UTF_8);
+        byte[] newBytes = newName.getBytes(UTF_8);
 
         int pos = indexOf(stream, oldBytes);
         if (pos < 2) {

@@ -15,6 +15,8 @@
  */
 package de.speedbanking.util;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Objects;
 
 /**
@@ -143,7 +145,7 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      */
     @Override
     public int compareTo(IndexRange other) {
-        Objects.requireNonNull(other, "Comparison object must not be null");
+        requireNonNull(other, "Comparison object must not be null");
         int result = Integer.compare(this.begin, other.begin);
         if (result == 0) {
             result = Integer.compare(this.end, other.end);

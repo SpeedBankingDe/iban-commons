@@ -19,18 +19,19 @@ import java.util.stream.Stream;
 /**
  * Unit tests for {@link CountryValidators}.
  */
-class CountryValidatorsTest {
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+final class CountryValidatorsTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void testConstructorIsPrivate() {
+    void constructor_is_private() {
         TestUtil.assertConstructorIsPrivate(CountryValidators.class);
     }
 
     @DisplayName("Should instantiate and invoke validator for each registry entry")
     @ParameterizedTest
     @IbanRegistrySource
-    void testAllValidators(IbanRegistry countryData) {
+    void all_validators_are_invokable(IbanRegistry countryData) {
         CountryValidator validator = IbanValidator.getCountryValidator(countryData);
 
         assertThat(validator)
@@ -39,7 +40,10 @@ class CountryValidatorsTest {
 
         // trigger validation to cover the internal class logic
         // use a dummy IBAN that matches the country code to reach the internal validation code
-        CharSequence badIban = countryData.name() + String.format("%" + (countryData.getIbanLength() - countryData.name().length()) + "s", "0");
+        int totalLength = countryData.getIbanLength();
+        String name = countryData.name();
+        String format = "%s%-" + (totalLength - name.length()) + "s";
+        CharSequence badIban = String.format(format, name, "0");
 
         assertThat(validator.validateIban(badIban))
             .as("Validation should fail for %s using bad iban '%s'", countryData.name(), badIban)
@@ -55,7 +59,7 @@ class CountryValidatorsTest {
     @DisplayName("Should provide correct toString implementation")
     @ParameterizedTest
     @IbanRegistrySource
-    void testToString(IbanRegistry countryData) {
+    void to_string_is_correctly_implemented(IbanRegistry countryData) {
         CountryValidator validator = IbanValidator.getCountryValidator(countryData);
 
         assertThat(validator.toString())
@@ -73,8 +77,8 @@ class CountryValidatorsTest {
     @DisplayName("Should instantiate and invoke all NCD validators")
     @ParameterizedTest
     @MethodSource("allNcdIbanRegistryEntries")
-    @ResourceLock(value = IbanConfigTest.RESOURCE_NAME)
-    void testAllNcdValidators(IbanRegistry countryData) {
+    @ResourceLock(IbanConfigTest.RESOURCE_NAME)
+    void all_ncd_validators_are_invokable(IbanRegistry countryData) {
         IbanConfig.reset(IbanConfig.builder().validateNcd(true).calculateNcd(true).build());
 
         try {

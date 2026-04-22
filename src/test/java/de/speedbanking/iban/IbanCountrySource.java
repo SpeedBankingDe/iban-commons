@@ -1,5 +1,7 @@
 package de.speedbanking.iban;
 
+import static java.util.stream.Collectors.toSet;
+
 import de.speedbanking.iban.IbanCountrySource.IbanCountryArgumentsProvider;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -15,7 +17,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -71,7 +72,7 @@ public @interface IbanCountrySource {
 
             // convert excluded list to a Set for efficient filtering (O(1) lookup)
             Set<IbanRegistry> excludedCountries = Arrays.stream(src.excludeCountries())
-                .collect(Collectors.toSet());
+                .collect(toSet());
 
             // filter the included stream by the excluded set and map to Arguments
             return includeCountries
