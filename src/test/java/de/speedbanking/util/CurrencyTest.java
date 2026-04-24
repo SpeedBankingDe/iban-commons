@@ -27,12 +27,7 @@ import java.util.Set;
  * </ul>
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-@DisplayName("Currency")
 final class CurrencyTest {
-
-    // =========================================================================
-    // getAlphaCode()
-    // =========================================================================
 
     @DisplayName("getAlphaCode() equals name() for all constants")
     @ParameterizedTest(name = "[{index}] {0}")
@@ -51,10 +46,6 @@ final class CurrencyTest {
             .as("%s.getAlphaCode() must be 3 uppercase ASCII letters", c.name())
             .matches("^[A-Z]{3}$");
     }
-
-    // =========================================================================
-    // getCurrencyName()
-    // =========================================================================
 
     @DisplayName("getCurrencyName() is non-null and non-blank for all constants")
     @ParameterizedTest(name = "[{index}] {0}")
@@ -97,10 +88,6 @@ final class CurrencyTest {
         assertThat(Currency.valueOf(code).getCurrencyName())
             .isEqualTo(expectedName);
     }
-
-    // =========================================================================
-    // getNumericCode()
-    // =========================================================================
 
     @DisplayName("getNumericCode() returns the correct ISO 4217 numeric code")
     @ParameterizedTest(name = "[{index}] {0} → {1}")
@@ -176,10 +163,6 @@ final class CurrencyTest {
             .isLessThanOrEqualTo(999);
     }
 
-    // =========================================================================
-    // toString()
-    // =========================================================================
-
     @DisplayName("toString() follows \"<CODE> (<currencyName>)\" pattern for all constants")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(Currency.class)
@@ -203,10 +186,6 @@ final class CurrencyTest {
         assertThat(Currency.valueOf(code)).hasToString(expected);
     }
 
-    // =========================================================================
-    // Enum mechanics
-    // =========================================================================
-
     @DisplayName("values() contains exactly 153 constants")
     @Test
     void enum_values_contains153Constants() {
@@ -228,10 +207,6 @@ final class CurrencyTest {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> Currency.valueOf("XXX"));
     }
-
-    // =========================================================================
-    // Invariants
-    // =========================================================================
 
     @DisplayName("No duplicate numeric codes exist across all constants")
     @Test
@@ -294,3 +269,4 @@ final class CurrencyTest {
     }
 
 }
+

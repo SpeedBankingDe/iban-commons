@@ -25,7 +25,7 @@ final class BicValidationErrorTest {
     @DisplayName("Failure text should be defined for all reasons")
     @ParameterizedTest(name = "Constant {0} should have a non-empty failure text")
     @EnumSource(BicValidationError.class)
-    void failure_text_is_present(BicValidationError reason) {
+    void getText_shouldReturnNonEmptyFailureText_forAllReasons(BicValidationError reason) {
         String text = reason.getText();
 
         assertThat(text)
@@ -36,7 +36,7 @@ final class BicValidationErrorTest {
     @DisplayName("Verify InvalidBicException.toString() format")
     @ParameterizedTest(name = "toString for reason: {0}")
     @EnumSource(BicValidationError.class)
-    void to_string_format_is_valid(BicValidationError reason) {
+    void toString_shouldReturnValidFormat_forInvalidBicException(BicValidationError reason) {
         InvalidBicException ex = InvalidBicException.of(reason);
         assertThat(ex.toString())
             .contains(ex.getClass().getSimpleName())
@@ -52,7 +52,7 @@ final class BicValidationErrorTest {
         "ILLEGAL_CHARACTERS | BIC contains illegal character(s)",
         "INVALID_COUNTRY    | BIC has invalid country code"
     })
-    void failure_text_matches_description(BicValidationError reason, String expectedText) {
+    void failureText_shouldMatchDescription_andToLongStringFormat(BicValidationError reason, String expectedText) {
         assertThat(reason.getText()).isEqualTo(expectedText);
 
         assertThat(reason.toLongString())
@@ -62,7 +62,7 @@ final class BicValidationErrorTest {
 
     @DisplayName("All expected enum constants should exist in the correct order")
     @Test
-    void constants_are_correctly_ordered() {
+    void constants_shouldExist_inCorrectOrder() {
         assertThat(values()).containsExactly(
             EMPTY,
             INCORRECT_LENGTH,

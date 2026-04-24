@@ -8,11 +8,12 @@ import org.junit.jupiter.api.Test;
 /**
  * JUnit test class for {@link BicValidator}.
  */
+@SuppressWarnings("checkstyle:MethodName")
 final class BicValidatorTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructorShouldThrowException() {
+    void privateConstructor_shouldThrowException_whenInstantiated() {
         TestUtil.assertConstructorIsPrivate(BicValidator.class);
     }
 

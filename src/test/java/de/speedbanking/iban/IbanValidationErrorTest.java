@@ -22,12 +22,13 @@ import org.junit.jupiter.params.provider.EnumSource;
  * JUnit test class for the {@link IbanValidationError} enum.<br>
  * Ensures all constants are defined and their failure texts are correct.
  */
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 final class IbanValidationErrorTest {
 
     @DisplayName("Failure text should be defined for all reasons")
     @ParameterizedTest(name = "Constant {0} should have a non-empty failure text")
     @EnumSource(IbanValidationError.class)
-    void failureTextShouldNotBeNullOrEmpty(IbanValidationError reason) {
+    void getText_shouldReturnNonBlankText_whenCalledForAnyConstant(IbanValidationError reason) {
         String text = reason.getText();
 
         assertThat(text)
@@ -46,7 +47,7 @@ final class IbanValidationErrorTest {
         "INVALID_STRUCTURE        | IBAN violates country-specific structure rules",
         "INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
-    void failureTextsShouldMatchFixedExpectedDescriptions(IbanValidationError reason, String expectedText) {
+    void getText_shouldMatchExpectedDescription_whenConstantIsKnown(IbanValidationError reason, String expectedText) {
         assertThat(reason.getText()).isEqualTo(expectedText);
 
         assertThat(reason.toLongString())
@@ -56,7 +57,7 @@ final class IbanValidationErrorTest {
 
     @DisplayName("All expected enum constants should exist")
     @Test
-    void allConstantsShouldExist() {
+    void values_shouldContainAllConstants_whenEnumIsInspected() {
         assertThat(values())
             .containsExactly(EMPTY,
                              INCORRECT_LENGTH,

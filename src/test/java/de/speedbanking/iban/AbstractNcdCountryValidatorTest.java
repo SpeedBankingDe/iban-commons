@@ -58,7 +58,7 @@ final class AbstractNcdCountryValidatorTest {
      */
     @DisplayName("loadNcdCalculator() should throw ExceptionInInitializerError on invalid country code")
     @Test
-    void loadNcdCalculator_ShouldThrowExceptionInInitializerError_OnNonExistingClass() {
+    void loadNcdCalculator_shouldThrowException_whenClassDoesNotExist() {
         assertThatThrownBy(() -> AbstractNcdCountryValidator.loadNcdCalculator(XYZ.class))
             .isExactlyInstanceOf(ExceptionInInitializerError.class)
             .hasMessageContaining("Could not load ncd calculator class");
@@ -66,7 +66,7 @@ final class AbstractNcdCountryValidatorTest {
 
     @DisplayName("validateNationalCheckDigit should delegate to calculator when enabled")
     @Test
-    void validateNationalCheckDigit_ShouldDelegate_WhenEnabled() {
+    void validateNationalCheckDigit_shouldDelegate_whenEnabled() {
         AbstractNcdCountryValidator validator = new PT();
         char[] iban = "PT50000201231234567890154".toCharArray();
 
@@ -75,7 +75,7 @@ final class AbstractNcdCountryValidatorTest {
 
     @DisplayName("validateNationalCheckDigit should return true when validation is disabled")
     @Test
-    void validateNationalCheckDigit_ShouldReturnTrue_WhenDisabled() {
+    void validateNationalCheckDigit_shouldReturnTrue_whenDisabled() {
         IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
 
         AbstractNcdCountryValidator validator = new PT();
@@ -84,7 +84,7 @@ final class AbstractNcdCountryValidatorTest {
 
     @DisplayName("calculateNationalCheckDigit should return range when calculation is disabled")
     @Test
-    void calculateNationalCheckDigit_ShouldReturnRange_WhenDisabled() {
+    void calculateNationalCheckDigit_shouldReturnRange_whenDisabled() {
         IbanConfig.reset(IbanConfig.builder().calculateNcd(false).build());
 
         AbstractNcdCountryValidator validator = new PT();
@@ -94,7 +94,7 @@ final class AbstractNcdCountryValidatorTest {
 
     @DisplayName("calculateNationalCheckDigit should return calculated value when enabled")
     @Test
-    void calculateNationalCheckDigit_ShouldDelegate_WhenEnabled() {
+    void calculateNationalCheckDigit_shouldDelegateToCalculator_whenEnabled() {
         AbstractNcdCountryValidator validator = new PT();
         CharSequence iban = "PT50002700000001234567833";
 
@@ -105,7 +105,7 @@ final class AbstractNcdCountryValidatorTest {
 
     @DisplayName("loadNcdCalculator should throw IllegalStateException on failure if config requires it")
     @Test
-    void loadNcdCalculator_ShouldThrow_OnMissingClass() {
+    void loadNcdCalculator_shouldThrowException_onMissingClass() {
         assertThatThrownBy(XYZ::new)
             .isExactlyInstanceOf(ExceptionInInitializerError.class)
             .hasMessage("'XYZ' is not a supported IBAN country code");
@@ -113,7 +113,7 @@ final class AbstractNcdCountryValidatorTest {
 
     @DisplayName("getNcdCalculator should return the instance loaded via reflection")
     @Test
-    void getNcdCalculator_ShouldReturnLoadedInstance() {
+    void getNcdCalculator_shouldReturnLoadedInstance() {
         AbstractNcdCountryValidator validator = new PT();
 
         assertThat(validator.getNcdCalculator())
@@ -123,13 +123,13 @@ final class AbstractNcdCountryValidatorTest {
 
     @DisplayName("toString should still function correctly via inheritance")
     @Test
-    void toString_ShouldIncludeCountryName() {
+    void toString_shouldIncludeCountryName() {
         AbstractNcdCountryValidator validator = new PT();
 
         assertThat(validator.toString())
             .contains("PT[Portugal]")
             .contains(IbanRegistry.PT.getCountryName())
             .contains(Iso3166Alpha2.PT.getCountryName());
-
     }
 }
+

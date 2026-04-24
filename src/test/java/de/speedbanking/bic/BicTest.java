@@ -36,7 +36,7 @@ final class BicTest {
 
     @DisplayName("of() should create Bic object for a valid BIC-8")
     @Test
-    void of_ValidBic8_ShouldReturnBic() {
+    void of_shouldReturnBic_whenValidBic8() {
         assertThatBicOf("MARKDEFF")
             .as("Check properties for BIC-8")
             .isBic8()
@@ -54,7 +54,7 @@ final class BicTest {
 
     @DisplayName("of() should create Bic object for a valid BIC-11")
     @Test
-    void of_ValidBic11_ShouldReturnBic() {
+    void of_shouldReturnBic_whenValidBic11() {
         assertThatBicOf("MARKDEFF500")
             .as("Check properties for BIC-11")
             .isBic11()
@@ -72,7 +72,7 @@ final class BicTest {
     @DisplayName("of() should throw exception for null or empty BIC")
     @ParameterizedTest(name = "BIC: ''{0}''")
     @NullAndEmptySource
-    void of_NullOrEmpty_ShouldThrowException(String bic) {
+    void of_shouldThrowException_whenNullOrEmpty(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
             .withMessage("BIC is null or empty (%s)", BicValidationError.EMPTY)
@@ -88,7 +88,7 @@ final class BicTest {
         "MARKDEFFX",    //  9 chars
         "DEUTDEFF1234"  // 12 chars
     })
-    void of_InvalidLength_ShouldThrowException(CharSequence bic) {
+    void of_shouldThrowException_whenInvalidLength(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
             .withMessage("BIC has incorrect length (INCORRECT_LENGTH): '%s'", bic)
@@ -101,7 +101,7 @@ final class BicTest {
         "MARK99FF", // 99 is not a valid ISO country
         "MARKXXFF"  // XX is not a valid ISO country
     })
-    void of_InvalidCountry_ShouldThrowException(CharSequence bic) {
+    void of_shouldThrowException_whenInvalidCountry(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
             .withMessage("BIC has invalid country code (INVALID_COUNTRY): '%s'", bic)
@@ -115,7 +115,7 @@ final class BicTest {
         "MÄRKDEFF",
         "____DEFF"
     })
-    void of_InvalidBankCode_ShouldThrowException(CharSequence bic) {
+    void of_shouldThrowException_whenInvalidBankCode(CharSequence bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
             .withMessage("Invalid bank code (INVALID_BANK_CODE): '%s'", bic)
@@ -129,7 +129,7 @@ final class BicTest {
         "MARKDE_1", // underscore
         "MARKDEff"  // lowercase
     })
-    void of_IllegalCharacters_ShouldThrowException(String bic) {
+    void of_shouldThrowException_whenIllegalCharacters(String bic) {
         assertThatInvalidBicException()
             .isThrownBy(() -> Bic.of(bic))
             .withMessage("BIC contains illegal character(s) (ILLEGAL_CHARACTERS): '%s'", bic)
@@ -139,7 +139,7 @@ final class BicTest {
     @DisplayName("tryParse() should return non-empty Optional for valid BIC")
     @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
-    void tryParse_ValidBic_ShouldReturnNonEmptyOptional(String bic) {
+    void tryParse_shouldReturnNonEmptyOptional_whenValidBic(String bic) {
         assertThat(Bic.tryParse(bic))
             .hasValue(Bic.of(bic));
     }
@@ -147,7 +147,7 @@ final class BicTest {
     @DisplayName("tryParseOrNull() should return valid BIC")
     @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
-    void tryParseOrNull_ValidBic_ShouldReturnNonEmptyOptional(String bic) {
+    void tryParseOrNull_shouldReturnBic_whenValidBic(String bic) {
         assertThat(Bic.tryParseOrNull(bic))
             .isEqualTo(Bic.of(bic));
     }
@@ -156,7 +156,7 @@ final class BicTest {
     @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {" ", "INVALID99", "MARK00FF"})
     @NullAndEmptySource
-    void tryParse_InvalidBic_ShouldReturnEmptyOptional(String bic) {
+    void tryParse_shouldReturnEmptyOptional_whenInvalidBic(String bic) {
         assertThat(Bic.tryParse(bic)).isEmpty();
     }
 
@@ -164,7 +164,7 @@ final class BicTest {
     @ParameterizedTest(name = "BIC: ''{0}''")
     @ValueSource(strings = {" ", "INVALID99", "MARK00FF"})
     @NullAndEmptySource
-    void tryParseOrNull_InvalidBic_ShouldReturnEmptyOptional(String bic) {
+    void tryParseOrNull_shouldReturnNull_whenInvalidBic(String bic) {
         assertThat(Bic.tryParseOrNull(bic)).isNull();
     }
 
@@ -180,7 +180,7 @@ final class BicTest {
         "MARKxxFF | false",
         "MARK00FF | false"
     })
-    void isValid_ShouldReflectValidationResult(String bic, boolean expectedResult) {
+    void isValid_shouldReflectValidationResult(String bic, boolean expectedResult) {
         assertThat(Bic.isValid(bic)).isEqualTo(expectedResult);
         if (expectedResult) {
             assertThatBicIsValid(bic);
@@ -197,7 +197,7 @@ final class BicTest {
         "NEDSZAJJXXX   | NEDS      | ZA           | JJ            | XXX",
         "DBABDEFF500   | DBAB      | DE           | FF            | 500"
     })
-    void getters_ShouldExtractCorrectComponents(
+    void getters_shouldExtractCorrectComponents(
             String bicValue,
             String expectedBankCode,
             String expectedCountryCode,
@@ -213,8 +213,6 @@ final class BicTest {
             .hasLocationCode(expectedLocationCode)
             .hasBranchCode(expectedBranchCode);
 
-        // the isSameAs checks are implementation details (caching) and must remain separate
-        // to verify instance identity, as they do not return BicAssert
         assertThat(bic.getBankCode()).isSameAs(bic.getBankCode());
         assertThat(bic.getCountryCode()).isSameAs(bic.getCountryCode());
         assertThat(bic.getLocationCode()).isSameAs(bic.getLocationCode());
@@ -228,7 +226,7 @@ final class BicTest {
         "MARKDEFFXXX   | MARKDEFFXXX     | MARKDEFF       | MARKDEFFXXX",
         "DBABDEFF500   | DBABDEFF500     | DBABDEFF       | DBABDEFF500"
     })
-    void toBicFormats_ShouldReturnCorrectNormalizedStrings(String inputBic, String expectedBic11, String expectedBic8, String expectedToString) {
+    void toBicFormats_shouldReturnCorrectNormalizedStrings(String inputBic, String expectedBic11, String expectedBic8, String expectedToString) {
         assertThatBicOf(inputBic)
             .as("Format check for BIC %s", inputBic)
             .isBic11NormalizedEqualTo(expectedBic11)
@@ -242,7 +240,7 @@ final class BicTest {
         "MARKDEFF | MARKDEFFXXX",
         "NEDSZAJJ | NEDSZAJJXXX"
     })
-    void equality_Bic8AndBic11XXX_ShouldBeEqual(String bic8Value, String bic11Value) {
+    void equality_shouldBeEqual_whenBic8AndBic11XXX(String bic8Value, String bic11Value) {
         Bic bic8 = Bic.of(bic8Value);
         Bic bic11First = Bic.of(bic11Value);
         Bic bic11Second = Bic.of(bic11Value);
@@ -270,21 +268,18 @@ final class BicTest {
 
     @DisplayName("equals() should not treat different branch codes as equal")
     @Test
-    void equality_DifferentBICs_ShouldNotBeEqual() {
+    void equality_shouldNotBeEqual_whenDifferentBICs() {
         Bic bic8 = Bic.of("MARKDEFF");
         Bic bic11Branch1 = Bic.of("MARKDEFF500");
         Bic bic11Branch2 = Bic.of("MARKDEFF100");
 
-        assertThat(bic8)
-            .isNotEqualTo(bic11Branch1);
-
-        assertThat(bic11Branch1)
-            .isNotEqualTo(bic11Branch2);
+        assertThat(bic8).isNotEqualTo(bic11Branch1);
+        assertThat(bic11Branch1).isNotEqualTo(bic11Branch2);
     }
 
     @DisplayName("compareTo() should compare based on BIC-11 string and handle null")
     @Test
-    void compareTo_ShouldBeBasedOnBic11() {
+    void compareTo_shouldBeBasedOnBic11() {
         Bic bicA = Bic.of("MARKDEFF");    // MARKDEFFXXX
         Bic bicB = Bic.of("MARKDEFFXXX");
         Bic bicC = Bic.of("MARKDEFF500"); // MARKDEFF500
@@ -305,7 +300,7 @@ final class BicTest {
 
     @DisplayName("charAt() should return correct character and check bounds")
     @Test
-    void charSequenceCharAt() {
+    void charAt_shouldReturnCorrectCharacter_andCheckBounds() {
         Bic bic = Bic.of("MARKDEFF500"); // 11 chars
 
         assertThat(bic)
@@ -322,8 +317,8 @@ final class BicTest {
 
     @DisplayName("subSequence() should return correct substring and check bounds")
     @Test
-    void charSequenceSubSequence() {
-        Bic bic = Bic.of("MARKDEFF"); // 8 chars
+    void subSequence_shouldReturnCorrectSubstring_andCheckBounds() {
+        Bic bic = Bic.of("MARKDEFF");
 
         assertThat(bic)
             .extracting(
@@ -357,7 +352,7 @@ final class BicTest {
         "MARKDEFF500 | 8  | 11 | 500",
         "MARKDEFFXXX | 6  | 11 | FFXXX"
     })
-    void charSequenceSubSequence_crossBoundaryBic11(String bicInput, int start, int end, String expected) {
+    void subSequence_shouldReturnCorrectSubstring_whenRangeCrossesBoundaryBic11(String bicInput, int start, int end, String expected) {
         // exercises the toBic11() fallback path in subSequence() where end > BIC8_LENGTH
         assertThat(Bic.of(bicInput).subSequence(start, end))
             .as("subSequence(%d, %d) on %s", start, end, bicInput)
@@ -366,7 +361,7 @@ final class BicTest {
 
     @DisplayName("toBic11() should lazily compute and cache the BIC-11 string for BIC-8 objects")
     @Test
-    void toBic11_lazyInit_bic8Object() {
+    void toBic11_shouldLazyInit_whenBic8Object() {
         Bic bic = Bic.of("MARKDEFF");
         // first call: triggers lazy initialisation (bic11 == null branch)
         assertThat(bic.toBic11()).isEqualTo("MARKDEFFXXX");
@@ -376,7 +371,7 @@ final class BicTest {
 
     @DisplayName("toString() should return the original input string")
     @Test
-    void toStringShouldReturnOriginalInput() {
+    void toString_shouldReturnOriginalInput() {
         Bic bic8 = Bic.of("MARKDEFF");
         Bic bic11 = Bic.of("MARKDEFF500");
 
@@ -408,7 +403,7 @@ final class BicTest {
         "BHLSDEM1",
         "DEUTDEFF"
     })
-    void serialization_ValidBic_ShouldPreserveState(String bicInput) throws IOException, ClassNotFoundException {
+    void serialization_shouldPreserveState_whenValidBic(String bicInput) throws IOException, ClassNotFoundException {
         Bic original = Bic.of(bicInput);
         final Bic bic = original;
 
@@ -439,7 +434,7 @@ final class BicTest {
      */
     @DisplayName("Serialization round-trip should preserve BIC-8 / BIC-11 distinction")
     @Test
-    void serializationPreservesBicFormat() throws IOException, ClassNotFoundException {
+    void serialization_shouldPreserveBicFormat() throws IOException, ClassNotFoundException {
         Bic originalBic8  = Bic.of("MARKDEFF");
         Bic originalBic11 = Bic.of("MARKDEFFXXX");
         final Bic bic = originalBic8;
@@ -468,7 +463,7 @@ final class BicTest {
      */
     @DisplayName("Serialized stream must reference the Memento proxy, not Bic directly")
     @Test
-    void serializedFormUsesMementoProxy() throws IOException {
+    void serialization_shouldUseMementoProxy() throws IOException {
         byte[] bytes = TestUtil.serialize(Bic.of("MARKDEFF"));
         String streamContent = new String(bytes, UTF_8);
 
@@ -491,7 +486,7 @@ final class BicTest {
      */
     @DisplayName("Direct deserialization of Bic bypassing Memento must be rejected")
     @Test
-    void deserialization_DirectBic_ShouldThrowException() throws IOException {
+    void deserialization_shouldThrowException_whenDirectBic() throws IOException {
         byte[] mementoBytes = TestUtil.serialize(Bic.of("MARKDEFF"));
         final byte[] stream = mementoBytes;
 
@@ -512,7 +507,7 @@ final class BicTest {
      */
     @DisplayName("Deserialized Bic instance must be distinct from the original")
     @Test
-    void deserializedInstanceIsDistinct() throws ClassNotFoundException, IOException {
+    void deserialization_shouldProduceDistinctInstance() throws ClassNotFoundException, IOException {
         Bic original = Bic.of("DEUTDEFF");
         final Bic bic = original;
         Bic restored = TestUtil.deserialize(TestUtil.serialize(bic));
@@ -533,7 +528,7 @@ final class BicTest {
      */
     @DisplayName("Memento.readResolve() must reject an invalid BIC stored in the stream")
     @Test
-    void mementoReadResolveRejectsInvalidBic() throws IOException {
+    void mementoReadResolve_shouldRejectInvalidBic() throws IOException {
         byte[] corruptStream = TestUtil.buildMementoStream(Bic.of("MARKDEFF"), "NOT_A_BIC!!");
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
@@ -553,7 +548,7 @@ final class BicTest {
      */
     @DisplayName("Memento.readObject() must reject a stream with an unsupported version")
     @Test
-    void mementoReadObjectRejectsUnknownStreamVersion() throws IOException {
+    void mementoReadObject_shouldRejectUnknownStreamVersion() throws IOException {
         byte[] corruptStream = TestUtil.buildMementoStream(Bic.of("MARKDEFF"), 99L, "MARKDEFF");
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
@@ -574,7 +569,7 @@ final class BicTest {
      */
     @DisplayName("readObjectNoData() must throw InvalidObjectException")
     @Test
-    void readObjectNoData_DirectInvocation_ShouldThrowException() throws Exception {
+    void readObjectNoData_shouldThrowException_whenInvokedDirectly() throws Exception {
         Bic bic = Bic.of("MARKDEFF");
 
         Throwable cause = TestUtil.invokeSerializationGuard(bic, "readObjectNoData", new Class<?>[0]);
@@ -596,7 +591,7 @@ final class BicTest {
      */
     @DisplayName("readObject() must throw InvalidObjectException when invoked directly")
     @Test
-    void readObject_DirectInvocation_ShouldThrowException() throws Exception {
+    void readObject_shouldThrowException_whenInvokedDirectly() throws Exception {
         Bic bic = Bic.of("MARKDEFF");
 
         Throwable cause = TestUtil.invokeSerializationGuard(bic, "readObject",

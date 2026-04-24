@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * JUnit test class for {@link Formatter}.
  */
-@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@SuppressWarnings("checkstyle:MethodName")
 final class FormatterTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")

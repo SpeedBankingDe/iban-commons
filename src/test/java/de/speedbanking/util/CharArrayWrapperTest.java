@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Unit tests for {@link CharArrayWrapper}.
  */
-@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@SuppressWarnings("checkstyle:MethodName")
 final class CharArrayWrapperTest {
 
     @DisplayName("Should wrap full array and provide correct characters")

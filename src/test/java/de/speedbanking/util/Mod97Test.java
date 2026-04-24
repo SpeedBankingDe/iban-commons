@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * Unit tests for {@link Mod97}.
  */
-@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@SuppressWarnings("checkstyle:MethodName")
 final class Mod97Test {
 
     private static final String VALID_DE_IBAN    = "DE91100000000123456789";

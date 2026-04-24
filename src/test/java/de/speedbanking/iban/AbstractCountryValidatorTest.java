@@ -38,7 +38,7 @@ final class AbstractCountryValidatorTest {
 
     @DisplayName("Constructor should resolve country data when class name is valid")
     @Test
-    void constructor_ShouldResolveCountryData_WhenClassNameIsValid() {
+    void constructor_shouldResolveCountryData_whenClassNameIsValid() {
         AbstractCountryValidator validator = new DE();
 
         assertThat(validator.getCountryData())
@@ -48,7 +48,7 @@ final class AbstractCountryValidatorTest {
 
     @DisplayName("Constructor should throw exception when class name is not in registry")
     @Test
-    void constructor_ShouldThrowException_WhenClassNameIsInvalid() {
+    void constructor_shouldThrowException_whenClassNameIsInvalid() {
         assertThatThrownBy(INVALID::new)
             .isExactlyInstanceOf(ExceptionInInitializerError.class)
             .hasMessageContaining("'INVALID' is not a supported IBAN country code");
@@ -56,7 +56,7 @@ final class AbstractCountryValidatorTest {
 
     @DisplayName("toString should return formatted string matching the contract")
     @Test
-    void toString_ShouldReturnFormattedString() {
+    void toString_shouldReturnFormattedString() {
         AbstractCountryValidator validator = new DE();
 
         // expected format: DE[Germany]
@@ -67,7 +67,7 @@ final class AbstractCountryValidatorTest {
 
     @DisplayName("getCountryData should return the same instance as resolved at construction")
     @Test
-    void getCountryData_ShouldReturnRegistryEntry() {
+    void getCountryData_shouldReturnRegistryEntry() {
         AbstractCountryValidator validator = new DE();
         IbanRegistry data = validator.getCountryData();
 
@@ -76,7 +76,7 @@ final class AbstractCountryValidatorTest {
 
     @DisplayName("toString should match the required pattern and contain country name")
     @Test
-    void toString_ShouldFollowPattern() {
+    void toString_shouldFollowPattern() {
         AbstractCountryValidator validator = new DE();
         String result = validator.toString();
 

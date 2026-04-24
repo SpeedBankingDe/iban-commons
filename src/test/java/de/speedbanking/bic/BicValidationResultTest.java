@@ -27,7 +27,7 @@ final class BicValidationResultTest {
 
     @DisplayName("Private constructor should throw exception if both arguments are NULL")
     @Test
-    void privateConstructor_shouldThrowIfBothNull() throws Exception {
+    void privateConstructor_shouldThrowException_whenBothArgumentsAreNull() throws Exception {
         Constructor<BicValidationResult> constructor = getPrivateConstructor();
 
         assertThatExceptionOfType(InvocationTargetException.class)
@@ -40,7 +40,7 @@ final class BicValidationResultTest {
 
     @DisplayName("Private constructor should throw exception if both arguments are NOT NULL")
     @Test
-    void privateConstructor_shouldThrowIfBothNotNull() throws Exception {
+    void privateConstructor_shouldThrowException_whenBothArgumentsAreNotNull() throws Exception {
         Constructor<BicValidationResult> constructor = getPrivateConstructor();
 
         assertThatExceptionOfType(InvocationTargetException.class)
@@ -53,7 +53,7 @@ final class BicValidationResultTest {
 
     @DisplayName("Instantiation failures (factory methods)")
     @Test
-    void instantiation_fails_on_invalid_input() {
+    void instantiation_shouldThrowException_whenInputIsInvalid() {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> BicValidationResult.valid(null))
             .withMessage("Valid result requires a BIC");
@@ -65,7 +65,7 @@ final class BicValidationResultTest {
 
     @DisplayName("Should correctly create a valid result")
     @Test
-    void valid_result_is_correctly_created() {
+    void valid_shouldStoreBic_whenBicIsValid() {
         BicValidationResult result = BicValidationResult.valid(validBic);
 
         assertThat(result.isValid()).isTrue();
@@ -80,7 +80,7 @@ final class BicValidationResultTest {
 
     @DisplayName("Should correctly create an invalid result")
     @Test
-    void invalid_result_stores_error_details() {
+    void invalid_shouldStoreErrorDetails_whenReasonIsProvided() {
         BicValidationError testReason = BicValidationError.EMPTY;
 
         BicValidationResult result = BicValidationResult.invalid(testReason);
@@ -97,7 +97,7 @@ final class BicValidationResultTest {
 
     @DisplayName("toString() should be correctly formatted for a valid result")
     @Test
-    void to_string_contains_bic_when_valid() {
+    void toString_shouldContainBic_whenResultIsValid() {
         BicValidationResult result = BicValidationResult.valid(validBic);
         String expected = BicValidationResult.class.getSimpleName() + "[valid: " + validBic + "]";
 
@@ -106,7 +106,7 @@ final class BicValidationResultTest {
 
     @DisplayName("toString() should be correctly formatted for an invalid result")
     @Test
-    void to_string_contains_error_when_invalid() {
+    void toString_shouldContainError_whenResultIsInvalid() {
         BicValidationResult result = BicValidationResult.invalid(BicValidationError.INVALID_COUNTRY);
         String expected = BicValidationResult.class.getSimpleName() + "[invalid: BIC has invalid country code]";
 

@@ -26,7 +26,7 @@ final class InvalidBicExceptionTest {
     @DisplayName("of(reason) should store reason and derive message from reason text")
     @ParameterizedTest(name = "Test Exception for reason: {0}")
     @EnumSource(BicValidationError.class)
-    void ofShouldInitializeCorrectly(BicValidationError reason) {
+    void of_shouldInitializeCorrectly_whenReasonIsGiven(BicValidationError reason) {
         InvalidBicException exception = InvalidBicException.of(reason);
 
         assertThat(exception)
@@ -47,7 +47,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("of(reason) should yield no input")
     @Test
-    void ofWithoutInputShouldHaveNoInput() {
+    void of_shouldHaveNoInput_whenCalledWithoutInput() {
         InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY);
 
         assertThat(exception.getInput())
@@ -61,7 +61,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("of(reason, input) should store both reason and input")
     @Test
-    void ofWithInputShouldStoreInput() {
+    void of_shouldStoreInput_whenInputIsGiven() {
         BicValidationError reason = BicValidationError.EMPTY;
         String input = "DEUTDEDB";
 
@@ -82,7 +82,7 @@ final class InvalidBicExceptionTest {
     @DisplayName("of(reason, <empty>) should keep input")
     @ParameterizedTest(name = "input ''{0}''")
     @NullAndEmptySource
-    void ofWithNullInputShouldKeepInput(String input) {
+    void of_shouldKeepInput_whenInputIsNullOrEmpty(String input) {
         InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY, input);
 
         assertThat(exception.getInput()).isEqualTo(input);
@@ -94,7 +94,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("of(null) should throw NullPointerException")
     @Test
-    void ofShouldThrowOnNullReason() {
+    void of_shouldThrowException_whenReasonIsNull() {
         assertThatExceptionOfType(NullPointerException.class)
             .isThrownBy(() -> InvalidBicException.of(null))
             .withMessage("reason required");
@@ -102,7 +102,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("of(null, input) should throw NullPointerException")
     @Test
-    void ofWithInputShouldThrowOnNullReason() {
+    void of_shouldThrowException_whenReasonIsNullAndInputIsGiven() {
         assertThatExceptionOfType(NullPointerException.class)
             .isThrownBy(() -> InvalidBicException.of(null, "DEUTDEDB"))
             .withMessage("reason required");
@@ -114,7 +114,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("equals() should be true for same reason and same input")
     @Test
-    void equalsShouldBeTrueForSameReasonAndInput() {
+    void equals_shouldBeTrue_whenReasonAndInputAreEqual() {
         BicValidationError reason = BicValidationError.EMPTY;
         String input = "DEUTDEDB";
 
@@ -128,7 +128,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("equals() should be true for same reason and both inputs null")
     @Test
-    void equalsShouldBeTrueForSameReasonAndNullInput() {
+    void equals_shouldBeTrue_whenReasonIsEqualAndInputIsNull() {
         BicValidationError reason = BicValidationError.EMPTY;
 
         InvalidBicException a = InvalidBicException.of(reason, null);
@@ -141,7 +141,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("equals() should be false for different reasons")
     @Test
-    void equalsShouldBeFalseForDifferentReasons() {
+    void equals_shouldBeFalse_whenReasonsAreDifferent() {
         BicValidationError[] errors = BicValidationError.values();
         org.junit.jupiter.api.Assumptions.assumeTrue(errors.length >= 2,
             "Need at least two BicValidationError values for this test");
@@ -154,7 +154,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("equals() should be false when one has input and the other does not")
     @Test
-    void equalsShouldBeFalseWhenInputDiffers() {
+    void equals_shouldBeFalse_whenInputsDiffer() {
         BicValidationError reason = BicValidationError.EMPTY;
 
         InvalidBicException withInput    = InvalidBicException.of(reason, "DEUTDEDB");
@@ -166,14 +166,14 @@ final class InvalidBicExceptionTest {
     @DisplayName("equals() should be reflexive")
     @Test
     @SuppressWarnings("SelfAssertion")
-    void equalsShouldBeReflexive() {
+    void equals_shouldBeReflexive_whenComparedToItself() {
         InvalidBicException ex = InvalidBicException.of(BicValidationError.EMPTY);
         assertThat(ex).isEqualTo(ex);
     }
 
     @DisplayName("equals() should return false for null and other types")
     @Test
-    void equalsShouldReturnFalseForNullAndOtherTypes() {
+    void equals_shouldBeFalse_whenComparedToNullOrOtherType() {
         InvalidBicException ex = InvalidBicException.of(BicValidationError.EMPTY);
         assertThat(ex)
             .isNotNull()
@@ -186,7 +186,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("toString() should include class name, message, reason and input")
     @Test
-    void toStringShouldContainAllParts() {
+    void toString_shouldContainAllParts_whenInputIsGiven() {
         BicValidationError reason = BicValidationError.EMPTY;
         String input = "DEUTDEDB";
 
@@ -200,7 +200,7 @@ final class InvalidBicExceptionTest {
 
     @DisplayName("toString() without input should not contain trailing colon segment")
     @Test
-    void toStringShouldNotContainInputSegmentWhenAbsent() {
+    void toString_shouldOmitInputSegment_whenInputIsAbsent() {
         BicValidationError reason = BicValidationError.EMPTY;
 
         String result = InvalidBicException.of(reason).toString();

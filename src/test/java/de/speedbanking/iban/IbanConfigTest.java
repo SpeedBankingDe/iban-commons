@@ -34,7 +34,7 @@ final class IbanConfigTest {
 
     @DisplayName("Default instance should have all options disabled")
     @Test
-    void default_values_are_consistent() {
+    void get_shouldHaveAllOptionsDisabled_whenDefaultIsUsed() {
         assertThat(IbanConfig.isValidateNcd()).isFalse();
         assertThat(IbanConfig.isCalculateNcd()).isFalse();
         assertThat(IbanConfig.isAllowSpace()).isFalse();
@@ -43,7 +43,7 @@ final class IbanConfigTest {
 
     @DisplayName("get() without configure() should return DEFAULT instance")
     @Test
-    void get_returns_default_instance() {
+    void get_shouldReturnDefaultInstance_whenNotConfigured() {
         assertThat(IbanConfig.get()).isSameAs(IbanConfig.DEFAULT);
     }
 
@@ -53,7 +53,7 @@ final class IbanConfigTest {
 
     @DisplayName("configure() should install the provided instance")
     @Test
-    void configure_updates_settings() {
+    void configure_shouldUpdateSettings_whenCustomInstanceIsProvided() {
         IbanConfig custom = IbanConfig.builder()
             .allowSpace(true)
             .allowLowercase(true)
@@ -68,14 +68,14 @@ final class IbanConfigTest {
 
     @DisplayName("configure() should reject null")
     @Test
-    void configure_throws_on_null_input() {
+    void configure_shouldThrowException_whenInputIsNull() {
         assertThatThrownBy(() -> IbanConfig.configure(null))
             .isInstanceOf(NullPointerException.class);
     }
 
     @DisplayName("configure() after get() should throw IllegalStateException")
     @Test
-    void configure_fails_after_instance_freeze() {
+    void configure_shouldThrowException_whenInstanceIsAlreadyFrozen() {
         IbanConfig.get(); // freezes
 
         assertThatThrownBy(() -> IbanConfig.configure(IbanConfig.DEFAULT))
@@ -85,7 +85,7 @@ final class IbanConfigTest {
 
     @DisplayName("configure() before get() should succeed")
     @Test
-    void configure_succeeds_before_first_access() {
+    void configure_shouldSucceed_whenCalledBeforeFirstAccess() {
         IbanConfig custom = IbanConfig.builder().validateNcd(true).build();
 
         IbanConfig.configure(custom); // must not throw
@@ -99,7 +99,7 @@ final class IbanConfigTest {
 
     @DisplayName("Builder should set each property independently")
     @Test
-    void builder_sets_all_properties_correctly() {
+    void builder_shouldSetAllProperties_whenEachIsConfigured() {
         IbanConfig config = IbanConfig.builder()
             .validateNcd(true)
             .calculateNcd(true)
@@ -117,7 +117,7 @@ final class IbanConfigTest {
 
     @DisplayName("Builder defaults should match DEFAULT instance")
     @Test
-    void builder_defaults_align_with_global_defaults() {
+    void builder_shouldMatchDefaultInstance_whenBuiltWithoutConfiguration() {
         IbanConfig fromBuilder = IbanConfig.builder().build();
 
         assertThat(fromBuilder).hasToString(IbanConfig.DEFAULT.toString());
@@ -129,7 +129,7 @@ final class IbanConfigTest {
 
     @DisplayName("toString should contain class name and all property values")
     @Test
-    void to_string_contains_relevant_fields() {
+    void toString_shouldContainAllFields_whenDefaultIsUsed() {
         String result = IbanConfig.DEFAULT.toString();
 
         assertThat(result)

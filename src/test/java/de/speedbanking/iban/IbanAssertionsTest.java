@@ -12,12 +12,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 /**
  * Tests for the custom AssertJ assertions.
  */
-@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@SuppressWarnings("checkstyle:MethodName")
 final class IbanAssertionsTest {
 
     @DisplayName("Should assert on IBAN creation")
     @Test
-    void shouldAssertOnIban() {
+    void assertThatIbanOf_shouldVerifyProperties_whenValidIban() {
         // test lowercase and spaces
         assertThatIbanOf("DE89370400440532013000")
             .hasCountryCode("DE")
@@ -32,16 +32,17 @@ final class IbanAssertionsTest {
         "' '                    | false"
     })
     @DisplayName("Should assert IBAN validity")
-    void shouldAssertIbanValidity(String input, boolean expected) {
+    void assertThatIbanIsValid_shouldReflectValidity_whenInputIsProvided(String input, boolean expected) {
         assertThatIbanIsValid(input).isEqualTo(expected);
     }
 
     @DisplayName("Should catch InvalidIbanException fluently")
     @Test
-    void shouldCatchInvalidIbanException() {
+    void assertThatInvalidIbanException_shouldCatchException_whenIbanIsInvalid() {
         assertThatInvalidIbanException().isThrownBy(() -> Iban.of("SHORT"))
             .withMessage("IBAN has incorrect length (INCORRECT_LENGTH): 'SHORT'")
             .withNoCause();
     }
 
 }
+

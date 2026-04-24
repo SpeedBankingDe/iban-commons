@@ -16,11 +16,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 /**
  * JUnit test class for {@link IndexRange}.
  */
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 final class IndexRangeTest {
 
     @DisplayName("Should create IndexRange and check getters for valid indices")
     @Test
-    void shouldCreateAndCheckGetters() {
+    void of_shouldCreateRangeWithCorrectGetters_whenIndicesAreValid() {
         final int begin = 5;
         final int end = 10;
 
@@ -35,7 +36,7 @@ final class IndexRangeTest {
     @DisplayName("Should throw IllegalArgumentException if begin index is negative")
     @ParameterizedTest
     @ValueSource(ints = {-1, -5, Integer.MIN_VALUE})
-    void shouldThrowIAEWhenBeginIsNegative(int negativeBegin) {
+    void of_shouldThrowException_whenBeginIsNegative(int negativeBegin) {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> IndexRange.of(negativeBegin, 1))
             .withMessageContaining("must be non-negative");
@@ -48,7 +49,7 @@ final class IndexRangeTest {
         "10 | 0",
         " 1 | 0"
     })
-    void shouldThrowIAEWhenEndIsLessThanBegin(int begin, int end) {
+    void of_shouldThrowException_whenEndIsLessThanBegin(int begin, int end) {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> IndexRange.of(begin, end))
             .withMessageContaining("must be greater than or equal to 'begin'");
@@ -56,7 +57,7 @@ final class IndexRangeTest {
 
     @DisplayName("Should allow zero-length range (begin == end)")
     @Test
-    void shouldAllowZeroLengthRange() {
+    void of_shouldCreateZeroLengthRange_whenBeginEqualsEnd() {
         IndexRange range = IndexRange.of(5, 5);
         assertThat(range)
             .isNotNull()
@@ -72,13 +73,13 @@ final class IndexRangeTest {
         " 5, 15 | 10",
         " 0,  0 |  0"
     })
-    void shouldReturnCorrectLength(@ConvertWith(IndexRangeConverter.class) IndexRange range, int expectedLength) {
+    void length_shouldReturnCorrectLength_whenRangeIsGiven(@ConvertWith(IndexRangeConverter.class) IndexRange range, int expectedLength) {
         assertThat(range.length()).isEqualTo(expectedLength);
     }
 
     @DisplayName("Should extract correct substring with applyTo(CharSequence)")
     @Test
-    void shouldExtractCorrectSubstringFromCharSequence() {
+    void applyTo_shouldExtractCorrectSubstring_whenCharSequenceIsGiven() {
         final String sequence = "ABCDEFGHIJ"; // 10 chars, indices 0 to 9
         IndexRange range = IndexRange.of(3, 7); // indices 3 (incl.) to 7 (excl.) -> DEFG
 
@@ -89,7 +90,7 @@ final class IndexRangeTest {
 
     @DisplayName("Should throw IndexOutOfBoundsException when sequence is too short for applyTo(CharSequence)")
     @Test
-    void shouldThrowIOOBEWhenSequenceIsTooShortForCharSequence() {
+    void applyTo_shouldThrowException_whenCharSequenceIsTooShort() {
         final String sequence = "ABC"; // Length 3, indices 0, 1, 2
         IndexRange range = IndexRange.of(1, 5); // needs index 5 (exclusive)
 
@@ -99,7 +100,7 @@ final class IndexRangeTest {
 
     @DisplayName("Should extract correct string from char array with applyTo(char[])")
     @Test
-    void shouldExtractCorrectStringFromCharArray() {
+    void applyTo_shouldExtractCorrectSubstring_whenCharArrayIsGiven() {
         final char[] sequence = "KLMNOPQRSTUVWXYZ".toCharArray();
         IndexRange range = IndexRange.of(4, 10); // indices 4 (incl.) to 10 (excl.) -> OPQRST
 
@@ -110,7 +111,7 @@ final class IndexRangeTest {
 
     @DisplayName("Should throw IndexOutOfBoundsException when char array is too short for applyTo(char[])")
     @Test
-    void shouldThrowIOOBEWhenCharArrayIsTooShort() {
+    void applyTo_shouldThrowException_whenCharArrayIsTooShort() {
         final char[] sequence = "K".toCharArray(); // length 1
         IndexRange range = IndexRange.of(0, 5); // needs index 5 (exclusive)
 
@@ -128,7 +129,7 @@ final class IndexRangeTest {
         " 1, 5 | 1, 6 | -1", // begin equal, end is less
         " 1, 6 | 1, 5 |  1"  // begin equal, end is greater
     })
-    void shouldSatisfyCompareTo(@ConvertWith(IndexRangeConverter.class) IndexRange range1, @ConvertWith(IndexRangeConverter.class) IndexRange range2, int expectedSign) {
+    void compareTo_shouldSatisfyContract_whenRangesAreCompared(@ConvertWith(IndexRangeConverter.class) IndexRange range1, @ConvertWith(IndexRangeConverter.class) IndexRange range2, int expectedSign) {
         int result = range1.compareTo(range2);
 
         if (expectedSign == 0) {
@@ -142,7 +143,7 @@ final class IndexRangeTest {
 
     @DisplayName("Should throw NullPointerException when compareTo is called with null")
     @Test
-    void shouldThrowNPEWhenComparingWithNull() {
+    void compareTo_shouldThrowException_whenArgumentIsNull() {
         IndexRange range = IndexRange.of(1, 5);
 
         assertThatNullPointerException()
@@ -153,7 +154,7 @@ final class IndexRangeTest {
     @DisplayName("Should satisfy equals and hashCode contract, including null names")
     @Test
     @SuppressWarnings("SelfAssertion")
-    void shouldSatisfyEqualsAndHashCodeContract() {
+    void equalsAndHashCode_shouldSatisfyContract_whenRangesAreCompared() {
         IndexRange range1 = IndexRange.of(1, 5);
         IndexRange range2 = IndexRange.of(1, 5);
         IndexRange rangeDifferentBegin = IndexRange.of(0, 5);
@@ -169,7 +170,7 @@ final class IndexRangeTest {
 
     @DisplayName("Should return correct and descriptive toString format, handling null name")
     @Test
-    void shouldReturnCorrectToString() {
+    void toString_shouldReturnCorrectFormat_whenRangeIsGiven() {
          // Length 4. End-1 = 4
         assertThat(IndexRange.of(1, 5)).hasToString("IndexRange[1-4 (4)]");
     }

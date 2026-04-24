@@ -22,18 +22,18 @@ import java.util.stream.Stream;
 /**
  * JUnit 5 tests for {@link RandomBic}.
  */
-@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@SuppressWarnings("checkstyle:MethodName")
 final class RandomBicTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_Instantiation_ShouldThrowException() {
+    void privateConstructor_shouldThrowException_whenInstantiated() {
         TestUtil.assertConstructorIsPrivate(RandomBic.class);
     }
 
     @DisplayName("of() should return a non-null valid BIC-8")
     @Test
-    void of_NoArgs_ShouldReturnValidBic8() {
+    void of_shouldReturnValidBic8_whenNoArgs() {
         Bic bic = RandomBic.of();
 
         assertThat(bic)
@@ -45,19 +45,19 @@ final class RandomBicTest {
 
     @DisplayName("of() should not throw any exception")
     @Test
-    void of_NoArgs_ShouldNotThrowException() {
+    void of_shouldNotThrowException_whenNoArgs() {
         assertThatCode(RandomBic::of).doesNotThrowAnyException();
     }
 
     @DisplayName("of(Random) with null Random should not throw (falls back to ThreadLocalRandom)")
     @Test
-    void of_NullRandom_ShouldNotThrow() {
+    void of_shouldNotThrow_whenRandomIsNull() {
         assertThatCode(() -> RandomBic.of((Random) null)).doesNotThrowAnyException();
     }
 
     @DisplayName("of(Random) should return a valid BIC-8")
     @Test
-    void of_WithRandom_ShouldReturnValidBic8() {
+    void of_shouldReturnValidBic8_whenWithRandom() {
         Bic bic = RandomBic.of(new Random(1L));
 
         assertThat(bic)
@@ -69,7 +69,7 @@ final class RandomBicTest {
     @DisplayName("of(String) with null or unsupported country code should throw NullPointerException")
     @ParameterizedTest(name = "Country code: ''{0}''")
     @ValueSource(strings = {"", " ", "  ", "XX", "ZZ", "de", "99", "D", "DEU", " DE"})
-    void of_InvalidCountryCode_ShouldThrowNpe(String countryCode) {
+    void of_shouldThrowNpe_whenCountryCodeIsInvalid(String countryCode) {
         assertThatNullPointerException()
             .isThrownBy(() -> RandomBic.of(countryCode))
             .withMessage("Supported ISO 3166-1 Alpha-2 country code required");
@@ -77,14 +77,14 @@ final class RandomBicTest {
 
     @DisplayName("of(String, null) with null Random should not throw")
     @Test
-    void of_CountryCodeNullRandom_ShouldNotThrow() {
+    void of_shouldNotThrow_whenCountryCodeIsValidAndRandomIsNull() {
         assertThatCode(() -> RandomBic.of("DE", null)).doesNotThrowAnyException();
     }
 
     @DisplayName("of(String) should return a BIC-8 with the correct country code")
     @ParameterizedTest(name = "Country: {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "US", "JP", "CH", "AT", "NL"})
-    void of_ValidCountryCode_ShouldReturnBic8WithCountry(String countryCode) {
+    void of_shouldReturnBic8WithCountry_whenCountryCodeIsValid(String countryCode) {
         Bic bic = RandomBic.of(countryCode);
 
         assertThat(bic)
@@ -96,7 +96,7 @@ final class RandomBicTest {
 
     @DisplayName("ofBic11() should return a non-null valid BIC-11")
     @Test
-    void ofBic11_NoArgs_ShouldReturnValidBic11() {
+    void ofBic11_shouldReturnValidBic11_whenNoArgs() {
         Bic bic = RandomBic.ofBic11();
 
         assertThat(bic)
@@ -108,19 +108,19 @@ final class RandomBicTest {
 
     @DisplayName("ofBic11() should not throw any exception")
     @Test
-    void ofBic11_NoArgs_ShouldNotThrowException() {
+    void ofBic11_shouldNotThrowException_whenNoArgs() {
         assertThatCode(RandomBic::ofBic11).doesNotThrowAnyException();
     }
 
     @DisplayName("ofBic11(Random) with null Random should not throw")
     @Test
-    void ofBic11_NullRandom_ShouldNotThrow() {
+    void ofBic11_shouldNotThrow_whenRandomIsNull() {
         assertThatCode(() -> RandomBic.ofBic11((Random) null)).doesNotThrowAnyException();
     }
 
     @DisplayName("ofBic11(Random) should return a valid BIC-11")
     @Test
-    void ofBic11_WithRandom_ShouldReturnValidBic11() {
+    void ofBic11_shouldReturnValidBic11_whenWithRandom() {
         Bic bic = RandomBic.ofBic11(new Random(99L));
 
         assertThat(bic)
@@ -132,7 +132,7 @@ final class RandomBicTest {
     @DisplayName("ofBic11(String) with null or unsupported country code should throw NullPointerException")
     @ParameterizedTest(name = "Country code: ''{0}''")
     @ValueSource(strings = {"", " ", "  ", "XX", "ZZ", "de", "99", "D", "DEU", " DE"})
-    void ofBic11_InvalidCountryCode_ShouldThrowNpe(String countryCode) {
+    void ofBic11_shouldThrowNpe_whenCountryCodeIsInvalid(String countryCode) {
         assertThatNullPointerException()
             .isThrownBy(() -> RandomBic.ofBic11(countryCode))
             .withMessage("Supported ISO 3166-1 Alpha-2 country code required");
@@ -140,14 +140,14 @@ final class RandomBicTest {
 
     @DisplayName("ofBic11(String, null) with null Random should not throw")
     @Test
-    void ofBic11_CountryCodeNullRandom_ShouldNotThrow() {
+    void ofBic11_shouldNotThrow_whenCountryCodeIsValidAndRandomIsNull() {
         assertThatCode(() -> RandomBic.ofBic11("DE", null)).doesNotThrowAnyException();
     }
 
     @DisplayName("ofBic11(String) should return a BIC-11 with the correct country code")
     @ParameterizedTest(name = "Country: {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "US", "JP", "CH", "AT", "NL"})
-    void ofBic11_ValidCountryCode_ShouldReturnBic11WithCountry(String countryCode) {
+    void ofBic11_shouldReturnBic11WithCountry_whenCountryCodeIsValid(String countryCode) {
         Bic bic = RandomBic.ofBic11(countryCode);
 
         assertThat(bic)
@@ -160,7 +160,7 @@ final class RandomBicTest {
 
     @DisplayName("Same seed and country code should produce identical BIC-8 (reproducibility)")
     @Test
-    void of_SameSeed_ShouldProduceIdenticalBic8() {
+    void of_shouldProduceIdenticalBic8_whenSeedsAreSame() {
         long seed = 42L;
         Bic first  = RandomBic.of("DE", new Random(seed));
         Bic second = RandomBic.of("DE", new Random(seed));
@@ -170,7 +170,7 @@ final class RandomBicTest {
 
     @DisplayName("Same seed and country code should produce identical BIC-11 (reproducibility)")
     @Test
-    void ofBic11_SameSeed_ShouldProduceIdenticalBic11() {
+    void ofBic11_shouldProduceIdenticalBic11_whenSeedsAreSame() {
         long seed = 42L;
         Bic first  = RandomBic.ofBic11("FR", new Random(seed));
         Bic second = RandomBic.ofBic11("FR", new Random(seed));
@@ -180,7 +180,7 @@ final class RandomBicTest {
 
     @DisplayName("Same seed should produce identical BIC-8 for any-country selection")
     @Test
-    void of_SameSeedAnyCountry_ShouldProduceIdenticalBic8() {
+    void of_shouldProduceIdenticalBic8_whenAnyCountryAndSeedsAreSame() {
         long seed = 123456L;
         Bic first  = RandomBic.of(new Random(seed));
         Bic second = RandomBic.of(new Random(seed));
@@ -190,7 +190,7 @@ final class RandomBicTest {
 
     @DisplayName("Same seed should produce identical BIC-11 for any-country selection")
     @Test
-    void ofBic11_SameSeedAnyCountry_ShouldProduceIdenticalBic11() {
+    void ofBic11_shouldProduceIdenticalBic11_whenAnyCountryAndSeedsAreSame() {
         long seed = 789L;
         Bic first  = RandomBic.ofBic11(new Random(seed));
         Bic second = RandomBic.ofBic11(new Random(seed));
@@ -200,7 +200,7 @@ final class RandomBicTest {
 
     @DisplayName("Different seeds should produce different BIC-8 values")
     @Test
-    void of_DifferentSeeds_ShouldProduceDifferentBic8s() {
+    void of_shouldProduceDifferentBic8s_whenSeedsAreDifferent() {
         Bic first  = RandomBic.of("DE", new Random(1L));
         Bic second = RandomBic.of("DE", new Random(2L));
 
@@ -210,21 +210,21 @@ final class RandomBicTest {
 
     @DisplayName("Different seeds should produce different BIC-11 values")
     @Test
-    void ofBic11_DifferentSeeds_ShouldProduceDifferentBic11s() {
+    void ofBic11_shouldProduceDifferentBic11s_whenSeedsAreDifferent() {
         Bic first  = RandomBic.ofBic11("DE", new Random(1L));
         Bic second = RandomBic.ofBic11("DE", new Random(2L));
 
         assertThat(first.toString()).isNotEqualTo(second.toString());
     }
 
-    static Stream<Iso3166Alpha2> allIsoCountries() {
+    static Stream<Iso3166Alpha2> provideAllIsoCountries() {
         return Arrays.stream(Iso3166Alpha2.values());
     }
 
     @DisplayName("of(String) should generate a valid BIC-8 for every ISO 3166-1 Alpha-2 country")
     @ParameterizedTest(name = "Country: {0}")
-    @MethodSource("allIsoCountries")
-    void of_AllIsoCountries_ShouldGenerateValidBic8(Iso3166Alpha2 country) {
+    @MethodSource("provideAllIsoCountries")
+    void of_shouldGenerateValidBic8_forEveryIsoCountry(Iso3166Alpha2 country) {
         Bic bic = RandomBic.of(country.getCode(), new Random(4711L));
 
         assertThat(bic)
@@ -236,8 +236,8 @@ final class RandomBicTest {
 
     @DisplayName("ofBic11(String) should generate a valid BIC-11 for every ISO 3166-1 Alpha-2 country")
     @ParameterizedTest(name = "Country: {0}")
-    @MethodSource("allIsoCountries")
-    void ofBic11_AllIsoCountries_ShouldGenerateValidBic11(Iso3166Alpha2 country) {
+    @MethodSource("provideAllIsoCountries")
+    void ofBic11_shouldGenerateValidBic11_forEveryIsoCountry(Iso3166Alpha2 country) {
         Bic bic = RandomBic.ofBic11(country.getCode(), new Random(4711L));
 
         assertThat(bic)
@@ -261,7 +261,7 @@ final class RandomBicTest {
         "JP | 42",
         "CH | 99"
     })
-    void of_SeededSnapshot_ShouldHaveCorrectCountryAndBeValid(String countryCode, long seed) {
+    void of_shouldProduceStableSnapshotValues_whenSeeded(String countryCode, long seed) {
         Bic bic = RandomBic.of(countryCode, new Random(seed));
 
         assertThat(bic)
@@ -284,7 +284,7 @@ final class RandomBicTest {
         "JP | 42",
         "CH | 99"
     })
-    void ofBic11_SeededSnapshot_ShouldHaveCorrectCountryAndBeValid(String countryCode, long seed) {
+    void ofBic11_shouldProduceStableSnapshotValues_whenSeeded(String countryCode, long seed) {
         Bic bic = RandomBic.ofBic11(countryCode, new Random(seed));
 
         assertThat(bic)
@@ -296,7 +296,7 @@ final class RandomBicTest {
 
     @DisplayName("of() should always return BIC-8, never BIC-11")
     @Test
-    void of_MultipleInvocations_ShouldAlwaysReturnBic8() {
+    void of_shouldAlwaysReturnBic8_whenInvokedMultipleTimes() {
         for (int i = 0; i < 50; i++) {
             Bic bic = RandomBic.of();
             assertThat(bic)
@@ -307,7 +307,7 @@ final class RandomBicTest {
 
     @DisplayName("ofBic11() should always return BIC-11, never BIC-8")
     @Test
-    void ofBic11_MultipleInvocations_ShouldAlwaysReturnBic11() {
+    void ofBic11_shouldAlwaysReturnBic11_whenInvokedMultipleTimes() {
         for (int i = 0; i < 50; i++) {
             Bic bic = RandomBic.ofBic11();
             assertThat(bic)
@@ -318,7 +318,7 @@ final class RandomBicTest {
 
     @DisplayName("generateBankCode should return exactly 4 uppercase letters")
     @Test
-    void generateBankCode_ShouldReturn4UppercaseLetters() {
+    void generateBankCode_shouldReturn4UppercaseLetters() {
         Random rnd = new Random(0L);
         for (int i = 0; i < 100; i++) {
             String bankCode = RandomBic.generateBankCode(rnd);
@@ -328,7 +328,7 @@ final class RandomBicTest {
 
     @DisplayName("generateLocationCode should return exactly 2 alphanumeric characters")
     @Test
-    void generateLocationCode_ShouldReturn2AlphanumericChars() {
+    void generateLocationCode_shouldReturn2AlphanumericChars() {
         Random rnd = new Random(0L);
         for (int i = 0; i < 100; i++) {
             String locationCode = RandomBic.generateLocationCode(rnd);
@@ -338,7 +338,7 @@ final class RandomBicTest {
 
     @DisplayName("generateBranchCode should return exactly 3 alphanumeric characters")
     @Test
-    void generateBranchCode_ShouldReturn3AlphanumericChars() {
+    void generateBranchCode_shouldReturn3AlphanumericChars() {
         Random rnd = new Random(0L);
         for (int i = 0; i < 100; i++) {
             String branchCode = RandomBic.generateBranchCode(rnd);
@@ -348,7 +348,7 @@ final class RandomBicTest {
 
     @DisplayName("generateBic8String should return an 8-character string with the given country code")
     @Test
-    void generateBic8String_ShouldReturnBic8WithGivenCountryCode() {
+    void generateBic8String_shouldReturnBic8WithGivenCountryCode() {
         Random rnd = new Random(42L);
         String bic8 = RandomBic.generateBic8String("DE", rnd);
 
@@ -360,7 +360,7 @@ final class RandomBicTest {
 
     @DisplayName("generateBic11String should return an 11-character string with the given country code")
     @Test
-    void generateBic11String_ShouldReturnBic11WithGivenCountryCode() {
+    void generateBic11String_shouldReturnBic11WithGivenCountryCode() {
         Random rnd = new Random(42L);
         String bic11 = RandomBic.generateBic11String("DE", rnd);
 
@@ -372,7 +372,7 @@ final class RandomBicTest {
 
     @DisplayName("Generated BIC-8 should expose correct component lengths")
     @Test
-    void of_GeneratedBic8_ShouldHaveCorrectComponentLengths() {
+    void of_shouldHaveCorrectComponentLengths_whenBic8IsGenerated() {
         Bic bic = RandomBic.of("DE", new Random(42L));
 
         assertThat(bic.getBankCode()).hasSize(4);
@@ -383,7 +383,7 @@ final class RandomBicTest {
 
     @DisplayName("Generated BIC-11 should expose correct component lengths")
     @Test
-    void ofBic11_GeneratedBic11_ShouldHaveCorrectComponentLengths() {
+    void ofBic11_shouldHaveCorrectComponentLengths_whenBic11IsGenerated() {
         Bic bic = RandomBic.ofBic11("DE", new Random(42L));
 
         assertThat(bic.getBankCode()).hasSize(4);
@@ -394,7 +394,7 @@ final class RandomBicTest {
 
     @DisplayName("Generated BIC-8 bank code should contain only uppercase letters")
     @Test
-    void of_BankCode_ShouldContainOnlyUppercaseLetters() {
+    void of_shouldContainOnlyUppercaseLetters_whenBankCodeIsGenerated() {
         for (int i = 0; i < 20; i++) {
             Bic bic = RandomBic.of();
             assertThat(bic.getBankCode()).matches("[A-Z]{4}");
@@ -404,7 +404,7 @@ final class RandomBicTest {
     @DisplayName("Generated country flag emoji should match the requested country code")
     @ParameterizedTest(name = "Country: {0}")
     @ValueSource(strings = {"DE", "GB", "FR"})
-    void of_CountryFlag_ShouldMatchCountryCode(String countryCode) {
+    void of_shouldMatchCountryCode_whenCountryFlagIsGenerated(String countryCode) {
         Bic bic = RandomBic.of(countryCode);
 
         assertThat(bic.getCountryFlag()).isNotBlank();

@@ -21,12 +21,12 @@ import java.util.Random;
 /**
  * JUnit test class for the {@link RandomIban}.
  */
-@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
+@SuppressWarnings("checkstyle:MethodName")
 final class RandomIbanTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_Instantiation_ShouldThrowException() {
+    void privateConstructor_shouldThrowException_whenInstantiated() {
         TestUtil.assertConstructorIsPrivate(RandomIban.class);
     }
 
@@ -37,7 +37,7 @@ final class RandomIbanTest {
     @ParameterizedTest(name = "Country code: ''{0}''")
     @NullAndEmptySource
     @ValueSource(strings = {" ", "   ", "XX", "de", "12"})
-    void of_InvalidCountryCode_ShouldThrowIllegalArgumentException(String countryCode) {
+    void of_shouldThrowException_whenCountryCodeIsInvalid(String countryCode) {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> RandomIban.of(countryCode));
     }
@@ -49,7 +49,7 @@ final class RandomIbanTest {
     @DisplayName("Should generate a valid IBAN for every supported country enum")
     @ParameterizedTest(name = "Generation for country: {0}")
     @IbanRegistrySource
-    void of_CountryEnum_ShouldGenerateValidIban(IbanRegistry countryData) {
+    void of_shouldGenerateValidIban_whenCountryEnumIsSupported(IbanRegistry countryData) {
         IbanValidator.setLastReason(null);
         Iban iban = RandomIban.of(countryData);
 
@@ -85,7 +85,7 @@ final class RandomIbanTest {
     @DisplayName("Should generate a valid IBAN for every supported country code")
     @ParameterizedTest(name = "Generation for country: {0}")
     @IbanRegistrySource
-    void of_CountryCode_ShouldGenerateValidIban(IbanRegistry countryData) {
+    void of_shouldGenerateValidIban_whenCountryCodeIsSupported(IbanRegistry countryData) {
         IbanValidator.setLastReason(null);
         Iban iban = RandomIban.of(countryData.getCountryCode());
 
@@ -109,7 +109,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Should generate only SEPA IBANs when calling ofSepa")
     @Test
-    void ofSepa_MultipleIbans_ShouldBeValidAndFromSepaCountry() {
+    void ofSepa_shouldGenerateValidIban_whenCalledRepeatedly() {
         // test multiple times to increase statistical confidence in random selection
         for (int i = 0; i < 20; i++) {
             Iban iban = RandomIban.ofSepa();
@@ -124,7 +124,7 @@ final class RandomIbanTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @IbanRegistrySource
-    void fixNationalCheckDigit_should_MaintainInstance_And_ValidateLength(IbanRegistry countryData) {
+    void fixNationalCheckDigit_shouldMaintainInstance_whenLengthIsValid(IbanRegistry countryData) {
         StringBuilder ibanIn1 = new StringBuilder(countryData.getIbanExample());
         StringBuilder ibanOut = RandomIban.fixNationalCheckDigit(countryData, ibanIn1);
 
@@ -145,7 +145,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Default builder build should not throw")
     @Test
-    void builder_DefaultBuild_ShouldNotThrow() {
+    void builder_shouldNotThrow_whenBuiltWithDefaults() {
         assertThatCode(() -> RandomIban.builder().build())
             .doesNotThrowAnyException();
     }
@@ -155,7 +155,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Builder without constraints should produce a valid IBAN for any country")
     @Test
-    void builder_AnyCountry_ShouldBeValid() {
+    void builder_shouldProduceValidIban_whenNoConstraintsAreSet() {
         Iban iban = RandomIban.builder().build();
 
         assertThat(iban).isNotNull();
@@ -169,7 +169,7 @@ final class RandomIbanTest {
     @ParameterizedTest(name = "Country code: ''{0}''")
     @NullAndEmptySource
     @ValueSource(strings = {" ", "   ", "XX", "de", "12"})
-    void builder_InvalidCountryCode_ShouldThrowIllegalArgumentException(String countryCode) {
+    void builder_shouldThrowException_whenCountryCodeIsInvalid(String countryCode) {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> RandomIban.builder().country(countryCode));
     }
@@ -180,7 +180,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Builder country(IbanRegistry) with null should throw NullPointerException")
     @Test
-    void builder_NullRegistry_ShouldThrowNullPointerException() {
+    void builder_shouldThrowException_whenRegistryIsNull() {
         RandomIban.Builder builder = RandomIban.builder();
 
         assertThatNullPointerException()
@@ -194,7 +194,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Builder random(null) should throw NullPointerException")
     @Test
-    void builder_NullRandom_ShouldThrowNullPointerException() {
+    void builder_shouldThrowException_whenRandomIsNull() {
         RandomIban.Builder builder = RandomIban.builder();
 
         assertThatNullPointerException()
@@ -208,7 +208,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Builder sepaOnly() after country() should override the fixed country")
     @Test
-    void builder_SepaOnlyAfterCountry_ShouldYieldSepaIban() {
+    void builder_shouldYieldSepaIban_whenSepaOnlyIsCalledAfterCountry() {
         // chain: country first, then sepaOnly — sepaOnly must win
         for (int i = 0; i < 10; i++) {
             Iban iban = RandomIban.builder().country("DE").sepaOnly().build();
@@ -222,7 +222,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Builder country() after sepaOnly() should pin the country to DE")
     @Test
-    void builder_CountryAfterSepaOnly_ShouldYieldPinnedCountry() {
+    void builder_shouldYieldPinnedCountry_whenCountryIsCalledAfterSepaOnly() {
         Iban iban = RandomIban.builder()
             .sepaOnly()
             .country("DE")
@@ -235,7 +235,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Builder sepaOnly should generate only SEPA IBANs")
     @Test
-    void builder_SepaOnly_ShouldBeValidAndFromSepaCountry() {
+    void builder_shouldGenerateSepaIban_whenSepaOnlyIsSet() {
         for (int i = 0; i < 20; i++) {
             Iban iban = RandomIban.builder().sepaOnly().build();
             IbanRegistry registry = IbanRegistry.getByCode(iban.getCountryCode());
@@ -252,7 +252,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Same seed and country code should produce identical IBANs (reproducibility)")
     @Test
-    void builder_SameSeedCountryCode_ShouldProduceIdenticalIban() {
+    void builder_shouldProduceIdenticalIban_whenSameSeedAndCountryCodeAreUsed() {
         long seed = 42L;
         Iban first  = RandomIban.builder().country("DE").seed(seed).build();
         Iban second = RandomIban.builder().country("DE").seed(seed).build();
@@ -265,7 +265,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Same seed and IbanRegistry should produce identical IBANs")
     @Test
-    void builder_SameSeedRegistry_ShouldProduceIdenticalIban() {
+    void builder_shouldProduceIdenticalIban_whenSameSeedAndRegistryAreUsed() {
         long seed = 99L;
         Iban first  = RandomIban.builder().country(IbanRegistry.FR).seed(seed).build();
         Iban second = RandomIban.builder().country(IbanRegistry.FR).seed(seed).build();
@@ -278,7 +278,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Same seed should produce identical IBANs for any-country selection")
     @Test
-    void builder_SameSeedAnyCountry_ShouldProduceIdenticalIban() {
+    void builder_shouldProduceIdenticalIban_whenSameSeedAndAnyCountryAreUsed() {
         long seed = 123456L;
         Iban first  = RandomIban.builder().seed(seed).build();
         Iban second = RandomIban.builder().seed(seed).build();
@@ -291,7 +291,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Same seed should produce identical IBANs for SEPA-only selection")
     @Test
-    void builder_SepaOnly_SameSeed_ShouldProduceIdenticalIban() {
+    void builder_shouldProduceIdenticalIban_whenSameSeedAndSepaOnlyAreUsed() {
         long seed = 789L;
         Iban first  = RandomIban.builder().sepaOnly().seed(seed).build();
         Iban second = RandomIban.builder().sepaOnly().seed(seed).build();
@@ -306,7 +306,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Builder random(Random) with same seed should produce identical IBANs")
     @Test
-    void builder_RandomInstance_ShouldProduceIdenticalIban() {
+    void builder_shouldProduceIdenticalIban_whenSameRandomInstanceIsUsed() {
         Iban first  = RandomIban.builder().country("DE").random(new Random(42L)).build();
         Iban second = RandomIban.builder().country("DE").random(new Random(42L)).build();
 
@@ -319,7 +319,7 @@ final class RandomIbanTest {
      */
     @DisplayName("Different seeds should produce different IBANs")
     @Test
-    void builder_DifferentSeeds_ShouldProduceDifferentIbans() {
+    void builder_shouldProduceDifferentIbans_whenDifferentSeedsAreUsed() {
         Iban first  = RandomIban.builder().country("DE").seed(1L).build();
         Iban second = RandomIban.builder().country("DE").seed(2L).build();
 
@@ -333,7 +333,7 @@ final class RandomIbanTest {
     @DisplayName("Seeded builder generation should produce valid IBANs for all countries")
     @ParameterizedTest(name = "Country: {0}")
     @IbanRegistrySource
-    void builder_SeededAllCountries_ShouldBeValid(IbanRegistry countryData) {
+    void builder_shouldProduceValidIban_whenSeededForAllCountries(IbanRegistry countryData) {
         Iban iban = RandomIban.builder().country(countryData).seed(4711L).build();
         String countryCode = countryData.isBaseCountry()
             ? countryData.getCountryCode()
@@ -358,7 +358,7 @@ final class RandomIbanTest {
             "PL | 42 | PL",
             "IT | 42 | IT",
     })
-    void builder_SeededSnapshot_ShouldBeStable(String countryCode, long seed, String expectedPrefix) {
+    void builder_shouldProduceStableSnapshot_whenSeededWithKnownValues(String countryCode, long seed, String expectedPrefix) {
         Iban iban = RandomIban.builder().country(countryCode).seed(seed).build();
 
         // Country code prefix is always deterministic
