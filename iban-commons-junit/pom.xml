@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright © 2025-2026 Markus Spann, SpeedBankingDe
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.speedbanking</groupId>
+        <artifactId>iban-commons-parent</artifactId>
+        <version>1.8.6-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>iban-commons-junit</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.organization.name} IBAN Commons JUnit Extensions</name>
+    <description>
+        JUnit 5 extensions for iban-commons. Provides parameterized-test argument
+        providers (IbanCountrySource, IbanRegistrySource, RandomIbanSource) in the
+        package de.speedbanking.iban.junit.jupiter.params.provider, following the
+        naming conventions of org.junit.jupiter.params.provider.
+    </description>
+
+    <dependencies>
+
+        <!--
+            Core library: compile dependency.
+            The public API of the *Source classes (e.g. RandomIbanSource) directly
+            references IbanRegistry, RandomIban, etc., so consumers of
+            iban-commons-junit automatically get iban-commons on their classpath.
+        -->
+        <dependency>
+            <groupId>de.speedbanking</groupId>
+            <artifactId>iban-commons</artifactId>
+            <!-- scope: compile (inherited from dependencyManagement) -->
+        </dependency>
+
+        <!--
+            JUnit Jupiter API and Params: compile scope.
+            These are intentionally NOT test-scoped: the *Source annotation
+            classes are themselves part of the public API and carry JUnit types
+            in their signatures (@ArgumentsSource, ArgumentsProvider, etc.).
+            Consumers need these types on their compile classpath.
+            Declaring them here with compile scope makes them available to
+            consumers without requiring them to declare a separate JUnit dependency.
+        -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <!-- scope: compile (inherited from dependencyManagement) -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <!-- scope: compile (inherited from dependencyManagement) -->
+        </dependency>
+
+        <!-- Test dependencies for this module's own unit tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <!-- scope: test (inherited from dependencyManagement) -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <!-- scope: test (inherited from dependencyManagement) -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <!-- scope: test (inherited from dependencyManagement) -->
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <!--
+                                Separate JPMS automatic module name for this artifact.
+                                Consumers can declare:
+                                  requires de.speedbanking.iban.junit;
+                            -->
+                            <Automatic-Module-Name>de.speedbanking.iban.junit</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!--
+                Surefire override: this module has very few tests (mainly smoke tests
+                for the *Source providers). A single fork is sufficient.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <forkCount>1</forkCount>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

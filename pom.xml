@@ -20,18 +20,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.speedbanking</groupId>
-    <artifactId>iban-commons</artifactId>
+    <artifactId>iban-commons-parent</artifactId>
     <version>1.8.6-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>${project.organization.name} IBAN Commons</name>
+    <packaging>pom</packaging>
+    <name>${project.organization.name} IBAN Commons Parent</name>
     <description>
-        Zero-dependency, high-performance Java 8+ library for IBAN and BIC validation,
-        parsing, and formatting. Supports 120 countries from the SWIFT IBAN Registry
-        (ISO 13616) and BIC validation per ISO 9362. Outperforms iban4j and Apache Commons
-        Validator by up to 4x in throughput (7,700,000 ops/s) with 10x lower memory
-        allocation. Android-compatible (API 21+). Features: SEPA validation, country
-        metadata, immutable thread-safe objects, serialization security, small JAR (~100KB).
-        Suitable for banking, fintech, e-commerce, and payment processing applications.
+        Parent POM for the IBAN Commons multi-module project. Provides shared dependency
+        management, plugin configuration, and build conventions for all sub-modules.
     </description>
     <url>https://www.speedbanking.de</url>
     <inceptionYear>2025</inceptionYear>
@@ -62,10 +57,15 @@
         </developer>
     </developers>
 
+    <modules>
+        <module>iban-commons</module>
+        <module>iban-commons-junit</module>
+    </modules>
+
     <scm>
-        <connection>scm:git:ssh://git@github.com/${project.organization.name}/${project.artifactId}.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/${project.artifactId}.git</developerConnection>
-        <url>https://github.com/${project.organization.name}/${project.artifactId}</url>
+        <connection>scm:git:ssh://git@github.com/${project.organization.name}/iban-commons.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/iban-commons.git</developerConnection>
+        <url>https://github.com/${project.organization.name}/iban-commons</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -111,6 +111,7 @@
         <deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</deploy.snapshot.url>
 
         <dep.checkstyle.version>12.3.1</dep.checkstyle.version>
+        <!-- Path relative to each sub-module; both modules share the same ruleset location -->
         <check.checkstyle.ruleset>src/test/resources/team/checkstyle-rules.xml</check.checkstyle.ruleset>
 
         <dep.pmd.version>7.23.0</dep.pmd.version>
@@ -144,32 +145,81 @@
         <surefireArgLine></surefireArgLine>
     </properties>
 
-    <dependencies>
+    <!--
+        Dependency management: versions and default scopes for all dependencies
+        used across sub-modules. Sub-modules inherit versions but still must
+        declare the dependency explicitly to opt in.
+    -->
+    <dependencyManagement>
+        <dependencies>
 
-        <!-- zero compile/runtime dependencies -->
+            <!-- inter-module dependency: iban-commons-junit depends on iban-commons -->
+            <dependency>
+                <groupId>de.speedbanking</groupId>
+                <artifactId>iban-commons</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${dep.junit.version}</version>
-            <scope>test</scope>
-        </dependency>
+            <!--
+                iban-commons-junit as test dependency for iban-commons.
+                Using test scope here avoids a circular compile dependency:
+                  iban-commons (compile) -> iban-commons-junit (test-only)
+                  iban-commons-junit (compile) -> iban-commons
+                Maven does not consider test-scoped deps when checking for cycles,
+                so the reactor build order (iban-commons first) is unambiguous.
+            -->
+            <dependency>
+                <groupId>de.speedbanking</groupId>
+                <artifactId>iban-commons-junit</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
 
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${dep.assertj.version}</version>
-            <scope>test</scope>
-        </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${dep.junit.version}</version>
+                <scope>test</scope>
+            </dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>${dep.mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
+            <!--
+                junit-jupiter-api at compile scope: required by iban-commons-junit
+                because its public API (annotations, ArgumentsProvider implementations)
+                references JUnit types that consumers need on their compile classpath.
+            -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${dep.junit.version}</version>
+            </dependency>
 
-    </dependencies>
+            <!--
+                junit-jupiter-params at compile scope: required by iban-commons-junit
+                because @ArgumentsSource, ArgumentsProvider, AnnotationConsumer etc.
+                are part of the public API of the *Source annotation classes.
+            -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>${dep.junit.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${dep.assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-inline</artifactId>
+                <version>${dep.mockito.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
 
     <build>
 
@@ -269,10 +319,6 @@
                                 <Project-Url>${project.url}</Project-Url>
                                 <Project-Inception-Year>${project.inceptionYear}</Project-Inception-Year>
                                 <Creation-User>${developer1Id} (${developer1Name}), ${developer2Id} (${developer2Name})</Creation-User>
-                                <!-- JPMS: allows Java 9+ consumers to declare 'requires de.speedbanking.iban;'
-                                     without requiring this library itself to be compiled as a named module.
-                                     Must be a stable, reverse-DNS name and must never change after first release. -->
-                                <Automatic-Module-Name>de.speedbanking.iban</Automatic-Module-Name>
                             </manifestEntries>
                         </archive>
                     </configuration>
@@ -543,7 +589,7 @@
                              The script reads the new release version from the
                              ${releaseVersion} property injected by the plugin. -->
                         <completionGoals>exec:exec@update-docs-version</completionGoals>
-                   </configuration>
+                    </configuration>
                 </plugin>
 
                 <plugin>
@@ -561,7 +607,8 @@
                             <configuration>
                                 <executable>bash</executable>
                                 <arguments>
-                                    <argument>${project.basedir}/src/main/scripts/update-docs-version.sh</argument>
+                                    <!-- Script lives in the root (parent) module -->
+                                    <argument>${project.basedir}/iban-commons/src/main/scripts/update-docs-version.sh</argument>
                                     <argument>${releaseVersion}</argument>
                                 </arguments>
                                 <workingDirectory>${project.basedir}</workingDirectory>
@@ -590,6 +637,11 @@
 
         </pluginManagement>
 
+        <!--
+            Plugins active for ALL sub-modules.
+            Plugins that are sub-module-specific (e.g. exec, cyclonedx) are activated
+            only in the respective sub-module POM.
+        -->
         <plugins>
 
             <plugin>
@@ -626,11 +678,6 @@
                         <phase>package</phase>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.cyclonedx</groupId>
-                <artifactId>cyclonedx-maven-plugin</artifactId>
             </plugin>
 
             <plugin>
@@ -701,7 +748,7 @@
         </profile>
 
         <profile>
-            <!-- this profile is activated for release:prepare and release:perform goals -->
+            <!-- Activated for release:prepare and release:perform goals -->
             <id>release</id>
 
             <properties>
@@ -786,7 +833,6 @@
                             <!-- generates all available checksum types (e.g., MD5, SHA-1, SHA-256) for the deployed artifacts -->
                             <checksums>all</checksums>
                         </configuration>
-
                     </plugin>
 
                 </plugins>
@@ -796,3 +842,4 @@
     </profiles>
 
 </project>
+
