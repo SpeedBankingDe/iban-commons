@@ -141,7 +141,7 @@
 
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
-        <argLine></argLine>
+        <surefireArgLine></surefireArgLine>
     </properties>
 
     <dependencies>
@@ -212,7 +212,7 @@
                         <reuseForks>true</reuseForks>
                         <forkedProcessTimeoutInSeconds>180</forkedProcessTimeoutInSeconds>
 
-                        <argLine>${argLine} -Xmx2048m</argLine>
+                        <argLine>@{surefireArgLine} -XX:+EnableDynamicAgentLoading -Xmx2048m</argLine>
                     </configuration>
                 </plugin>
 
@@ -226,6 +226,9 @@
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
+                            <configuration>
+                                <propertyName>surefireArgLine</propertyName>
+                            </configuration>
                         </execution>
                         <execution>
                             <id>jacoco-report</id>

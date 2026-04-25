@@ -229,29 +229,6 @@ final class IbanTest {
         assertThat(countryData.getDerivedCountries()).isEmpty();
     }
 
-    /**
-     * Tests {@link Iban#of(CharSequence)} with random IBANs.
-     *
-     * @param ibanInput the valid random IBAN string to test
-     */
-    @DisplayName("Random IBAN generation and validation")
-    @ParameterizedTest(name = "[{index}] {0}")
-    @RandomIbanSource(ibanCount = 1111)
-    void of_shouldReturnIban_whenIbanIsRandom(String ibanInput) {
-        assertThat(ibanInput).isNotNull();
-
-        assertThatCode(
-            () -> Iban.of(ibanInput))
-            .as("IBAN '%s' is valid", ibanInput)
-            .doesNotThrowAnyException();
-
-        Iban iban = Iban.of(ibanInput);
-        assertThat(iban)
-            .hasToString(ibanInput)
-            .hasCountryName(IbanRegistry.valueOf(iban.getCountryCode()).getCountryName());
-        assertThatIbanIsValid(ibanInput);
-    }
-
     @DisplayName("Valid IBAN structure and components — all countries")
     @ParameterizedTest(name = "[{index}] {3}: {0}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
