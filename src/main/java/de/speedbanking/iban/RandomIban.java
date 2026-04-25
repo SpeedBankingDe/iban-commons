@@ -21,6 +21,7 @@ import de.speedbanking.iban.util.IbanCharType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
 import de.speedbanking.util.IndexRange;
+import de.speedbanking.util.Iso3166Alpha2;
 
 import java.util.List;
 import java.util.Random;
@@ -59,6 +60,15 @@ import java.util.concurrent.ThreadLocalRandom;
  * Iban iban = RandomIban.of(IbanRegistry.PL);
  * Iban iban = RandomIban.ofSepa();
  * }</pre>
+ * <p>
+ * <strong>Invalid IBAN strings</strong> (strings only — not {@link Iban} objects, which are
+ * always valid by definition) can be produced via:
+ * <pre>{@code
+ * String invalid = RandomIban.invalidString();
+ * String invalid = RandomIban.invalidString("DE");
+ * String invalid = RandomIban.invalidString(IbanRegistry.DE);
+ * String invalid = RandomIban.invalidString(validIbanString, random);
+ * }</pre>
  */
 public final class RandomIban {
 
@@ -82,6 +92,11 @@ public final class RandomIban {
         IbanRegistry.getSepaCountries().toArray(new IbanRegistry[0]);
 
     /**
+     * Number of distinct sabotage strategies implemented in {@link #sabotageIban(StringBuilder, Random)}.
+     */
+    private static final int SABOTAGE_STRATEGY_COUNT = 6;
+
+    /**
      * Private constructor to prevent instantiation of this utility class.
      * @throws UnsupportedOperationException always
      */
@@ -89,6 +104,10 @@ public final class RandomIban {
         throw new UnsupportedOperationException(
             "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
     }
+
+    // -------------------------------------------------------------------------
+    // Valid IBAN generation
+    // -------------------------------------------------------------------------
 
     /**
      * Generates a random, valid IBAN for the country identified by the given two-letter code.
@@ -148,6 +167,235 @@ public final class RandomIban {
     public static Builder builder() {
         return new Builder();
     }
+
+    // -------------------------------------------------------------------------
+    // Invalid IBAN string generation
+    // -------------------------------------------------------------------------
+
+    /**
+     * Generates a deliberately invalid IBAN string from a randomly selected country.
+     * <p>
+     * Starts with a valid IBAN and corrupts it using a randomly chosen sabotage strategy
+     * (see {@link #sabotageIban(StringBuilder, Random)}) until validation fails.
+     * Uses {@link ThreadLocalRandom} as the source of randomness.
+     * <p>
+     * The return type is {@link String} rather than {@link Iban}: {@code Iban} objects are
+     * always valid by definition; only plain strings may represent invalid IBANs.
+     *
+     * @return a string that fails {@link IbanValidator#isValid(String)} validation
+     *
+     * @since 1.8.6
+     */
+    public static String invalidString() {
+        return invalidString(ThreadLocalRandom.current());
+    }
+
+    /**
+     * Generates a deliberately invalid IBAN string for the country identified by the given
+     * two-letter country code.
+     * <p>
+     * Uses {@link ThreadLocalRandom} as the source of randomness.
+     *
+     * @param countryCode the two-letter country code (e.g., {@code "DE"})
+     * @return a string that fails {@link IbanValidator#isValid(String)} validation
+     * @throws IllegalArgumentException if {@code countryCode} is not supported
+     *
+     * @since 1.8.6
+     */
+    public static String invalidString(String countryCode) {
+        IbanRegistry country = IbanRegistry.getByCode(countryCode);
+        if (country == null) {
+            throw new IllegalArgumentException("Unsupported country code: " + countryCode);
+        }
+        return invalidString(country);
+    }
+
+    /**
+     * Generates a deliberately invalid IBAN string for the given {@link IbanRegistry} entry.
+     * <p>
+     * Uses {@link ThreadLocalRandom} as the source of randomness.
+     *
+     * @param countryData the registry entry; must not be {@code null}
+     * @return a string that fails {@link IbanValidator#isValid(String)} validation
+     *
+     * @since 1.8.6
+     */
+    public static String invalidString(IbanRegistry countryData) {
+        return invalidString(countryData, ThreadLocalRandom.current());
+    }
+
+    /**
+     * Generates a deliberately invalid IBAN string for the given {@link IbanRegistry} entry,
+     * using the provided {@link Random} source.
+     *
+     * @param countryData the registry entry; must not be {@code null}
+     * @param random      the source of randomness; must not be {@code null}
+     * @return a string that fails {@link IbanValidator#isValid(String)} validation
+     *
+     * @since 1.8.6
+     */
+    public static String invalidString(IbanRegistry countryData, Random random) {
+        requireNonNull(countryData, "countryData must not be null");
+        requireNonNull(random, "random must not be null");
+        String valid = generate(countryData, random).toString();
+        return sabotageUntilInvalid(valid, random);
+    }
+
+    /**
+     * Corrupts the given valid IBAN string until it fails validation.
+     * <p>
+     * Uses the provided {@link Random} instance; the sabotage strategy is chosen randomly
+     * via {@link #sabotageIban(StringBuilder, Random)}.
+     *
+     * @param validIban a syntactically and checksum-valid IBAN string; must not be {@code null}
+     * @param random    the source of randomness; must not be {@code null}
+     * @return a string derived from {@code validIban} that fails {@link IbanValidator#isValid(String)}
+     *
+     * @since 1.8.6
+     */
+    public static String invalidString(String validIban, Random random) {
+        requireNonNull(validIban, "validIban must not be null");
+        requireNonNull(random, "random must not be null");
+        return sabotageUntilInvalid(validIban, random);
+    }
+
+    /**
+     * Generates a deliberately invalid IBAN string from a randomly selected country,
+     * using the provided {@link Random} source.
+     *
+     * @param random the source of randomness; must not be {@code null}
+     * @return a string that fails {@link IbanValidator#isValid(String)} validation
+     *
+     * @since 1.8.6
+     */
+    static String invalidString(Random random) {
+        requireNonNull(random, "random must not be null");
+        IbanRegistry country = ALL_COUNTRIES[random.nextInt(ALL_COUNTRIES.length)];
+        return invalidString(country, random);
+    }
+
+    /**
+     * Applies {@link #sabotageIban(StringBuilder, Random)} in a loop until
+     * {@link IbanValidator#isValid(String)} returns {@code false}.
+     * <p>
+     * Most sabotage strategies produce an invalid result on the first attempt; the loop
+     * guards against the rare case where a mutation happens to preserve validity (e.g.
+     * a transposition that does not change the checksum outcome).
+     *
+     * @param validIban a valid IBAN string; must not be {@code null}
+     * @param random    the source of randomness; must not be {@code null}
+     * @return a string derived from {@code validIban} that fails IBAN validation
+     *
+     * @since 1.8.6
+     */
+    private static String sabotageUntilInvalid(String validIban, Random random) {
+        StringBuilder sb = new StringBuilder(validIban);
+        do {
+            // reset to original before each attempt so cumulative mutations don't
+            // accidentally cancel each other out (e.g. two transpositions undoing each other)
+            sb.replace(0, sb.length(), validIban);
+            sabotageIban(sb, random);
+        } while (IbanValidator.isValid(sb.toString()));
+        return sb.toString();
+    }
+
+    // -------------------------------------------------------------------------
+    // Sabotage
+    // -------------------------------------------------------------------------
+
+    /**
+     * Corrupts the given IBAN in-place using a randomly selected sabotage strategy.
+     * <p>
+     * The method modifies the {@link StringBuilder} <em>in-place</em> and returns it.
+     * Six strategies are applied with equal probability (1/6 each):
+     * <ol>
+     *   <li><strong>Tamper check digit</strong> – one of the two check digits (position 3 or 4)
+     *       is incremented by 1 (wrapping: {@code '9'} → {@code '0'}) to trigger a Mod-97
+     *       checksum failure.</li>
+     *   <li><strong>Invalid country code</strong> – the first two characters are replaced with
+     *       {@code "XY"}, a non-registered ISO 3166 Alpha-2 code.</li>
+     *   <li><strong>Mismatched ISO code</strong> – the first two characters are replaced with a
+     *       valid but randomly chosen {@link Iso3166Alpha2} code that does not match the
+     *       existing BBAN format.</li>
+     *   <li><strong>Structural violation in BBAN</strong> – a letter ({@code 'A'}) is injected
+     *       at a random position within the BBAN section to break the expected character
+     *       pattern.</li>
+     *   <li><strong>Transposition error</strong> – two adjacent characters are swapped,
+     *       simulating a classic human keying mistake.</li>
+     *   <li><strong>Illegal length</strong> – the string is truncated to below
+     *       {@link IbanRegistry#MIN_IBAN_BASE_LENGTH}, making it structurally invalid.</li>
+     * </ol>
+     *
+     * @param iban   the IBAN to corrupt; modified in-place; must not be {@code null}
+     * @param random the source of randomness; must not be {@code null}
+     * @return the same {@link StringBuilder} instance after mutation
+     * @throws IllegalArgumentException if {@code iban} or {@code random} is {@code null}
+     *
+     * @since 1.8.6
+     */
+    static StringBuilder sabotageIban(StringBuilder iban, Random random) {
+        requireNonNull(iban, "iban must not be null");
+        requireNonNull(random, "random must not be null");
+
+        final int minLen       = IbanRegistry.MIN_IBAN_BASE_LENGTH;
+        final int idxCheckDig1 = IbanRegistry.INDEX_CHECK_DIGIT1;
+        final int idxCheckDig2 = IbanRegistry.INDEX_CHECK_DIGIT2;
+        final int idxBban      = IbanRegistry.INDEX_BBAN;
+
+        switch (random.nextInt(SABOTAGE_STRATEGY_COUNT)) {
+            case 0:
+                // increment one check digit (position 3 or 4) to trigger a Mod-97 failure
+                int cdIdx = random.nextBoolean() ? idxCheckDig1 : idxCheckDig2;
+                char c = iban.charAt(cdIdx);
+                iban.setCharAt(cdIdx, c == '9' ? '0' : (char) (c + 1));
+                break;
+            case 1:
+                // replace country code with non-existent "XY"
+                iban.setCharAt(0, 'X');
+                iban.setCharAt(1, 'Y');
+                break;
+            case 2:
+                // replace country code with a valid but mismatched ISO code
+                Iso3166Alpha2[] countries = Iso3166Alpha2.values();
+                String randomIso = countries[random.nextInt(countries.length)].name();
+                iban.setCharAt(0, randomIso.charAt(0));
+                iban.setCharAt(1, randomIso.charAt(1));
+                break;
+            case 3:
+                // inject a letter into the numeric BBAN section to cause a structural violation
+                if (iban.length() > idxBban) {
+                    int pos = idxBban + random.nextInt(iban.length() - idxBban);
+                    iban.setCharAt(pos, 'A');
+                }
+                break;
+            case 4:
+                // classic transposition: swap two adjacent characters
+                if (iban.length() >= 2) {
+                    int p = random.nextInt(iban.length() - 1);
+                    char tmp = iban.charAt(p);
+                    iban.setCharAt(p, iban.charAt(p + 1));
+                    iban.setCharAt(p + 1, tmp);
+                }
+                break;
+            case 5:
+                // truncate below minimum length to produce a structurally invalid IBAN
+                if (iban.length() > minLen) {
+                    iban.setLength(minLen - 1);
+                } else {
+                    // already short — just corrupt the check digit as a safe fallback
+                    char ch = iban.charAt(idxCheckDig1);
+                    iban.setCharAt(idxCheckDig1, ch == '9' ? '0' : (char) (ch + 1));
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected sabotage strategy index");
+        }
+        return iban;
+    }
+
+    // -------------------------------------------------------------------------
+    // Builder
+    // -------------------------------------------------------------------------
 
     /**
      * Fluent builder for generating random, valid IBANs.
@@ -295,6 +543,10 @@ public final class RandomIban {
             return ALL_COUNTRIES[rnd.nextInt(ALL_COUNTRIES.length)];
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Internal generation helpers
+    // -------------------------------------------------------------------------
 
     /**
      * Core IBAN generation method. All public entry points (builder and static methods)

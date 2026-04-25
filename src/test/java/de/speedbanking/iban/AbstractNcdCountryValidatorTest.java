@@ -68,9 +68,11 @@ final class AbstractNcdCountryValidatorTest {
     @Test
     void validateNationalCheckDigit_shouldDelegate_whenEnabled() {
         AbstractNcdCountryValidator validator = new PT();
-        char[] iban = "PT50000201231234567890154".toCharArray();
+        String iban = "PT50000201231234567890154";
 
-        assertThat(validator.validateNationalCheckDigit(iban)).isTrue();
+        assertThat(validator.validateNationalCheckDigit(iban))
+            .isEqualTo(validator.validateNationalCheckDigit(iban.toCharArray()))
+            .isTrue();
     }
 
     @DisplayName("validateNationalCheckDigit should return true when validation is disabled")

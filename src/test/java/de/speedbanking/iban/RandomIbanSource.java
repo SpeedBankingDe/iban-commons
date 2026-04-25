@@ -3,8 +3,6 @@ package de.speedbanking.iban;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-import de.speedbanking.test.TestUtil;
-
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
@@ -76,9 +74,12 @@ public @interface RandomIbanSource {
     int count() default 1000;
 
     /**
-     * Percentage of generated IBANs that will be deliberately corrupted (two characters swapped).
+     * Percentage of generated IBANs that will be deliberately corrupted.
      * <p>
      * Must be between 0 (default, all valid) and 100 (all invalid).
+     * Corruption is performed via {@link RandomIban#invalidString(String, java.util.Random)},
+     * which applies a randomly chosen sabotage strategy (check digit tamper, wrong country
+     * code, structural BBAN violation, transposition, or illegal length).
      */
     int invalidPercentage() default 0;
 
@@ -241,7 +242,9 @@ public @interface RandomIbanSource {
          * Generates a single IBAN string for a randomly selected country from the pool.
          * <p>
          * With probability {@code invalidPercent / 100}, the generated IBAN is deliberately
-         * corrupted by swapping two randomly chosen characters via {@link TestUtil#swapRandomChars}.
+         * corrupted via {@link RandomIban#invalidString(String, java.util.Random)}, which applies
+         * a randomly chosen sabotage strategy that reliably produces a string that fails
+         * {@link IbanValidator#isValid(String)}.
          *
          * @param countries         non-empty list of eligible countries
          * @param invalidPercentage percentage chance (0–100) that the IBAN will be corrupted
@@ -255,12 +258,12 @@ public @interface RandomIbanSource {
                 .random(random)
                 .build().toString();
 
-            // corrupt the IBAN with the requested probability
             if (invalidPercentage > 0 && random.nextInt(100) < invalidPercentage) {
-                iban = TestUtil.swapRandomChars(iban);
+                iban = RandomIban.invalidString(iban, random);
             }
             return iban;
         }
     }
 
 }
+
