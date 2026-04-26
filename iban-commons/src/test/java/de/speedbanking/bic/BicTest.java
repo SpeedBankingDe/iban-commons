@@ -70,7 +70,7 @@ final class BicTest {
     }
 
     @DisplayName("of() should throw exception for null or empty BIC")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @NullAndEmptySource
     void of_shouldThrowException_whenNullOrEmpty(String bic) {
         assertThatInvalidBicException()
@@ -80,7 +80,7 @@ final class BicTest {
     }
 
     @DisplayName("of() should throw exception for incorrect length")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {
         "SHORT12",      //  7 chars
         "LONG12345678", // 12 chars
@@ -96,7 +96,7 @@ final class BicTest {
     }
 
     @DisplayName("of() should throw exception for invalid country code")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {
         "MARK99FF", // 99 is not a valid ISO country
         "MARKXXFF"  // XX is not a valid ISO country
@@ -109,7 +109,7 @@ final class BicTest {
     }
 
     @DisplayName("of() should throw exception for invalid bank code")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {
         "mARKDEFF",
         "MÄRKDEFF",
@@ -123,7 +123,7 @@ final class BicTest {
     }
 
     @DisplayName("of() should throw exception for illegal characters")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {
         "MARKDE 1", // space
         "MARKDE_1", // underscore
@@ -137,7 +137,7 @@ final class BicTest {
     }
 
     @DisplayName("tryParse() should return non-empty Optional for valid BIC")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
     void tryParse_shouldReturnNonEmptyOptional_whenValidBic(String bic) {
         assertThat(Bic.tryParse(bic))
@@ -145,7 +145,7 @@ final class BicTest {
     }
 
     @DisplayName("tryParseOrNull() should return valid BIC")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
     void tryParseOrNull_shouldReturnBic_whenValidBic(String bic) {
         assertThat(Bic.tryParseOrNull(bic))
@@ -153,7 +153,7 @@ final class BicTest {
     }
 
     @DisplayName("tryParse() should return Optional.empty for invalid BIC")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {" ", "INVALID99", "MARK00FF"})
     @NullAndEmptySource
     void tryParse_shouldReturnEmptyOptional_whenInvalidBic(String bic) {
@@ -161,7 +161,7 @@ final class BicTest {
     }
 
     @DisplayName("tryParseOrNull() should return null for invalid BIC")
-    @ParameterizedTest(name = "BIC: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {" ", "INVALID99", "MARK00FF"})
     @NullAndEmptySource
     void tryParseOrNull_shouldReturnNull_whenInvalidBic(String bic) {

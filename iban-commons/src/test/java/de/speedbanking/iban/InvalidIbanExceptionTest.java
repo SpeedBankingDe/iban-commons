@@ -22,7 +22,7 @@ final class InvalidIbanExceptionTest {
     // -------------------------------------------------------------------------
 
     @DisplayName("of(reason) should store reason and derive message from reason text")
-    @ParameterizedTest(name = "Test Exception for reason: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanValidationError.class)
     void of_shouldInitializeCorrectly(IbanValidationError reason) {
         InvalidIbanException exception = InvalidIbanException.of(reason);

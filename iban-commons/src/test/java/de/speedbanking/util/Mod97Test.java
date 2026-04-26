@@ -49,7 +49,7 @@ final class Mod97Test {
         assertThat(Mod97.calculate((CharSequence) null)).isEqualTo(Mod97.INVALID_REMAINDER);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {
         "DE91 1000 0000 0123 4567 89", // spaces
         "de91100000000123456789",      // lowercase
@@ -110,7 +110,7 @@ final class Mod97Test {
             .withMessageContaining("Invalid range");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
     void isValid_charSequence_validIbans_returnTrue(IbanRegistry countryData) {
         assertThat(Mod97.isValid(countryData.getIbanExample())).isTrue();
@@ -167,7 +167,7 @@ final class Mod97Test {
         assertThat(result).isEqualTo(Mod97.INVALID_REMAINDER);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @CsvSource(delimiter = '|', value = {
         "123 | -1 |  2", // negative offset
         "123 |  5 |  2", // offset too large

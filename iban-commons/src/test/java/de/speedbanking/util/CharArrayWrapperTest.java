@@ -30,7 +30,7 @@ final class CharArrayWrapperTest {
     }
 
     @DisplayName("Should wrap sub-ranges correctly")
-    @ParameterizedTest(name = "range [{0}, {1}] should represent {2}")
+    @ParameterizedTest(name = "[{index}] range [{0}, {1}] should represent {2}")
     @CsvSource(delimiter = '|', value = {
         "0 | 2 | AB",
         "1 | 3 | BCD",
@@ -47,7 +47,7 @@ final class CharArrayWrapperTest {
     }
 
     @DisplayName("Constructor should throw IndexOutOfBoundsException for invalid ranges")
-    @ParameterizedTest(name = "offset={0}, length={1} ({2})")
+    @ParameterizedTest(name = "[{index}] offset={0}, length={1} ({2})")
     @CsvSource(delimiter = '|', value = {
         "-1 |  0 | Offset negative",
         " 0 | -1 | Length negative",
@@ -66,7 +66,7 @@ final class CharArrayWrapperTest {
     }
 
     @DisplayName("charAt should throw IndexOutOfBoundsException for invalid access")
-    @ParameterizedTest(name = "index {0} should throw exception")
+    @ParameterizedTest(name = "[{index}] index {0} should throw exception")
     @ValueSource(ints = {-1, 3, 99})
     void charAt_shouldThrowOnInvalidIndex(int index) {
         CharArrayWrapper wrapper = new CharArrayWrapper("ABC".toCharArray());
@@ -76,7 +76,7 @@ final class CharArrayWrapperTest {
     }
 
     @DisplayName("subSequence should throw IndexOutOfBoundsException for invalid ranges")
-    @ParameterizedTest(name = "start={0}, end={1}")
+    @ParameterizedTest(name = "[{index}] start={0}, end={1}")
     @CsvSource(delimiter = '|', value = {
         "-1 |  1 | Start negative",
         " 1 |  0 | End before start",
@@ -92,7 +92,7 @@ final class CharArrayWrapperTest {
     }
 
     @DisplayName("subSequence should return the same instance if range covers everything")
-    @ParameterizedTest(name = "start={0}, end={1} on wrapper with length {2}")
+    @ParameterizedTest(name = "[{index}] start={0}, end={1} on wrapper with length {2}")
     @CsvSource(delimiter = '|', value = {
         "0 | 3 | 3 | Full range of 3 chars",
         "0 | 0 | 0 | Empty range of empty wrapper",
@@ -113,7 +113,7 @@ final class CharArrayWrapperTest {
     }
 
     @DisplayName("subSequence should return a new instance for actual sub-ranges")
-    @ParameterizedTest(name = "{2} (start={0}, end={1})")
+    @ParameterizedTest(name = "[{index}] {2} (start={0}, end={1})")
     @CsvSource(delimiter = '|', value = {
         "1 | 4 | Middle sub-range",
         "0 | 4 | Start matches but end differs",

@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 final class IbanValidationErrorTest {
 
     @DisplayName("Failure text should be defined for all reasons")
-    @ParameterizedTest(name = "Constant {0} should have a non-empty failure text")
+    @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanValidationError.class)
     void getText_shouldReturnNonBlankText_whenCalledForAnyConstant(IbanValidationError reason) {
         String text = reason.getText();
@@ -37,7 +37,7 @@ final class IbanValidationErrorTest {
     }
 
     @DisplayName("All failure texts must match their fixed expected descriptions")
-    @ParameterizedTest(name = "Reason {0} text should be ''{1}''")
+    @ParameterizedTest(name = "[{index}]: reason {0} text should be ''{1}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         "EMPTY                    | IBAN is null or empty",
         "INCORRECT_LENGTH         | IBAN has incorrect length",

@@ -10,6 +10,7 @@ import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
 import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.speedbanking.test.TestUtil;
 
@@ -52,6 +53,24 @@ final class IbanValidatorTest {
         TestUtil.assertConstructorIsPrivate(IbanValidator.class);
     }
 
+    @DisplayName("Should load country validator when valid country code is provided")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {"DE", "AT", "CH"})
+    void loadCountryValidator_ShouldReturnValidator_WhenCountryCodeIsValid(String countryCode) {
+        CountryValidator validator = IbanValidator.loadCountryValidator(countryCode);
+
+        assertThat(validator).isNotNull();
+    }
+
+    @DisplayName("Should throw exception when country code is unknown")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {"XX", "47", "  ", " ", ""})
+    void loadCountryValidator_ShouldThrowException_WhenCountryCodeIsUnknown(String countryCode) {
+        assertThatThrownBy(() -> IbanValidator.loadCountryValidator(countryCode))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageStartingWith("Could not instantiate class '%s': java.lang.ClassNotFoundException", CountryValidators.class.getName() + '$' + countryCode);
+    }
+
     @DisplayName("validate should return success object for valid raw IBAN")
     @Test
     void validate_shouldReturnSuccess_whenIbanIsValidAndRaw() {
@@ -64,7 +83,7 @@ final class IbanValidatorTest {
     }
 
     @DisplayName("validate should return null and set error on null or empty input")
-    @ParameterizedTest(name = "Input: ''{0}'' -> Expected: EMPTY")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
     @NullAndEmptySource
     void validate_shouldReturnNull_whenInputIsNullOrEmpty(String input) {
         IbanValidationSuccess result = IbanValidator.validate(input, false);
@@ -140,13 +159,14 @@ final class IbanValidatorTest {
     void validate_shouldReturnSuccess_whenIbanIsValidLu() {
         IbanValidationSuccess result = IbanValidator.validate(VALID_NORM_LU);
         assertThat(result).isNotNull();
+        assertThat(result.normIban).isEqualTo(VALID_NORM_LU);
     }
 
     @DisplayName("validate should return null and set error on null input")
     @Test
     void validate_shouldReturnNull_whenInputIsNull() {
-        IbanValidationSuccess result = IbanValidator.validate(null);
-        assertThat(result).isNull();
+        assertThat(IbanValidator.validate(null)).isNull();
+        assertThat(IbanValidator.validate((CharSequence) null)).isNull();
         assertThat(IbanValidator.getLastReason()).isEqualTo(EMPTY);
     }
 
@@ -168,17 +188,18 @@ final class IbanValidatorTest {
     @Test
     void validate_shouldReturnNull_whenLengthIsIncorrectForCountry() {
         // DE expects 22 characters, here 21
-        IbanValidationSuccess result = IbanValidator.validate("DE9110000000012345678");
-        assertThat(result).isNull();
+        String iban = "DE9110000000012345678";
+        assertThat(IbanValidator.validate(iban)).isNull();
+        assertThat(IbanValidator.validate((CharSequence) iban)).isNull();
         assertThat(IbanValidator.getLastReason()).isEqualTo(INCORRECT_LENGTH_COUNTRY);
     }
 
     @DisplayName("validate should return null and set error on non-digit check digits")
-    @ParameterizedTest(name = "Input: ''{0}''")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"DE9A100000000123456789", "DEA9100000000123456789", "DEAA100000000123456789"})
     void validate_shouldReturnNull_whenCheckDigitsAreInvalid(String input) {
-        IbanValidationSuccess result = IbanValidator.validate(input);
-        assertThat(result).isNull();
+        assertThat(IbanValidator.validate(input)).isNull();
+        assertThat(IbanValidator.validate((CharSequence) input)).isNull();
         assertThat(IbanValidator.getLastReason()).isEqualTo(INVALID_CHECK_DIGITS);
     }
 
@@ -205,7 +226,7 @@ final class IbanValidatorTest {
      * Tests {@link IbanValidator#isMod97Valid(CharSequence)} using various IBAN strings.
      */
     @DisplayName("Modulo 97 Validation")
-    @ParameterizedTest(name = "[{index}] IBAN: {0} -> expected: {1}")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> expected ''{1}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         // Valid case (long string, forces intermediate modulo); uses a known, valid SA IBAN structure/value
         "SA0320000001000201861989 | true",
@@ -248,9 +269,10 @@ final class IbanValidatorTest {
     void isValid_shouldReturnTrue_whenIbanIsValid() {
         // uses the simple API, must not set any error reason
         assertThat(IbanValidator.isValid(VALID_NORM_DE)).isTrue();
+        assertThat(IbanValidator.isValid((CharSequence) VALID_NORM_DE)).isTrue();
     }
 
-    @ParameterizedTest(name = "[{index}] Validating formatted IBAN: {0}")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {
         "DE91 1000 0000 0123 4567 89",
         "GB29 NWBK 6016 1331 9268 19",
@@ -268,12 +290,14 @@ final class IbanValidatorTest {
             assertThat(IbanValidator.isValid(formattedIban))
                 .as("IBAN %s should be recognized as valid", formattedIban)
                 .isTrue();
+            assertThat(IbanValidator.isValid((CharSequence) formattedIban)).isTrue();
 
-            String lowercaseIban = formattedIban.toLowerCase(Locale.ROOT);
+            String lowerCaseIban = formattedIban.toLowerCase(Locale.ROOT);
 
-            assertThat(IbanValidator.isValid(lowercaseIban))
-                .as("IBAN %s should be recognized as valid", lowercaseIban)
+            assertThat(IbanValidator.isValid(lowerCaseIban))
+                .as("IBAN %s should be recognized as valid", lowerCaseIban)
                 .isTrue();
+            assertThat(IbanValidator.isValid((CharSequence) lowerCaseIban)).isTrue();
 
         } finally {
             IbanConfig.reset();
@@ -306,7 +330,7 @@ final class IbanValidatorTest {
      * @param ibanWithZeroCheckDigits the IBAN with "00" in the check digit position
      * @param expectedRemainder       the remainder R that must be produced by the modulo 97 calculation
      */
-    @ParameterizedTest(name = "[{index}] IBAN ''{0}'' should yield Mod 97 Remainder {1}")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> {1}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         // IBAN (00 CD)              | Expected Remainder R (for CD = 98 - R)
         "DE00370400440532013000      | 9",  // result 9 -> CD 91 (DE91...)
@@ -326,7 +350,7 @@ final class IbanValidatorTest {
      *
      * @param ibanInput the input string containing illegal characters
      */
-    @ParameterizedTest(name = "[{index}] Invalid character in ''{0}'' returns " + IbanValidator.INVALID_MOD97)
+    @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {
         "DE0010000000012345678/", // forward slash
         "DE0010000000012345678-", // hyphen
@@ -339,7 +363,7 @@ final class IbanValidatorTest {
     }
 
     @DisplayName("fixCheckDigits should correctly overwrite initial placeholders")
-    @ParameterizedTest(name = "IBAN with initial check digit ''{0}'' should result in ''{1}''")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         "DE | 11 | 1000000001234567890123 | 23",
         "DE | 99 | 1000000001234567890123 | 23"
@@ -367,13 +391,14 @@ final class IbanValidatorTest {
     }
 
     @DisplayName("isValid: fail on non-digit at check digit position or illegal BBAN on spaced IBANs")
-    @ParameterizedTest(name = "Input: {0}")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
     @CsvSource(delimiter = '|', value = {
         "DE A1 1000 0000 0123 4567 89",       // non-digit at pos 3
         "DE9A 1000 0000 0123 4567 89",        // non-digit at pos 4
         "DE91 1000 !000 0123 4567 89",        // illegal char in BBAN
         "DE91 1000 0000 0123 4567 8",         // length check fail via registry
         "GT00 TRAJ 0102 0000 0012 1002 9690", // no country validator & invalid check digits
+        "DE00 4444 7777 1111 1111 4747 1111 0047 119" // too long (and invalid)
     })
     @NullAndEmptySource
     void isValid_shouldReturnFalse_whenInputIsInvalidWithSpacing(String input) {
@@ -381,13 +406,14 @@ final class IbanValidatorTest {
             IbanConfig.reset(IbanConfig.builder().allowSpace(true).build());
 
             assertThat(IbanValidator.isValid(input)).isFalse();
+            assertThat(IbanValidator.isValid((CharSequence) input)).isFalse();
 
         } finally {
             IbanConfig.reset();
         }
     }
 
-    @ParameterizedTest(name = "[{index}] input: {0} ({1})")
+    @ParameterizedTest(name = "[{index}] ''{0}'' ({1})")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         "(null) | null input",
         "''     | empty input",

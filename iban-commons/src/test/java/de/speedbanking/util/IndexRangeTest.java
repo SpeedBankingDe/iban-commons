@@ -34,7 +34,7 @@ final class IndexRangeTest {
     }
 
     @DisplayName("Should throw IllegalArgumentException if begin index is negative")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(ints = {-1, -5, Integer.MIN_VALUE})
     void of_shouldThrowException_whenBeginIsNegative(int negativeBegin) {
         assertThatIllegalArgumentException()
@@ -43,7 +43,7 @@ final class IndexRangeTest {
     }
 
     @DisplayName("Should throw IllegalArgumentException if end index is less than begin index")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         " 5 | 4", // end < begin
         "10 | 0",
@@ -66,7 +66,7 @@ final class IndexRangeTest {
     }
 
     @DisplayName("Should return correct length (end - begin)")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @CsvSource(delimiter = '|', value = {
         " 0,  5 |  5",
         "10, 10 |  0",

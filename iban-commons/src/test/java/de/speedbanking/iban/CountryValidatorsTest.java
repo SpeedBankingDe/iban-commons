@@ -30,7 +30,7 @@ final class CountryValidatorsTest {
     }
 
     @DisplayName("Should instantiate and invoke validator for each registry entry")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
     void all_validators_are_invokable(IbanRegistry countryData) {
         CountryValidator validator = IbanValidator.getCountryValidator(countryData);
@@ -58,7 +58,7 @@ final class CountryValidatorsTest {
     }
 
     @DisplayName("Should provide correct toString implementation")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
     void to_string_is_correctly_implemented(IbanRegistry countryData) {
         CountryValidator validator = IbanValidator.getCountryValidator(countryData);
@@ -76,7 +76,7 @@ final class CountryValidatorsTest {
     }
 
     @DisplayName("Should instantiate and invoke all NCD validators")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("allNcdIbanRegistryEntries")
     @ResourceLock(IbanConfigTest.RESOURCE_NAME)
     void all_ncd_validators_are_invokable(IbanRegistry countryData) {

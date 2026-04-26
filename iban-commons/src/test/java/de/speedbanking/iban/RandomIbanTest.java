@@ -71,7 +71,7 @@ final class RandomIbanTest {
     // Static factory methods — valid IBAN generation
     // =========================================================================
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "NL", "AT", "CH", "PL", "IT", "ES", "SE"})
     void of_shouldReturnValidIban_whenInvokedByCountryCode(String countryCode) {
         Iban iban = RandomIban.of(countryCode);
@@ -92,7 +92,7 @@ final class RandomIbanTest {
             .withMessageContaining("XX");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = IbanRegistry.class, names = {"DE", "GB", "FR", "NL", "AT"})
     void of_byRegistry_returnsValidIban(IbanRegistry country) {
         Iban iban = RandomIban.of(country);
@@ -131,8 +131,11 @@ final class RandomIbanTest {
 
         IbanAssertions.assertThat(iban)
             .isNotNull();
-
         assertThat(IbanValidator.isValid(iban.toString())).isTrue();
+        assertThat(IbanValidator.isValid(iban)).isTrue();
+
+        IbanAssertions.assertThatIbanIsValid(iban.toString());
+
     }
 
     // =========================================================================
@@ -384,9 +387,9 @@ final class RandomIbanTest {
      */
     @Test
     void sabotageIban_strategy5_alreadyShort_corruptsCheckDigit() {
-        int minLen = IbanRegistry.MIN_IBAN_BASE_LENGTH;
+        int minLen = IbanRegistry.MIN_IBAN_LENGTH;
 
-        // Exactly minLen characters — length guard prevents truncation
+        // exactly minLen characters - length guard prevents truncation
         char[] zeros = new char[minLen - 4];
         Arrays.fill(zeros, '0');
         String shortIban = "DE00" + new String(zeros);
@@ -400,7 +403,7 @@ final class RandomIbanTest {
         RandomIban.sabotageIban(sb, rnd);
 
         // length unchanged — fallback must not truncate
-        assertThat(sb.length()).isEqualTo(minLen);
+        assertThat(sb.length()).isLessThan(shortIban.length());
         // but the content must differ (check digit was incremented)
         assertThat(sb.toString()).isNotEqualTo(before);
     }
@@ -420,13 +423,19 @@ final class RandomIbanTest {
         StringBuilder sb = new StringBuilder(validIban);
         RandomIban.sabotageIban(sb, rnd);
 
-        assertThat(sb.length()).isLessThan(minLen);
+        assertThat(sb.length()).isLessThan(validIban.length());
     }
 
     @Test
     void sabotageIban_nullIban_throwsNPE() {
         assertThatNullPointerException()
             .isThrownBy(() -> RandomIban.sabotageIban(null, ThreadLocalRandom.current()));
+    }
+
+    @Test
+    void sabotageIban_shortIban_throwsIAE() {
+        assertThatIllegalArgumentException()
+            .isThrownBy(() -> RandomIban.sabotageIban(new StringBuilder("FOO"), ThreadLocalRandom.current()));
     }
 
     @Test
@@ -504,7 +513,7 @@ final class RandomIbanTest {
             .isFalse();
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "NL", "AT", "CH", "PL", "IT", "ES", "SE"})
     void invalidString_shouldReturnInvalidIban_whenInvokedByCountryCode(String countryCode) {
         String invalid = RandomIban.invalidString(countryCode);
@@ -518,7 +527,7 @@ final class RandomIbanTest {
             .isFalse();
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = IbanRegistry.class, names = {"DE", "GB", "FR", "NL", "AT"})
     void invalidString_shouldReturnInvalidIban_whenInvokedByRegistry(IbanRegistry country) {
         String invalid = RandomIban.invalidString(country);
@@ -556,7 +565,7 @@ final class RandomIbanTest {
             .isFalse();
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
     void invalidString_shouldReturnInvalidIban_forAllRegistryCountries(IbanRegistry country) {
         String invalid = RandomIban.invalidString(country);

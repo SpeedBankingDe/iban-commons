@@ -199,7 +199,7 @@ final class IbanTest {
      * @param countryData the {@link IbanRegistry} entry to test as a base
      */
     @DisplayName("Base/derived registry relationship")
-    @ParameterizedTest(name = "[{index}] {0} — base/derived relationship")
+    @ParameterizedTest(name = "[{index}] {0} - base/derived relationship")
     @EnumSource(value = IbanRegistry.class, names = {"FI", "FR", "GB"})
     void registry_shouldBeConsistent_whenBaseAndDerivedRelationshipIsChecked(IbanRegistry countryData) {
         assertThat(countryData.getBaseCountry()).isNull();
@@ -216,7 +216,7 @@ final class IbanTest {
     }
 
     @DisplayName("Derived/base registry relationship")
-    @ParameterizedTest(name = "[{index}] {0} — derived/base relationship")
+    @ParameterizedTest(name = "[{index}] {0} - derived/base relationship")
     @MethodSource("provideDerivedCountries")
     void registry_shouldBeConsistent_whenDerivedAndBaseRelationshipIsChecked(IbanRegistry countryData) {
         assertThat(countryData.getBaseCountry()).isNotNull();
@@ -612,7 +612,7 @@ final class IbanTest {
      * @throws ClassNotFoundException never expected in this context
      */
     @DisplayName("Serialization round-trip preserves IBAN value")
-    @ParameterizedTest(name = "[{index}] Serialization round-trip: ''{0}''")
+    @ParameterizedTest(name = "[{index}] serialization round-trip: ''{0}''")
     @ValueSource(strings = {
         "DE89370400440532013000",
         "GB29NWBK60161331926819",

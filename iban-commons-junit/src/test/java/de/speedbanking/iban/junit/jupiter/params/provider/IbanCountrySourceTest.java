@@ -121,8 +121,8 @@ final class IbanCountrySourceTest {
     @IbanCountrySource(includeCountries = {IbanRegistry.DE, IbanRegistry.AT, IbanRegistry.CH},
                        excludeCountries = {IbanRegistry.CH})
     void includeAndExclude_combined_excludedEntryAbsent(String countryCode, String countryName) {
-        assertThat(countryCode).isIn("DE", "AT");
-        assertThat(countryCode).isNotEqualTo("CH");
+        assertThat(countryCode).isIn("DE", "AT")
+                               .isNotEqualTo("CH");
     }
 
     // =========================================================================

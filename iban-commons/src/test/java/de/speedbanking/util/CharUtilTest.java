@@ -40,7 +40,7 @@ final class CharUtilTest {
         assertThat(CharUtil.isAllDigits(String.valueOf(c), 0, 1)).isFalse();
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @CsvSource(delimiter = '|', value = {
         // input, beginIndex, endIndex, expected result
         "'123'   | 0 | 3 | true",  // full array (0 to 3 exclusive)
@@ -208,9 +208,8 @@ final class CharUtilTest {
 
         char[] result = CharUtil.toCharArray(cs);
 
-        assertThat(result).containsExactly(expected);
-        // Sicherstellen, dass es ein neues Array ist
-        assertThat(result).isNotSameAs(expected);
+        assertThat(result).containsExactly(expected)
+                          .isNotSameAs(expected);
     }
 
     @Test
@@ -246,7 +245,7 @@ final class CharUtilTest {
         assertThat(CharUtil.toCharArray(new StringBuilder(), 0)).isEmpty();
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}] {0}")
     @CsvSource(delimiter = '|', value = {
         "ABC    | 0 | 3 | true",
         "A1C    | 0 | 3 | true",

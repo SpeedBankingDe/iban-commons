@@ -67,7 +67,7 @@ final class RandomBicTest {
     }
 
     @DisplayName("of(String) with null or unsupported country code should throw NullPointerException")
-    @ParameterizedTest(name = "Country code: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"", " ", "  ", "XX", "ZZ", "de", "99", "D", "DEU", " DE"})
     void of_shouldThrowNpe_whenCountryCodeIsInvalid(String countryCode) {
         assertThatNullPointerException()
@@ -82,7 +82,7 @@ final class RandomBicTest {
     }
 
     @DisplayName("of(String) should return a BIC-8 with the correct country code")
-    @ParameterizedTest(name = "Country: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "US", "JP", "CH", "AT", "NL"})
     void of_shouldReturnBic8WithCountry_whenCountryCodeIsValid(String countryCode) {
         Bic bic = RandomBic.of(countryCode);
@@ -130,7 +130,7 @@ final class RandomBicTest {
     }
 
     @DisplayName("ofBic11(String) with null or unsupported country code should throw NullPointerException")
-    @ParameterizedTest(name = "Country code: ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"", " ", "  ", "XX", "ZZ", "de", "99", "D", "DEU", " DE"})
     void ofBic11_shouldThrowNpe_whenCountryCodeIsInvalid(String countryCode) {
         assertThatNullPointerException()
@@ -145,7 +145,7 @@ final class RandomBicTest {
     }
 
     @DisplayName("ofBic11(String) should return a BIC-11 with the correct country code")
-    @ParameterizedTest(name = "Country: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "US", "JP", "CH", "AT", "NL"})
     void ofBic11_shouldReturnBic11WithCountry_whenCountryCodeIsValid(String countryCode) {
         Bic bic = RandomBic.ofBic11(countryCode);
@@ -222,7 +222,7 @@ final class RandomBicTest {
     }
 
     @DisplayName("of(String) should generate a valid BIC-8 for every ISO 3166-1 Alpha-2 country")
-    @ParameterizedTest(name = "Country: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideAllIsoCountries")
     void of_shouldGenerateValidBic8_forEveryIsoCountry(Iso3166Alpha2 country) {
         Bic bic = RandomBic.of(country.getCode(), new Random(4711L));
@@ -235,7 +235,7 @@ final class RandomBicTest {
     }
 
     @DisplayName("ofBic11(String) should generate a valid BIC-11 for every ISO 3166-1 Alpha-2 country")
-    @ParameterizedTest(name = "Country: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideAllIsoCountries")
     void ofBic11_shouldGenerateValidBic11_forEveryIsoCountry(Iso3166Alpha2 country) {
         Bic bic = RandomBic.ofBic11(country.getCode(), new Random(4711L));
@@ -402,7 +402,7 @@ final class RandomBicTest {
     }
 
     @DisplayName("Generated country flag emoji should match the requested country code")
-    @ParameterizedTest(name = "Country: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR"})
     void of_shouldMatchCountryCode_whenCountryFlagIsGenerated(String countryCode) {
         Bic bic = RandomBic.of(countryCode);

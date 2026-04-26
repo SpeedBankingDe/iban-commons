@@ -24,7 +24,7 @@ final class InvalidBicExceptionTest {
     // -------------------------------------------------------------------------
 
     @DisplayName("of(reason) should store reason and derive message from reason text")
-    @ParameterizedTest(name = "Test Exception for reason: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(BicValidationError.class)
     void of_shouldInitializeCorrectly_whenReasonIsGiven(BicValidationError reason) {
         InvalidBicException exception = InvalidBicException.of(reason);
@@ -80,7 +80,7 @@ final class InvalidBicExceptionTest {
     }
 
     @DisplayName("of(reason, <empty>) should keep input")
-    @ParameterizedTest(name = "input ''{0}''")
+    @ParameterizedTest(name = "[{index}] {0}")
     @NullAndEmptySource
     void of_shouldKeepInput_whenInputIsNullOrEmpty(String input) {
         InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY, input);

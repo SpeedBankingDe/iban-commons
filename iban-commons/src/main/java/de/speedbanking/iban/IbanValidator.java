@@ -103,16 +103,15 @@ public final class IbanValidator {
      * <p>
      * To maximize throughput in high-concurrency or batch-processing scenarios, this
      * buffer allows the validator to copy and transform raw input (e.g., stripping spaces
-     * or upper-casing) within the same memory area. By using a {@link ThreadLocal},
-     * we ensure thread-safety while avoiding the overhead of frequent {@code char[]}
-     * allocations and the resulting garbage collection pressure.
+     * or upper-casing) within the same memory area. Using a {@link ThreadLocal} ensures
+     * thread-safety while avoiding the overhead of frequent {@code char[]} allocations
+     * and the resulting garbage collection pressure.
      * <p>
-     * The capacity is set to {@code MAX_IBAN_LENGTH * 2} to provide sufficient overhead
-     * for raw input strings that may contain a significant amount of ignorable
-     * whitespace before being normalized to the final IBAN length.
+     * The capacity is set to {@code MAX_IBAN_LENGTH}, the longst possible unformatted IBAN.
      */
+    @SuppressWarnings("java:S5164") // ThreadLocal used as a tiny persistent buffer to avoid GC pressure
     private static final ThreadLocal<char[]>              VALIDATION_BUFFER = ThreadLocal
-        .withInitial(() -> new char[MAX_IBAN_LENGTH * 2]);
+        .withInitial(() -> new char[MAX_IBAN_LENGTH]);
 
     /**
      * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
@@ -292,6 +291,9 @@ public final class IbanValidator {
         final boolean allowSpace, final boolean allowLower) {
 
         if (!allowSpace && !allowLower) {
+            if (inputLen > MAX_IBAN_LENGTH) {
+                return INVALID_INPUT;
+            }
             for (int i = 0; i < inputLen; i++) {
                 output[i] = input.charAt(i);
                 if (!isDigitOrUpperCase(output[i])) {
@@ -312,6 +314,9 @@ public final class IbanValidator {
                 }
                 output[targetIdx++] = (char) (c - 32);
             } else if (c != ' ' || !allowSpace) {
+                return INVALID_INPUT;
+            }
+            if (targetIdx >= MAX_IBAN_LENGTH) {
                 return INVALID_INPUT;
             }
         }
@@ -345,6 +350,10 @@ public final class IbanValidator {
         final boolean allowSpace, final boolean allowLower) {
 
         if (!allowSpace && !allowLower) {
+            if (inputLen > MAX_IBAN_LENGTH) {
+                return INVALID_INPUT;
+            }
+
             // Fast path: one combined pass — validate and copy simultaneously.
             // The JIT inlines String.charAt() to direct char[] array access,
             // and early exit on the first invalid character avoids processing
@@ -373,6 +382,9 @@ public final class IbanValidator {
                 }
                 output[targetIdx++] = (char) (c - 32);
             } else if (c != ' ' || !allowSpace) {
+                return INVALID_INPUT;
+            }
+            if (targetIdx >= MAX_IBAN_LENGTH) {
                 return INVALID_INPUT;
             }
         }

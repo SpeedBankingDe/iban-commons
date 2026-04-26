@@ -92,9 +92,43 @@ public final class RandomIban {
         IbanRegistry.getSepaCountries().toArray(new IbanRegistry[0]);
 
     /**
-     * Number of distinct sabotage strategies implemented in {@link #sabotageIban(StringBuilder, Random)}.
+     * Strategies for intentional IBAN corruption used to generate negative test data.
+     * <p>
+     * Each constant represents a specific way to violate IBAN structural or logical rules.
      */
-    private static final int SABOTAGE_STRATEGY_COUNT = 6;
+    private enum SabotageStrategy {
+
+        /** Increments a check digit to cause a Mod-97 validation failure. */
+        CORRUPT_CHECK_DIGIT,
+
+        /** Replaces the country code with an undefined ISO code (e.g., "XY"). */
+        INVALID_COUNTRY_CODE,
+
+        /** Replaces the country code with a valid but mismatched ISO code from another country. */
+        MISMATCHED_COUNTRY_CODE,
+
+        /** Injects an alphabetic character into a strictly numeric BBAN section. */
+        INJECT_LETTER_INTO_BBAN,
+
+        /** Swaps two adjacent characters (transposition error). */
+        TRANSPOSE_CHARACTERS,
+
+        /** Truncates the IBAN to a length below the minimum required 15 characters. */
+        TRUNCATE_IBAN;
+
+        /** Cached array of values to avoid repeated heap allocation by {@code values()}. */
+        private static final SabotageStrategy[] VALUES = values();
+
+        /**
+         * Picks a random sabotage strategy using the provided random generator.
+         *
+         * @param random the random generator to use; must not be null
+         * @return a random strategy
+         */
+        static SabotageStrategy getRandom(Random random) {
+            return VALUES[random.nextInt(VALUES.length)];
+        }
+    }
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -333,62 +367,45 @@ public final class RandomIban {
      *
      * @since 1.8.6
      */
+    @SuppressWarnings("checkstyle:MissingSwitchDefault")
     static StringBuilder sabotageIban(StringBuilder iban, Random random) {
         requireNonNull(iban, "iban must not be null");
+        if (iban.length() < IbanRegistry.MIN_IBAN_LENGTH) {
+            throw new IllegalArgumentException("IBAN length must be at least " + IbanRegistry.MIN_IBAN_LENGTH);
+        }
         requireRandom(random);
 
-        final int minLen       = IbanRegistry.MIN_IBAN_BASE_LENGTH;
-        final int idxCheckDig1 = IbanRegistry.INDEX_CHECK_DIGIT1;
-        final int idxCheckDig2 = IbanRegistry.INDEX_CHECK_DIGIT2;
-        final int idxBban      = IbanRegistry.INDEX_BBAN;
-
-        switch (random.nextInt(SABOTAGE_STRATEGY_COUNT)) {
-            case 0:
+        SabotageStrategy strategy = SabotageStrategy.getRandom(random);
+        switch (strategy) {
+            case CORRUPT_CHECK_DIGIT:
                 // increment one check digit (position 3 or 4) to trigger a Mod-97 failure
-                int cdIdx = random.nextBoolean() ? idxCheckDig1 : idxCheckDig2;
+                int cdIdx = random.nextBoolean() ? IbanRegistry.INDEX_CHECK_DIGIT1 : IbanRegistry.INDEX_CHECK_DIGIT2;
                 char c = iban.charAt(cdIdx);
                 iban.setCharAt(cdIdx, c == '9' ? '0' : (char) (c + 1));
                 break;
-            case 1:
-                // replace country code with non-existent "XY"
+            case INVALID_COUNTRY_CODE:
                 iban.setCharAt(0, 'X');
                 iban.setCharAt(1, 'Y');
                 break;
-            case 2:
-                // replace country code with a valid but mismatched ISO code
+            case MISMATCHED_COUNTRY_CODE:
                 Iso3166Alpha2[] countries = Iso3166Alpha2.values();
                 String randomIso = countries[random.nextInt(countries.length)].name();
                 iban.setCharAt(0, randomIso.charAt(0));
                 iban.setCharAt(1, randomIso.charAt(1));
                 break;
-            case 3:
-                // inject a letter into the numeric BBAN section to cause a structural violation
-                if (iban.length() > idxBban) {
-                    int pos = idxBban + random.nextInt(iban.length() - idxBban);
-                    iban.setCharAt(pos, 'A');
-                }
+            case INJECT_LETTER_INTO_BBAN:
+                int pos = IbanRegistry.INDEX_BBAN + random.nextInt(iban.length() - IbanRegistry.INDEX_BBAN);
+                iban.setCharAt(pos, 'A');
                 break;
-            case 4:
-                // classic transposition: swap two adjacent characters
-                if (iban.length() >= 2) {
-                    int p = random.nextInt(iban.length() - 1);
-                    char tmp = iban.charAt(p);
-                    iban.setCharAt(p, iban.charAt(p + 1));
-                    iban.setCharAt(p + 1, tmp);
-                }
+            case TRANSPOSE_CHARACTERS:
+                int p = random.nextInt(iban.length() - 1);
+                char tmp = iban.charAt(p);
+                iban.setCharAt(p, iban.charAt(p + 1));
+                iban.setCharAt(p + 1, tmp);
                 break;
-            case 5:
-                // truncate below minimum length to produce a structurally invalid IBAN
-                if (iban.length() > minLen) {
-                    iban.setLength(minLen - 1);
-                } else {
-                    // already short — just corrupt the check digit as a safe fallback
-                    char ch = iban.charAt(idxCheckDig1);
-                    iban.setCharAt(idxCheckDig1, ch == '9' ? '0' : (char) (ch + 1));
-                }
+            case TRUNCATE_IBAN:
+                iban.setLength(iban.length() - 1);
                 break;
-            default:
-                throw new IllegalStateException("Unexpected sabotage strategy index");
         }
         return iban;
     }

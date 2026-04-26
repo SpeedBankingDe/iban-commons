@@ -24,7 +24,7 @@ final class NationalCheckDigitCalculatorsTest {
         TestUtil.assertConstructorIsPrivate(NationalCheckDigitCalculators.class);
     }
 
-    @ParameterizedTest(name = "toString for {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideNcdCalculatorClasses")
     void toString_shouldFollowCustomFormat(Class<? extends NcdCalculatorBase> clazz) throws Exception {
         Constructor<? extends NcdCalculatorBase> constructor = clazz.getDeclaredConstructor();

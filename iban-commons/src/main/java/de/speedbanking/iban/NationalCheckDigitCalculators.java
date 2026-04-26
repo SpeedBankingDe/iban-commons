@@ -852,7 +852,7 @@ final class NationalCheckDigitCalculators {
             final char[] computedNcd = calculateNationalCheckDigit(iban);
 
             // perform an in-place comparison to stay within L1 cache and avoid allocation
-            if (computedNcd == null || length != computedNcd.length) {
+            if (length != computedNcd.length) {
                 return false;
             }
 

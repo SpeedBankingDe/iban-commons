@@ -40,7 +40,7 @@ final class IbanRegistryTest {
     }
 
     @DisplayName("Should return null for an unsupported country code")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}]: {0}")
     @ValueSource(strings = {"XX", "xx"})
     @NullAndEmptySource
     void getByCode_shouldReturnNullForInvalidCode(String code) {
@@ -76,7 +76,7 @@ final class IbanRegistryTest {
     }
 
     @DisplayName("Should have correct length and derived IBAN pattern string")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}]: {0}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
             "DE | 22 | 8!n10!n       | (null)", // Deutschland: 18 Zeichen
             "FR | 27 | 5!n5!n11!c2!n | (null)", // Frankreich: 23 Zeichen
@@ -141,6 +141,7 @@ final class IbanRegistryTest {
             .containsExactly(12, 22);
 
         softly.assertThat(registryDe.getOrganisation()).isEqualTo("Bundesverband deutscher Banken");
+        softly.assertThat(registryDe.getDepartment()).isNull();
         softly.assertThat(registryDe.getStreetAddress()).isEqualTo("Burgstraße 28");
         softly.assertThat(registryDe.getCityPostcode()).isEqualTo("10178 Berlin");
         softly.assertThat(registryDe.getDepartmentGenericEmail()).isEqualTo("iban@bdb.de");
@@ -192,6 +193,7 @@ final class IbanRegistryTest {
             .containsExactly(14, 25);
 
         softly.assertThat(registryFr.getOrganisation()).isEqualTo("CFONB");
+        softly.assertThat(registryFr.getDepartment()).isNull();
         softly.assertThat(registryFr.getStreetAddress()).isEqualTo("18 rue la Fayette");
         softly.assertThat(registryFr.getCityPostcode()).isEqualTo("75009 Paris");
         softly.assertThat(registryFr.getDepartmentGenericEmail()).isEqualTo("cfonb@cfonb.fr");
@@ -258,14 +260,14 @@ final class IbanRegistryTest {
     }
 
     @DisplayName("All entries must exist in Iso3166Alpha2")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanRegistry.class)
     void allEntries_mustExistInIso3166Alpha2(IbanRegistry entry) {
         assertThat(Iso3166Alpha2.fromCode(entry.getCountryCode())).isNotNull();
     }
 
     @DisplayName("All entries must have null or valid lastUpdate date")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanRegistry.class)
     void allEntries_mustHaveValidLastUpdate(IbanRegistry entry) {
         YearMonth firstYearMonth = YearMonth.of(2000, 1);
@@ -280,7 +282,7 @@ final class IbanRegistryTest {
     }
 
     @DisplayName("All entries must have a valid IBAN length (4 to 34)")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanRegistry.class)
     void allEntries_mustHaveValidIbanLength(IbanRegistry entry) {
         assertThat(entry.getIbanLength())
@@ -289,7 +291,7 @@ final class IbanRegistryTest {
     }
 
     @DisplayName("All entries must have a valid example IBAN")
-    @ParameterizedTest
+    @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanRegistry.class)
     void allEntries_mustHaveValidIbanExample(IbanRegistry entry) {
         assertThat(entry.getIbanExample())
@@ -365,7 +367,7 @@ final class IbanRegistryTest {
     }
 
     @DisplayName("Validate IBAN length is positive")
-    @ParameterizedTest(name = "Should throw exception for invalid IBAN length: {0}")
+    @ParameterizedTest(name = "[{index}]: {0}")
     @ValueSource(ints = {-1, 0})
     void build_shouldThrowExceptionWhenIbanLengthIsInvalid(int invalidLength) {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
@@ -391,7 +393,7 @@ final class IbanRegistryTest {
     }
 
     @DisplayName("Validate IBAN length limits (15-34)")
-    @ParameterizedTest(name = "Should throw exception for ISO 13616 violation: {0}")
+    @ParameterizedTest(name = "[{index}]: {0}")
     @ValueSource(ints = {14, 35})
     void build_shouldThrowExceptionWhenIbanLengthViolatesIsoLimits(int invalidLength) {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()

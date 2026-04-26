@@ -23,7 +23,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 final class BicValidationErrorTest {
 
     @DisplayName("Failure text should be defined for all reasons")
-    @ParameterizedTest(name = "Constant {0} should have a non-empty failure text")
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(BicValidationError.class)
     void getText_shouldReturnNonEmptyFailureText_forAllReasons(BicValidationError reason) {
         String text = reason.getText();
@@ -34,7 +34,7 @@ final class BicValidationErrorTest {
     }
 
     @DisplayName("Verify InvalidBicException.toString() format")
-    @ParameterizedTest(name = "toString for reason: {0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(BicValidationError.class)
     void toString_shouldReturnValidFormat_forInvalidBicException(BicValidationError reason) {
         InvalidBicException ex = InvalidBicException.of(reason);

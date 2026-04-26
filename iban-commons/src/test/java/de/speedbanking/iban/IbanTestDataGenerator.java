@@ -13,6 +13,14 @@ import java.util.List;
 final class IbanTestDataGenerator {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private IbanTestDataGenerator() {
+        throw new UnsupportedOperationException(
+            String.format("Utility class %s cannot be instantiated", IbanTestDataGenerator.class.getSimpleName()));
+    }
+
+    /**
      * Generates a list of formatted test data strings for all countries in the registry.
      * <p>
      * Each line contains the full IBAN, length, country details, and decomposed BBAN components.
@@ -20,7 +28,7 @@ final class IbanTestDataGenerator {
      *
      * @return a list of pipe-separated strings containing IBAN metadata
      */
-    List<String> createTestDatatAllCountries() {
+    static List<String> createTestDatatAllCountries() {
         List<String> lines = new ArrayList<>();
         String formatIban = "%-" + IbanRegistry.MAX_IBAN_LENGTH + "s";
         String formatBban = "%-" + IbanRegistry.MAX_BBAN_LENGTH + "s";
@@ -51,8 +59,8 @@ final class IbanTestDataGenerator {
     }
 
     public static void main(String[] args) {
-        System.out.print(String.join("," + System.lineSeparator(),
-            new IbanTestDataGenerator().createTestDatatAllCountries()) + System.lineSeparator());
+        String nl = System.lineSeparator();
+        System.out.print(String.join("," + nl, createTestDatatAllCountries()) + nl);
     }
 
 }
