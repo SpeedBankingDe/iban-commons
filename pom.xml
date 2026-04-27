@@ -160,6 +160,14 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>de.speedbanking</groupId>
+                <artifactId>iban-commons</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <classifier>tests</classifier>
+            </dependency>
+
             <!--
                 iban-commons-junit as test dependency for iban-commons.
                 Using test scope here avoids a circular compile dependency:
@@ -578,7 +586,6 @@
                     <version>${dep.plugin.release.version}</version>
                     <configuration>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <mavenExecutorId>forked-path</mavenExecutorId>
                         <pushChanges>false</pushChanges>
                         <localCheckout>true</localCheckout>
                         <preparationGoals>clean install</preparationGoals>
@@ -588,7 +595,7 @@
                         <!-- After tagging, update version strings in docs.
                              The script reads the new release version from the
                              ${releaseVersion} property injected by the plugin. -->
-                        <completionGoals>exec:exec@update-docs-version</completionGoals>
+                        <completionGoals>exec:exec@update-docs-version -N</completionGoals>
                     </configuration>
                 </plugin>
 
@@ -609,7 +616,7 @@
                             <configuration>
                                 <executable>bash</executable>
                                 <arguments>
-                                    <!-- Script lives in the root (parent) module -->
+                                    <!-- script lives in the root (parent) module -->
                                     <argument>${maven.multiModuleProjectDirectory}/src/main/scripts/update-docs-version.sh</argument>
                                     <argument>${releaseVersion}</argument>
                                 </arguments>
