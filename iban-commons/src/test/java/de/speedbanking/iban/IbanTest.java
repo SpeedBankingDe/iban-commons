@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import de.speedbanking.iban.junit.jupiter.params.converter.BooleanConverter;
+import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.test.TestUtil;
 import de.speedbanking.util.Iso3166Alpha2;
 
@@ -38,6 +39,7 @@ import java.io.StreamCorruptedException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -215,6 +217,29 @@ final class IbanTest {
             });
     }
 
+    @DisplayName("Example IBAN should match the generated regex from BBAN pattern")
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("provideBaseCountries")
+    void exampleIban_shouldMatchGeneratedRegex_whenRegistryIsProcessed(IbanRegistry countryData) {
+        String bbanRegex = IbanPatternConverter.convertToRegex(countryData.getBbanPatternStr());
+
+        Pattern ibanPattern = Pattern.compile('^' + countryData.getCountryCode() + IbanPatternConverter.convertToRegex("2!n") + bbanRegex + '$');
+
+        assertThat(countryData.getIbanExample())
+            .as("Valid IBAN for %s should match pattern", countryData.getCountryCode())
+            .matches(ibanPattern);
+    }
+
+    /**
+     * Provides a stream of IBAN registry entries representing base countries.
+     *
+     * @return a stream of registry entries where {@link IbanRegistry#isBaseCountry()} is true
+     */
+    static Stream<IbanRegistry> provideBaseCountries() {
+        return Arrays.stream(IbanRegistry.values())
+            .filter(IbanRegistry::isBaseCountry);
+    }
+
     @DisplayName("Derived/base registry relationship")
     @ParameterizedTest(name = "[{index}] {0} - derived/base relationship")
     @MethodSource("provideDerivedCountries")
@@ -227,6 +252,11 @@ final class IbanTest {
         assertThat(countryData.getDerivedCountries()).isEmpty();
     }
 
+    /**
+     * Provides a stream of IBAN registry entries representing derived countries.
+     *
+     * @return a stream of registry entries where {@link IbanRegistry#isDerivedCountry()} is true
+     */
     static Stream<IbanRegistry> provideDerivedCountries() {
         return Arrays.stream(IbanRegistry.values())
             .filter(IbanRegistry::isDerivedCountry);

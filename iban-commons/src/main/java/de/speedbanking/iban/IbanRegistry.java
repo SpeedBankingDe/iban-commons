@@ -2914,7 +2914,7 @@ public enum IbanRegistry {
         .mapToInt(IbanRegistry::getIbanLength).min().orElse(MIN_IBAN_BASE_LENGTH);
 
     /** ISO 13616 standard maximum. */
-    static final int                    MAX_IBAN_LENGTH      = Arrays.stream(values())
+    public static final int             MAX_IBAN_LENGTH      = Arrays.stream(values())
         .mapToInt(IbanRegistry::getIbanLength).max().orElse(34);
 
     /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
@@ -2927,7 +2927,7 @@ public enum IbanRegistry {
     static final int                    INDEX_BBAN           = MIN_IBAN_BASE_LENGTH;
 
     /** Maximum length of BBAN. */
-    static final int                    MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
+    public static final int             MAX_BBAN_LENGTH      = MAX_IBAN_LENGTH - INDEX_BBAN;
 
     /**
      * Fixed-size lookup array covering all 676 possible two-letter combinations

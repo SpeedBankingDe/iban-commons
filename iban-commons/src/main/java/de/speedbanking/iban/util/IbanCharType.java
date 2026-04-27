@@ -48,7 +48,7 @@ public enum IbanCharType {
      * <p>
      * Corresponds to the ISO 13616 code {@code 'c'}.
      */
-    ALPHANUMERIC('c', "[A-Z0-9]"),
+    ALPHANUMERIC('c', "[0-9A-Z]"),
 
     /**
      * Blank space (used only in the display format notation).

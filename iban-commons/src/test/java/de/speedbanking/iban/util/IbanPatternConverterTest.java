@@ -44,14 +44,14 @@ final class IbanPatternConverterTest {
     @DisplayName("Valid patterns should convert to correct Regex")
     @ParameterizedTest(name = "{0} -> {1}")
     @CsvSource(delimiter = ';', nullValues = "(null)", value = {
-        "4!a16!c      ; [A-Z]{4}[A-Z0-9]{16}",
+        "4!a16!c      ; [A-Z]{4}[0-9A-Z]{16}",
         "30!n         ; [0-9]{30}",
-        "2!a3!n4!c    ; [A-Z]{2}[0-9]{3}[A-Z0-9]{4}",
-        "1!a1!n1!c    ; [A-Z][0-9][A-Z0-9]",
+        "2!a3!n4!c    ; [A-Z]{2}[0-9]{3}[0-9A-Z]{4}",
+        "1!a1!n1!c    ; [A-Z][0-9][0-9A-Z]",
         "4!a2!a3!n    ; [A-Z]{6}[0-9]{3}",           // aggregation (4a + 2a = 6a) then segment change (3n)
         "4!a3!n2!n    ; [A-Z]{4}[0-9]{5}",           // segment change, then aggregation (3n + 2n = 5n). Ensures line 160 is covered.
         "4!a10!a      ; [A-Z]{14}",                  // only two segments of the same type
-        "2!c1!a2!a3!n ; [A-Z0-9]{2}[A-Z]{3}[0-9]{3}" // all three types and aggregation
+        "2!c1!a2!a3!n ; [0-9A-Z]{2}[A-Z]{3}[0-9]{3}" // all three types and aggregation
     })
     void convertToRegex_givenValidPattern_shouldReturnCorrectRegex(String input, String expected) {
         String patternInput = (input == null) ? "" : input;
@@ -184,7 +184,7 @@ final class IbanPatternConverterTest {
             createSegment(ALPHABETIC, 1)
         );
 
-        String expected = "[A-Z]{4}[A-Z0-9]{16}[A-Z]";
+        String expected = "[A-Z]{4}[0-9A-Z]{16}[A-Z]";
 
         assertThat(IbanPatternConverter.buildRegex(segments)).isEqualTo(expected);
 

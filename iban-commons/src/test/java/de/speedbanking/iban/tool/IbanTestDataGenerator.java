@@ -1,4 +1,7 @@
-package de.speedbanking.iban;
+package de.speedbanking.iban.tool;
+
+import de.speedbanking.iban.Iban;
+import de.speedbanking.iban.IbanRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
