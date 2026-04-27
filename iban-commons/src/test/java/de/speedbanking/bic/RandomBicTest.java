@@ -1,6 +1,6 @@
 package de.speedbanking.bic;
 
-import static de.speedbanking.bic.BicAssertions.assertThat;
+import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThat;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;

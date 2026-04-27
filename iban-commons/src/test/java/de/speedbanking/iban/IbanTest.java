@@ -1,9 +1,9 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanAssertions.assertThat;
-import static de.speedbanking.iban.IbanAssertions.assertThatIbanIsValid;
-import static de.speedbanking.iban.IbanAssertions.assertThatIbanOf;
-import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThat;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsValid;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanOf;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatComparable;

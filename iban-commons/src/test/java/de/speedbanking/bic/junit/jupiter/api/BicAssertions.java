@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.speedbanking.bic;
+package de.speedbanking.bic.junit.jupiter.api;
 
 import static java.util.Objects.requireNonNull;
 
+import de.speedbanking.bic.Bic;
+import de.speedbanking.bic.InvalidBicException;
 import de.speedbanking.util.Currency;
 
 import org.assertj.core.api.AbstractBooleanAssert;
@@ -208,7 +210,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasLength(int expectedLength) {
             isNotNull();
             if (actual.length() != expectedLength) {
-                failWithMessage("Expected BIC length to be <%d> but was <%d> for BIC <%s>",
+                failWithMessage("Expected BIC length to be %d but was %d for BIC '%s'",
                     expectedLength, actual.length(), actual);
             }
             return myself;
@@ -228,7 +230,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasToString(String expectedToString) {
             isNotNull();
             if (!Objects.equals(actual.toString(), expectedToString)) {
-                failWithMessage("Expected BIC toString() to be <%s> but was <%s>",
+                failWithMessage("Expected BIC toString() to be '%s' but was '%s'",
                     expectedToString, actual.toString());
             }
             return myself;
@@ -243,7 +245,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasBic8(String expectedBic8) {
             isNotNull();
             if (!Objects.equals(actual.toBic8(), expectedBic8)) {
-                failWithMessage("Expected BIC-8 to be <%s> but was <%s> for BIC <%s>",
+                failWithMessage("Expected BIC-8 to be '%s' but was '%s' for BIC '%s'",
                     expectedBic8, actual.toBic8(), actual);
             }
             return myself;
@@ -261,7 +263,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasBic11(String expectedBic11) {
             isNotNull();
             if (!Objects.equals(actual.toBic11(), expectedBic11)) {
-                failWithMessage("Expected BIC-11 to be <%s> but was <%s> for BIC <%s>",
+                failWithMessage("Expected BIC-11 to be '%s' but was '%s' for BIC '%s'",
                     expectedBic11, actual.toBic11(), actual);
             }
             return myself;
@@ -298,7 +300,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasBankCode(String expectedBankCode) {
             isNotNull();
             if (!Objects.equals(actual.getBankCode(), expectedBankCode)) {
-                failWithMessage("Expected BIC Bank Code to be <%s> but was <%s> for BIC <%s>",
+                failWithMessage("Expected BIC bank code to be '%s' but was '%s' for BIC '%s'",
                     expectedBankCode, actual.getBankCode(), actual);
             }
             return myself;
@@ -313,7 +315,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasCountryCode(String expectedCountryCode) {
             isNotNull();
             if (!Objects.equals(actual.getCountryCode(), expectedCountryCode)) {
-                failWithMessage("Expected BIC Country Code to be <%s> but was <%s> for BIC <%s>",
+                failWithMessage("Expected BIC country code to be '%s' but was '%s' for BIC '%s'",
                     expectedCountryCode, actual.getCountryCode(), actual);
             }
             return myself;
@@ -343,7 +345,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasCountryFlag(String expectedCountryFlag) {
             isNotNull();
             if (!Objects.equals(actual.getCountryFlag(), expectedCountryFlag)) {
-                failWithMessage("Expected BIC Country Flag to be <%s> but was <%s> for BIC <%s>",
+                failWithMessage("Expected BIC country flag to be '%s' but was '%s' for BIC '%s'",
                     expectedCountryFlag, actual.getCountryFlag(), actual);
             }
             return myself;
@@ -392,7 +394,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasLocationCode(String expectedLocationCode) {
             isNotNull();
             if (!Objects.equals(actual.getLocationCode(), expectedLocationCode)) {
-                failWithMessage("Expected BIC Location Code to be <%s> but was <%s> for BIC <%s>",
+                failWithMessage("Expected BIC location code to be '%s' but was '%s' for BIC '%s'",
                     expectedLocationCode, actual.getLocationCode(), actual);
             }
             return myself;
@@ -410,7 +412,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasBranchCode(String expectedBranchCode) {
             isNotNull();
             if (!Objects.equals(actual.getBranchCode(), expectedBranchCode)) {
-                failWithMessage("Expected BIC Branch Code to be <%s> but was <%s> for BIC <%s>",
+                failWithMessage("Expected BIC branch code to be '%s' but was '%s' for BIC '%s'",
                     expectedBranchCode, actual.getBranchCode(), actual);
             }
             return myself;
@@ -438,7 +440,7 @@ public class BicAssertions extends Assertions {
         public BicAssert matches(Pattern bicPattern) {
             isNotNull();
             if (bicPattern != null && !bicPattern.matcher(actual.toString()).matches()) {
-                failWithMessage("BIC <%s> does not match pattern <%s>", actual, bicPattern);
+                failWithMessage("BIC '%s' does not match pattern '%s'", actual, bicPattern);
             }
             return myself;
         }
@@ -454,7 +456,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) >= 0) {
-                failWithMessage("Expected BIC <%s> to be less than <%s> but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be less than '%s' but it was not", actual, other);
             }
             return myself;
         }
@@ -470,7 +472,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) > 0) {
-                failWithMessage("Expected BIC <%s> to be less than or equal to <%s> but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be less than or equal to '%s' but it was not", actual, other);
             }
             return myself;
         }
@@ -486,7 +488,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) <= 0) {
-                failWithMessage("Expected BIC <%s> to be greater than <%s> but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be greater than '%s' but it was not", actual, other);
             }
             return myself;
         }
@@ -502,7 +504,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) < 0) {
-                failWithMessage("Expected BIC <%s> to be greater than or equal to <%s> but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be greater than or equal to '%s' but it was not", actual, other);
             }
             return myself;
         }
@@ -522,7 +524,7 @@ public class BicAssertions extends Assertions {
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) != 0) {
                 failWithMessage(
-                    "Expected BIC <%s> to compare as equal to <%s> (compareTo == 0) but compareTo returned %d",
+                    "Expected BIC '%s' to compare as equal to '%s' (compareTo == 0) but compareTo returned %d",
                     actual, other, actual.compareTo(other));
             }
             return myself;

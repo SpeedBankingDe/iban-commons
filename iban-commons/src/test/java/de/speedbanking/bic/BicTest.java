@@ -1,9 +1,9 @@
 package de.speedbanking.bic;
 
-import static de.speedbanking.bic.BicAssertions.assertThat;
-import static de.speedbanking.bic.BicAssertions.assertThatBicIsValid;
-import static de.speedbanking.bic.BicAssertions.assertThatBicOf;
-import static de.speedbanking.bic.BicAssertions.assertThatInvalidBicException;
+import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThat;
+import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBicIsValid;
+import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBicOf;
+import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatInvalidBicException;
 
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

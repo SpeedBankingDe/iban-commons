@@ -44,9 +44,16 @@
             iban-commons-junit automatically get iban-commons on their classpath.
         -->
         <dependency>
-            <groupId>de.speedbanking</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>iban-commons</artifactId>
-            <!-- scope: compile (inherited from dependencyManagement) -->
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>iban-commons</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
         </dependency>
 
         <!--

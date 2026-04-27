@@ -1,12 +1,13 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanAssertions.assertThatInvalidIbanException;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.Assertions.fail;
 
+import de.speedbanking.iban.junit.jupiter.api.IbanAssertions;
 import de.speedbanking.iban.util.IbanCharType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;

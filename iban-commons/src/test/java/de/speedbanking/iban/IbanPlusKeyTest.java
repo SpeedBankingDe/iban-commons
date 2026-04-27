@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import de.speedbanking.iban.junit.jupiter.api.IbanAssertions;
 import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;

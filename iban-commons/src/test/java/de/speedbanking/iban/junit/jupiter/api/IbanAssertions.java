@@ -1,7 +1,9 @@
-package de.speedbanking.iban;
+package de.speedbanking.iban.junit.jupiter.api;
 
 import static java.util.Objects.requireNonNull;
 
+import de.speedbanking.iban.Iban;
+import de.speedbanking.iban.InvalidIbanException;
 import de.speedbanking.util.Currency;
 
 import org.assertj.core.api.AbstractBooleanAssert;
@@ -92,24 +94,9 @@ public class IbanAssertions extends Assertions {
     public static IbanAssert assertThatIbanTryParseValue(CharSequence ibanValue) {
         Optional<Iban> result = Iban.tryParse(ibanValue);
         if (!result.isPresent()) {
-            throw new AssertionError("Expected Iban.tryParse(\"" + ibanValue + "\") to return a non-empty Optional, but it was empty.");
+            throw new AssertionError("Expected Iban.tryParse(\"" + ibanValue + "\") to return a non-empty Optional, but it was empty");
         }
         return assertThat(result.get());
-    }
-
-    /**
-     * Creates an {@link IbanAssert} for a valid IBAN parsed via {@link Iban#tryParseOrNull(CharSequence)}.
-     * The result must be non-null; if it is null the assertion fails immediately.
-     *
-     * @param ibanValue the IBAN character sequence to parse
-     * @return the custom assertion object
-     */
-    public static IbanAssert assertThatIbanTryParseOrNull(CharSequence ibanValue) {
-        Iban result = Iban.tryParseOrNull(ibanValue);
-        if (result == null) {
-            throw new AssertionError("Expected Iban.tryParseOrNull(\"" + ibanValue + "\") to return a non-null Iban, but it returned null.");
-        }
-        return assertThat(result);
     }
 
     /**
@@ -267,7 +254,7 @@ public class IbanAssertions extends Assertions {
             isNotNull();
             if (!Objects.equals(actual.getCurrency(), expectedCurrency)) {
                 failWithMessage("Expected currency to be '%s' but was '%s' for IBAN '%s'",
-                    expectedCurrency, actual.getCurrency(), actual);
+                    expectedCurrency.getAlphaCode(), actual.getCurrency().getAlphaCode(), actual);
             }
             return myself;
         }
@@ -300,8 +287,8 @@ public class IbanAssertions extends Assertions {
         public IbanAssert isSepa(boolean expectedSepaParticipation) {
             isNotNull();
             if (actual.isSepa() != expectedSepaParticipation) {
-                failWithMessage("Expected SEPA participation to be '%s' but was '%s' for IBAN '%s'",
-                    expectedSepaParticipation, actual.isSepa(), actual);
+                failWithMessage("Expected SEPA participation to be '%s' for IBAN '%s'",
+                    expectedSepaParticipation, actual);
             }
             return myself;
         }
@@ -442,6 +429,22 @@ public class IbanAssertions extends Assertions {
         }
 
         /**
+         * Asserts that the normalized IBAN string matches the given regular-expression.
+         * <p>
+         * A {@code null} or empty regex skips the check.
+         *
+         * @param regex the regular expression to match against, or {@code null} to skip
+         * @return {@code this} assertion object for method chaining
+         */
+        public IbanAssert matches(CharSequence regex) {
+            isNotNull();
+            if (regex != null && regex.length() > 0) {
+                return matches(Pattern.compile(regex.toString()));
+            }
+            return myself;
+        }
+
+        /**
          * Asserts that the normalized IBAN string matches the given regular-expression {@link Pattern}.
          * A {@code null} pattern skips the check.
          *
@@ -468,7 +471,7 @@ public class IbanAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) >= 0) {
-                failWithMessage("Expected IBAN '%s' to be less than '%s' but it was not",
+                failWithMessage("Expected IBAN '%s' to be less than '%s'",
                     actual, other);
             }
             return myself;
@@ -485,7 +488,7 @@ public class IbanAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) > 0) {
-                failWithMessage("Expected IBAN '%s' to be less than or equal to '%s' but it was not",
+                failWithMessage("Expected IBAN '%s' to be less than or equal to '%s'",
                     actual, other);
             }
             return myself;
@@ -502,7 +505,7 @@ public class IbanAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) <= 0) {
-                failWithMessage("Expected IBAN '%s' to be greater than '%s' but it was not",
+                failWithMessage("Expected IBAN '%s' to be greater than '%s'",
                     actual, other);
             }
             return myself;
@@ -519,7 +522,7 @@ public class IbanAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The IBAN to compare against must not be null");
             if (actual.compareTo(other) < 0) {
-                failWithMessage("Expected IBAN '%s' to be greater than or equal to '%s' but it was not",
+                failWithMessage("Expected IBAN '%s' to be greater than or equal to '%s'",
                     actual, other);
             }
             return myself;
