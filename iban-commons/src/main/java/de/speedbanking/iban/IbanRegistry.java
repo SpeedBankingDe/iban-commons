@@ -788,7 +788,7 @@ public enum IbanRegistry {
        MetaData.of(
            "Faroe Islands", false, "FO6264600001631634",
            YearMonth.of(2017, 2)),
-       DK.getContactData()),
+       DK.contactData),
 
     /**
      * <strong>France ({@code FR})</strong><p>
@@ -1131,7 +1131,7 @@ public enum IbanRegistry {
        MetaData.of(
            "Greenland", false, "GL8964710001000206",
            YearMonth.of(2017, 2)),
-       DK.getContactData()),
+       DK.contactData),
 
     /**
      * <strong>Greece ({@code GR})</strong><p>
@@ -2970,7 +2970,7 @@ public enum IbanRegistry {
 
         this.countryFlag = CountryUtil.createFlagEmoji(name());
 
-        String ibanPatternNoCountry = "2!n" + structureData.bbanPatternStr();
+        String ibanPatternNoCountry = "2!n" + structureData.bbanPatternStr;
         this.ibanRegex = Pattern.compile('^' + name() + IbanPatternConverter.convertToRegex(ibanPatternNoCountry) + '$');
     }
 
@@ -3023,7 +3023,7 @@ public enum IbanRegistry {
      * @return the country name
      */
     public String getCountryName() {
-        return metaData.getCountryName();
+        return metaData.countryName;
     }
 
     /**
@@ -3072,7 +3072,7 @@ public enum IbanRegistry {
      * @see <a href="https://www.europeanpaymentscouncil.eu/document-library/other/map-sepa-scheme-countries-and-territories">Map of SEPA Scheme Countries and Territories</a>
      */
     public boolean isSepa() {
-        return metaData.isSepa();
+        return metaData.isSepa;
     }
 
     /**
@@ -3083,7 +3083,7 @@ public enum IbanRegistry {
      * @return {@code true} if the country is not a SEPA member, {@code false} if it is
      */
     public boolean isNotSepa() {
-        return !isSepa();
+        return !metaData.isSepa;
     }
 
     /**
@@ -3092,7 +3092,7 @@ public enum IbanRegistry {
      * @return the total IBAN length
      */
     public int getIbanLength() {
-        return structureData.ibanLength();
+        return structureData.ibanLength;
     }
 
     /**
@@ -3119,7 +3119,7 @@ public enum IbanRegistry {
      * @return the BBAN length
      */
     public int getBbanLength() {
-        return structureData.getBbanLength();
+        return structureData.ibanLength - INDEX_BBAN;
     }
 
     /**
@@ -3128,7 +3128,7 @@ public enum IbanRegistry {
      * @return the BBAN pattern string
      */
     public String getBbanPatternStr() {
-        return structureData.bbanPatternStr();
+        return structureData.bbanPatternStr;
     }
 
     /**
@@ -3137,7 +3137,7 @@ public enum IbanRegistry {
      * @return the IBAN example string
      */
     public String getIbanExample() {
-        return metaData.getIbanExample();
+        return metaData.ibanExample;
     }
 
     /**
@@ -3146,7 +3146,7 @@ public enum IbanRegistry {
      * @return the bank code pattern string
      */
     public String getBankCodePatternStr() {
-        return structureData.bankCodePatternStr();
+        return structureData.bankCodePatternStr;
     }
 
     /**
@@ -3155,7 +3155,7 @@ public enum IbanRegistry {
      * @return the {@code IndexRange} for the bank code
      */
     IndexRange getBankCodeIndexRange() {
-        return structureData.bankCodeIndexRange();
+        return structureData.bankCodeIndexRange;
     }
 
     /**
@@ -3164,7 +3164,7 @@ public enum IbanRegistry {
      * @return the branch code pattern string
      */
     public String getBranchCodePattern() {
-        return structureData.branchCodePatternStr();
+        return structureData.branchCodePatternStr;
     }
 
     /**
@@ -3173,7 +3173,7 @@ public enum IbanRegistry {
      * @return the {@code IndexRange} for the branch code, or {@code null}
      */
     IndexRange getBranchCodeIndexRange() {
-        return structureData.branchCodeIndexRange();
+        return structureData.branchCodeIndexRange;
     }
 
     /**
@@ -3182,7 +3182,7 @@ public enum IbanRegistry {
      * @return {@code true} if a branch code exists, {@code false} otherwise
      */
     public boolean hasBranchCode() {
-        return structureData.hasBranchCode();
+        return structureData.branchCodeIndexRange != null;
     }
 
     /**
@@ -3191,7 +3191,7 @@ public enum IbanRegistry {
      * @return the {@code IndexRange} for the account number
      */
     IndexRange getAccountNumberIndexRange() {
-        return structureData.accountNumberIndexRange();
+        return structureData.accountNumberIndexRange;
     }
 
     /**
@@ -3200,7 +3200,7 @@ public enum IbanRegistry {
      * @return the {@code IndexRange} for the national check digit
      */
     IndexRange getNationalCheckDigitIndexRange() {
-        return structureData.nationalCheckDigitIndexRange();
+        return structureData.nationalCheckDigitIndexRange;
     }
 
     /**
@@ -3209,16 +3209,7 @@ public enum IbanRegistry {
      * @return {@code true} if a National Check Digit (NCD) exists, {@code false} otherwise
      */
     public boolean hasNationalCheckDigit() {
-        return structureData.hasNationalCheckDigit();
-    }
-
-    /**
-     * Returns the {@link ContactData} object.
-     *
-     * @return contact data
-     */
-    public ContactData getContactData() {
-        return contactData;
+        return structureData.nationalCheckDigitIndexRange != null;
     }
 
     /**
@@ -3227,7 +3218,7 @@ public enum IbanRegistry {
      * @return the organization's name
      */
     public String getOrganisation() {
-        return contactData.getOrganisation();
+        return contactData.organisation;
     }
 
     /**
@@ -3236,7 +3227,7 @@ public enum IbanRegistry {
      * @return the department name
      */
     public String getDepartment() {
-        return contactData.getDepartment();
+        return contactData.department;
     }
 
     /**
@@ -3245,7 +3236,7 @@ public enum IbanRegistry {
      * @return the street address
      */
     public String getStreetAddress() {
-        return contactData.getStreetAddress();
+        return contactData.streetAddress;
     }
 
     /**
@@ -3254,7 +3245,7 @@ public enum IbanRegistry {
      * @return the city and postcode (zip code)
      */
     public String getCityPostcode() {
-        return contactData.getCityPostcode();
+        return contactData.cityPostcode;
     }
 
     /**
@@ -3263,7 +3254,7 @@ public enum IbanRegistry {
      * @return the email address
      */
     public String getDepartmentGenericEmail() {
-        return contactData.getDepartmentGenericEmail();
+        return contactData.departmentGenericEmail;
     }
 
     /**
@@ -3272,7 +3263,7 @@ public enum IbanRegistry {
      * @return the telephone number
      */
     public String getDepartmentTel() {
-        return contactData.getDepartmentTel();
+        return contactData.departmentTel;
     }
 
     /**
@@ -3281,7 +3272,7 @@ public enum IbanRegistry {
      * @return the {@code YearMonth} of the last update
      */
     public YearMonth getLastUpdate() {
-        return metaData.getLastUpdate();
+        return metaData.lastUpdate;
     }
 
     /**
@@ -3295,7 +3286,7 @@ public enum IbanRegistry {
      * @since 1.8.3
      */
     public int getLastUpdateYear() {
-        return metaData.getLastUpdateYear();
+        return metaData.lastUpdate.getYear();
     }
 
     /**
@@ -3310,7 +3301,7 @@ public enum IbanRegistry {
      * @since 1.8.3
      */
     public int getLastUpdateMonth() {
-        return metaData.getLastUpdateMonth();
+        return metaData.lastUpdate.getMonthValue();
     }
 
     /**
@@ -3504,11 +3495,11 @@ public enum IbanRegistry {
             this.nationalCheckDigitIndexRange = builder.nationalCheckDigitIndexRange;
         }
 
-        public static Builder builder() {
+        static Builder builder() {
             return new Builder();
         }
 
-        public static final class Builder {
+        static final class Builder {
             private int        ibanLength;
             private String     bbanPatternStr;
             private IndexRange accountNumberIndexRange;
@@ -3523,33 +3514,33 @@ public enum IbanRegistry {
             private Builder() {
             }
 
-            public Builder withIbanLength(int ibanLength) {
+            Builder withIbanLength(int ibanLength) {
                 this.ibanLength = ibanLength;
                 return this;
             }
 
-            public Builder withBbanPattern(String bbanPatternStr) {
+            Builder withBbanPattern(String bbanPatternStr) {
                 this.bbanPatternStr = bbanPatternStr;
                 return this;
             }
 
-            public Builder withAccountNumber(IndexRange accountNumberIndexRange) {
+            Builder withAccountNumber(IndexRange accountNumberIndexRange) {
                 this.accountNumberIndexRange = accountNumberIndexRange;
                 return this;
             }
 
-            public Builder withNationalCheckDigit(IndexRange nationalCheckDigitIndexRange) {
+            Builder withNationalCheckDigit(IndexRange nationalCheckDigitIndexRange) {
                 this.nationalCheckDigitIndexRange = nationalCheckDigitIndexRange;
                 return this;
             }
 
-            public Builder withBankCode(String bankCodePatternStr, IndexRange bankCodeIndexRange) {
+            Builder withBankCode(String bankCodePatternStr, IndexRange bankCodeIndexRange) {
                 this.bankCodePatternStr = bankCodePatternStr;
                 this.bankCodeIndexRange = bankCodeIndexRange;
                 return this;
             }
 
-            public Builder withBranchCode(String branchCodePatternStr, IndexRange branchCodeIndexRange) {
+            Builder withBranchCode(String branchCodePatternStr, IndexRange branchCodeIndexRange) {
                 this.branchCodePatternStr = branchCodePatternStr;
                 this.branchCodeIndexRange = branchCodeIndexRange;
                 return this;
@@ -3568,49 +3559,6 @@ public enum IbanRegistry {
             }
         }
 
-        public int ibanLength() {
-            return ibanLength;
-        }
-
-        public String bbanPatternStr() {
-            return bbanPatternStr;
-        }
-
-        public String bankCodePatternStr() {
-            return bankCodePatternStr;
-        }
-
-        IndexRange bankCodeIndexRange() {
-            return bankCodeIndexRange;
-        }
-
-        public String branchCodePatternStr() {
-            return branchCodePatternStr;
-        }
-
-        IndexRange branchCodeIndexRange() {
-            return branchCodeIndexRange;
-        }
-
-        public boolean hasBranchCode() {
-            return branchCodeIndexRange != null;
-        }
-
-        IndexRange accountNumberIndexRange() {
-            return accountNumberIndexRange;
-        }
-
-        IndexRange nationalCheckDigitIndexRange() {
-            return nationalCheckDigitIndexRange;
-        }
-
-        public boolean hasNationalCheckDigit() {
-            return nationalCheckDigitIndexRange != null;
-        }
-
-        public int getBbanLength() {
-            return ibanLength - INDEX_BBAN;
-        }
     }
 
     /**
@@ -3641,7 +3589,7 @@ public enum IbanRegistry {
             this.departmentTel = departmentTel;
         }
 
-        public static ContactData of(
+        static ContactData of(
             String organisation,
             String department,
             String streetAddress,
@@ -3653,27 +3601,27 @@ public enum IbanRegistry {
                 cityPostcode, departmentGenericEmail, departmentTel);
         }
 
-        public String getOrganisation() {
+        String getOrganisation() {
             return organisation;
         }
 
-        public String getDepartment() {
+        String getDepartment() {
             return department;
         }
 
-        public String getStreetAddress() {
+        String getStreetAddress() {
             return streetAddress;
         }
 
-        public String getCityPostcode() {
+        String getCityPostcode() {
             return cityPostcode;
         }
 
-        public String getDepartmentGenericEmail() {
+        String getDepartmentGenericEmail() {
             return departmentGenericEmail;
         }
 
-        public String getDepartmentTel() {
+        String getDepartmentTel() {
             return departmentTel;
         }
 
@@ -3695,8 +3643,9 @@ public enum IbanRegistry {
 
         @Override
         public int hashCode() {
-            return Objects.hash(organisation, department, streetAddress,
-                                cityPostcode, departmentGenericEmail, departmentTel);
+            return Objects.hash(organisation, department,
+                                streetAddress, cityPostcode,
+                                departmentGenericEmail, departmentTel);
         }
 
         @Override
@@ -3741,52 +3690,6 @@ public enum IbanRegistry {
             return new MetaData(
                 countryName, isSepa, ibanExample, lastUpdate);
         }
-
-        public String getCountryName() {
-            return countryName;
-        }
-
-        public boolean isSepa() {
-            return isSepa;
-        }
-
-        public String getIbanExample() {
-            return ibanExample;
-        }
-
-        public YearMonth getLastUpdate() {
-            return lastUpdate;
-        }
-
-        /**
-         * Returns the year component of the last-update date.
-         * <p>
-         * Equivalent to {@code getLastUpdate().getYear()} but avoids a dependency on
-         * {@link java.time.YearMonth}, which requires API level 26 on Android.
-         *
-         * @return the four-digit year of the last update (e.g., {@code 2025})
-         *
-         * @since 1.8.3
-         */
-        public int getLastUpdateYear() {
-            return lastUpdate.getYear();
-        }
-
-        /**
-         * Returns the month component of the last-update date as a value from 1 (January)
-         * to 12 (December).
-         * <p>
-         * Equivalent to {@code getLastUpdate().getMonthValue()} but avoids a dependency on
-         * {@link java.time.YearMonth}, which requires API level 26 on Android.
-         *
-         * @return the month of the last update (1–12)
-         *
-         * @since 1.8.3
-         */
-        public int getLastUpdateMonth() {
-            return lastUpdate.getMonthValue();
-        }
     }
 
 }
-

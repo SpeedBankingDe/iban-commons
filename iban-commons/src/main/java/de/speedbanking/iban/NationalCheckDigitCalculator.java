@@ -26,7 +26,7 @@ import de.speedbanking.util.IndexRange;
  * Several national IBAN formats embed a country-specific check digit (or check-digit pair)
  * inside the BBAN, in addition to the two ISO 7064 Mod 97-10 check digits at positions 3–4
  * of the full IBAN. The position of this NCD is recorded in
- * {@link IbanRegistry.StructureData#nationalCheckDigitIndexRange()} and marked with
+ * {@link IbanRegistry#getNationalCheckDigitIndexRange()} and marked with
  * {@code withNationalCheckDigit(…)} in the registry builder.
  *
  * <h3>Usage</h3>
@@ -45,7 +45,7 @@ import de.speedbanking.util.IndexRange;
  *       guaranteed to be digits or uppercase ASCII letters.</li>
  *   <li>{@link #calculateNationalCheckDigit(CharSequence)} returns the NCD as a {@link CharSequence}
  *       whose length equals the width of
- *       {@link IbanRegistry.StructureData#nationalCheckDigitIndexRange()}.</li>
+ *       {@link IbanRegistry#getNationalCheckDigitIndexRange()}.</li>
  *   <li>{@link #validateNationalCheckDigit(CharSequence)} computes the expected NCD and compares
  *       it with the value already present in {@code iban}.</li>
  * </ul>
