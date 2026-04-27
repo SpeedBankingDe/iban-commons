@@ -63,9 +63,9 @@
     </modules>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com/${project.organization.name}/iban-commons.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/iban-commons.git</developerConnection>
-        <url>https://github.com/${project.organization.name}/iban-commons</url>
+        <connection>scm:git:ssh://git@github.com/${project.organization.name}/${project.dist.name}.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/${project.dist.name}.git</developerConnection>
+        <url>https://github.com/${project.organization.name}/${project.dist.name}</url>
         <tag>HEAD</tag>
     </scm>
 
@@ -89,6 +89,8 @@
 
     <properties>
         <javaVersion>8</javaVersion>
+
+        <project.dist.name>iban-commons</project.dist.name>
 
         <dep.junit.version>5.14.3</dep.junit.version>
         <dep.assertj.version>3.27.7</dep.assertj.version>
@@ -585,6 +587,7 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>${dep.plugin.release.version}</version>
                     <configuration>
+                        <tagNameFormat>${project.dist.name}-@{project.version}</tagNameFormat>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <pushChanges>false</pushChanges>
                         <localCheckout>true</localCheckout>
@@ -618,6 +621,7 @@
                                 <arguments>
                                     <!-- script lives in the root (parent) module -->
                                     <argument>${maven.multiModuleProjectDirectory}/src/main/scripts/update-docs-version.sh</argument>
+                                    <argument>${project.dist.name}</argument>
                                     <argument>${releaseVersion}</argument>
                                 </arguments>
                                 <workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
