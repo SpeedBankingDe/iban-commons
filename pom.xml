@@ -112,10 +112,10 @@
 
         <dep.checkstyle.version>12.3.1</dep.checkstyle.version>
         <!-- Path relative to each sub-module; both modules share the same ruleset location -->
-        <check.checkstyle.ruleset>src/test/resources/team/checkstyle-rules.xml</check.checkstyle.ruleset>
+        <check.checkstyle.ruleset>${maven.multiModuleProjectDirectory}/src/test/resources/team/checkstyle-rules.xml</check.checkstyle.ruleset>
 
         <dep.pmd.version>7.23.0</dep.pmd.version>
-        <check.pmd.ruleset>src/test/resources/team/pmd-rules.xml</check.pmd.ruleset>
+        <check.pmd.ruleset>${maven.multiModuleProjectDirectory}/src/test/resources/team/pmd-rules.xml</check.pmd.ruleset>
 
         <!-- Plugin versions (alphabetically) -->
         <dep.plugin.central-publishing.version>0.10.0</dep.plugin.central-publishing.version>
@@ -593,6 +593,8 @@
                 </plugin>
 
                 <plugin>
+                    <!-- https://www.mojohaus.org/exec-maven-plugin/
+                         e.g. mvn exec:exec@update-docs-version -DreleaseVersion=1.8.6 -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>${dep.plugin.exec.version}</version>
@@ -608,10 +610,10 @@
                                 <executable>bash</executable>
                                 <arguments>
                                     <!-- Script lives in the root (parent) module -->
-                                    <argument>${project.basedir}/iban-commons/src/main/scripts/update-docs-version.sh</argument>
+                                    <argument>${maven.multiModuleProjectDirectory}/src/main/scripts/update-docs-version.sh</argument>
                                     <argument>${releaseVersion}</argument>
                                 </arguments>
-                                <workingDirectory>${project.basedir}</workingDirectory>
+                                <workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
                             </configuration>
                         </execution>
                     </executions>
