@@ -17,28 +17,12 @@ import java.util.Set;
 
 /**
  * JUnit tests for {@link Iso3166Alpha2}.
- * <p>
- * Coverage map:
- * <ul>
- *   <li>{@link Iso3166Alpha2#getCode()}                — {@code getCode_*}</li>
- *   <li>{@link Iso3166Alpha2#getCountryName()}         — {@code getCountryName_*}</li>
- *   <li>{@link Iso3166Alpha2#getCurrencyCode()}        — {@code getCurrencyCode_*}</li>
- *   <li>{@link Iso3166Alpha2#fromCode(CharSequence)}   — {@code fromCode_*}</li>
- *   <li>{@link Iso3166Alpha2#isAssigned(CharSequence)} — {@code isAssigned_*}</li>
- *   <li>{@link Iso3166Alpha2#toString()}               — {@code toString_*}</li>
- *   <li>Enum mechanics ({@code values()}, {@code valueOf()}) — {@code enum_*}</li>
- *   <li>Completeness / uniqueness invariants           — {@code invariant_*}</li>
- * </ul>
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 final class Iso3166Alpha2Test {
 
-    // =========================================================================
-    // getCode()
-    // =========================================================================
-
     @DisplayName("getCode() returns the two-letter enum name")
-    @ParameterizedTest(name = "[{index}] {0} → code = {0}")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
         "DZ | DZ",
         "IE | IE",
@@ -51,7 +35,7 @@ final class Iso3166Alpha2Test {
         "CO | CO",
         "TR | TR"
     })
-    void getCode_knownConstants_returnsEnumName(String code, CharSequence expected) {
+    void getCode_knownConstants_returnsEnumName(String code, String expected) {
         assertThat(Iso3166Alpha2.valueOf(code).getCode()).isEqualTo(expected);
     }
 
@@ -64,12 +48,8 @@ final class Iso3166Alpha2Test {
             .isEqualTo(c.name());
     }
 
-    // =========================================================================
-    // getCountryName()
-    // =========================================================================
-
     @DisplayName("getCountryName() returns the correct English country name")
-    @ParameterizedTest(name = "[{index}] {0} → ''{1}''")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
         "KP | Korea (Democratic People's Republic of)",
         "IR | Iran (Islamic Republic of)",
@@ -102,12 +82,8 @@ final class Iso3166Alpha2Test {
             .isNotBlank();
     }
 
-    // =========================================================================
-    // getCurrencyCode()
-    // =========================================================================
-
     @DisplayName("getCurrencyCode() returns the correct ISO 4217 currency code")
-    @ParameterizedTest(name = "[{index}] {0} → ''{1}''")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
         // Eurozone members
         "DE | EUR",
@@ -206,8 +182,8 @@ final class Iso3166Alpha2Test {
         "SV | USD",
         "TL | USD"
     })
-    void getCurrencyCode_knownConstants_returnsCorrectCode(String code, String expectedCurrency) {
-        assertThat(Iso3166Alpha2.valueOf(code).getCurrency().getAlphaCode())
+    void getCurrencyCode_knownConstants_returnsCorrectCode(Iso3166Alpha2 code, String expectedCurrency) {
+        assertThat(code.getCurrency().getAlphaCode())
             .as("%s.getCurrency().getAlphaCode()", code)
             .isEqualTo(expectedCurrency);
     }
@@ -253,13 +229,13 @@ final class Iso3166Alpha2Test {
                 eurCodes.add(c.getCode());
             }
         }
-        // At minimum the 20 Eurozone member states plus the 6 micro-states/territories
-        // that formally use EUR must be present.
+        // at minimum the 20 Eurozone member states plus the 6 micro-states/territories
+        // that formally use EUR must be present
         assertThat(eurCodes)
             .as("EUR zone should contain at least 26 entries (20 EU Eurozone + 6 non-EU)")
             .hasSizeGreaterThanOrEqualTo(26);
 
-        // Non-Eurozone European countries must NOT be in the EUR set
+        // non-Eurozone European countries must NOT be in the EUR set
         for (String nonEurCode : Arrays.asList("GB", "CH", "DK", "NO", "SE", "IS", "PL",
                                                "CZ", "HU", "RO", "BG", "LI")) {
             assertThat(eurCodes)
@@ -267,10 +243,6 @@ final class Iso3166Alpha2Test {
                 .doesNotContain(nonEurCode);
         }
     }
-
-    // =========================================================================
-    // fromCode(String)
-    // =========================================================================
 
     @DisplayName("fromCode() returns the correct constant for every assigned code")
     @ParameterizedTest(name = "[{index}] ''{0}''")
@@ -345,7 +317,7 @@ final class Iso3166Alpha2Test {
     }
 
     @DisplayName("fromCode() returns null for syntactically plausible but unassigned codes")
-    @ParameterizedTest(name = "[{index}] ''{0}'' is unassigned")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {
         "AA", // user-assigned range
         "QM", // user-assigned range
@@ -379,20 +351,27 @@ final class Iso3166Alpha2Test {
     }
 
     @DisplayName("fromCode() accepts StringBuilder and returns the correct constant")
-    @Test
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @CsvSource(delimiter = '|', value = {
+        "DE | DE",
+        "FR | FR",
+        "XK | XK",
+        "ZA | ZA"
+    })
     @SuppressWarnings("UnnecessaryStringBuilder")
-    void fromCode_stringBuilder_returnsCorrectConstant() {
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("DE"))).isSameAs(Iso3166Alpha2.DE);
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("FR"))).isSameAs(Iso3166Alpha2.FR);
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("XK"))).isSameAs(Iso3166Alpha2.XK);
+    void fromCode_stringBuilder_returnsCorrectConstant(String code, Iso3166Alpha2 iso3166Alpha2) {
+        assertThat(Iso3166Alpha2.fromCode(new StringBuilder(code))).isSameAs(iso3166Alpha2);
     }
 
     @DisplayName("fromCode() accepts StringBuffer and returns the correct constant")
-    @Test
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @CsvSource(delimiter = '|', value = {
+        "GB | GB",
+        "JP | JP"
+    })
     @SuppressWarnings("JdkObsolete")
-    void fromCode_stringBuffer_returnsCorrectConstant() {
-        assertThat(Iso3166Alpha2.fromCode(new StringBuffer("GB"))).isSameAs(Iso3166Alpha2.GB);
-        assertThat(Iso3166Alpha2.fromCode(new StringBuffer("JP"))).isSameAs(Iso3166Alpha2.JP);
+    void fromCode_stringBuffer_returnsCorrectConstant(String code, Iso3166Alpha2 iso3166Alpha2) {
+        assertThat(Iso3166Alpha2.fromCode(new StringBuffer(code))).isSameAs(iso3166Alpha2);
     }
 
     @DisplayName("fromCode() returns null for null or wrong-length StringBuilder/StringBuffer inputs")
@@ -447,7 +426,7 @@ final class Iso3166Alpha2Test {
     }
 
     @DisplayName("isAssigned(char, char) returns true for valid pairs and false for invalid ones")
-    @ParameterizedTest(name = "[{index}] {0} + {1} = {2}")
+    @ParameterizedTest(name = "[{index}] ''{0}'', ''{1}'' -> {2}")
     @CsvSource(delimiter = '|', value = {
         "D | E | true",
         "F | R | true",
@@ -468,7 +447,7 @@ final class Iso3166Alpha2Test {
     // =========================================================================
 
     @DisplayName("toString() returns \"<CODE> (<countryName>)\" format")
-    @ParameterizedTest(name = "[{index}] {0} → ''{1}''")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
         "NZ | NZ (New Zealand)",
         "IS | IS (Iceland)",
@@ -478,19 +457,18 @@ final class Iso3166Alpha2Test {
         "XK | XK (Kosovo)",
         "AX | AX (Åland Islands)"
     })
-    void toString_knownConstants_returnsFormattedString(String code, String expected) {
-        assertThat(Iso3166Alpha2.valueOf(code)).hasToString(expected);
+    void toString_knownConstants_returnsFormattedString(Iso3166Alpha2 code, String expected) {
+        assertThat(code).hasToString(expected);
     }
 
     @DisplayName("toString() follows \"<CODE> (<countryName>)\" pattern for all constants")
-    @Test
-    void toString_allConstants_followsPattern() {
-        for (Iso3166Alpha2 c : Iso3166Alpha2.values()) {
-            assertThat(c.toString())
-                .as("%s.toString()", c.name())
-                .startsWith(c.name() + " (")
-                .endsWith(")");
-        }
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @EnumSource(Iso3166Alpha2.class)
+    void toString_allConstants_followsPattern(Iso3166Alpha2 code) {
+        assertThat(code.toString())
+            .as("%s.toString()", code.name())
+            .startsWith(code.name() + " (")
+            .endsWith(")");
     }
 
     // =========================================================================

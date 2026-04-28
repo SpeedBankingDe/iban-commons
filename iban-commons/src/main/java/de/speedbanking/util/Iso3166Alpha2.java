@@ -68,88 +68,84 @@ public enum Iso3166Alpha2 {
     // -------------------------------------------------------------------------
     // A
     // -------------------------------------------------------------------------
-    /** Aruba */
-    AW("Aruba",                                                Currency.AWG),
-    /** Afghanistan */
-    AF("Afghanistan",                                          Currency.AFN),
-    /** Angola */
-    AO("Angola",                                               Currency.AOA),
-    /** Anguilla */
-    AI("Anguilla",                                             Currency.XCD),
-    /** Åland Islands */
-    AX("Åland Islands",                                        Currency.EUR),
-    /** Albania */
-    AL("Albania",                                              Currency.ALL),
     /** Andorra */
     AD("Andorra",                                              Currency.EUR),
     /** United Arab Emirates */
     AE("United Arab Emirates",                                 Currency.AED),
-    /** Argentina */
-    AR("Argentina",                                            Currency.ARS),
-    /** Armenia */
-    AM("Armenia",                                              Currency.AMD),
-    /** American Samoa */
-    AS("American Samoa",                                       Currency.USD),
-    /** Antarctica — no currency in use */
-    AQ("Antarctica",                                           null),
-    /** French Southern Territories */
-    TF("French Southern Territories",                          Currency.EUR),
+    /** Afghanistan */
+    AF("Afghanistan",                                          Currency.AFN),
     /** Antigua and Barbuda */
     AG("Antigua and Barbuda",                                  Currency.XCD),
-    /** Australia */
-    AU("Australia",                                            Currency.AUD),
+    /** Anguilla */
+    AI("Anguilla",                                             Currency.XCD),
+    /** Albania */
+    AL("Albania",                                              Currency.ALL),
+    /** Armenia */
+    AM("Armenia",                                              Currency.AMD),
+    /** Angola */
+    AO("Angola",                                               Currency.AOA),
+    /** Antarctica — no currency in use */
+    AQ("Antarctica",                                           null),
+    /** Argentina */
+    AR("Argentina",                                            Currency.ARS),
+    /** American Samoa */
+    AS("American Samoa",                                       Currency.USD),
     /** Austria */
     AT("Austria",                                              Currency.EUR),
+    /** Australia */
+    AU("Australia",                                            Currency.AUD),
+    /** Aruba */
+    AW("Aruba",                                                Currency.AWG),
+    /** Åland Islands */
+    AX("Åland Islands",                                        Currency.EUR),
     /** Azerbaijan */
     AZ("Azerbaijan",                                           Currency.AZN),
 
     // -------------------------------------------------------------------------
     // B
     // -------------------------------------------------------------------------
-    /** Burundi */
-    BI("Burundi",                                              Currency.BIF),
-    /** Belgium */
-    BE("Belgium",                                              Currency.EUR),
-    /** Benin */
-    BJ("Benin",                                                Currency.XOF),
-    /** Bonaire, Sint Eustatius and Saba */
-    BQ("Bonaire, Sint Eustatius and Saba",                     Currency.USD),
-    /** Burkina Faso */
-    BF("Burkina Faso",                                         Currency.XOF),
+    /** Bosnia and Herzegovina */
+    BA("Bosnia and Herzegovina",                               Currency.BAM),
+    /** Barbados */
+    BB("Barbados",                                             Currency.BBD),
     /** Bangladesh */
     BD("Bangladesh",                                           Currency.BDT),
+    /** Belgium */
+    BE("Belgium",                                              Currency.EUR),
+    /** Burkina Faso */
+    BF("Burkina Faso",                                         Currency.XOF),
     /** Bulgaria */
     BG("Bulgaria",                                             Currency.BGN),
     /** Bahrain */
     BH("Bahrain",                                              Currency.BHD),
-    /** Bahamas */
-    BS("Bahamas",                                              Currency.BSD),
-    /** Bosnia and Herzegovina */
-    BA("Bosnia and Herzegovina",                               Currency.BAM),
+    /** Burundi */
+    BI("Burundi",                                              Currency.BIF),
+    /** Benin */
+    BJ("Benin",                                                Currency.XOF),
     /** Saint Barthélemy */
     BL("Saint Barthélemy",                                     Currency.EUR),
-    /** Belarus */
-    BY("Belarus",                                              Currency.BYN),
-    /** Belize */
-    BZ("Belize",                                               Currency.BZD),
     /** Bermuda */
     BM("Bermuda",                                              Currency.BMD),
-    /** Bolivia (Plurinational State of) */
-    BO("Bolivia",                                              Currency.BOB),
-    /** Brazil */
-    BR("Brazil",                                               Currency.BRL),
-    /** Barbados */
-    BB("Barbados",                                             Currency.BBD),
     /** Brunei Darussalam */
     BN("Brunei Darussalam",                                    Currency.BND),
+    /** Bolivia (Plurinational State of) */
+    BO("Bolivia",                                              Currency.BOB),
+    /** Bonaire, Sint Eustatius and Saba */
+    BQ("Bonaire, Sint Eustatius and Saba",                     Currency.USD),
+    /** Brazil */
+    BR("Brazil",                                               Currency.BRL),
+    /** Bahamas */
+    BS("Bahamas",                                              Currency.BSD),
     /** Bhutan */
     BT("Bhutan",                                               Currency.BTN),
     /** Bouvet Island */
     BV("Bouvet Island",                                        Currency.NOK),
     /** Botswana */
     BW("Botswana",                                             Currency.BWP),
-    /** Central African Republic */
-    CF("Central African Republic",                             Currency.XAF),
+    /** Belarus */
+    BY("Belarus",                                              Currency.BYN),
+    /** Belize */
+    BZ("Belize",                                               Currency.BZD),
 
     // -------------------------------------------------------------------------
     // C
@@ -158,38 +154,36 @@ public enum Iso3166Alpha2 {
     CA("Canada",                                               Currency.CAD),
     /** Cocos (Keeling) Islands */
     CC("Cocos (Keeling) Islands",                              Currency.AUD),
-    /** Switzerland */
-    CH("Switzerland",                                          Currency.CHF),
-    /** Chile */
-    CL("Chile",                                                Currency.CLP),
-    /** China */
-    CN("China",                                                Currency.CNY),
-    /** Côte d'Ivoire */
-    CI("Côte d'Ivoire",                                        Currency.XOF),
-    /** Cameroon */
-    CM("Cameroon",                                             Currency.XAF),
     /** Congo, Democratic Republic of the */
     CD("Congo, Democratic Republic of the",                    Currency.CDF),
+    /** Central African Republic */
+    CF("Central African Republic",                             Currency.XAF),
     /** Congo */
     CG("Congo",                                                Currency.XAF),
+    /** Switzerland */
+    CH("Switzerland",                                          Currency.CHF),
+    /** Côte d'Ivoire */
+    CI("Côte d'Ivoire",                                        Currency.XOF),
     /** Cook Islands */
     CK("Cook Islands",                                         Currency.NZD),
+    /** Chile */
+    CL("Chile",                                                Currency.CLP),
+    /** Cameroon */
+    CM("Cameroon",                                             Currency.XAF),
+    /** China */
+    CN("China",                                                Currency.CNY),
     /** Colombia */
     CO("Colombia",                                             Currency.COP),
-    /** Comoros */
-    KM("Comoros",                                              Currency.KMF),
-    /** Cabo Verde */
-    CV("Cabo Verde",                                           Currency.CVE),
     /** Costa Rica */
     CR("Costa Rica",                                           Currency.CRC),
     /** Cuba */
     CU("Cuba",                                                 Currency.CUP),
+    /** Cabo Verde */
+    CV("Cabo Verde",                                           Currency.CVE),
     /** Curaçao */
     CW("Curaçao",                                              Currency.ANG),
     /** Christmas Island */
     CX("Christmas Island",                                     Currency.AUD),
-    /** Cayman Islands */
-    KY("Cayman Islands",                                       Currency.KYD),
     /** Cyprus */
     CY("Cyprus",                                               Currency.EUR),
     /** Czechia */
@@ -202,10 +196,10 @@ public enum Iso3166Alpha2 {
     DE("Germany",                                              Currency.EUR),
     /** Djibouti */
     DJ("Djibouti",                                             Currency.DJF),
-    /** Dominica */
-    DM("Dominica",                                             Currency.XCD),
     /** Denmark */
     DK("Denmark",                                              Currency.DKK),
+    /** Dominica */
+    DM("Dominica",                                             Currency.XCD),
     /** Dominican Republic */
     DO("Dominican Republic",                                   Currency.DOP),
     /** Algeria */
@@ -216,16 +210,16 @@ public enum Iso3166Alpha2 {
     // -------------------------------------------------------------------------
     /** Ecuador */
     EC("Ecuador",                                              Currency.USD),
-    /** Egypt */
-    EG("Egypt",                                                Currency.EGP),
-    /** Eritrea */
-    ER("Eritrea",                                              Currency.ERN),
-    /** Western Sahara */
-    EH("Western Sahara",                                       Currency.MAD),
-    /** Spain */
-    ES("Spain",                                                Currency.EUR),
     /** Estonia */
     EE("Estonia",                                              Currency.EUR),
+    /** Egypt */
+    EG("Egypt",                                                Currency.EGP),
+    /** Western Sahara */
+    EH("Western Sahara",                                       Currency.MAD),
+    /** Eritrea */
+    ER("Eritrea",                                              Currency.ERN),
+    /** Spain */
+    ES("Spain",                                                Currency.EUR),
     /** Ethiopia */
     ET("Ethiopia",                                             Currency.ETB),
 
@@ -238,12 +232,12 @@ public enum Iso3166Alpha2 {
     FJ("Fiji",                                                 Currency.FJD),
     /** Falkland Islands (Malvinas) */
     FK("Falkland Islands (Malvinas)",                          Currency.FKP),
-    /** France */
-    FR("France",                                               Currency.EUR),
-    /** Faroe Islands */
-    FO("Faroe Islands",                                        Currency.DKK),
     /** Micronesia (Federated States of) */
     FM("Micronesia (Federated States of)",                     Currency.USD),
+    /** Faroe Islands */
+    FO("Faroe Islands",                                        Currency.DKK),
+    /** France */
+    FR("France",                                               Currency.EUR),
 
     // -------------------------------------------------------------------------
     // G
@@ -252,44 +246,44 @@ public enum Iso3166Alpha2 {
     GA("Gabon",                                                Currency.XAF),
     /** United Kingdom of Great Britain and Northern Ireland */
     GB("United Kingdom of Great Britain and Northern Ireland", Currency.GBP),
+    /** Grenada */
+    GD("Grenada",                                              Currency.XCD),
     /** Georgia */
     GE("Georgia",                                              Currency.GEL),
+    /** French Guiana */
+    GF("French Guiana",                                        Currency.EUR),
     /** Guernsey */
     GG("Guernsey",                                             Currency.GBP),
     /** Ghana */
     GH("Ghana",                                                Currency.GHS),
     /** Gibraltar */
     GI("Gibraltar",                                            Currency.GIP),
+    /** Greenland */
+    GL("Greenland",                                            Currency.DKK),
+    /** Gambia */
+    GM("Gambia",                                               Currency.GMD),
     /** Guinea */
     GN("Guinea",                                               Currency.GNF),
     /** Guadeloupe */
     GP("Guadeloupe",                                           Currency.EUR),
-    /** Gambia */
-    GM("Gambia",                                               Currency.GMD),
-    /** Guinea-Bissau */
-    GW("Guinea-Bissau",                                        Currency.XOF),
     /** Equatorial Guinea */
     GQ("Equatorial Guinea",                                    Currency.XAF),
     /** Greece */
     GR("Greece",                                               Currency.EUR),
-    /** Grenada */
-    GD("Grenada",                                              Currency.XCD),
-    /** Greenland */
-    GL("Greenland",                                            Currency.DKK),
     /** Guatemala */
     GT("Guatemala",                                            Currency.GTQ),
-    /** French Guiana */
-    GF("French Guiana",                                        Currency.EUR),
     /** Guam */
     GU("Guam",                                                 Currency.USD),
+    /** Guinea-Bissau */
+    GW("Guinea-Bissau",                                        Currency.XOF),
     /** Guyana */
     GY("Guyana",                                               Currency.GYD),
-    /** Hong Kong */
-    HK("Hong Kong",                                            Currency.HKD),
 
     // -------------------------------------------------------------------------
     // H
     // -------------------------------------------------------------------------
+    /** Hong Kong */
+    HK("Hong Kong",                                            Currency.HKD),
     /** Heard Island and McDonald Islands */
     HM("Heard Island and McDonald Islands",                    Currency.AUD),
     /** Honduras */
@@ -306,32 +300,32 @@ public enum Iso3166Alpha2 {
     // -------------------------------------------------------------------------
     /** Indonesia */
     ID("Indonesia",                                            Currency.IDR),
+    /** Ireland */
+    IE("Ireland",                                              Currency.EUR),
+    /** Israel */
+    IL("Israel",                                               Currency.ILS),
     /** Isle of Man */
     IM("Isle of Man",                                          Currency.GBP),
     /** India */
     IN("India",                                                Currency.INR),
     /** British Indian Ocean Territory */
     IO("British Indian Ocean Territory",                       Currency.USD),
-    /** Ireland */
-    IE("Ireland",                                              Currency.EUR),
-    /** Iran (Islamic Republic of) */
-    IR("Iran (Islamic Republic of)",                           Currency.IRR),
     /** Iraq */
     IQ("Iraq",                                                 Currency.IQD),
+    /** Iran (Islamic Republic of) */
+    IR("Iran (Islamic Republic of)",                           Currency.IRR),
     /** Iceland */
     IS("Iceland",                                              Currency.ISK),
-    /** Israel */
-    IL("Israel",                                               Currency.ILS),
     /** Italy */
     IT("Italy",                                                Currency.EUR),
 
     // -------------------------------------------------------------------------
     // J
     // -------------------------------------------------------------------------
-    /** Jamaica */
-    JM("Jamaica",                                              Currency.JMD),
     /** Jersey */
     JE("Jersey",                                               Currency.GBP),
+    /** Jamaica */
+    JM("Jamaica",                                              Currency.JMD),
     /** Jordan */
     JO("Jordan",                                               Currency.JOD),
     /** Japan */
@@ -348,16 +342,20 @@ public enum Iso3166Alpha2 {
     KH("Cambodia",                                             Currency.KHR),
     /** Kiribati */
     KI("Kiribati",                                             Currency.AUD),
+    /** Comoros */
+    KM("Comoros",                                              Currency.KMF),
     /** Saint Kitts and Nevis */
     KN("Saint Kitts and Nevis",                                Currency.XCD),
+    /** Korea (Democratic People's Republic of) */
+    KP("Korea (Democratic People's Republic of)",              Currency.KPW),
     /** Korea, Republic of */
     KR("Korea, Republic of",                                   Currency.KRW),
     /** Kuwait */
     KW("Kuwait",                                               Currency.KWD),
+    /** Cayman Islands */
+    KY("Cayman Islands",                                       Currency.KYD),
     /** Kazakhstan */
     KZ("Kazakhstan",                                           Currency.KZT),
-    /** Korea (Democratic People's Republic of) */
-    KP("Korea (Democratic People's Republic of)",              Currency.KPW),
 
     // -------------------------------------------------------------------------
     // L
@@ -366,16 +364,14 @@ public enum Iso3166Alpha2 {
     LA("Lao People's Democratic Republic",                     Currency.LAK),
     /** Lebanon */
     LB("Lebanon",                                              Currency.LBP),
-    /** Liberia */
-    LR("Liberia",                                              Currency.LRD),
-    /** Libya */
-    LY("Libya",                                                Currency.LYD),
     /** Saint Lucia */
     LC("Saint Lucia",                                          Currency.XCD),
     /** Liechtenstein */
     LI("Liechtenstein",                                        Currency.CHF),
     /** Sri Lanka */
     LK("Sri Lanka",                                            Currency.LKR),
+    /** Liberia */
+    LR("Liberia",                                              Currency.LRD),
     /** Lesotho */
     LS("Lesotho",                                              Currency.LSL),
     /** Lithuania */
@@ -384,58 +380,58 @@ public enum Iso3166Alpha2 {
     LU("Luxembourg",                                           Currency.EUR),
     /** Latvia */
     LV("Latvia",                                               Currency.EUR),
+    /** Libya */
+    LY("Libya",                                                Currency.LYD),
 
     // -------------------------------------------------------------------------
     // M
     // -------------------------------------------------------------------------
-    /** Macao */
-    MO("Macao",                                                Currency.MOP),
-    /** Saint Martin (French part) */
-    MF("Saint Martin (French part)",                           Currency.EUR),
     /** Morocco */
     MA("Morocco",                                              Currency.MAD),
     /** Monaco */
     MC("Monaco",                                               Currency.EUR),
     /** Moldova, Republic of */
     MD("Moldova, Republic of",                                 Currency.MDL),
+    /** Montenegro */
+    ME("Montenegro",                                           Currency.EUR),
+    /** Saint Martin (French part) */
+    MF("Saint Martin (French part)",                           Currency.EUR),
     /** Madagascar */
     MG("Madagascar",                                           Currency.MGA),
-    /** Maldives */
-    MV("Maldives",                                             Currency.MVR),
-    /** Mexico */
-    MX("Mexico",                                               Currency.MXN),
     /** Marshall Islands */
     MH("Marshall Islands",                                     Currency.USD),
     /** North Macedonia */
     MK("North Macedonia",                                      Currency.MKD),
     /** Mali */
     ML("Mali",                                                 Currency.XOF),
-    /** Malta */
-    MT("Malta",                                                Currency.EUR),
     /** Myanmar */
     MM("Myanmar",                                              Currency.MMK),
     /** Mongolia */
     MN("Mongolia",                                             Currency.MNT),
+    /** Macao */
+    MO("Macao",                                                Currency.MOP),
     /** Northern Mariana Islands */
     MP("Northern Mariana Islands",                             Currency.USD),
-    /** Mozambique */
-    MZ("Mozambique",                                           Currency.MZN),
-    /** Mauritania */
-    MR("Mauritania",                                           Currency.MRU),
-    /** Montenegro */
-    ME("Montenegro",                                           Currency.EUR),
-    /** Montserrat */
-    MS("Montserrat",                                           Currency.XCD),
     /** Martinique */
     MQ("Martinique",                                           Currency.EUR),
+    /** Mauritania */
+    MR("Mauritania",                                           Currency.MRU),
+    /** Montserrat */
+    MS("Montserrat",                                           Currency.XCD),
+    /** Malta */
+    MT("Malta",                                                Currency.EUR),
     /** Mauritius */
     MU("Mauritius",                                            Currency.MUR),
+    /** Maldives */
+    MV("Maldives",                                             Currency.MVR),
     /** Malawi */
     MW("Malawi",                                               Currency.MWK),
+    /** Mexico */
+    MX("Mexico",                                               Currency.MXN),
     /** Malaysia */
     MY("Malaysia",                                             Currency.MYR),
-    /** Mayotte */
-    YT("Mayotte",                                              Currency.EUR),
+    /** Mozambique */
+    MZ("Mozambique",                                           Currency.MZN),
 
     // -------------------------------------------------------------------------
     // N
@@ -452,8 +448,6 @@ public enum Iso3166Alpha2 {
     NG("Nigeria",                                              Currency.NGN),
     /** Nicaragua */
     NI("Nicaragua",                                            Currency.NIO),
-    /** Niue */
-    NU("Niue",                                                 Currency.NZD),
     /** Netherlands */
     NL("Netherlands",                                          Currency.EUR),
     /** Norway */
@@ -462,6 +456,8 @@ public enum Iso3166Alpha2 {
     NP("Nepal",                                                Currency.NPR),
     /** Nauru */
     NR("Nauru",                                                Currency.AUD),
+    /** Niue */
+    NU("Niue",                                                 Currency.NZD),
     /** New Zealand */
     NZ("New Zealand",                                          Currency.NZD),
 
@@ -530,6 +526,8 @@ public enum Iso3166Alpha2 {
     SA("Saudi Arabia",                                         Currency.SAR),
     /** Solomon Islands */
     SB("Solomon Islands",                                      Currency.SBD),
+    /** Seychelles */
+    SC("Seychelles",                                           Currency.SCR),
     /** Sudan */
     SD("Sudan",                                                Currency.SDG),
     /** Sweden */
@@ -566,8 +564,6 @@ public enum Iso3166Alpha2 {
     SY("Syrian Arab Republic",                                 Currency.SYP),
     /** Eswatini */
     SZ("Eswatini",                                             Currency.SZL),
-    /** Seychelles */
-    SC("Seychelles",                                           Currency.SCR),
 
     // -------------------------------------------------------------------------
     // T
@@ -576,6 +572,8 @@ public enum Iso3166Alpha2 {
     TC("Turks and Caicos Islands",                             Currency.USD),
     /** Chad */
     TD("Chad",                                                 Currency.XAF),
+    /** French Southern Territories */
+    TF("French Southern Territories",                          Currency.EUR),
     /** Togo */
     TG("Togo",                                                 Currency.XOF),
     /** Thailand */
@@ -584,18 +582,18 @@ public enum Iso3166Alpha2 {
     TJ("Tajikistan",                                           Currency.TJS),
     /** Tokelau */
     TK("Tokelau",                                              Currency.NZD),
-    /** Turkmenistan */
-    TM("Turkmenistan",                                         Currency.TMT),
     /** Timor-Leste */
     TL("Timor-Leste",                                          Currency.USD),
-    /** Tonga */
-    TO("Tonga",                                                Currency.TOP),
-    /** Trinidad and Tobago */
-    TT("Trinidad and Tobago",                                  Currency.TTD),
+    /** Turkmenistan */
+    TM("Turkmenistan",                                         Currency.TMT),
     /** Tunisia */
     TN("Tunisia",                                              Currency.TND),
+    /** Tonga */
+    TO("Tonga",                                                Currency.TOP),
     /** Türkiye */
     TR("Türkiye",                                              Currency.TRY),
+    /** Trinidad and Tobago */
+    TT("Trinidad and Tobago",                                  Currency.TTD),
     /** Tuvalu */
     TV("Tuvalu",                                               Currency.AUD),
     /** Taiwan, Province of China */
@@ -612,12 +610,12 @@ public enum Iso3166Alpha2 {
     UG("Uganda",                                               Currency.UGX),
     /** United States Minor Outlying Islands */
     UM("United States Minor Outlying Islands",                 Currency.USD),
+    /** United States of America */
+    US("United States of America",                             Currency.USD),
     /** Uruguay */
     UY("Uruguay",                                              Currency.UYU),
     /** Uzbekistan */
     UZ("Uzbekistan",                                           Currency.UZS),
-    /** United States of America */
-    US("United States of America",                             Currency.USD),
 
     // -------------------------------------------------------------------------
     // V
@@ -656,6 +654,8 @@ public enum Iso3166Alpha2 {
     // -------------------------------------------------------------------------
     /** Yemen */
     YE("Yemen",                                                Currency.YER),
+    /** Mayotte */
+    YT("Mayotte",                                              Currency.EUR),
 
     // -------------------------------------------------------------------------
     // Z
@@ -809,4 +809,3 @@ public enum Iso3166Alpha2 {
     }
 
 }
-

@@ -501,7 +501,7 @@ public enum IbanRegistry {
      * <strong>Czechia ({@code CZ})</strong><p>
      * IBAN Length: 24<br>
      * SEPA: Yes<br>
-     * BBAN Structure: {@code 4!n16!n}<br>
+     * BBAN Structure: {@code 4!n6!n10!n}<br>
      * Examples:<pre>
      *   unformatted: {@code CZ6508000000192000145399}
      *   formatted:   {@code CZ65 0800 0000 1920 0014 5399}
@@ -510,7 +510,7 @@ public enum IbanRegistry {
      */
     CZ(StructureData.builder()
          .withIbanLength(24)
-         .withBbanPattern("4!n16!n")
+         .withBbanPattern("4!n6!n10!n")
          .withBankCode("4!n", IndexRange.of(4, 8))
          .withAccountNumber(IndexRange.of(8, 24))
          .build(),
