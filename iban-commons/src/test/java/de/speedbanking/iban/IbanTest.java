@@ -236,7 +236,7 @@ final class IbanTest {
      * @return a stream of registry entries where {@link IbanRegistry#isBaseCountry()} is true
      */
     static Stream<IbanRegistry> provideBaseCountries() {
-        return Arrays.stream(IbanRegistry.values())
+        return Arrays.stream(IbanRegistry.ALL_COUNTRIES)
             .filter(IbanRegistry::isBaseCountry);
     }
 
@@ -258,7 +258,7 @@ final class IbanTest {
      * @return a stream of registry entries where {@link IbanRegistry#isDerivedCountry()} is true
      */
     static Stream<IbanRegistry> provideDerivedCountries() {
-        return Arrays.stream(IbanRegistry.values())
+        return Arrays.stream(IbanRegistry.ALL_COUNTRIES)
             .filter(IbanRegistry::isDerivedCountry);
     }
 

@@ -42,7 +42,8 @@ public final class IbanPlusKey {
 
     /** Cache for pre-calculated extraction strategies per country code. */
     private static final Map<String, Strategy> STRATEGY_CACHE = unmodifiableMap(
-        Arrays.stream(IbanRegistry.values())
+        Arrays.stream(IbanRegistry.ALL_COUNTRIES)
+              .filter(IbanRegistry::isBaseCountry)
               .collect(toMap(
                   IbanRegistry::getCountryCode,
                   Strategy::new

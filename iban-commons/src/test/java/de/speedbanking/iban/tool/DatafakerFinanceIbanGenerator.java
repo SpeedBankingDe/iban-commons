@@ -1,5 +1,6 @@
 package de.speedbanking.iban.tool;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
 import de.speedbanking.iban.IbanRegistry;
@@ -37,6 +38,7 @@ public final class DatafakerFinanceIbanGenerator {
     static List<String> formatEntries() {
         return Arrays.stream(IbanRegistry.values())
             .filter(IbanRegistry::isBaseCountry)
+            .sorted(comparing(IbanRegistry::getCountryCode))
             .map(DatafakerFinanceIbanGenerator::formatEntry)
             .collect(toList());
     }

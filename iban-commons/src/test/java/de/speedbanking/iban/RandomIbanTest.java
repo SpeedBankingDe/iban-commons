@@ -239,7 +239,7 @@ final class RandomIbanTest {
     @Test
     void generate_withNcdEnabled_producesValidIban() {
         try {
-            IbanRegistry[] ncdCountries = Arrays.stream(IbanRegistry.values())
+            IbanRegistry[] ncdCountries = Arrays.stream(IbanRegistry.ALL_COUNTRIES)
                 .filter(r -> r.getNationalCheckDigitIndexRange() != null)
                 .toArray(IbanRegistry[]::new);
 
@@ -301,7 +301,7 @@ final class RandomIbanTest {
     @Test
     void fixNationalCheckDigit_ncdCountry_writesCheckDigit() {
         try {
-            IbanRegistry[] ncdCountries = Arrays.stream(IbanRegistry.values())
+            IbanRegistry[] ncdCountries = Arrays.stream(IbanRegistry.ALL_COUNTRIES)
                 .filter(r -> r.getNationalCheckDigitIndexRange() != null)
                 .toArray(IbanRegistry[]::new);
             assertThat(ncdCountries).isNotEmpty();

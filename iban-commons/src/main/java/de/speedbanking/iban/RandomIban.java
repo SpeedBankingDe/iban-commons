@@ -72,14 +72,9 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class RandomIban {
 
-    private static final String         DIGITS        = "0123456789";
-    private static final String         LETTERS       = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String         ALPHANUMERIC  = DIGITS + LETTERS;
-
-    /**
-     * Cached array of all registry entries.
-     */
-    private static final IbanRegistry[] ALL_COUNTRIES = IbanRegistry.values();
+    private static final String         DIGITS         = "0123456789";
+    private static final String         LETTERS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String         ALPHANUMERIC   = DIGITS + LETTERS;
 
     /**
      * Cached array of SEPA-country registry entries.
@@ -88,8 +83,7 @@ public final class RandomIban {
      * result as an array avoids repeated allocation in {@link Builder#resolveCountry(Random)}
      * and {@link #ofSepa()}.
      */
-    private static final IbanRegistry[] SEPA_COUNTRIES =
-        IbanRegistry.getSepaCountries().toArray(new IbanRegistry[0]);
+    private static final IbanRegistry[] SEPA_COUNTRIES = IbanRegistry.getSepaCountries().toArray(new IbanRegistry[0]);
 
     /**
      * Strategies for intentional IBAN corruption used to generate negative test data.
@@ -304,7 +298,7 @@ public final class RandomIban {
      */
     static String invalidString(Random random) {
         requireRandom(random);
-        IbanRegistry country = ALL_COUNTRIES[random.nextInt(ALL_COUNTRIES.length)];
+        IbanRegistry country = IbanRegistry.ALL_COUNTRIES[random.nextInt(IbanRegistry.ALL_COUNTRIES.length)];
         return invalidString(country, random);
     }
 
@@ -568,7 +562,7 @@ public final class RandomIban {
             } else if (sepaOnly) {
                 return SEPA_COUNTRIES[rnd.nextInt(SEPA_COUNTRIES.length)];
             }
-            return ALL_COUNTRIES[rnd.nextInt(ALL_COUNTRIES.length)];
+            return IbanRegistry.ALL_COUNTRIES[rnd.nextInt(IbanRegistry.ALL_COUNTRIES.length)];
         }
     }
 

@@ -16,6 +16,7 @@
 package de.speedbanking.iban;
 
 import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
@@ -2906,15 +2907,22 @@ public enum IbanRegistry {
 
     private final IbanRegistry          baseCountry;
 
+    /**
+     * Cached array of all {@link IbanRegistry} entries, sorted alphabetically by their ISO country code.
+     */
+    static final IbanRegistry[]         ALL_COUNTRIES        = Arrays.stream(values())
+        .sorted(comparing(IbanRegistry::getCountryCode))
+        .toArray(IbanRegistry[]::new);
+
     /** The minimum required length: Country Code (2) + Check Digits (2). */
     static final int                    MIN_IBAN_BASE_LENGTH = 4;
 
     /** ISO 13616 standard minimum. */
-    static final int                    MIN_IBAN_LENGTH      = Arrays.stream(values())
+    static final int                    MIN_IBAN_LENGTH      = Arrays.stream(ALL_COUNTRIES)
         .mapToInt(IbanRegistry::getIbanLength).min().orElse(MIN_IBAN_BASE_LENGTH);
 
     /** ISO 13616 standard maximum. */
-    public static final int             MAX_IBAN_LENGTH      = Arrays.stream(values())
+    public static final int             MAX_IBAN_LENGTH      = Arrays.stream(ALL_COUNTRIES)
         .mapToInt(IbanRegistry::getIbanLength).max().orElse(34);
 
     /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
@@ -3322,7 +3330,7 @@ public enum IbanRegistry {
      */
     List<IbanRegistry> getDerivedCountries() {
         return isBaseCountry()
-            ? Arrays.stream(values())
+            ? Arrays.stream(ALL_COUNTRIES)
                 .filter(cd -> this == cd.getBaseCountry())
                 .collect(toList())
             : emptyList();
@@ -3407,7 +3415,7 @@ public enum IbanRegistry {
      */
     private static IbanRegistry[] buildLookupArray(boolean baseCountriesOnly) {
         IbanRegistry[] array = new IbanRegistry[26 * 26]; // 676 Einträge, alle null
-        for (IbanRegistry entry : values()) {
+        for (IbanRegistry entry : ALL_COUNTRIES) {
             if (!baseCountriesOnly || entry.isBaseCountry()) {
                 String name = entry.name();
                 array[calcLookupIndex(name.charAt(0), name.charAt(1))] = entry;
@@ -3462,7 +3470,7 @@ public enum IbanRegistry {
      * @return an unmodifiable list of SEPA country registries
      */
     public static List<IbanRegistry> getSepaCountries() {
-        return Arrays.stream(values())
+        return Arrays.stream(ALL_COUNTRIES)
             .filter(IbanRegistry::isSepa)
             .collect(collectingAndThen(
                 toList(),

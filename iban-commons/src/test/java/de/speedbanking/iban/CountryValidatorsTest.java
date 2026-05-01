@@ -71,7 +71,7 @@ final class CountryValidatorsTest {
     }
 
     static Stream<IbanRegistry> allNcdIbanRegistryEntries() {
-        return Arrays.stream(IbanRegistry.values())
+        return Arrays.stream(IbanRegistry.ALL_COUNTRIES)
             .filter(IbanRegistry::hasNationalCheckDigit);
     }
 
