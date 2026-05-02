@@ -61,12 +61,13 @@ public final class CountryUtil {
      *
      * @param countryCode the two-letter Alpha-2 country code (case-insensitive)
      * @return the flag emoji string, or an empty string if the input code is invalid or null
-     * @throws IllegalArgumentException if the provided {@code countryCode} is not a valid two-letter uppercase code (as checked by {@link #isValidCountryCode(String)})
+     * @throws IllegalArgumentException if the provided {@code countryCode} is not a valid two-letter uppercase code
+     *                                  (as checked by {@link #isValidCountryCode(CharSequence)})
      *
      * @since 1.8.0
      */
     public static String createFlagEmoji(final String countryCode) {
-        if (countryCode == null || countryCode.isEmpty()
+        if (countryCode == null
             || countryCode.length() != 2
             || !Character.isUpperCase(countryCode.charAt(0))
             || !Character.isUpperCase(countryCode.charAt(1))) {

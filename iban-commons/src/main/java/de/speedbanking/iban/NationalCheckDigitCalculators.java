@@ -366,8 +366,8 @@ final class NationalCheckDigitCalculators {
 
         /**
          * Computes MOD 97 using the French RIB letter-to-digit mapping.
-         *
-         * <p>Unlike {@link NcdCalculatorBase#mod97(CharSequence, int, int)} (ISO 7064, A=10…Z=35),
+         * <p>
+         * Unlike {@link Mod97#calculateRange(CharSequence, int, int)} (ISO 7064, A=10…Z=35),
          * each letter is mapped to a <em>single</em> digit 1–9 (see {@link #getFrenchRIBValue})
          * and fed as one digit into the streaming accumulator.
          *
@@ -765,7 +765,7 @@ final class NationalCheckDigitCalculators {
      * <p>Provides:
      * <ul>
      *   <li>Auto-wiring of {@link #countryData} from the class's simple name via
-     *       {@link IbanRegistry#getByCode(String)}.</li>
+     *       {@link IbanRegistry#getByCode(CharSequence)}.</li>
      *   <li>A default {@link #validateNationalCheckDigit} implementation that extracts
      *       the NCD from the IBAN and compares it to {@link #calculateNationalCheckDigit}.</li>
      *   <li>Shared constants ({@link #BBAN_START}, {@link #MODULO_BASE},

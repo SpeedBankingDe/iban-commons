@@ -3117,7 +3117,7 @@ public enum IbanRegistry {
      *
      * @return structure data
      */
-    public StructureData getStructureData() {
+    StructureData getStructureData() {
         return structureData;
     }
 
