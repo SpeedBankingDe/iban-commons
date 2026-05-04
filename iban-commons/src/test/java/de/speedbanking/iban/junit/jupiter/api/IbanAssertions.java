@@ -9,26 +9,74 @@ import de.speedbanking.util.Currency;
 import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.OptionalAssert;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.ThrowableTypeAssert;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
  * Entry point for AssertJ custom assertions for the {@link Iban} class.
  * <p>
- * To use, import statically: {@code import static de.speedbanking.iban.IbanAssertions.*;}
+ * To use, import statically: {@code import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.*;}
+ * <p>
+ * The primary entry point is {@link #assertThatIban(CharSequence)}, which accepts any {@link CharSequence}
+ * (e.g. a plain {@link String}), performs a null-check, and then parses the value via
+ * {@link Iban#of(CharSequence)}. Passing {@code null} is permitted and yields an
+ * {@link IbanAssert} on which only {@code isNull()} will succeed (consistent with the AssertJ contract).
  */
 public class IbanAssertions extends Assertions {
 
     /**
-     * Creates a new instance of {@link IbanAssert}.
+     * Creates a new {@link IbanAssert} by parsing the given character sequence via
+     * {@link Iban#of(CharSequence)}.
+     * <p>
+     * <ul>
+     *   <li>A {@code null} argument is forwarded as-is; only {@code isNull()} will succeed on the
+     *       returned assert — consistent with the AssertJ null-handling contract.
+     *   </li>
+     *   <li>An invalid IBAN string causes an {@link AssertionError} whose cause is the
+     *       {@link InvalidIbanException} thrown by the parser — the error is surfaced before
+     *       any assertion method is invoked, which is the standard behaviour for invalid inputs
+     *       in custom AssertJ entry points.
+     *   </li>
+     * </ul>
      *
-     * @param actual the IBAN instance to assert on
+     * @param actual the IBAN character sequence to assert on, or {@code null}
      * @return the custom assertion object
+     *
+     * @since 1.8.7
+     */
+    public static IbanAssert assertThatIban(CharSequence actual) {
+        if (actual == null) {
+            return new IbanAssert(null);
+        }
+        try {
+            return new IbanAssert(Iban.of(actual));
+        } catch (InvalidIbanException ex) {
+            throw new AssertionError(ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #assertThatIban(CharSequence)} instead.
+     */
+    @Deprecated // (since = "1.8.7", forRemoval = true)
+    @SuppressWarnings("InlineMeSuggester")
+    public static IbanAssert assertThatIbanOf(CharSequence actual) {
+        return assertThatIban(actual);
+    }
+
+    /**
+     * Creates a new {@link IbanAssert} wrapping an already-parsed {@link Iban} instance.
+     * <p>
+     * This overload is provided for cases where an {@link Iban} object is already at hand
+     * (e.g. returned directly by application code under test).
+     *
+     * @param actual the {@link Iban} instance to assert on, or {@code null}
+     * @return the custom assertion object
+     *
+     * @since 1.8.7
      */
     public static IbanAssert assertThat(Iban actual) {
         return new IbanAssert(actual);
@@ -43,60 +91,6 @@ public class IbanAssertions extends Assertions {
      */
     public static IbanAssert using(Iban actual, SoftAssertions softly) {
         return softly.proxy(IbanAssert.class, Iban.class, actual);
-    }
-
-    // --- Static Utility Assertions for Iban Factory Methods ---
-
-    /**
-     * Creates an {@link IbanAssert} by parsing the given IBAN string via {@link Iban#of(CharSequence)}.
-     * Spaces are permitted; normalization is applied automatically.
-     *
-     * @param ibanValue the IBAN character sequence to parse
-     * @return the custom assertion object
-     * @throws InvalidIbanException if the IBAN is invalid
-     */
-    public static IbanAssert assertThatIbanOf(CharSequence ibanValue) {
-        return assertThat(Iban.of(ibanValue));
-    }
-
-    /**
-     * Creates an {@link IbanAssert} by parsing the given IBAN string via {@link Iban#parse(CharSequence)}.
-     * Functionally equivalent to {@link #assertThatIbanOf(CharSequence)}; provided for symmetry
-     * with the {@code Iban} API.
-     *
-     * @param ibanValue the IBAN character sequence to parse
-     * @return the custom assertion object
-     * @throws InvalidIbanException if the IBAN is invalid
-     */
-    public static IbanAssert assertThatIbanParse(CharSequence ibanValue) {
-        return assertThat(Iban.parse(ibanValue));
-    }
-
-    /**
-     * Creates an {@link AbstractObjectAssert} for the {@link Optional} returned by
-     * {@link Iban#tryParse(CharSequence)}, allowing assertions on the Optional itself
-     * (e.g. {@code isPresent()}, {@code isEmpty()}, {@code hasValueSatisfying(…)}).
-     *
-     * @param ibanValue the IBAN character sequence to parse
-     * @return an Optional assertion object
-     */
-    public static OptionalAssert<Iban> assertThatIbanTryParse(CharSequence ibanValue) {
-        return assertThat(Iban.tryParse(ibanValue));
-    }
-
-    /**
-     * Creates an {@link IbanAssert} for a valid IBAN parsed via {@link Iban#tryParse(CharSequence)}.
-     * The Optional must be present; if it is empty the assertion fails immediately.
-     *
-     * @param ibanValue the IBAN character sequence to parse
-     * @return the custom assertion object
-     */
-    public static IbanAssert assertThatIbanTryParseValue(CharSequence ibanValue) {
-        Optional<Iban> result = Iban.tryParse(ibanValue);
-        if (!result.isPresent()) {
-            throw new AssertionError("Expected Iban.tryParse(\"" + ibanValue + "\") to return a non-empty Optional, but it was empty");
-        }
-        return assertThat(result.get());
     }
 
     /**
@@ -117,8 +111,6 @@ public class IbanAssertions extends Assertions {
     public static ThrowableTypeAssert<InvalidIbanException> assertThatInvalidIbanException() {
         return assertThatExceptionOfType(InvalidIbanException.class);
     }
-
-    // -------------------------------------------------------------------------
 
     /**
      * Custom AssertJ assertions for {@link Iban}.
@@ -254,7 +246,7 @@ public class IbanAssertions extends Assertions {
             isNotNull();
             if (!Objects.equals(actual.getCurrency(), expectedCurrency)) {
                 failWithMessage("Expected currency to be '%s' but was '%s' for IBAN '%s'",
-                    expectedCurrency.getAlphaCode(), actual.getCurrency().getAlphaCode(), actual);
+                    expectedCurrency.getAlphaCode(), actual.getCurrencyCode(), actual);
             }
             return myself;
         }

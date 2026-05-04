@@ -51,7 +51,7 @@ final class AbstractCountryValidatorTest {
     void constructor_shouldThrowException_whenClassNameIsInvalid() {
         assertThatThrownBy(INVALID::new)
             .isExactlyInstanceOf(ExceptionInInitializerError.class)
-            .hasMessageContaining("'INVALID' is not a supported IBAN country code");
+            .hasMessage("'INVALID' is not a supported IBAN country code");
     }
 
     @DisplayName("toString should return formatted string matching the contract")

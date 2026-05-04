@@ -1,6 +1,6 @@
 package de.speedbanking.iban.junit.jupiter.params.converter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.converter.ConvertWith;
@@ -23,6 +23,6 @@ final class BooleanConverterTest {
             @ConvertWith(BooleanConverter.class) boolean input,
             boolean expected) {
 
-        assertEquals(expected, input);
+        assertThat(input).isEqualTo(expected);
     }
 }

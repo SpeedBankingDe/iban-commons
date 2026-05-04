@@ -47,13 +47,8 @@ final class RandomIbanTest {
         IbanConfig.reset();
     }
 
-    // =========================================================================
-    // Utility constructor guard
-    // =========================================================================
-
     /**
      * Verifies that {@link RandomIban} cannot be instantiated even via reflection.
-     * Covers the private constructor guard (lines 103–105).
      */
     @Test
     void constructor_isPrivateAndThrows() throws Exception {
@@ -67,10 +62,6 @@ final class RandomIbanTest {
         }
         fail("Expected UnsupportedOperationException to be thrown");
     }
-
-    // =========================================================================
-    // Static factory methods — valid IBAN generation
-    // =========================================================================
 
     @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "NL", "AT", "CH", "PL", "IT", "ES", "SE"})
@@ -138,10 +129,6 @@ final class RandomIbanTest {
         IbanAssertions.assertThatIbanIsValid(iban.toString());
 
     }
-
-    // =========================================================================
-    // Builder
-    // =========================================================================
 
     @Test
     void builder_country_byString_buildsValidIban() {
@@ -226,10 +213,6 @@ final class RandomIbanTest {
             .isThrownBy(() -> RandomIban.builder().random(null));
     }
 
-    // =========================================================================
-    // generate() — NCD branch (IbanConfig.isCalculateNcd() == true)
-    // =========================================================================
-
     /**
      * Countries with a National Check Digit (e.g. NO, BE, IT) exercise the
      * {@code fixNationalCheckDigit()} branch inside {@link RandomIban#generate}.
@@ -256,10 +239,6 @@ final class RandomIbanTest {
             IbanConfig.reset(IbanConfig.DEFAULT);
         }
     }
-
-    // =========================================================================
-    // fixNationalCheckDigit()
-    // =========================================================================
 
     /** Countries without an NCD field must return the StringBuilder unchanged. */
     @Test
@@ -323,10 +302,6 @@ final class RandomIbanTest {
         }
     }
 
-    // =========================================================================
-    // generateRandomSegment() — unknown CharType branch (line 651)
-    // =========================================================================
-
     /**
      * The {@code else} branch in {@link RandomIban#generateRandomSegment} returns {@code null}
      * for any {@link IbanCharType} outside the three known values.
@@ -377,10 +352,6 @@ final class RandomIbanTest {
             .isThrownBy(() -> RandomIban.generateRandomSegment(
                 Segment.of(IbanCharType.NUMERIC, 4), null));
     }
-
-    // =========================================================================
-    // sabotageIban() — all six strategies, including strategy-5 fallback
-    // =========================================================================
 
     /**
      * Strategy 5 fallback: when the IBAN string is already at exactly {@code MIN_IBAN_BASE_LENGTH},
@@ -489,10 +460,6 @@ final class RandomIbanTest {
             .as("sabotage must produce varied corruptions (expected >= 3 distinct variants)")
             .hasSizeGreaterThanOrEqualTo(3);
     }
-
-    // =========================================================================
-    // invalidString() — happy path
-    // =========================================================================
 
     @Test
     void invalidString_noArgs_returnsInvalidIban() {

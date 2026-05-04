@@ -54,9 +54,36 @@ import java.util.regex.Pattern;
  */
 public class BicAssertions extends Assertions {
 
-    // -------------------------------------------------------------------------
-    // Static entry points — BicAssert
-    // -------------------------------------------------------------------------
+    /**
+     * Creates a new {@link BicAssert} by parsing the given character sequence via
+     * {@link Bic#of(CharSequence)}.
+     * <p>
+     * <ul>
+     *   <li>A {@code null} argument is forwarded as-is; only {@code isNull()} will succeed on the
+     *       returned assert — consistent with the AssertJ null-handling contract.
+     *   </li>
+     *   <li>An invalid BIC string causes an {@link AssertionError} whose cause is the
+     *       {@link InvalidBicException} thrown by the parser — the error is surfaced before
+     *       any assertion method is invoked, which is the standard behaviour for invalid inputs
+     *       in custom AssertJ entry points.
+     *   </li>
+     * </ul>
+     *
+     * @param actual the BIC character sequence to assert on, or {@code null}
+     * @return the custom assertion object
+     *
+     * @since 1.8.7
+     */
+    public static BicAssert assertThatBic(CharSequence actual) {
+        if (actual == null) {
+            return new BicAssert(null);
+        }
+        try {
+            return new BicAssert(Bic.of(actual));
+        } catch (InvalidBicException ex) {
+            throw new AssertionError(ex.getMessage(), ex);
+        }
+    }
 
     /**
      * Creates a new instance of {@link BicAssert}.
@@ -86,21 +113,6 @@ public class BicAssertions extends Assertions {
         return softly.proxy(BicAssert.class, Bic.class, actual);
     }
 
-    // -------------------------------------------------------------------------
-    // Static entry points — Bic factory methods
-    // -------------------------------------------------------------------------
-
-    /**
-     * Creates a {@link BicAssert} by parsing the given BIC string via {@link Bic#of(CharSequence)}.
-     *
-     * @param bicValue the BIC character sequence to parse
-     * @return the custom assertion object
-     * @throws InvalidBicException if the BIC is invalid
-     */
-    public static BicAssert assertThatBicOf(CharSequence bicValue) {
-        return assertThat(Bic.of(bicValue));
-    }
-
     /**
      * Provides a boolean assertion for {@link Bic#isValid(CharSequence)}.
      *
@@ -110,10 +122,6 @@ public class BicAssertions extends Assertions {
     public static AbstractBooleanAssert<?> assertThatBicIsValid(CharSequence bicValue) {
         return assertThat(Bic.isValid(bicValue));
     }
-
-    // -------------------------------------------------------------------------
-    // Static entry point — exception
-    // -------------------------------------------------------------------------
 
     /**
      * Provides a typed throwable assertion for {@link InvalidBicException}.
@@ -130,10 +138,6 @@ public class BicAssertions extends Assertions {
     public static ThrowableTypeAssert<InvalidBicException> assertThatInvalidBicException() {
         return assertThatExceptionOfType(InvalidBicException.class);
     }
-
-    // -------------------------------------------------------------------------
-    // BicAssert — instance-level assertions
-    // -------------------------------------------------------------------------
 
     /**
      * Custom AssertJ assertions for {@link Bic}.
@@ -345,7 +349,7 @@ public class BicAssertions extends Assertions {
         public BicAssert hasCountryFlag(String expectedCountryFlag) {
             isNotNull();
             if (!Objects.equals(actual.getCountryFlag(), expectedCountryFlag)) {
-                failWithMessage("Expected BIC country flag to be '%s' but was '%s' for BIC '%s'",
+                failWithMessage("Expected BIC country flag to be %s but was %s for BIC '%s'",
                     expectedCountryFlag, actual.getCountryFlag(), actual);
             }
             return myself;
@@ -361,7 +365,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             if (actual.getCurrency() != expectedCurrency) {
                 failWithMessage("Expected currency to be '%s' but was '%s' for BIC '%s'",
-                    expectedCurrency, actual.getCurrency(), actual);
+                    expectedCurrency.getAlphaCode(), actual.getCurrencyCode(), actual);
             }
             return myself;
         }
@@ -456,7 +460,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) >= 0) {
-                failWithMessage("Expected BIC '%s' to be less than '%s' but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be less than '%s'", actual, other);
             }
             return myself;
         }
@@ -472,7 +476,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) > 0) {
-                failWithMessage("Expected BIC '%s' to be less than or equal to '%s' but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be less than or equal to '%s'", actual, other);
             }
             return myself;
         }
@@ -488,7 +492,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) <= 0) {
-                failWithMessage("Expected BIC '%s' to be greater than '%s' but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be greater than '%s'", actual, other);
             }
             return myself;
         }
@@ -504,7 +508,7 @@ public class BicAssertions extends Assertions {
             isNotNull();
             requireNonNull(other, "The BIC to compare against must not be null");
             if (actual.compareTo(other) < 0) {
-                failWithMessage("Expected BIC '%s' to be greater than or equal to '%s' but it was not", actual, other);
+                failWithMessage("Expected BIC '%s' to be greater than or equal to '%s'", actual, other);
             }
             return myself;
         }

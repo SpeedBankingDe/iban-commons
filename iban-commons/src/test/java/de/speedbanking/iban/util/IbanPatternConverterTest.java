@@ -49,7 +49,7 @@ final class IbanPatternConverterTest {
         "2!a3!n4!c    ; [A-Z]{2}[0-9]{3}[0-9A-Z]{4}",
         "1!a1!n1!c    ; [A-Z][0-9][0-9A-Z]",
         "4!a2!a3!n    ; [A-Z]{6}[0-9]{3}",           // aggregation (4a + 2a = 6a) then segment change (3n)
-        "4!a3!n2!n    ; [A-Z]{4}[0-9]{5}",           // segment change, then aggregation (3n + 2n = 5n). Ensures line 160 is covered.
+        "4!a3!n2!n    ; [A-Z]{4}[0-9]{5}",           // segment change, then aggregation (3n + 2n = 5n)
         "4!a10!a      ; [A-Z]{14}",                  // only two segments of the same type
         "2!c1!a2!a3!n ; [0-9A-Z]{2}[A-Z]{3}[0-9]{3}" // all three types and aggregation
     })

@@ -80,7 +80,7 @@ final class IbanConfigTest {
 
         assertThatThrownBy(() -> IbanConfig.configure(IbanConfig.DEFAULT))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("already in use");
+            .hasMessageStartingWith("IbanConfig is already in use and cannot be changed");
     }
 
     @DisplayName("configure() before get() should succeed")

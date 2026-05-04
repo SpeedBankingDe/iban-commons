@@ -78,17 +78,17 @@ final class CharArrayWrapperTest {
     @DisplayName("subSequence should throw IndexOutOfBoundsException for invalid ranges")
     @ParameterizedTest(name = "[{index}] start={0}, end={1}")
     @CsvSource(delimiter = '|', value = {
-        "-1 |  1 | Start negative",
-        " 1 |  0 | End before start",
-        " 0 |  4 | End exceeds length",
-        " 2 |  5 | End far out"
+        "-1 | 1 | Start negative",
+        " 1 | 0 | End before start",
+        " 0 | 4 | End exceeds length",
+        " 2 | 5 | End far out"
     })
     void subSequence_shouldThrowOnInvalidRange(int start, int end) {
         CharArrayWrapper wrapper = new CharArrayWrapper("ABC".toCharArray());
 
         assertThatThrownBy(() -> wrapper.subSequence(start, end))
             .isExactlyInstanceOf(IndexOutOfBoundsException.class)
-            .hasMessageContaining("Invalid subSequence range");
+            .hasMessageStartingWith("Invalid subSequence range");
     }
 
     @DisplayName("subSequence should return the same instance if range covers everything")

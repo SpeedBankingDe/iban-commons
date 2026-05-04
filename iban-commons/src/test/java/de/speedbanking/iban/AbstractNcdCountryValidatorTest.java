@@ -61,7 +61,7 @@ final class AbstractNcdCountryValidatorTest {
     void loadNcdCalculator_shouldThrowException_whenClassDoesNotExist() {
         assertThatThrownBy(() -> AbstractNcdCountryValidator.loadNcdCalculator(XYZ.class))
             .isExactlyInstanceOf(ExceptionInInitializerError.class)
-            .hasMessageContaining("Could not load ncd calculator class");
+            .hasMessageStartingWith("Could not load ncd calculator class");
     }
 
     @DisplayName("validateNationalCheckDigit should delegate to calculator when enabled")

@@ -1,8 +1,8 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThat;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsValid;
-import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanOf;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -86,7 +86,7 @@ final class IbanTest {
                 .as("IBAN '%s' is valid and should be instantiable", ibanInput)
                 .doesNotThrowAnyException();
 
-            Iban iban1 = assertThatIbanOf(ibanInput)
+            Iban iban1 = assertThatIban(ibanInput)
                 .as("IBAN instance 1 must not be null and match input string")
                 .isNotNull()
                 .hasToString(ibanInputNorm)
@@ -102,7 +102,7 @@ final class IbanTest {
                 .as("IBAN '%s' is valid and should be instantiable", ibanInput)
                 .doesNotThrowAnyException();
 
-            Iban iban2 = assertThatIbanOf(ibanInputNorm)
+            Iban iban2 = assertThatIban(ibanInputNorm)
                 .as("IBAN instance 2 must not be null and match input string")
                 .isNotNull()
                 .hasToString(ibanInputNorm)
@@ -399,9 +399,7 @@ final class IbanTest {
             .as("IBAN '%s' should be valid", ibanInput)
             .isThrownBy(() -> Iban.of(ibanInput));
 
-        Iban iban = Iban.of(ibanInput);
-
-        assertThat(iban)
+        Iban iban = assertThatIban(ibanInput)
             .hasLength(expectedIbanLength)
             .hasCountryCode(expectedCountryCode)
             .hasCountryFlag(expectedCountryFlag)
@@ -420,7 +418,8 @@ final class IbanTest {
             .hasOrganisation(countryData.getOrganisation())
             .isSepa(countryData.isSepa())
 
-            .matches(countryData.getIbanRegex());
+            .matches(countryData.getIbanRegex())
+            .actual();
 
         String ibanLastChar = iban.subSequence(iban.length() - 1, iban.length());
 
@@ -507,7 +506,7 @@ final class IbanTest {
         Iban iban2 = Iban.of(ibanStr2);
         Iban iban3 = Iban.of(ibanStr3);
 
-        assertThat(iban1)
+        assertThatIban(iban1)
             .isNotNull()
             .isNotEqualTo(ibanStr1)
             .isNotEqualTo(new Object())
@@ -652,13 +651,13 @@ final class IbanTest {
     })
     void serialization_shouldPreserveState_whenIbanIsValid(String ibanInput) throws IOException, ClassNotFoundException {
         Iban original = Iban.of(ibanInput);
-        final Iban iban = original;
+        Iban iban = original;
 
         byte[] bytes = TestUtil.serialize(iban);
-        final byte[] bytes1 = bytes;
+        byte[] bytes1 = bytes;
         Iban restored = TestUtil.deserialize(bytes1);
 
-        assertThat(restored)
+        assertThatIban(restored)
             .as("Deserialized Iban must equal the original")
             .isNotNull()
             .isEqualTo(original)
@@ -743,7 +742,7 @@ final class IbanTest {
         final Iban iban = original;
         Iban restored = TestUtil.deserialize(TestUtil.serialize(iban));
 
-        assertThat(restored)
+        assertThatIban(restored)
             .isNotSameAs(original)
             .isEqualTo(original);
     }
@@ -792,7 +791,7 @@ final class IbanTest {
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
             .as("readResolve() must reject an invalid IBAN stored in the Memento")
             .isInstanceOf(InvalidObjectException.class)
-            .hasMessageContaining("Cannot restore Iban from serialized form");
+            .hasMessageStartingWith("Cannot restore Iban from serialized form");
     }
 
     /**
@@ -812,7 +811,7 @@ final class IbanTest {
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
             .as("readObject() must reject a Memento with an unsupported stream version")
             .isInstanceOf(InvalidObjectException.class)
-            .hasMessageContaining("Unsupported Iban Memento stream version: 99");
+            .hasMessageStartingWith("Unsupported Iban Memento stream version: 99");
     }
 
     /**
@@ -835,7 +834,7 @@ final class IbanTest {
         assertThat(cause)
             .as("readObjectNoData() must throw InvalidObjectException")
             .isInstanceOf(InvalidObjectException.class)
-            .hasMessageContaining("must be deserialized via its Memento proxy");
+            .hasMessageStartingWith("Iban must be deserialized via its Memento proxy");
     }
 
     /**
@@ -857,12 +856,8 @@ final class IbanTest {
         assertThat(cause)
             .as("readObject() must throw InvalidObjectException")
             .isInstanceOf(InvalidObjectException.class)
-            .hasMessageContaining("must be deserialized via its Memento proxy");
+            .hasMessageStartingWith("Iban must be deserialized via its Memento proxy");
     }
-
-    // =========================================================================
-    // getCurrency() / getCurrencyCode()
-    // =========================================================================
 
     /**
      * Verifies that {@link Iban#getCurrency()} returns the correct {@link de.speedbanking.util.Currency}
@@ -879,42 +874,42 @@ final class IbanTest {
     @DisplayName("getCurrency() and getCurrencyCode() return the correct ISO 4217 currency")
     @ParameterizedTest(name = "[{index}] {0} → {1}")
     @CsvSource(delimiter = '|', value = {
-        // ibanInput                         | expectedCurrency
+        // ibanInput                      | expectedCurrency
         // Eurozone SEPA
-        "DE89370400440532013000              | EUR",  // Germany
-        "AT611904300234573201                | EUR",  // Austria
-        "FR1420041010050500013M02606         | EUR",  // France
-        "IE29AIBK93115212345678              | EUR",  // Ireland
-        "NL91ABNA0417164300                  | EUR",  // Netherlands
-        "FI2112345600000785                  | EUR",  // Finland
-        "BE68539007547034                    | EUR",  // Belgium
-        "LU280019400644750000                | EUR",  // Luxembourg
-        "GR1601101250000000012300695         | EUR",  // Greece
-        "IT60X0542811101000000123456         | EUR",  // Italy
-        "ES9121000418450200051332            | EUR",  // Spain
-        "PT50000201231234567890154           | EUR",  // Portugal
-        "ME25505000012345678951              | EUR",  // Montenegro (EUR without EU)
-        "XK051212012345678906               | EUR",  // Kosovo (EUR without EU)
+        "DE89370400440532013000           | EUR",  // Germany
+        "AT611904300234573201             | EUR",  // Austria
+        "FR1420041010050500013M02606      | EUR",  // France
+        "IE29AIBK93115212345678           | EUR",  // Ireland
+        "NL91ABNA0417164300               | EUR",  // Netherlands
+        "FI2112345600000785               | EUR",  // Finland
+        "BE68539007547034                 | EUR",  // Belgium
+        "LU280019400644750000             | EUR",  // Luxembourg
+        "GR1601101250000000012300695      | EUR",  // Greece
+        "IT60X0542811101000000123456      | EUR",  // Italy
+        "ES9121000418450200051332         | EUR",  // Spain
+        "PT50000201231234567890154        | EUR",  // Portugal
+        "ME25505000012345678951           | EUR",  // Montenegro (EUR without EU)
+        "XK051212012345678906             | EUR",  // Kosovo (EUR without EU)
         // Non-Euro SEPA — own currencies
-        "GB29NWBK60161331926819             | GBP",  // United Kingdom
-        "CH9300762011623852957              | CHF",  // Switzerland
-        "LI21088100002324013AA              | CHF",  // Liechtenstein (uses CHF)
-        "SE4550000000058398257466           | SEK",  // Sweden
-        "NO9386011117947                    | NOK",  // Norway
-        "DK5000400440116243                 | DKK",  // Denmark
-        "PL61109010140000071219812874       | PLN",  // Poland
-        "CZ6508000000192000145399           | CZK",  // Czechia
-        "HU42117730161111101800000000       | HUF",  // Hungary
-        "RO49AAAA1B31007593840000           | RON",  // Romania
-        "BG80BNBG96611020345678             | BGN",  // Bulgaria
-        "IS140159260076545510730339          | ISK",  // Iceland
+        "GB29NWBK60161331926819           | GBP",  // United Kingdom
+        "CH9300762011623852957            | CHF",  // Switzerland
+        "LI21088100002324013AA            | CHF",  // Liechtenstein (uses CHF)
+        "SE4550000000058398257466         | SEK",  // Sweden
+        "NO9386011117947                  | NOK",  // Norway
+        "DK5000400440116243               | DKK",  // Denmark
+        "PL61109010140000071219812874     | PLN",  // Poland
+        "CZ6508000000192000145399         | CZK",  // Czechia
+        "HU42117730161111101800000000     | HUF",  // Hungary
+        "RO49AAAA1B31007593840000         | RON",  // Romania
+        "BG80BNBG96611020345678           | BGN",  // Bulgaria
+        "IS140159260076545510730339       | ISK",  // Iceland
         // Non-SEPA
-        "AE070331234567890123456            | AED",  // UAE
-        "PS92PALS000000000400123456702      | ILS",  // Palestine
-        "QA58DOHB00001234567890ABCDEFG      | QAR",  // Qatar
-        "SA0380000000608010167519           | SAR",  // Saudi Arabia
-        "TR330006100519786457841326         | TRY",  // Türkiye
-        "PK36SCBL0000001123456702          | PKR",  // Pakistan
+        "AE070331234567890123456          | AED",  // UAE
+        "PS92PALS000000000400123456702    | ILS",  // Palestine
+        "QA58DOHB00001234567890ABCDEFG    | QAR",  // Qatar
+        "SA0380000000608010167519         | SAR",  // Saudi Arabia
+        "TR330006100519786457841326       | TRY",  // Türkiye
+        "PK36SCBL0000001123456702         | PKR",  // Pakistan
     })
     void getCurrency_shouldReturnCorrectCurrency_whenIbanIsKnown(String ibanInput, String expectedCurrency) {
         Iban iban = Iban.of(ibanInput.trim());

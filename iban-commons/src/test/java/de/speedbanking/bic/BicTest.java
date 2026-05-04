@@ -1,8 +1,8 @@
 package de.speedbanking.bic;
 
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThat;
+import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBic;
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBicIsValid;
-import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBicOf;
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatInvalidBicException;
 
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
@@ -37,7 +37,7 @@ final class BicTest {
     @DisplayName("of() should create Bic object for a valid BIC-8")
     @Test
     void of_shouldReturnBic_whenValidBic8() {
-        assertThatBicOf("MARKDEFF")
+        assertThatBic("MARKDEFF")
             .as("Check properties for BIC-8")
             .isBic8()
             .isNotBic11()
@@ -55,7 +55,7 @@ final class BicTest {
     @DisplayName("of() should create Bic object for a valid BIC-11")
     @Test
     void of_shouldReturnBic_whenValidBic11() {
-        assertThatBicOf("MARKDEFF500")
+        assertThatBic("MARKDEFF500")
             .as("Check properties for BIC-11")
             .isBic11()
             .isNotBic8()
@@ -227,7 +227,7 @@ final class BicTest {
         "DBABDEFF500   | DBABDEFF500     | DBABDEFF       | DBABDEFF500"
     })
     void toBicFormats_shouldReturnCorrectNormalizedStrings(String inputBic, String expectedBic11, String expectedBic8, String expectedToString) {
-        assertThatBicOf(inputBic)
+        assertThatBic(inputBic)
             .as("Format check for BIC %s", inputBic)
             .isBic11NormalizedEqualTo(expectedBic11)
             .isBic8EqualTo(expectedBic8)
@@ -534,7 +534,7 @@ final class BicTest {
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
             .as("readResolve() must reject an invalid BIC stored in the Memento")
             .isInstanceOf(InvalidObjectException.class)
-            .hasMessageContaining("Cannot restore Bic from serialized form");
+            .hasMessageStartingWith("Cannot restore Bic from serialized form");
     }
 
     /**
@@ -554,7 +554,7 @@ final class BicTest {
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
             .as("readObject() must reject a Memento with an unsupported stream version")
             .isInstanceOfAny(InvalidObjectException.class, EOFException.class)
-            .hasMessageContaining("Unsupported Bic Memento stream version: 99");
+            .hasMessageStartingWith("Unsupported Bic Memento stream version: 99");
     }
 
     /**
@@ -577,7 +577,7 @@ final class BicTest {
         assertThat(cause)
             .as("readObjectNoData() must throw InvalidObjectException")
             .isInstanceOf(InvalidObjectException.class)
-            .hasMessageContaining("must be deserialized via its Memento proxy");
+            .hasMessageStartingWith("Bic must be deserialized via its Memento proxy");
     }
 
     /**
@@ -600,7 +600,7 @@ final class BicTest {
         assertThat(cause)
             .as("readObject() must throw InvalidObjectException")
             .isInstanceOf(InvalidObjectException.class)
-            .hasMessageContaining("must be deserialized via its Memento proxy");
+            .hasMessageStartingWith("Bic must be deserialized via its Memento proxy");
     }
 
 }
