@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.speedbanking.iban.Iban;
+import de.speedbanking.iban.IbanValidationError;
 import de.speedbanking.iban.InvalidIbanException;
 import de.speedbanking.util.Currency;
 
@@ -34,7 +35,7 @@ final class IbanAssertionsTest {
     // NO has: bankCode, no branchCode, nationalCheckDigit
     private static final String VALID_NO = "NO9386011117947";
 
-    @DisplayName("assertThatIban(CharSequence) — valid string parses successfully")
+    @DisplayName("assertThatIban(CharSequence) - valid string parses successfully")
     @Test
     @SuppressWarnings("UnnecessaryStringBuilder")
     void assertThat_charSequence_validString_succeeds() {
@@ -42,48 +43,50 @@ final class IbanAssertionsTest {
         assertThatIban((CharSequence) new StringBuilder(VALID_CY)).hasCountryCode("CY");
     }
 
-    @DisplayName("assertThatIban(CharSequence) — null is forwarded as-is; isNull() succeeds")
+    @DisplayName("assertThatIban(CharSequence) - null is forwarded as-is; isNull() succeeds")
     @Test
     void assertThat_charSequence_null_isNullSucceeds() {
         assertThatIban((CharSequence) null).isNull();
     }
 
-    @DisplayName("assertThatIban(CharSequence) — invalid string throws AssertionError wrapping InvalidIbanException")
+    @DisplayName("assertThatIban(CharSequence) - invalid string throws AssertionError wrapping InvalidIbanException")
     @Test
     void assertThat_charSequence_invalidString_throwsAssertionError() {
-        assertThatThrownBy(() -> assertThatIban("INVALID"))
+        String iban = "INVALID";
+        assertThatThrownBy(() -> assertThatIban(iban))
             .isInstanceOf(AssertionError.class)
-            .hasMessageStartingWith("IBAN has incorrect length (INCORRECT_LENGTH): 'INVALID'")
+            .hasMessage("%s (%s): '%s'", IbanValidationError.INCORRECT_LENGTH.getText(),
+                IbanValidationError.INCORRECT_LENGTH.name(), iban)
             .hasCauseInstanceOf(InvalidIbanException.class);
     }
 
-    @DisplayName("assertThatIban(Iban) — pre-parsed instance is wrapped directly")
+    @DisplayName("assertThatIban(Iban) - pre-parsed instance is wrapped directly")
     @Test
     void assertThat_iban_wrapsDirectly() {
         Iban iban = Iban.of(VALID_CY);
         assertThatIban(iban).hasCountryCode("CY");
     }
 
-    @DisplayName("assertThatIban(Iban) — null is forwarded as-is; isNull() succeeds")
+    @DisplayName("assertThatIban(Iban) - null is forwarded as-is; isNull() succeeds")
     @Test
     void assertThat_iban_null_isNullSucceeds() {
         assertThatIban(null).isNull();
     }
 
-    @DisplayName("assertThat(Iban) — static factory overload wraps a pre-parsed Iban directly")
+    @DisplayName("assertThat(Iban) - static factory overload wraps a pre-parsed Iban directly")
     @Test
     void assertThat_iban_staticOverload_wrapsDirectly() {
         Iban iban = Iban.of(VALID_CY);
         IbanAssertions.assertThat(iban).hasCountryCode("CY");
     }
 
-    @DisplayName("assertThat(Iban) — static factory overload: null is forwarded as-is; isNull() succeeds")
+    @DisplayName("assertThat(Iban) - static factory overload: null is forwarded as-is; isNull() succeeds")
     @Test
     void assertThat_iban_staticOverload_null_isNullSucceeds() {
         IbanAssertions.assertThat((Iban) null).isNull();
     }
 
-    @DisplayName("Metadata assertions — all structural properties of a Cyprus IBAN")
+    @DisplayName("Metadata assertions - all structural properties of a Cyprus IBAN")
     @Test
     void metadataAssertions_cyprus_allProperties() {
         assertThatIban(VALID_CY)
@@ -104,79 +107,88 @@ final class IbanAssertionsTest {
             .hasOrganisation("Central Bank of Cyprus");
     }
 
-    @DisplayName("hasBankCode — success path")
+    @DisplayName("hasBankCode - success path")
     @Test
     void hasBankCode_success() {
         assertThatIban(VALID_DE).hasBankCode("37040044");
     }
 
-    @DisplayName("hasBranchCode — success path for IBAN with branch code (GB)")
+    @DisplayName("hasBranchCode - success path for IBAN with branch code (GB)")
     @Test
     void hasBranchCode_present_success() {
         assertThatIban(VALID_GB).hasBranchCode("601613");
     }
 
-    @DisplayName("hasBranchCode — null asserts absence of branch code (DE)")
+    @DisplayName("hasBranchCode - null asserts absence of branch code (DE)")
     @Test
     void hasBranchCode_absent_success() {
         assertThatIban(VALID_DE).hasBranchCode(null);
     }
 
-    @DisplayName("hasBankAndBranchCode — success path (GB)")
+    @DisplayName("hasBankAndBranchCode - success path (GB)")
     @Test
     void hasBankAndBranchCode_success() {
         assertThatIban(VALID_GB).hasBankAndBranchCode("NWBK601613");
     }
 
-    @DisplayName("hasNationalCheckDigit — success path for IBAN with NCD (NO)")
+    @DisplayName("hasNationalCheckDigit - success path for IBAN with NCD (NO)")
     @Test
     void hasNationalCheckDigit_present_success() {
         assertThatIban(VALID_NO).hasNationalCheckDigit("7");
     }
 
-    @DisplayName("hasNationalCheckDigit — null asserts absence of NCD (DE)")
+    @DisplayName("hasNationalCheckDigit - null asserts absence of NCD (DE)")
     @Test
     void hasNationalCheckDigit_absent_success() {
         assertThatIban(VALID_DE).hasNationalCheckDigit(null);
     }
 
-    @DisplayName("Failure messages — country code mismatch")
+    @DisplayName("Failure messages - country code mismatch")
     @Test
     void failureMessage_countryCode_mismatch() {
         Iban iban = Iban.of(VALID_CY);
-        assertThatThrownBy(() -> assertThatIban(iban).hasCountryCode("GL"))
+        String expectedCountryCode = "GL";
+        assertThatThrownBy(() -> assertThatIban(iban).hasCountryCode(expectedCountryCode))
             .isInstanceOf(AssertionError.class)
-            .hasMessage("Expected country code to be 'GL' but was 'CY' for IBAN '%s'", iban);
+            .hasMessage("Expected country code to be '%s' but was '%s' for IBAN '%s'", expectedCountryCode, iban.getCountryCode(), iban);
     }
 
-    @DisplayName("Failure messages — length mismatch")
+    @DisplayName("Failure messages - length mismatch")
     @Test
     void failureMessage_length_mismatch() {
         Iban iban = Iban.of(VALID_CY);
-        assertThatThrownBy(() -> assertThatIban(iban).hasLength(10))
+        int expectedLength = 10;
+        assertThatThrownBy(() -> assertThatIban(iban).hasLength(expectedLength))
             .isInstanceOf(AssertionError.class)
-            .hasMessage("Expected IBAN length to be 10 but was 28 for IBAN '%s'", iban);
+            .hasMessage("Expected IBAN length to be %d but was %d for IBAN '%s'",
+                expectedLength, iban.length(), iban);
     }
 
-    @DisplayName("Failure messages — SEPA mismatch")
+    @DisplayName("Failure messages - SEPA mismatch")
     @Test
     void failureMessage_sepa_mismatch() {
         Iban iban = Iban.of(VALID_CY);
-        assertThatThrownBy(() -> assertThatIban(iban).isSepa(false))
+        boolean expectedSepa = false;
+        assertThatThrownBy(() -> {
+            assertThatIban(iban).isSepa(expectedSepa);
+        })
             .isInstanceOf(AssertionError.class)
-            .hasMessage("Expected SEPA participation to be 'false' for IBAN '%s'", iban);
+            .hasMessage("Expected SEPA participation to be '%s' but was '%s' for IBAN '%s'",
+                expectedSepa, !expectedSepa, iban);
     }
 
-    @DisplayName("Failure messages — currency mismatch")
+    @DisplayName("Failure messages - currency mismatch")
     @Test
     void failureMessage_currency_mismatch() {
         Iban iban = Iban.of(VALID_CY);
-        assertThatThrownBy(() -> assertThatIban(iban).hasCurrency(Currency.USD))
+        Currency expectedCcy = Currency.USD;
+        assertThatThrownBy(() -> assertThatIban(iban).hasCurrency(expectedCcy))
             .isInstanceOf(AssertionError.class)
-            .hasMessage("Expected currency to be 'USD' but was 'EUR' for IBAN '%s'", iban);
+            .hasMessage("Expected currency to be '%s' but was '%s' for IBAN '%s'",
+                expectedCcy.getAlphaCode(), iban.getCurrencyCode(), iban);
     }
 
-    @DisplayName("Failure messages — normalizedValue mismatch")
+    @DisplayName("Failure messages - normalizedValue mismatch")
     @Test
     void failureMessage_normalizedValue_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -185,7 +197,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected normalized IBAN to be 'XX00000'");
     }
 
-    @DisplayName("Failure messages — formattedString mismatch")
+    @DisplayName("Failure messages - formattedString mismatch")
     @Test
     void failureMessage_formattedString_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -194,7 +206,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected formatted IBAN to be 'WRONG'");
     }
 
-    @DisplayName("Failure messages — componentString mismatch")
+    @DisplayName("Failure messages - componentString mismatch")
     @Test
     void failureMessage_componentString_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -203,7 +215,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected component string to be 'WRONG'");
     }
 
-    @DisplayName("Failure messages — countryName mismatch")
+    @DisplayName("Failure messages - countryName mismatch")
     @Test
     void failureMessage_countryName_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -212,7 +224,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected country name to be 'Germany'");
     }
 
-    @DisplayName("Failure messages — countryFlag mismatch")
+    @DisplayName("Failure messages - countryFlag mismatch")
     @Test
     void failureMessage_countryFlag_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -221,7 +233,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected country flag to be '🇩🇪'");
     }
 
-    @DisplayName("Failure messages — currencyCode mismatch")
+    @DisplayName("Failure messages - currencyCode mismatch")
     @Test
     void failureMessage_currencyCode_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -230,7 +242,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected currency code to be 'USD'");
     }
 
-    @DisplayName("Failure messages — checkDigits (String) mismatch")
+    @DisplayName("Failure messages - checkDigits (String) mismatch")
     @Test
     void failureMessage_checkDigits_string_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -239,7 +251,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected check digits to be '99'");
     }
 
-    @DisplayName("Failure messages — bban mismatch")
+    @DisplayName("Failure messages - bban mismatch")
     @Test
     void failureMessage_bban_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -248,7 +260,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected BBAN to be '000000'");
     }
 
-    @DisplayName("Failure messages — accountNumber mismatch")
+    @DisplayName("Failure messages - accountNumber mismatch")
     @Test
     void failureMessage_accountNumber_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -257,7 +269,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected account number to be '0000000000'");
     }
 
-    @DisplayName("Failure messages — organisation mismatch")
+    @DisplayName("Failure messages - organisation mismatch")
     @Test
     void failureMessage_organisation_mismatch() {
         Iban iban = Iban.of(VALID_CY);
@@ -266,7 +278,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected organisation to be 'Deutsche Bundesbank'");
     }
 
-    @DisplayName("Failure messages — bankCode mismatch")
+    @DisplayName("Failure messages - bankCode mismatch")
     @Test
     void failureMessage_bankCode_mismatch() {
         Iban iban = Iban.of(VALID_DE);
@@ -275,7 +287,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected bank code to be '00000000'");
     }
 
-    @DisplayName("Failure messages — branchCode mismatch")
+    @DisplayName("Failure messages - branchCode mismatch")
     @Test
     void failureMessage_branchCode_mismatch() {
         Iban iban = Iban.of(VALID_GB);
@@ -284,7 +296,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected branch code to be '000000'");
     }
 
-    @DisplayName("Failure messages — bankAndBranchCode mismatch")
+    @DisplayName("Failure messages - bankAndBranchCode mismatch")
     @Test
     void failureMessage_bankAndBranchCode_mismatch() {
         Iban iban = Iban.of(VALID_GB);
@@ -293,7 +305,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("Expected bank and branch code to be 'WRONG'");
     }
 
-    @DisplayName("Failure messages — nationalCheckDigit mismatch")
+    @DisplayName("Failure messages - nationalCheckDigit mismatch")
     @Test
     void failureMessage_nationalCheckDigit_mismatch() {
         Iban iban = Iban.of(VALID_NO);
@@ -311,7 +323,7 @@ final class IbanAssertionsTest {
         assertThatIbanIsValid(input).isEqualTo(expected);
     }
 
-    @DisplayName("assertThatInvalidIbanException — scoped to InvalidIbanException")
+    @DisplayName("assertThatInvalidIbanException - scoped to InvalidIbanException")
     @Test
     void assertThatInvalidIbanException_catchesInvalidIban() {
         assertThatInvalidIbanException()
@@ -319,7 +331,7 @@ final class IbanAssertionsTest {
             .withMessageContaining("INVALID");
     }
 
-    @DisplayName("matches(CharSequence) — matching, null, and empty regex")
+    @DisplayName("matches(CharSequence) - matching, null, and empty regex")
     @Test
     void matches_charSequence_successCases() {
         assertThatIban(VALID_CY).matches("^CY.+");
@@ -327,7 +339,7 @@ final class IbanAssertionsTest {
         assertThatIban(VALID_CY).matches("");
     }
 
-    @DisplayName("matches(CharSequence) — non-matching regex fails with descriptive message")
+    @DisplayName("matches(CharSequence) - non-matching regex fails with descriptive message")
     @Test
     void matches_charSequence_mismatch_fails() {
         Iban iban = Iban.of(VALID_CY);
@@ -337,19 +349,19 @@ final class IbanAssertionsTest {
             .hasMessage("IBAN '%s' does not match pattern '%s'", iban, regex);
     }
 
-    @DisplayName("matches(Pattern) — matching pattern succeeds")
+    @DisplayName("matches(Pattern) - matching pattern succeeds")
     @Test
     void matches_pattern_success() {
         assertThatIban(VALID_CY).matches(Pattern.compile("^CY.+"));
     }
 
-    @DisplayName("matches(Pattern) — null pattern skips the check")
+    @DisplayName("matches(Pattern) - null pattern skips the check")
     @Test
     void matches_pattern_null_skips() {
         assertThatIban(VALID_CY).matches((Pattern) null);
     }
 
-    @DisplayName("matches(Pattern) — non-matching pattern fails with descriptive message")
+    @DisplayName("matches(Pattern) - non-matching pattern fails with descriptive message")
     @Test
     void matches_pattern_mismatch_fails() {
         Iban iban = Iban.of(VALID_CY);
@@ -375,7 +387,7 @@ final class IbanAssertionsTest {
         assertThatIban(glIban).isGreaterThan(cyIban);
     }
 
-    @DisplayName("Comparison assertions — boundary cases with DK and GL")
+    @DisplayName("Comparison assertions - boundary cases with DK and GL")
     @Test
     void comparisonAssertions_boundaries() {
         Iban lower  = Iban.of("DK5000400440116243");
@@ -387,7 +399,7 @@ final class IbanAssertionsTest {
         assertThatIban(higher).isGreaterThanOrEqualTo(higher);
     }
 
-    @DisplayName("Comparison assertions — isLessThan fails with descriptive message")
+    @DisplayName("Comparison assertions - isLessThan fails with descriptive message")
     @Test
     void comparisonAssertions_isLessThan_fail() {
         Iban lower  = Iban.of("DK5000400440116243");
@@ -397,7 +409,7 @@ final class IbanAssertionsTest {
             .hasMessage("Expected IBAN '%s' to be less than '%s'", higher, lower);
     }
 
-    @DisplayName("Comparison assertions — isLessThanOrEqualTo fails when actual is greater")
+    @DisplayName("Comparison assertions - isLessThanOrEqualTo fails when actual is greater")
     @Test
     void comparisonAssertions_isLessThanOrEqualTo_fail() {
         Iban lower  = Iban.of("DK5000400440116243");
@@ -407,7 +419,7 @@ final class IbanAssertionsTest {
             .hasMessage("Expected IBAN '%s' to be less than or equal to '%s'", higher, lower);
     }
 
-    @DisplayName("Comparison assertions — isGreaterThan fails with descriptive message")
+    @DisplayName("Comparison assertions - isGreaterThan fails with descriptive message")
     @Test
     void comparisonAssertions_isGreaterThan_fail() {
         Iban lower  = Iban.of("DK5000400440116243");
@@ -417,7 +429,7 @@ final class IbanAssertionsTest {
             .hasMessage("Expected IBAN '%s' to be greater than '%s'", lower, higher);
     }
 
-    @DisplayName("Comparison assertions — isGreaterThanOrEqualTo fails when actual is less")
+    @DisplayName("Comparison assertions - isGreaterThanOrEqualTo fails when actual is less")
     @Test
     void comparisonAssertions_isGreaterThanOrEqualTo_fail() {
         Iban lower  = Iban.of("DK5000400440116243");
@@ -427,7 +439,7 @@ final class IbanAssertionsTest {
             .hasMessage("Expected IBAN '%s' to be greater than or equal to '%s'", lower, higher);
     }
 
-    @DisplayName("Comparison assertions — isEqualByCompareTo fails when IBANs differ")
+    @DisplayName("Comparison assertions - isEqualByCompareTo fails when IBANs differ")
     @Test
     void comparisonAssertions_isEqualByCompareTo_fail() {
         Iban cyIban = Iban.of(VALID_CY);
@@ -438,7 +450,7 @@ final class IbanAssertionsTest {
             .hasMessageContaining("to compare as equal to");
     }
 
-    @DisplayName("Comparison assertions — null argument throws NullPointerException")
+    @DisplayName("Comparison assertions - null argument throws NullPointerException")
     @Test
     void comparisonAssertions_nullArgument_throwsNpe() {
         Iban iban = Iban.of(VALID_CY);
@@ -447,7 +459,7 @@ final class IbanAssertionsTest {
             .hasMessage("The IBAN to compare against must not be null");
     }
 
-    @DisplayName("SoftAssertions — using() proxy collects failures without throwing immediately")
+    @DisplayName("SoftAssertions - using() proxy collects failures without throwing immediately")
     @Test
     void softAssertions_using_proxy() {
         SoftAssertions softly = new SoftAssertions();
@@ -460,14 +472,14 @@ final class IbanAssertionsTest {
         assertThatCode(softly::assertAll).doesNotThrowAnyException();
     }
 
-    @DisplayName("SoftAssertions — using() proxy collects failure without throwing immediately")
+    @DisplayName("SoftAssertions - using() proxy collects failure without throwing immediately")
     @Test
     void softAssertions_using_proxy_collectsFailure() {
         SoftAssertions softly = new SoftAssertions();
         Iban iban = Iban.of(VALID_CY);
 
         IbanAssertions.using(iban, softly)
-            .hasCountryCode("DE"); // wrong — should be collected, not thrown
+            .hasCountryCode("DE"); // wrong - should be collected, not thrown
 
         assertThatThrownBy(softly::assertAll)
             .isInstanceOf(AssertionError.class);
