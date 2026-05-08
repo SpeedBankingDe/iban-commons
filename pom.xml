@@ -590,10 +590,6 @@
                         <useReleaseProfile>false</useReleaseProfile>
                         <goals>deploy</goals>
                         <releaseProfiles>release</releaseProfiles>
-                        <!-- After tagging, update version strings in docs.
-                             The script reads the new release version from the
-                             ${releaseVersion} property injected by the plugin. -->
-                        <completionGoals>exec:exec@update-docs-version -N</completionGoals>
                     </configuration>
                 </plugin>
 
@@ -606,8 +602,7 @@
                     <executions>
                         <execution>
                             <id>update-docs-version</id>
-                            <!-- phase is irrelevant here; invoked explicitly via completionGoals -->
-                            <phase>none</phase>
+                            <phase>none</phase> <!-- only manual execution -->
                             <goals>
                                 <goal>exec</goal>
                             </goals>
