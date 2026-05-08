@@ -70,7 +70,7 @@
     </scm>
 
     <issueManagement>
-        <system>Github</system>
+        <system>GitHub</system>
         <url>${project.url}/issues</url>
     </issueManagement>
 
@@ -91,6 +91,8 @@
         <javaVersion>8</javaVersion>
 
         <project.dist.name>iban-commons</project.dist.name>
+
+        <project.copyrightYear>2026</project.copyrightYear>
 
         <dep.junit.version>5.14.3</dep.junit.version>
         <dep.assertj.version>3.27.7</dep.assertj.version>
@@ -116,7 +118,7 @@
         <!-- Path relative to each sub-module; both modules share the same ruleset location -->
         <check.checkstyle.ruleset>${maven.multiModuleProjectDirectory}/src/test/resources/team/checkstyle-rules.xml</check.checkstyle.ruleset>
 
-        <dep.pmd.version>7.23.0</dep.pmd.version>
+        <dep.pmd.version>7.24.0</dep.pmd.version>
         <check.pmd.ruleset>${maven.multiModuleProjectDirectory}/src/test/resources/team/pmd-rules.xml</check.pmd.ruleset>
 
         <!-- Plugin versions (alphabetically) -->
@@ -134,7 +136,7 @@
         <dep.plugin.jar.version>3.5.0</dep.plugin.jar.version>
         <dep.plugin.javadoc.version>3.12.0</dep.plugin.javadoc.version>
         <dep.plugin.license.version>5.0.0</dep.plugin.license.version> <!-- see https://mathieu.carbou.me/license-maven-plugin -->
-        <dep.plugin.pitest.version>1.23.0</dep.plugin.pitest.version>
+        <dep.plugin.pitest.version>1.23.1</dep.plugin.pitest.version>
         <dep.plugin.pmd.version>3.28.0</dep.plugin.pmd.version>
         <dep.plugin.release.version>3.3.1</dep.plugin.release.version>
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version> <!-- see https://github.com/Ekryd/sortpom/releases -->
@@ -144,7 +146,7 @@
 
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
-        <surefireArgLine />
+        <surefireArgLine /> <!-- placeholder; overridden by jacoco-prepare-agent -->
     </properties>
 
     <!--
@@ -223,7 +225,7 @@
 
             <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-inline</artifactId>
+                <artifactId>mockito-core</artifactId>
                 <version>${dep.mockito.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -244,11 +246,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${dep.plugin.compiler.version}</version>
                     <configuration>
-                        <!-- maven.compiler.release requires JDK 9+; source/target are kept
-                             as fallback for strict Java-8 toolchains -->
                         <release>${javaVersion}</release>
-                        <source>${javaVersion}</source>
-                        <target>${javaVersion}</target>
                         <debug>true</debug>
                         <debuglevel>lines,vars,source</debuglevel>
                         <showWarnings>true</showWarnings>
@@ -340,11 +338,10 @@
                     <version>${dep.plugin.javadoc.version}</version>
                     <configuration>
                         <failOnError>true</failOnError>
-                        <release>${maven.compiler.release}</release>
-                        <source>${maven.compiler.source}</source>
+                        <release>${javaVersion}</release>
+                        <source>${javaVersion}</source>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <maxmemory>1024m</maxmemory>
-                        <quiet>false</quiet>
                         <doclint>all,-missing</doclint>
                         <show>protected</show>
                         <windowtitle>${project.name} ${project.version} API</windowtitle>
@@ -399,7 +396,6 @@
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${dep.plugin.checkstyle.version}</version>
                     <configuration>
-                        <skip>false</skip>
                         <failOnViolation>true</failOnViolation>
                         <configLocation>${check.checkstyle.ruleset}</configLocation>
                         <consoleOutput>true</consoleOutput>
@@ -432,7 +428,6 @@
                     <artifactId>maven-pmd-plugin</artifactId>
                     <version>${dep.plugin.pmd.version}</version>
                     <configuration>
-                        <skip>false</skip>
                         <failOnViolation>true</failOnViolation>
                         <printFailingErrors>true</printFailingErrors>
                         <includeTests>true</includeTests>
@@ -476,7 +471,7 @@
                     <configuration>
                         <header>com/mycila/maven/plugin/license/templates/APACHE-2-noemail.txt</header>
                         <properties>
-                            <year>${project.inceptionYear}-2026</year>
+                            <year>${project.inceptionYear}-${project.copyrightYear}</year>
                             <owner>${developer1Name}, ${project.organization.name}</owner>
                         </properties>
                         <excludes>
@@ -663,6 +658,11 @@
             </plugin>
 
             <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
             </plugin>
@@ -670,11 +670,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
             </plugin>
 
             <!-- Sources are attached here for the default build -->
@@ -826,7 +821,6 @@
                              This lets the plugin take over the standard deploy goal and implement its own logic for deploying to the new Sonatype Central Portal. -->
                         <extensions>true</extensions>
                         <configuration>
-                            <skipPublishing>false</skipPublishing>
                             <publishingServerId>central</publishingServerId>
                             <!-- do not automatically release staged artifacts to Maven Central.
                                  This is the recommended setting for releases, as it allows us to manually inspect the staged repository

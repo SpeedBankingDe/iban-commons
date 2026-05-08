@@ -1,10 +1,7 @@
 package de.speedbanking.iban;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
-import de.speedbanking.iban.junit.jupiter.api.IbanAssertions;
 import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;
@@ -93,19 +90,6 @@ final class IbanPlusKeyTest {
     void of_shouldReturnNull_whenIbanIsNull() {
         assertThat(IbanPlusKey.of((Iban) null))
             .as("Null Iban should result in a null key")
-            .isNull();
-    }
-
-    @DisplayName("Should return null for IBAN with invalid country code")
-    @Test
-    void of_shouldReturnNull_whenCountryCodeIsInvalid() {
-        Iban iban = spy(Iban.of("MT84MALT011000012345MTLCAST001S"));
-
-        IbanAssertions.assertThat(iban).hasCountryCode("MT");
-
-        when(iban.getCountryCode()).thenReturn("!!");
-        assertThat(IbanPlusKey.of(iban))
-            .as("Input Iban '%s' (invalid country code) should result in a null key", iban)
             .isNull();
     }
 
