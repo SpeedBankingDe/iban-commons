@@ -106,11 +106,11 @@ public final class CharArrayWrapper implements CharSequence {
 
     @Override
     public int hashCode() {
-        int hash = 0;
+        int result = 0; // compatible with String.hashCode
         for (int i = 0; i < length; i++) {
-            hash = 31 * hash + data[offset + i];
+            result = 31 * result + data[offset + i];
         }
-        return hash;
+        return result;
     }
 
     /**

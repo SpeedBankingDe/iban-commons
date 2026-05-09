@@ -15,7 +15,6 @@
  */
 package de.speedbanking.iban.util;
 
-import static java.util.Objects.hash;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.ValidationError;
@@ -110,7 +109,8 @@ public abstract class InvalidBaseException extends RuntimeException {
      */
     @Override
     public int hashCode() {
-        return hash(reason, input);
+        int result = 31 * 17 + reason.hashCode();
+        return 31 * result + Objects.hashCode(input);
     }
 
     /**

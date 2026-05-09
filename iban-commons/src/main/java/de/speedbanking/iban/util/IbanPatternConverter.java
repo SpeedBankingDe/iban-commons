@@ -20,7 +20,6 @@ import static java.util.Collections.unmodifiableList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -308,13 +307,14 @@ public final class IbanPatternConverter {
         }
 
         /**
-         * Returns a hash code for this segment.
+         * Computes the hash code for this segment.
          *
-         * @return the hash code
+         * @return the hash code value for this segment
          */
         @Override
         public int hashCode() {
-            return Objects.hash(charType, length);
+            int result = 31 * 17 + charType.hashCode();
+            return 31 * result + length;
         }
 
         @Override

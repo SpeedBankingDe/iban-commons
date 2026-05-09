@@ -17,8 +17,6 @@ package de.speedbanking.util;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.Objects;
-
 /**
  * Represents an immutable range defined by a begin index (inclusive)
  * and an ending index (exclusive).
@@ -179,7 +177,8 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
      */
     @Override
     public int hashCode() {
-        return Objects.hash(begin, end);
+        int result = 31 * 17 + begin;
+        return 31 * result + end;
     }
 
     /**

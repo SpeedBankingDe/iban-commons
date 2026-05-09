@@ -3649,11 +3649,20 @@ public enum IbanRegistry {
                 && Objects.equals(departmentTel, other.departmentTel);
         }
 
+        /**
+         * Computes the hash code for this contact data.
+         *
+         * @return a hash code value for this object
+         */
         @Override
         public int hashCode() {
-            return Objects.hash(organisation, department,
-                                streetAddress, cityPostcode,
-                                departmentGenericEmail, departmentTel);
+            int result = 17;
+            result = 31 * result + Objects.hashCode(organisation);
+            result = 31 * result + Objects.hashCode(department);
+            result = 31 * result + Objects.hashCode(streetAddress);
+            result = 31 * result + Objects.hashCode(cityPostcode);
+            result = 31 * result + Objects.hashCode(departmentGenericEmail);
+            return 31 * result + Objects.hashCode(departmentTel);
         }
 
         @Override

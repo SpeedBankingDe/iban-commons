@@ -15,7 +15,6 @@
  */
 package de.speedbanking.bic;
 
-import static java.util.Objects.hash;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.CountryUtil;
@@ -118,7 +117,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
 
         if (this.isBic8) {
             this.bic8 = bicInput.toString();
-            this.bic11 = null;
+            this.bic11 = this.bic8 + HEAD_OFFICE_SUFFIX;
             this.branchCode = null;
         } else {
             this.bic8 = bicInput.subSequence(0, BIC8_LENGTH).toString();
@@ -369,16 +368,14 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     }
 
     /**
-     * Returns the BIC in its 11-character format.<br>
-     * If the original BIC is 8 characters, the <strong>{@code "XXX"}</strong>
-     * (head office) suffix is appended.
+     * Returns the BIC in its 11-character format.
      *
      * @return the BIC-11 string
      *
      * @since 1.8.0
      */
     public String toBic11() {
-        return this.isBic8 ? bic8 + HEAD_OFFICE_SUFFIX : bic11;
+        return bic11;
     }
 
     /**
@@ -456,7 +453,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public String toString() {
-        return isBic8 ? bic8 : toBic11();
+        return isBic8 ? bic8 : bic11;
     }
 
     /**
@@ -486,7 +483,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public int hashCode() {
-        return hash(toBic11());
+        return bic11.hashCode();
     }
 
     // -------------------------------------------------------------------------
