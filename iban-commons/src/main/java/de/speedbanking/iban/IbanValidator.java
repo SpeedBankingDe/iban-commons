@@ -47,8 +47,8 @@ import java.util.Arrays;
  *
  * <h2>Performance design</h2>
  * The hot validation path ({@link #isValid(CharSequence)}) is deliberately separated
- * from the diagnostic path ({@link #validate(CharSequence)}) to avoid {@link ThreadLocal}
- * writes and object allocations on the boolean fast-path.
+ * from the diagnostic path ({@link #validate(CharSequence)}) to avoid object allocations
+ * on the boolean fast-path.
  * <p>
  * Normalization writes directly into a pre-allocated {@link ThreadLocal} {@code char[]}
  * buffer ({@link #VALIDATION_BUFFER}), eliminating {@code char[]} allocations and GC
@@ -67,22 +67,22 @@ import java.util.Arrays;
  * the JIT to inline and auto-vectorize aggressively.
  *
  * <h2>Thread safety</h2>
- * This class is thread-safe. The {@link #VALIDATION_BUFFER} and {@link #LAST_REASON}
- * thread-locals isolate mutable state per thread. All other fields are effectively immutable.
+ * This class is thread-safe. The {@link #VALIDATION_BUFFER} thread-local isolates
+ * mutable state per thread. All other fields are effectively immutable.
  *
  * @since 1.8.0
  */
 public final class IbanValidator {
 
     /** Sentinel value indicating a normalization or validation error. */
-    static final int                                      INVALID_INPUT     = -1;
+    static final int                         INVALID_INPUT     = -1;
 
     /**
      * Return value for a failed Mod 97-10 calculation.
      * <p>
      * Delegates to {@link Mod97#INVALID_REMAINDER} for a consistent sentinel across the API.
      */
-    static final int                                      INVALID_MOD97     = Mod97.INVALID_REMAINDER;
+    static final int                         INVALID_MOD97     = Mod97.INVALID_REMAINDER;
 
     /**
      * Internal cache of all country-specific validators, indexed by the ordinal
@@ -91,7 +91,7 @@ public final class IbanValidator {
      * This field is thread-safe as the array and the contained {@link CountryValidator}
      * instances are effectively immutable.
      */
-    private static final CountryValidator[]               VALIDATORS    =
+    private static final CountryValidator[]  VALIDATORS        =
         Arrays.stream(IbanRegistry.values())
             .map(IbanRegistry::name)
             .map(IbanValidator::loadCountryValidator)
@@ -107,23 +107,11 @@ public final class IbanValidator {
      * thread-safety while avoiding the overhead of frequent {@code char[]} allocations
      * and the resulting garbage collection pressure.
      * <p>
-     * The capacity is set to {@code MAX_IBAN_LENGTH}, the longst possible unformatted IBAN.
+     * The capacity is set to {@code MAX_IBAN_LENGTH}, the longest possible unformatted IBAN.
      */
     @SuppressWarnings("java:S5164") // ThreadLocal used as a tiny persistent buffer to avoid GC pressure
-    private static final ThreadLocal<char[]>              VALIDATION_BUFFER = ThreadLocal
+    private static final ThreadLocal<char[]> VALIDATION_BUFFER = ThreadLocal
         .withInitial(() -> new char[MAX_IBAN_LENGTH]);
-
-    /**
-     * Simple thread-local holder for the last failure reason for the {@link Iban#of(CharSequence)} simplicity.
-     * <p>
-     * Ensures that the reason for failure is correctly associated with the calling thread
-     * when using a simplified API that doesn't return the full result object.
-     * <p>
-     * Only written on the {@link #validate} path.<br>
-     * {@link #isValid} never touches this field, avoiding unnecessary ThreadLocal overhead
-     * on the hot validation-only path.
-     */
-    private static final ThreadLocal<IbanValidationError> LAST_REASON   = new ThreadLocal<>();
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -179,9 +167,8 @@ public final class IbanValidator {
      * </ul>
      * <p>
      * Unlike the {@code validate} methods, this path is optimized for speed and
-     * does not write to the {@link ThreadLocal} error state. It always performs
-     * a full check against the {@link IbanRegistry} to ensure the country code
-     * and length are valid.
+     * does not allocate a result object. It always performs a full check against
+     * the {@link IbanRegistry} to ensure the country code and length are valid.
      *
      * @param iban the IBAN character sequence to validate (may be unnormalized
      *             depending on {@link IbanConfig} settings)
@@ -398,38 +385,35 @@ public final class IbanValidator {
      * using {@link IbanConfig#isAllowSpace()}.
      *
      * @param rawIban the IBAN character sequence to validate
-     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
+     * @return an {@link IbanValidationResult} carrying either the normalized IBAN and
+     *         country data (on success) or the failure reason (on failure)
      * @see #validate(CharSequence, boolean)
      * @since 1.8.0
      */
-    static IbanValidationSuccess validate(final CharSequence rawIban) {
+    static IbanValidationResult validate(final CharSequence rawIban) {
         return validate(rawIban, IbanConfig.isAllowSpace());
     }
 
     /**
-     * Performs a full IBAN validation and returns the required data for IBAN object creation.
+     * Performs a full IBAN validation and returns an {@link IbanValidationResult}.
      * <p>
-     * This is the preferred method for factory methods (like {@code Iban.of()})
-     * as it aborts validation on failure and provides the normalized data on success.
-     * <p>
-     * In case of failure, the specific reason is stored in a {@link ThreadLocal}
-     * and can be retrieved via {@link #getLastReason()}.
+     * This is the preferred method for factory methods (like {@code Iban.parse()})
+     * as it aborts validation on the first failure and carries the normalized data
+     * and country metadata on success, or the specific error reason on failure.
      *
      * @param rawIban    the IBAN character sequence to validate, potentially containing spaces
      * @param allowSpace whether to allow spaces during validation
-     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
-     * @see #getLastReason()
-     *
+     * @return an {@link IbanValidationResult} — never {@code null}
      * @since 1.8.5
      */
-    static IbanValidationSuccess validate(final CharSequence rawIban, boolean allowSpace) {
+    static IbanValidationResult validate(final CharSequence rawIban, boolean allowSpace) {
         if (rawIban == null) {
-            return validationFailed(IbanValidationError.EMPTY);
+            return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
 
         int rawLen = rawIban.length();
         if (rawLen == 0) {
-            return validationFailed(IbanValidationError.EMPTY);
+            return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
 
         // normalize to char[] once — all downstream calls use direct array access
@@ -440,53 +424,50 @@ public final class IbanValidator {
             allowSpace, IbanConfig.isAllowLowercase());
 
         if (normLen == INVALID_INPUT) {
-            return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
+            return IbanValidationResult.invalid(IbanValidationError.ILLEGAL_CHARACTERS);
         }
 
         // check min/max lengths
         if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
             return normLen == 0
-                ? validationFailed(IbanValidationError.EMPTY)
-                : validationFailed(IbanValidationError.INCORRECT_LENGTH);
+                ? IbanValidationResult.invalid(IbanValidationError.EMPTY)
+                : IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
         IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban[0], normIban[1]);
 
         if (countryData == null) {
-            return validationFailed(IbanValidationError.INVALID_COUNTRY);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_COUNTRY);
         }
 
         if (normLen != countryData.getIbanLength()) {
-            return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
+            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
         }
 
         if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
          || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
-            return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS);
         }
 
         // check BBAN structure (country-specific)
         CountryValidator countryValidator = getCountryValidator(countryData);
         if (countryValidator != null && !countryValidator.validateIban(normIban)) {
-            return validationFailed(IbanValidationError.INVALID_STRUCTURE);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE);
         }
 
         // check Mod 97 (most expensive operation — performed last)
         if (!Mod97.isValid(normIban, normLen)) {
-            return validationFailed(IbanValidationError.INVALID_CHECKSUM);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECKSUM);
         }
-
-        // success: reset thread-local error state and return carrier object
-        LAST_REASON.remove();
 
         /*
          * Create the success result.
          * Reuse the original input only if it was already normalized
-         * (matching length and no lowercase conversion).
+         * (no space stripping, no lowercase conversion).
          * Otherwise, MUST create a stable copy from the transient validation buffer.
          */
-        return new IbanValidationSuccess(
+        return IbanValidationResult.valid(
             !allowSpace && !IbanConfig.isAllowLowercase()
                 ? rawIban
                 : String.valueOf(normIban, 0, normLen),
@@ -500,11 +481,11 @@ public final class IbanValidator {
      * routing normalization through {@link #normalize(String, int, char[], boolean, boolean)}.
      *
      * @param rawIban the IBAN string to validate
-     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
+     * @return an {@link IbanValidationResult} — never {@code null}
      * @see #validate(CharSequence)
      * @since 1.8.5
      */
-    static IbanValidationSuccess validate(final String rawIban) {
+    static IbanValidationResult validate(final String rawIban) {
         return validate(rawIban, IbanConfig.isAllowSpace());
     }
 
@@ -516,18 +497,18 @@ public final class IbanValidator {
      *
      * @param rawIban    the IBAN string to validate, potentially containing spaces
      * @param allowSpace whether to allow spaces during validation
-     * @return the {@link IbanValidationSuccess} data if valid, or {@code null} if validation failed
+     * @return an {@link IbanValidationResult} — never {@code null}
      * @see #validate(CharSequence, boolean)
      * @since 1.8.5
      */
-    static IbanValidationSuccess validate(final String rawIban, final boolean allowSpace) {
+    static IbanValidationResult validate(final String rawIban, final boolean allowSpace) {
         if (rawIban == null) {
-            return validationFailed(IbanValidationError.EMPTY);
+            return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
 
         int rawLen = rawIban.length();
         if (rawLen == 0) {
-            return validationFailed(IbanValidationError.EMPTY);
+            return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
 
         char[] normIban = VALIDATION_BUFFER.get();
@@ -537,48 +518,40 @@ public final class IbanValidator {
             allowSpace, IbanConfig.isAllowLowercase());
 
         if (normLen == INVALID_INPUT) {
-            return validationFailed(IbanValidationError.ILLEGAL_CHARACTERS);
+            return IbanValidationResult.invalid(IbanValidationError.ILLEGAL_CHARACTERS);
         }
 
         if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
             return normLen == 0
-                ? validationFailed(IbanValidationError.EMPTY)
-                : validationFailed(IbanValidationError.INCORRECT_LENGTH);
+                ? IbanValidationResult.invalid(IbanValidationError.EMPTY)
+                : IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
         }
 
         IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban[0], normIban[1]);
 
         if (countryData == null) {
-            return validationFailed(IbanValidationError.INVALID_COUNTRY);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_COUNTRY);
         }
 
         if (normLen != countryData.getIbanLength()) {
-            return validationFailed(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
+            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
         }
 
         if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
          || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
-            return validationFailed(IbanValidationError.INVALID_CHECK_DIGITS);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS);
         }
 
         CountryValidator countryValidator = getCountryValidator(countryData);
         if (countryValidator != null && !countryValidator.validateIban(normIban)) {
-            return validationFailed(IbanValidationError.INVALID_STRUCTURE);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE);
         }
 
         if (!Mod97.isValid(normIban, normLen)) {
-            return validationFailed(IbanValidationError.INVALID_CHECKSUM);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECKSUM);
         }
 
-        LAST_REASON.remove();
-
-        /*
-         * Create the success result.
-         * Reuse the original String only if no transformation was applied
-         * (no space stripping, no lowercase conversion).
-         * Otherwise, MUST create a stable copy from the transient validation buffer.
-         */
-        return new IbanValidationSuccess(
+        return IbanValidationResult.valid(
             !allowSpace && !IbanConfig.isAllowLowercase()
                 ? rawIban
                 : String.valueOf(normIban, 0, normLen),
@@ -653,34 +626,6 @@ public final class IbanValidator {
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, (char) ('0' + (checkDigitsValue % 10)));
 
         return sb;
-    }
-
-    /**
-     * Retrieves the last single reason for a validation failure, for use by {@link Iban#of(CharSequence)}.
-     *
-     * @return the last validation failure
-     *
-     * @since 1.8.0
-     */
-    public static IbanValidationError getLastReason() {
-        return LAST_REASON.get();
-    }
-
-    static void setLastReason(final IbanValidationError reason) {
-        LAST_REASON.remove();
-        LAST_REASON.set(reason);
-    }
-
-    /**
-     * Finalizes an invalid validation result by storing the reason in the thread-local
-     * and returning {@code null}.
-     *
-     * @param reason the reason for the validation failure
-     * @return always {@code null}
-     */
-    static IbanValidationSuccess validationFailed(final IbanValidationError reason) {
-        setLastReason(reason);
-        return null;
     }
 
 }

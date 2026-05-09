@@ -13,44 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.speedbanking.bic;
+package de.speedbanking.iban;
 
 /**
- * An immutable container that holds the result of a BIC validation attempt.
+ * An immutable container that holds the result of an IBAN validation attempt.
  * <p>
- * The object contains either the validated BIC (on success), or a
- * {@link BicValidationError} (on failure) — never both, never neither.
+ * The object contains either the normalized IBAN and its country data (on success),
+ * or an {@link IbanValidationError} (on failure) — never both, never neither.
  * <p>
  * Intentionally avoids {@link java.util.Optional} to keep the internal validation
  * path allocation-free on the failure side.
  *
- * @since 1.8.0
+ * @since 1.8.6 (previously called IbanValidationSuccess)
  */
 @SuppressWarnings("VisibilityModifier")
-final class BicValidationResult {
+final class IbanValidationResult {
 
-    /** The validated, normalized BIC character sequence; {@code null} on failure. */
-    final CharSequence       bic;
+    /** The normalized IBAN string; {@code null} on failure. */
+    final CharSequence        normIban;
+
+    /** The country metadata; {@code null} on failure. */
+    final IbanRegistry        countryData;
 
     /** The validation error; {@code null} on success. */
-    final BicValidationError error;
+    final IbanValidationError error;
 
     /**
      * Private constructor: enforce creation through static factory methods.
      */
-    private BicValidationResult(CharSequence bic, BicValidationError error) {
-        this.bic   = bic;
-        this.error = error;
+    private IbanValidationResult(CharSequence normIban, IbanRegistry countryData, IbanValidationError error) {
+        this.normIban    = normIban;
+        this.countryData = countryData;
+        this.error       = error;
     }
 
     /**
      * Factory method for a successful validation result.
      *
-     * @param bic the validated, normalized BIC (must not be {@code null})
-     * @return a result carrying the validated BIC
+     * @param normIban    the normalized, validated IBAN characters (must not be {@code null})
+     * @param countryData the metadata for the country code (must not be {@code null})
+     * @return a result carrying the IBAN and its country data
      */
-    static BicValidationResult valid(CharSequence bic) {
-        return new BicValidationResult(bic, null);
+    static IbanValidationResult valid(CharSequence normIban, IbanRegistry countryData) {
+        return new IbanValidationResult(normIban, countryData, null);
     }
 
     /**
@@ -59,8 +64,8 @@ final class BicValidationResult {
      * @param error the reason for the validation failure (must not be {@code null})
      * @return a result carrying the error reason
      */
-    static BicValidationResult invalid(BicValidationError error) {
-        return new BicValidationResult(null, error);
+    static IbanValidationResult invalid(IbanValidationError error) {
+        return new IbanValidationResult(null, null, error);
     }
 
     /**
@@ -69,14 +74,14 @@ final class BicValidationResult {
      * @return {@code true} if valid, {@code false} otherwise
      */
     boolean isValid() {
-        return bic != null;
+        return normIban != null;
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName()
             + '['
-            + (isValid() ? "valid: " + bic : "invalid: " + error.getText())
+            + (isValid() ? "valid: " + normIban : "invalid: " + error.getText())
             + ']';
     }
 

@@ -1,10 +1,10 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThat;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsValid;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatComparable;
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
@@ -152,25 +152,17 @@ final class IbanTest {
     void of_shouldThrowException_whenIbanIsInvalid(String ibanInput, IbanValidationError expectedValidationError, String expectedMessagePattern) {
         String ibanInputNorm = ibanInput == null ? null : ibanInput.replace(" ", "");
 
-        IbanValidator.setLastReason(null);
-
         assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.ofNormalized(ibanInput))
             .withCause(null)
             .withMessage("%s (%s)%s", expectedMessagePattern, expectedValidationError, ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'")
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
 
-        assertThat(IbanValidator.getLastReason())
-            .isNotNull()
-            .extracting(IbanValidationError::getText)
-            .isEqualTo(expectedMessagePattern);
-
         assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.of(ibanInputNorm))
             .withCause(null)
             .withMessage("%s (%s)%s", expectedMessagePattern, expectedValidationError, ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'")
             .hasFieldOrPropertyWithValue("reason", expectedValidationError);
-        IbanValidator.setLastReason(null);
 
         assertThat(Iban.isValid(ibanInput)).isFalse();
 
@@ -178,9 +170,6 @@ final class IbanTest {
             assertThat(IbanValidator.isMod97Valid(input)).isFalse());
 
         assertThat(Iban.tryParse(ibanInput)).isEmpty();
-
-        assertThat(IbanValidator.getLastReason()).isEqualTo(expectedValidationError);
-        IbanValidator.setLastReason(null);
     }
 
     /**

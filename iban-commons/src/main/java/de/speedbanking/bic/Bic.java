@@ -151,8 +151,10 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public static Bic parse(CharSequence bic) throws InvalidBicException {
         BicValidationResult result = BicValidator.validate(bic);
-        return result.getBic().map(Bic::new)
-            .orElseThrow(() -> InvalidBicException.of(result.getError().orElse(null), bic));
+        if (!result.isValid()) {
+            throw InvalidBicException.of(result.error, bic);
+        }
+        return new Bic(result.bic);
     }
 
     /**
@@ -164,7 +166,10 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public static Optional<Bic> tryParse(CharSequence bic) {
-        return BicValidator.validate(bic).getBic().map(Bic::new);
+        BicValidationResult result = BicValidator.validate(bic);
+        return result.isValid()
+            ? Optional.of(new Bic(result.bic))
+            : Optional.empty();
     }
 
     /**
@@ -615,7 +620,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
          */
         private Object readResolve() throws InvalidObjectException {
             try {
-                return of(this.value);
+                return parse(this.value);
             } catch (final RuntimeException ex) {
                 final InvalidObjectException ioe = new InvalidObjectException(
                     "Cannot restore " + Bic.class.getSimpleName() + " from serialized form: " + ex.getMessage());

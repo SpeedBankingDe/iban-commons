@@ -148,14 +148,13 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Iban ofNormalized(CharSequence iban) throws InvalidIbanException {
-        IbanValidationSuccess success = IbanValidator.validate(iban, false);
+        IbanValidationResult result = IbanValidator.validate(iban, false);
 
-        if (success == null) {
-            IbanValidationError error = IbanValidator.getLastReason();
-            throw InvalidIbanException.of(error, iban);
+        if (!result.isValid()) {
+            throw InvalidIbanException.of(result.error, iban);
         }
 
-        return new Iban(success.normIban, success.countryData);
+        return new Iban(result.normIban, result.countryData);
     }
 
     /**
@@ -168,14 +167,13 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Iban parse(CharSequence iban) throws InvalidIbanException {
-        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
+        IbanValidationResult result = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
 
-        if (success == null) {
-            IbanValidationError error = IbanValidator.getLastReason();
-            throw InvalidIbanException.of(error, iban);
+        if (!result.isValid()) {
+            throw InvalidIbanException.of(result.error, iban);
         }
 
-        return new Iban(success.normIban, success.countryData);
+        return new Iban(result.normIban, result.countryData);
     }
 
     /**
@@ -187,11 +185,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public static Optional<Iban> tryParse(CharSequence iban) {
-        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
+        IbanValidationResult result = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
 
-        return success == null
-            ? Optional.empty()
-            : Optional.of(new Iban(success.normIban, success.countryData));
+        return result.isValid()
+            ? Optional.of(new Iban(result.normIban, result.countryData))
+            : Optional.empty();
     }
 
     /**
