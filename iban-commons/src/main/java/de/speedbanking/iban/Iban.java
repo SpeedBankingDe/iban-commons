@@ -195,33 +195,6 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
-     * Attempts to parse and validate the input character sequence safely,
-     * returning {@code null} on failure instead of an {@link java.util.Optional}.
-     * <p>
-     * This method is functionally equivalent to {@link #tryParse(CharSequence)} but avoids
-     * any dependency on {@link java.util.Optional}, which requires API level 24 on Android.
-     * Prefer this method in Android projects targeting API level below 24, or in any context
-     * where {@code Optional} is undesirable.
-     * <p>
-     * Example usage:
-     * <pre>{@code
-     * Iban iban = Iban.tryParseOrNull(input);
-     * if (iban != null) {
-     *     // use iban
-     * }
-     * }</pre>
-     *
-     * @param iban the IBAN character sequence, may include spaces but no other non-IBAN characters
-     * @return a valid, immutable {@link Iban} instance, or {@code null} if the input is invalid
-     *
-     * @since 1.8.3
-     */
-    public static Iban tryParseOrNull(CharSequence iban) {
-        IbanValidationSuccess success = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
-        return success == null ? null : new Iban(success.normIban, success.countryData);
-    }
-
-    /**
      * Performs a full IBAN validation and returns {@code true} if successful,
      * or {@code false} if any validation step fails.
      *

@@ -137,8 +137,22 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public static Bic of(CharSequence bic) throws InvalidBicException {
+        return parse(bic);
+    }
+
+    /**
+     * Parses and validates the input character sequence, throwing {@link InvalidBicException} if validation fails.
+     *
+     * @param bic the BIC character sequence
+     * @return a valid, immutable {@code Bic} instance
+     * @throws InvalidBicException if the BIC is invalid
+     *
+     * @since 1.8.6
+     */
+    public static Bic parse(CharSequence bic) throws InvalidBicException {
         BicValidationResult result = BicValidator.validate(bic);
-        return result.getBic().map(Bic::new).orElseThrow(() -> InvalidBicException.of(result.getError().orElse(null), bic));
+        return result.getBic().map(Bic::new)
+            .orElseThrow(() -> InvalidBicException.of(result.getError().orElse(null), bic));
     }
 
     /**
@@ -151,32 +165,6 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     public static Optional<Bic> tryParse(CharSequence bic) {
         return BicValidator.validate(bic).getBic().map(Bic::new);
-    }
-
-    /**
-     * Attempts to parse and validate the input character sequence safely,
-     * returning {@code null} on failure instead of an {@link java.util.Optional}.
-     * <p>
-     * This method is functionally equivalent to {@link #tryParse(CharSequence)} but avoids
-     * any dependency on {@link java.util.Optional}, which requires API level 24 on Android.
-     * Prefer this method in Android projects targeting API level below 24, or in any context
-     * where {@code Optional} is undesirable.
-     * <p>
-     * Example usage:
-     * <pre>{@code
-     * Bic bic = Bic.tryParseOrNull(input);
-     * if (bic != null) {
-     *     // use bic
-     * }
-     * }</pre>
-     *
-     * @param bic the BIC character sequence
-     * @return a valid, immutable {@link Bic} instance, or {@code null} if the input is invalid
-     *
-     * @since 1.8.3
-     */
-    public static Bic tryParseOrNull(CharSequence bic) {
-        return BicValidator.validate(bic).getBic().map(Bic::new).orElse(null);
     }
 
     /**
