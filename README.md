@@ -2,11 +2,16 @@
 
 > Ultra-fast, near-zero allocation, zero-dependency IBAN & BIC toolkit for Java 8+
 
-[![Maven Central Version](https://img.shields.io/maven-central/v/de.speedbanking/iban-commons?label=Maven%20Central)](https://central.sonatype.com/artifact/de.speedbanking/iban-commons)
-[![Maven Central Last Update](https://img.shields.io/maven-central/last-update/de.speedbanking/iban-commons?label=Last%20Update)](https://central.sonatype.com/artifact/de.speedbanking/iban-commons)
-[![Build (JDK 17 Linux)](https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_ubuntu.yml?label=Build%20(JDK%2017%20Linux))](https://github.com/SpeedBankingDe/iban-commons/actions)
-[![Build (JDK 17 Win)](https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_win.yml?label=Build%20(JDK%2017%20Win))](https://github.com/SpeedBankingDe/iban-commons/actions)
-[![GitHub Repo stars](https://img.shields.io/github/stars/SpeedBankingDe/iban-commons)](https://github.com/SpeedBankingDe/iban-commons/stargazers)
+<div align="center">
+  <a href="https://central.sonatype.com/artifact/de.speedbanking/iban-commons"><img src="https://img.shields.io/maven-central/v/de.speedbanking/iban-commons?label=Maven%20Central&style=flat-square" alt="Maven Central Version"></a>
+  <img src="https://img.shields.io/maven-central/last-update/de.speedbanking/iban-commons?label=Updated&style=flat-square&color=blue" alt="Maven Central Last Update">
+  <a href="https://github.com/SpeedBankingDe/iban-commons/stargazers"><img src="https://img.shields.io/github/stars/SpeedBankingDe/iban-commons?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars"></a>
+  <br>
+  <img src="https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat-square" alt="Test Coverage">
+  <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci_jdk17_ubuntu.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_ubuntu.yml?label=Build%20(JDK%2011%20Linux)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
+  <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci_jdk17_win.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_win.yml?label=Build%20(JDK%2011%20Win)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
+  <a href="https://javadoc.io/doc/de.speedbanking/iban-commons"><img src="https://javadoc.io/badge2/de.speedbanking/iban-commons/javadoc.svg?style=flat-square" alt="Javadoc"></a>
+</div>
 
 **[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [📚 Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
 
@@ -37,13 +42,13 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.5</version>
+    <version>1.8.6</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.5'
+implementation 'de.speedbanking:iban-commons:1.8.6'
 ```
 
 ### 2. Validate & Parse
@@ -381,7 +386,6 @@ Previously package-private or internal classes are now part of the stable public
 The overloaded `RandomIban.of(…)` factory methods have been replaced by a fluent builder:
 
 ```java
-// 1.8.5+
 Iban iban = RandomIban.builder()
     .country("DE")
     .random(new Random(42L))
@@ -463,17 +467,6 @@ It covers all public classes and methods including `Iban`, `Bic`, `IbanRegistry`
 <summary>Can I use this library on Android?</summary>
 
 Yes. `iban-commons` is Android-compatible from API level 21 (Android 5.0) onwards.
-
-The primary API (`Iban.tryParse()`, `Bic.tryParse()`) uses `java.util.Optional`, which requires API 24+.
-For projects targeting API 21–23, use the Android-safe alternatives introduced in v1.8.3:
-
-```java
-// Android-safe (API 21+) — returns null instead of Optional
-Iban iban = Iban.tryParseOrNull("DE91100000000123456789");
-Bic  bic  = Bic.tryParseOrNull("MARKDEFF");
-```
-
-The library has zero compile or runtime dependencies and does not use `java.time` types in its public API.
 </details>
 
 <details>
