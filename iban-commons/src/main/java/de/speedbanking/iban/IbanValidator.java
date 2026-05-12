@@ -55,9 +55,7 @@ import java.util.Arrays;
  * pressure even under high concurrency.
  * <p>
  * {@link String} inputs take a dedicated
- * {@link #normalize(String, int, char[], boolean, boolean)} overload that uses
- * {@link String#getChars(int, int, char[], int)} — a JVM intrinsic backed by
- * {@code System.arraycopy} — instead of per-character virtual {@code charAt()} dispatch.
+ * {@link #normalize(String, int, char[], boolean, boolean)} overload.
  * The Java compiler resolves this overload statically via the {@link #isValid(String)}
  * and {@link #validate(String)} entry points, so callers passing {@link String} literals
  * or variables pay no runtime dispatch cost.
@@ -129,13 +127,10 @@ public final class IbanValidator {
      * This method expects the validator implementation to be defined as a public
      * nested static class within the {@code CountryValidator} interface,
      * named after the country code (e.g., {@code CountryValidator.AD} for "AD").
-     * <p>
-     * <strong>Note:</strong> This method uses reflection and may fail silently
-     * if the validator class is not found.
      *
      * @param countryCode the two-letter country code (e.g., "DE", "AD")
-     * @return the instantiated {@link CountryValidator} for the given country,
-     *         or {@code null} if the validator class cannot be found or instantiated
+     * @return the instantiated {@link CountryValidator} for the given country; never {@code null}
+     * @throws IllegalStateException if the validator class cannot be found or instantiated
      *
      * @see CountryValidator
      * @see CountryValidators
@@ -213,9 +208,7 @@ public final class IbanValidator {
      * {@link String}-optimized overload of {@link #isValid(CharSequence)}.
      * <p>
      * Resolved statically by the Java compiler when the caller passes a {@link String},
-     * routing normalization through {@link #normalize(String, int, char[], boolean, boolean)},
-     * which uses {@link String#getChars(int, int, char[], int)} — a JVM intrinsic backed
-     * by {@code System.arraycopy} — instead of per-character virtual {@code charAt()} dispatch.
+     * routing normalization through {@link #normalize(String, int, char[], boolean, boolean)}.
      *
      * @param iban the IBAN string to validate (may be unnormalized
      *             depending on {@link IbanConfig} settings)
@@ -327,7 +320,7 @@ public final class IbanValidator {
      * @param output     the destination array; must hold at least {@code inputLen} characters
      * @param allowSpace if {@code true}, space characters are silently omitted from the output
      * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
-     * @return the number of characters written to {@code outputBuffer},
+     * @return the number of characters written to {@code output},
      *         or {@value #INVALID_INPUT} if an illegal character was encountered
      *
      * @since 1.8.5
@@ -451,8 +444,7 @@ public final class IbanValidator {
         }
 
         // check BBAN structure (country-specific)
-        CountryValidator countryValidator = getCountryValidator(countryData);
-        if (countryValidator != null && !countryValidator.validateIban(normIban)) {
+        if (!getCountryValidator(countryData).validateIban(normIban)) {
             return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE);
         }
 
@@ -542,8 +534,7 @@ public final class IbanValidator {
             return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS);
         }
 
-        CountryValidator countryValidator = getCountryValidator(countryData);
-        if (countryValidator != null && !countryValidator.validateIban(normIban)) {
+        if (!getCountryValidator(countryData).validateIban(normIban)) {
             return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE);
         }
 
@@ -608,8 +599,20 @@ public final class IbanValidator {
      *             with placeholders at the check digit position); if a {@code StringBuilder}
      *             is passed, it is mutated in place, otherwise a copy is created
      * @return the same {@code StringBuilder} instance with the correct check digits applied
+     * @throws IllegalArgumentException if {@code iban} is {@code null} or its length is outside
+     *                                  the valid IBAN range [{@value IbanRegistry#MIN_IBAN_LENGTH},
+     *                                  {@value IbanRegistry#MAX_IBAN_LENGTH}]
      */
     public static StringBuilder fixCheckDigits(final CharSequence iban) {
+        if (iban == null) {
+            throw new IllegalArgumentException("IBAN must not be null");
+        }
+        final int len = iban.length();
+        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
+            throw new IllegalArgumentException(
+                "IBAN length " + len + " is outside the valid range [" + MIN_IBAN_LENGTH + ", " + MAX_IBAN_LENGTH + "]");
+        }
+
         final StringBuilder sb = iban instanceof StringBuilder
             ? (StringBuilder) iban
             : new StringBuilder(iban);

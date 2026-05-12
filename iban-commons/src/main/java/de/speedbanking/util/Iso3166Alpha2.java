@@ -805,7 +805,7 @@ public enum Iso3166Alpha2 {
      */
     @Override
     public String toString() {
-        return name() + " (" + countryName + ")";
+        return name() + " (" + countryName + ')';
     }
 
 }

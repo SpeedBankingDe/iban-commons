@@ -18,6 +18,7 @@ package de.speedbanking.iban;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.Currency;
+import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Iso3166Alpha2;
 
 import java.io.IOException;
@@ -27,7 +28,6 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 /**
  * Represents a valid, immutable **International Bank Account Number (IBAN)**,
@@ -48,15 +48,15 @@ import java.util.stream.IntStream;
  */
 public final class Iban implements Serializable, CharSequence, Comparable<Iban> {
 
-    private static final long           serialVersionUID = 42L;
+    private static final long         serialVersionUID = 42L;
 
     /**
      * The raw, normalized IBAN string, created once in the constructor (e.g., "DE91100000000123456789").
      */
-    private final String                ibanStr;
+    private final String              ibanStr;
 
     /** Reference to the applicable {@link IbanRegistry} entry holding country metadata and BBAN structure details. */
-    private final IbanRegistry          countryData;
+    private final IbanRegistry        countryData;
 
     /**
      * Caches the two IBAN check digits (positions 3 and 4) upon first access.<br>
@@ -65,31 +65,36 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Multiple threads may compute and write the same value; this is harmless
      * because String assignment is atomic and all threads derive the identical result.
      */
-    private transient volatile String   checkDigits;
+    private transient volatile String checkDigits;
 
     /** Caches the Basic Bank Account Number (BBAN) part upon first access. */
-    private transient volatile String   bban;
+    private transient volatile String bban;
 
     /**
      * Caches the Bank Code part of the BBAN upon first access.
      * May remain {@code null} if the country's BBAN structure does not define a bank code.
      */
-    private transient volatile String   bankCode;
+    private transient volatile String bankCode;
 
     /**
      * Caches the Branch Code part of the BBAN upon first access.
      * May remain {@code null} if the country's BBAN structure does not define a branch code.
      */
-    private transient volatile String   branchCode;
+    private transient volatile String branchCode;
 
     /** Caches the Account Number part of the BBAN upon first access. */
-    private transient volatile String   accountNumber;
+    private transient volatile String accountNumber;
 
     /**
      * Caches the National Check Digit part of the BBAN upon first access.
      * May remain {@code null} if the country's BBAN structure does not define a national check digit.
      */
-    private transient volatile String   nationalCheckDigit;
+    private transient volatile String nationalCheckDigit;
+
+    /**
+     * Caches the IBAN formatted for display in groups of four characters (per ISO standard).
+     */
+    private transient volatile String formattedString;
 
     /**
      * Package-private constructor.
@@ -482,8 +487,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String toFormattedString() {
-        // delegate formatting to external Formatter
-        return Formatter.format(toString());
+        if (formattedString == null) {
+            // delegate formatting to external Formatter
+            formattedString = Formatter.format(toString());
+        }
+        return formattedString;
     }
 
     /**
@@ -500,31 +508,47 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.5
      */
     public String toComponentString() {
-        int[] rawIndices = {
-            IbanRegistry.INDEX_CHECK_DIGIT1,
-            IbanRegistry.INDEX_BBAN,
-            countryData.getBankCodeIndexRange().getBegin(),
-            countryData.getBranchCodeIndexRange() != null
-                ? countryData.getBranchCodeIndexRange().getBegin() : -1,
-            countryData.getAccountNumberIndexRange().getBegin(),
-            countryData.getNationalCheckDigitIndexRange() != null
-                ? countryData.getNationalCheckDigitIndexRange().getBegin() : -1
-        };
+        IndexRange branchRange = countryData.getBranchCodeIndexRange();
+        IndexRange ncdRange = countryData.getNationalCheckDigitIndexRange();
 
-        // filter, sort and unique check using primitives
-        int[] sortedIndices = IntStream.of(rawIndices)
-            .filter(idx -> idx > 0)
-            .distinct()
-            .sorted()
-            .toArray();
-
-        StringBuilder sb = new StringBuilder(ibanStr.length() + sortedIndices.length);
-        int lastIdx = 0;
-        for (int idx : sortedIndices) {
-            sb.append(ibanStr, lastIdx, idx).append(' ');
-            lastIdx = idx;
+        // fixed-size stack array (max 6 entries) — no Stream, no boxing
+        int[] idx = new int[6];
+        int count = 0;
+        idx[count++] = IbanRegistry.INDEX_CHECK_DIGIT1;
+        idx[count++] = IbanRegistry.INDEX_BBAN;
+        idx[count++] = countryData.getBankCodeIndexRange().getBegin();
+        idx[count++] = countryData.getAccountNumberIndexRange().getBegin();
+        if (branchRange != null) {
+            idx[count++] = branchRange.getBegin();
         }
-        sb.append(ibanStr.substring(lastIdx));
+        if (ncdRange != null) {
+            idx[count++] = ncdRange.getBegin();
+        }
+
+        // insertion sort - optimal for ≤6 elements, avoids Arrays.sort overhead
+        for (int i = 1; i < count; i++) {
+            int key = idx[i];
+            int j = i - 1;
+            while (j >= 0 && idx[j] > key) {
+                idx[j + 1] = idx[j--];
+            }
+            idx[j + 1] = key;
+        }
+
+        // build result, skipping duplicate cut points inline
+        StringBuilder sb = new StringBuilder(ibanStr.length() + count);
+        int last = 0;
+        int prev = -1;
+        for (int i = 0; i < count; i++) {
+            int cut = idx[i];
+            if (cut == prev) {
+                continue;
+            }
+            sb.append(ibanStr, last, cut).append(' ');
+            last = cut;
+            prev = cut;
+        }
+        sb.append(ibanStr, last, ibanStr.length());
 
         return sb.toString();
     }

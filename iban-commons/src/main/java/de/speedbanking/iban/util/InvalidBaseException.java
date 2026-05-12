@@ -141,7 +141,11 @@ public abstract class InvalidBaseException extends RuntimeException {
      */
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[reason=" + reason + ", input=" + input + ']';
+        return getClass().getSimpleName()
+            + '['
+            + "reason=" + reason
+            + ", input=" + input
+            + ']';
     }
 
 }

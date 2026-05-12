@@ -79,7 +79,10 @@ abstract class AbstractCountryValidator implements CountryValidator {
      */
     @Override
     public final String toString() {
-        return getClass().getSimpleName() + '[' + countryData.getCountryName() + ']';
+        return getClass().getSimpleName()
+            + '['
+            + countryData.getCountryName()
+            + ']';
     }
 
 }

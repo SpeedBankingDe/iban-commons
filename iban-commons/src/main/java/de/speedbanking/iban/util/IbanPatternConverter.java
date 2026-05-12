@@ -319,7 +319,11 @@ public final class IbanPatternConverter {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + '[' + "charType=" + charType + ", length=" + length + ']';
+            return getClass().getSimpleName()
+                + '['
+                + "charType=" + charType
+                + ", length=" + length
+                + ']';
         }
     }
 
