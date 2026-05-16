@@ -5,6 +5,7 @@ import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIn
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 
 import de.speedbanking.iban.junit.jupiter.api.IbanAssertions;
@@ -303,17 +304,17 @@ final class RandomIbanTest {
     }
 
     /**
-     * The {@code else} branch in {@link RandomIban#generateRandomSegment} returns {@code null}
-     * for any {@link IbanCharType} outside the three known values.
+     * The {@code else} branch in {@link RandomIban#generateRandomSegment} throws
+     * {@link IllegalStateException} for any {@link IbanCharType} outside the three known values.
      * Passes a {@code Segment} with a {@code null} CharType (simulating an unrecognised type).
      */
     @Test
-    void generateRandomSegment_unknownCharType_returnsNull() {
+    void generateRandomSegment_unknownCharType_throwsIllegalStateException() {
         IbanPatternConverter.Segment segment = Segment.of(null, 5);
 
-        String result = RandomIban.generateRandomSegment(segment, new Random(0));
-
-        assertThat(result).isNull();
+        assertThatThrownBy(() -> RandomIban.generateRandomSegment(segment, new Random(0)))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("null");
     }
 
     @Test

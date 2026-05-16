@@ -148,7 +148,7 @@ public final class IbanConfig {
         IbanConfig result = STATE.updateAndGet(current -> {
             if (current.frozen) {
                 throw new IllegalStateException(
-                    IbanConfig.class.getSimpleName() + " is already in use and cannot be changed -"
+                    IbanConfig.class.getSimpleName() + " is already in use and cannot be changed - "
                   + "call configure() before the first get() or accessor invocation");
             }
             return new State(config, false);

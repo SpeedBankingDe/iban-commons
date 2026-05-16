@@ -662,7 +662,7 @@ public final class RandomIban {
         requireNonNull(segment, "segment must not be null");
         requireRandom(random);
 
-        String sourceChars = null;
+        String sourceChars;
         if (IbanCharType.NUMERIC == segment.getCharType()) {
             sourceChars = DIGITS;
         } else if (IbanCharType.ALPHABETIC == segment.getCharType()) {
@@ -670,7 +670,7 @@ public final class RandomIban {
         } else if (IbanCharType.ALPHANUMERIC == segment.getCharType()) {
             sourceChars = ALPHANUMERIC;
         } else {
-            return null;
+            throw new IllegalStateException("Unrecognised IbanCharType: " + segment.getCharType());
         }
 
         int segmentLen = segment.getLength();

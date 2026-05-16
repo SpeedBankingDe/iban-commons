@@ -42,8 +42,7 @@ public final class Formatter {
      * Example: "DE91100000000123456789" {@code ->} "DE91 1000 0000 0123 4567 89"
      *
      * @param normalizedIban the raw, unformatted IBAN character sequence
-     * @return the formatted IBAN string with spaces
-     *
+     * @return the formatted IBAN string with spaces, or {@code null} if the input is {@code null} or empty
      * @since 1.8.0
      */
     public static String format(final CharSequence normalizedIban) {
@@ -56,7 +55,7 @@ public final class Formatter {
      *
      * @param inputIban the raw, unformatted IBAN character sequence
      * @param groupSize the number of characters per group (must be greater than zero)
-     * @return the formatted IBAN string with spaces
+     * @return the formatted IBAN string with spaces, or {@code null} if the input is {@code null} or empty
      *
      * @since 1.8.0
      */

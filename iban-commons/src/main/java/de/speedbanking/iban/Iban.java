@@ -163,7 +163,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
-     * Parses and validates the input character sequence.
+     * Parses and validates the input character sequence in order to return an {@code Iban} instance,
+     * throwing {@link InvalidIbanException} if validation fails.
      *
      * @param iban the IBAN character sequence, may include spaces but no other non-IBAN characters
      * @return a valid, immutable {@code Iban} instance
@@ -195,6 +196,27 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         return result.isValid()
             ? Optional.of(new Iban(result.normIban, result.countryData))
             : Optional.empty();
+    }
+
+    /**
+     * Validates the input character sequence, throwing {@link InvalidIbanException} if validation
+     * fails, and returning normally if it succeeds.
+     * <p>
+     * Unlike {@link #parse(CharSequence)}, this method does not allocate an {@code Iban} instance,
+     * making it the preferred choice when the validated value is not needed afterwards — for
+     * example in Bean Validation constraints or simple guard checks.
+     *
+     * @param iban the IBAN character sequence, may include spaces if {@link IbanConfig#isAllowSpace()} is {@code true}
+     *             but no other non-IBAN characters
+     * @throws InvalidIbanException if the IBAN is invalid for any reason
+     *
+     * @since 1.8.7
+     */
+    public static void validate(final CharSequence iban) throws InvalidIbanException {
+        IbanValidationResult result = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
+        if (!result.isValid()) {
+            throw InvalidIbanException.of(result.error, iban);
+        }
     }
 
     /**
@@ -316,6 +338,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
      *
      * @return the currency code string
+     * @throws NullPointerException if {@link #getCurrency()} returns {@code null}
+     *         (see its contract for the conditions under which that can occur)
      *
      * @since 1.8.5
      */

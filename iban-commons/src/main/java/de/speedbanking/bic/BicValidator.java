@@ -47,21 +47,22 @@ public final class BicValidator {
      *
      * @since 1.8.0
      */
-    public static BicValidationResult validate(final CharSequence rawBic) {
+    static BicValidationResult validate(final CharSequence rawBic) {
 
         if (rawBic == null || rawBic.length() == 0) {
-            return validationFailed(BicValidationError.EMPTY);
+            return BicValidationResult.invalid(BicValidationError.EMPTY);
         }
 
         final int len = rawBic.length();
 
         if (len != Bic.BIC8_LENGTH && len != Bic.BIC11_LENGTH) {
-            return validationFailed(BicValidationError.INCORRECT_LENGTH);
+            return BicValidationResult.invalid(BicValidationError.INCORRECT_LENGTH);
         }
 
         BicValidationError error = validateCharacters(rawBic, len);
+        final BicValidationError reason = error;
 
-        return error == null ? BicValidationResult.valid(rawBic) : validationFailed(error);
+        return error == null ? BicValidationResult.valid(rawBic) : BicValidationResult.invalid(reason);
     }
 
     /**
@@ -98,13 +99,6 @@ public final class BicValidator {
             }
         }
         return null;
-    }
-
-    /**
-     * Finalizes an invalid validation result by storing the reason and creating the result object.
-     */
-    static BicValidationResult validationFailed(final BicValidationError reason) {
-        return BicValidationResult.invalid(reason);
     }
 
 }

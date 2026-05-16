@@ -6,6 +6,7 @@ import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBicI
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatInvalidBicException;
 
 import static org.assertj.core.api.Assertions.assertThatIndexOutOfBoundsException;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
@@ -136,6 +137,83 @@ final class BicTest {
             .hasFieldOrPropertyWithValue("reason", BicValidationError.ILLEGAL_CHARACTERS);
     }
 
+    /**
+     * Verifies that {@link Bic#validate(CharSequence)} returns normally for valid BICs
+     * without allocating a {@link Bic} instance.
+     *
+     * @param bic a valid BIC string
+     */
+    @DisplayName("validate() completes without exception for valid BICs")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {"MARKDEFF", "MARKDEFFXXX", "BHLSDEM1", "NEDSZAJJ"})
+    void validate_shouldCompleteWithoutException_whenBicIsValid(String bic) {
+        assertThatNoException()
+            .as("validate('%s') must not throw for a valid BIC", bic)
+            .isThrownBy(() -> Bic.validate(bic));
+    }
+
+    /**
+     * Verifies that {@link Bic#validate(CharSequence)} throws {@link InvalidBicException}
+     * with the same error detail as {@link Bic#of(CharSequence)} for invalid BICs.
+     *
+     * @param bic                    the invalid BIC string
+     * @param expectedValidationError the expected {@link BicValidationError} enum constant
+     * @param expectedMessage         the full expected exception message
+     */
+    @DisplayName("validate() throws InvalidBicException for invalid BICs")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
+        // BIC (Input)  | ValidationError (Enum) | Expected Message
+        "(null)         | EMPTY                  | BIC is null or empty (EMPTY)",
+        "''             | EMPTY                  | BIC is null or empty (EMPTY)",
+        "MARK00FF       | INVALID_COUNTRY        | BIC has invalid country code (INVALID_COUNTRY): 'MARK00FF'",
+        "SHORT12        | INCORRECT_LENGTH       | BIC has incorrect length (INCORRECT_LENGTH): 'SHORT12'",
+        "mARKDEFF       | INVALID_BANK_CODE      | Invalid bank code (INVALID_BANK_CODE): 'mARKDEFF'"
+    })
+    void validate_shouldThrowException_whenBicIsInvalid(
+            String bic, BicValidationError expectedValidationError, String expectedMessage) {
+        assertThatInvalidBicException()
+            .isThrownBy(() -> Bic.validate(bic))
+            .withCause(null)
+            .withMessage(expectedMessage)
+            .hasFieldOrPropertyWithValue("reason", expectedValidationError);
+    }
+
+    /**
+     * Verifies that {@link Bic#validate(CharSequence)} and {@link Bic#of(CharSequence)} throw
+     * identical {@link InvalidBicException}s — same message and same {@code reason} field — so
+     * callers that do not need the {@link Bic} instance pay no observational price for using
+     * the allocation-free overload.
+     */
+    @DisplayName("validate() and of() throw identical exceptions for the same invalid input")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {"MARK00FF", "SHORT12", "mARKDEFF"})
+    void validate_shouldThrowSameExceptionAsOf_whenBicIsInvalid(String bic) {
+        InvalidBicException fromOf = null;
+        try {
+            Bic.of(bic);
+        } catch (InvalidBicException ex) {
+            fromOf = ex;
+        }
+
+        InvalidBicException fromValidate = null;
+        try {
+            Bic.validate(bic);
+        } catch (InvalidBicException ex) {
+            fromValidate = ex;
+        }
+
+        assertThat(fromOf).as("of() must throw for input '%s'", bic).isNotNull();
+        assertThat(fromValidate).as("validate() must throw for input '%s'", bic).isNotNull();
+
+        assertThat(fromValidate.getMessage())
+            .as("validate() and of() must produce the same exception message")
+            .isEqualTo(fromOf.getMessage());
+        assertThat(fromValidate)
+            .as("validate() and of() must carry the same validation error")
+            .hasFieldOrPropertyWithValue("reason", fromOf.getReason());
+    }
+
     @DisplayName("tryParse() should return non-empty Optional for valid BIC")
     @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
@@ -238,6 +316,11 @@ final class BicTest {
             .hasSameHashCodeAs(bic11First)
             .extracting(Object::hashCode)
             .isNotEqualTo(0);
+
+        // force explicit call to equals(this) to cover identity check branch
+        assertThat(bic8.equals(bic8))
+            .as("A BIC instance must be equal to itself via explicit equals call")
+            .isTrue();
 
         // second chain: bic11First equals and hashCode checks
         assertThat(bic11First)

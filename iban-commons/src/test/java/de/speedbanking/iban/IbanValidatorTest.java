@@ -365,11 +365,11 @@ final class IbanValidatorTest {
 
     @ParameterizedTest(name = "[{index}] ''{0}'' ({1})")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        "(null) | null input",
-        "''     | empty input",
-        "DE91   | short mixed input",
-        "123    | numeric short input",
-        "ABCDE  | non-numeric short input",
+        "(null)                       | null input",
+        "''                           | empty input",
+        "DE91                         | short mixed input",
+        "123                          | numeric short input",
+        "ABCDE                        | non-numeric short input",
         "XX61________________________ | invalid IBAN chars"
     })
     @DisplayName("calculateMod97 should return INVALID_MOD97 for invalid inputs")
@@ -377,6 +377,42 @@ final class IbanValidatorTest {
         assertThat(IbanValidator.calculateMod97(input))
             .as("Check failed for: %s", description)
             .isEqualTo(IbanValidator.INVALID_MOD97);
+    }
+
+    @DisplayName("fixCheckDigits: should throw IllegalArgumentException when input is null")
+    @Test
+    void fixCheckDigits_shouldThrowException_whenInputIsNull() {
+        assertThatThrownBy(() -> IbanValidator.fixCheckDigits(null))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("IBAN must not be null");
+    }
+
+    @DisplayName("fixCheckDigits: should throw IllegalArgumentException when length is out of bounds")
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "DE91", // too short (below MIN_IBAN_LENGTH)
+        "DE0044447777111111114747111100471191234" // too long (above MAX_IBAN_LENGTH)
+    })
+    void fixCheckDigits_shouldThrowException_whenLengthIsOutOfBounds(String invalidIban) {
+        assertThatThrownBy(() -> IbanValidator.fixCheckDigits(invalidIban))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageStartingWith("IBAN length ");
+    }
+
+    @DisplayName("fixCheckDigits: should reuse existing StringBuilder instance to prevent re-allocation")
+    @Test
+    @SuppressWarnings("UnnecessaryStringBuilder")
+    void fixCheckDigits_shouldReuseInstance_whenInputIsStringBuilder() {
+        StringBuilder inputBuffer = new StringBuilder("DE00370400440532013000");
+        StringBuilder resultBuffer = IbanValidator.fixCheckDigits(inputBuffer);
+
+        assertThat(resultBuffer)
+            .as("The returned StringBuilder must be identical to the input instance")
+            .isSameAs(inputBuffer);
+
+        assertThat(resultBuffer.toString())
+            .as("The check digits must be correctly computed and mutated inside the buffer")
+            .isEqualTo("DE89370400440532013000");
     }
 
 }

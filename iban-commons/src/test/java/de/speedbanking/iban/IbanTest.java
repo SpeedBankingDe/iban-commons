@@ -476,12 +476,105 @@ final class IbanTest {
     }
 
     /**
+     * Verifies that {@link Iban#validate(CharSequence)} returns normally for valid IBANs
+     * without allocating an {@link Iban} instance.
+     *
+     * @param ibanInput a valid IBAN string
+     */
+    @DisplayName("validate() completes without exception for valid IBANs")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {
+        "DE89370400440532013000",
+        "GB29NWBK60161331926819",
+        "FR1420041010050500013M02606",
+        "NL91ABNA0417164300"
+    })
+    void validate_shouldCompleteWithoutException_whenIbanIsValid(String ibanInput) {
+        assertThatNoException()
+            .as("validate('%s') must not throw for a valid IBAN", ibanInput)
+            .isThrownBy(() -> Iban.validate(ibanInput));
+    }
+
+    /**
+     * Verifies that {@link Iban#validate(CharSequence)} throws {@link InvalidIbanException}
+     * with the same error detail as {@link Iban#of(CharSequence)} for invalid IBANs.
+     *
+     * @param ibanInput              the invalid IBAN string
+     * @param expectedValidationError the expected {@link IbanValidationError} enum constant
+     * @param expectedMessagePattern  regex pattern for the expected exception message
+     */
+    @DisplayName("validate() throws InvalidIbanException for invalid IBANs")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
+        // IBAN (Input)               | ValidationError (Enum)   | Expected Message Pattern
+        "(null)                       | EMPTY                    | IBAN is null or empty",
+        "''                           | EMPTY                    | IBAN is null or empty",
+        "XX12345678901234567890       | INVALID_COUNTRY          | IBAN has invalid country code",
+        "DE123                        | INCORRECT_LENGTH         | IBAN has incorrect length",
+        "DE91100000000123456780       | INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
+    })
+    void validate_shouldThrowException_whenIbanIsInvalid(
+            String ibanInput, IbanValidationError expectedValidationError, String expectedMessagePattern) {
+        String ibanInputNorm = ibanInput == null ? null : ibanInput.replace(" ", "");
+        String expectedMessage = String.format("%s (%s)%s",
+            expectedMessagePattern,
+            expectedValidationError,
+            ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'");
+
+        assertThatInvalidIbanException()
+            .isThrownBy(() -> Iban.validate(ibanInput))
+            .withCause(null)
+            .withMessage(expectedMessage)
+            .hasFieldOrPropertyWithValue("reason", expectedValidationError);
+    }
+
+    /**
+     * Verifies that {@link Iban#validate(CharSequence)} and {@link Iban#of(CharSequence)} throw
+     * identical {@link InvalidIbanException}s — same message and same {@code reason} field — so
+     * callers that do not need the {@link Iban} instance pay no observational price for using
+     * the allocation-free overload.
+     */
+    @DisplayName("validate() and of() throw identical exceptions for the same invalid input")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {
+        "DE91100000000123456780",
+        "XX12345678901234567890",
+        "DE123"
+    })
+    void validate_shouldThrowSameExceptionAsOf_whenIbanIsInvalid(String ibanInput) {
+        InvalidIbanException fromOf = null;
+        try {
+            Iban.of(ibanInput);
+        } catch (InvalidIbanException ex) {
+            fromOf = ex;
+        }
+
+        InvalidIbanException fromValidate = null;
+        try {
+            Iban.validate(ibanInput);
+        } catch (InvalidIbanException ex) {
+            fromValidate = ex;
+        }
+
+        assertThat(fromOf).as("of() must throw for input '%s'", ibanInput).isNotNull();
+        assertThat(fromValidate).as("validate() must throw for input '%s'", ibanInput).isNotNull();
+
+        assertThat(fromValidate.getMessage())
+            .as("validate() and of() must produce the same exception message")
+            .isEqualTo(fromOf.getMessage());
+        assertThat(fromValidate)
+            .as("validate() and of() must carry the same validation error")
+            .hasFieldOrPropertyWithValue("reason", fromOf.getReason());
+    }
+
+    /**
      * Tests {@link Iban#equals(Object)} and {@link Iban#hashCode()}.<br>
      * Ensures two IBAN instances created from the same normalized string are considered equal
      * and have the same hash code, following the contract for immutable value objects.
      */
     @DisplayName("equals() and hashCode() contract")
     @Test
+    @SuppressWarnings("AssertJNullnessAssertion")
     void equalsAndHashCode_shouldBeConsistent_whenIbansAreSimilar() {
         String ibanStr1 = "DE89370400440532013000";
         String ibanStr2 = "DE89370400440532013000";
@@ -493,6 +586,7 @@ final class IbanTest {
 
         assertThatIban(iban1)
             .isNotNull()
+            .isNotEqualTo(null)
             .isNotEqualTo(ibanStr1)
             .isNotEqualTo(new Object())
 
@@ -506,6 +600,11 @@ final class IbanTest {
             .as("Iban instances with different content must not be equal")
             .isNotEqualTo(iban3)
             .doesNotHaveSameHashCodeAs(iban3);
+
+        // force explicit call to equals(this) to cover identity check branch
+        assertThat(iban1.equals(iban1))
+            .as("An IBAN instance must be equal to itself via explicit equals call")
+            .isTrue();
     }
 
     /**

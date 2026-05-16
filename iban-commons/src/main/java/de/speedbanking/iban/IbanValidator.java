@@ -151,6 +151,129 @@ public final class IbanValidator {
     }
 
     /**
+     * Normalizes a {@link CharSequence} into the provided output buffer.
+     * <p>
+     * Performs two optional transformations: stripping space characters and converting
+     * lowercase ASCII letters to uppercase. By writing directly into a pre-allocated
+     * buffer, this method avoids heap allocations in the validation hot-path.
+     * <p>
+     * Characters are read via {@code charAt()} — virtual dispatch whose cost depends on
+     * the concrete type at the callsite. Prefer the {@link String} overload
+     * ({@link #normalize(String, int, char[], boolean, boolean)}) wherever possible.
+     *
+     * @param input      the raw character sequence to normalize; must not be {@code null}
+     * @param inputLen   the number of characters to process from the input
+     * @param output     the destination array; must hold at least {@code inputLen} characters
+     * @param allowSpace if {@code true}, space characters are silently omitted from the output
+     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
+     * @return the number of characters written to {@code outputBuffer},
+     *         or {@value #INVALID_INPUT} if an illegal character was encountered
+     *
+     * @since 1.8.5
+     */
+    static int normalize(final CharSequence input, final int inputLen,
+        final char[] output,
+        final boolean allowSpace, final boolean allowLower) {
+
+        if (!allowSpace && !allowLower) {
+            if (inputLen > MAX_IBAN_LENGTH) {
+                return INVALID_INPUT;
+            }
+            for (int i = 0; i < inputLen; i++) {
+                output[i] = input.charAt(i);
+                if (!isDigitOrUpperCase(output[i])) {
+                    return INVALID_INPUT;
+                }
+            }
+            return inputLen;
+        }
+
+        int targetIdx = 0;
+        for (int i = 0; i < inputLen; i++) {
+            char c = input.charAt(i);
+            if (isDigitOrUpperCase(c)) {
+                output[targetIdx++] = c;
+            } else if (isLowerCase(c)) {
+                if (!allowLower) {
+                    return INVALID_INPUT;
+                }
+                output[targetIdx++] = (char) (c - 32);
+            } else if (c != ' ' || !allowSpace) {
+                return INVALID_INPUT;
+            }
+            if (targetIdx >= MAX_IBAN_LENGTH) {
+                return INVALID_INPUT;
+            }
+        }
+        return targetIdx;
+    }
+
+    /**
+     * {@link String}-optimized overload of {@link #normalize(CharSequence, int, char[], boolean, boolean)}.
+     * <p>
+     * The JIT compiler inlines {@link String#charAt(int)} to direct {@code char[]} array access,
+     * so this overload avoids the virtual dispatch overhead of the {@link CharSequence} variant.
+     * <p>
+     * In the transformation path ({@code allowSpace} or {@code allowLower}), in-place editing
+     * is safe because the write index {@code targetIdx} is always {@code ≤ i}, so no unread
+     * position is ever overwritten.
+     *
+     * @param input      the raw {@link String} to normalize; must not be {@code null}
+     * @param inputLen   the number of characters to process from the input
+     * @param output     the destination array; must hold at least {@code inputLen} characters
+     * @param allowSpace if {@code true}, space characters are silently omitted from the output
+     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
+     * @return the number of characters written to {@code output},
+     *         or {@value #INVALID_INPUT} if an illegal character was encountered
+     *
+     * @since 1.8.5
+     */
+    static int normalize(final String input, final int inputLen,
+        final char[] output,
+        final boolean allowSpace, final boolean allowLower) {
+
+        if (!allowSpace && !allowLower) {
+            if (inputLen > MAX_IBAN_LENGTH) {
+                return INVALID_INPUT;
+            }
+
+            // Fast path: one combined pass — validate and copy simultaneously.
+            // The JIT inlines String.charAt() to direct char[] array access,
+            // and early exit on the first invalid character avoids processing
+            // the rest of the input (critical for invalid-IBAN throughput).
+            for (int i = 0; i < inputLen; i++) {
+                output[i] = input.charAt(i);
+                if (!isDigitOrUpperCase(output[i])) {
+                    return INVALID_INPUT;
+                }
+            }
+            return inputLen;
+        }
+
+        // Transformation path: spaces stripped and/or lowercase converted.
+        // In-place editing is safe because targetIdx <= i always holds,
+        // so no unread position is ever overwritten.
+        int targetIdx = 0;
+        for (int i = 0; i < inputLen; i++) {
+            char c = input.charAt(i);
+            if (isDigitOrUpperCase(c)) {
+                output[targetIdx++] = c;
+            } else if (isLowerCase(c)) {
+                if (!allowLower) {
+                    return INVALID_INPUT;
+                }
+                output[targetIdx++] = (char) (c - 32);
+            } else if (c != ' ' || !allowSpace) {
+                return INVALID_INPUT;
+            }
+            if (targetIdx >= MAX_IBAN_LENGTH) {
+                return INVALID_INPUT;
+            }
+        }
+        return targetIdx;
+    }
+
+    /**
      * Performs a full IBAN validation and returns {@code true} if successful.
      * <p>
      * The validation process includes:
@@ -243,132 +366,6 @@ public final class IbanValidator {
             && len == countryData.getIbanLength()
             && getCountryValidator(countryData).validateIban(normIban)
             && Mod97.isValid(normIban, len);
-    }
-
-    /**
-     * Normalizes a {@link CharSequence} into the provided output buffer.
-     * <p>
-     * Performs two optional transformations: stripping space characters and converting
-     * lowercase ASCII letters to uppercase. By writing directly into a pre-allocated
-     * buffer, this method avoids heap allocations in the validation hot-path.
-     * <p>
-     * Characters are read via {@code charAt()} — virtual dispatch whose cost depends on
-     * the concrete type at the callsite. Prefer the {@link String} overload
-     * ({@link #normalize(String, int, char[], boolean, boolean)}) wherever possible.
-     *
-     * @param input      the raw character sequence to normalize; must not be {@code null}
-     * @param inputLen   the number of characters to process from the input
-     * @param output     the destination array; must hold at least {@code inputLen} characters
-     * @param allowSpace if {@code true}, space characters are silently omitted from the output
-     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
-     * @return the number of characters written to {@code outputBuffer},
-     *         or {@value #INVALID_INPUT} if an illegal character was encountered
-     *
-     * @since 1.8.5
-     */
-    static int normalize(final CharSequence input, final int inputLen,
-        final char[] output,
-        final boolean allowSpace, final boolean allowLower) {
-
-        if (!allowSpace && !allowLower) {
-            if (inputLen > MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
-            }
-            for (int i = 0; i < inputLen; i++) {
-                output[i] = input.charAt(i);
-                if (!isDigitOrUpperCase(output[i])) {
-                    return INVALID_INPUT;
-                }
-            }
-            return inputLen;
-        }
-
-        int targetIdx = 0;
-        for (int i = 0; i < inputLen; i++) {
-            char c = input.charAt(i);
-            if (isDigitOrUpperCase(c)) {
-                output[targetIdx++] = c;
-            } else if (isLowerCase(c)) {
-                if (!allowLower) {
-                    return INVALID_INPUT;
-                }
-                output[targetIdx++] = (char) (c - 32);
-            } else if (c != ' ' || !allowSpace) {
-                return INVALID_INPUT;
-            }
-            if (targetIdx >= MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
-            }
-        }
-        return targetIdx;
-    }
-
-    /**
-     * {@link String}-optimized overload of {@link #normalize(CharSequence, int, char[], boolean, boolean)}.
-     * <p>
-     * Uses {@link String#getChars(int, int, char[], int)} to bulk-copy the entire input into
-     * {@code outputBuffer} in a single JVM-intrinsic call (backed by {@code System.arraycopy}),
-     * replacing {@code inputLen} virtual {@code charAt()} dispatches with one native memory copy.
-     * The buffer is then validated — and transformed if necessary — entirely via direct array access.
-     * <p>
-     * In the transformation path ({@code allowSpace} or {@code allowLower}), in-place editing
-     * is safe because the write index {@code targetIdx} is always {@code ≤ i}, so no unread
-     * position is ever overwritten.
-     *
-     * @param input      the raw {@link String} to normalize; must not be {@code null}
-     * @param inputLen   the number of characters to process from the input
-     * @param output     the destination array; must hold at least {@code inputLen} characters
-     * @param allowSpace if {@code true}, space characters are silently omitted from the output
-     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
-     * @return the number of characters written to {@code output},
-     *         or {@value #INVALID_INPUT} if an illegal character was encountered
-     *
-     * @since 1.8.5
-     */
-    static int normalize(final String input, final int inputLen,
-        final char[] output,
-        final boolean allowSpace, final boolean allowLower) {
-
-        if (!allowSpace && !allowLower) {
-            if (inputLen > MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
-            }
-
-            // Fast path: one combined pass — validate and copy simultaneously.
-            // The JIT inlines String.charAt() to direct char[] array access,
-            // and early exit on the first invalid character avoids processing
-            // the rest of the input (critical for invalid-IBAN throughput).
-            for (int i = 0; i < inputLen; i++) {
-                output[i] = input.charAt(i);
-                if (!isDigitOrUpperCase(output[i])) {
-                    return INVALID_INPUT;
-                }
-            }
-            return inputLen;
-        }
-
-        // Transformation path: spaces stripped and/or lowercase converted.
-        // getChars() uses System.arraycopy (SIMD intrinsic) to bulk-copy the
-        // entire input first; in-place editing is then safe because targetIdx <= i
-        // always holds, so no unread position is ever overwritten.
-        int targetIdx = 0;
-        for (int i = 0; i < inputLen; i++) {
-            char c = input.charAt(i);
-            if (isDigitOrUpperCase(c)) {
-                output[targetIdx++] = c;
-            } else if (isLowerCase(c)) {
-                if (!allowLower) {
-                    return INVALID_INPUT;
-                }
-                output[targetIdx++] = (char) (c - 32);
-            } else if (c != ' ' || !allowSpace) {
-                return INVALID_INPUT;
-            }
-            if (targetIdx >= MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
-            }
-        }
-        return targetIdx;
     }
 
     /**
@@ -550,7 +547,6 @@ public final class IbanValidator {
     }
 
     /**
-     * <p>
      * Delegates to {@link Mod97#isValid(CharSequence)}.
      *
      * @param iban the normalized IBAN {@link CharSequence} (uppercase, no spaces)

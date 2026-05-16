@@ -128,10 +128,13 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
 
     /**
      * Parses and validates the input character sequence, throwing {@link InvalidBicException} if validation fails.
+     * <p>
+     * Delegates to {@link #parse(CharSequence)}.
      *
      * @param bic the BIC character sequence
      * @return a valid, immutable {@code Bic} instance
      * @throws InvalidBicException if the BIC is invalid
+     * @see #parse(CharSequence)
      *
      * @since 1.8.0
      */
@@ -140,7 +143,28 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     }
 
     /**
-     * Parses and validates the input character sequence, throwing {@link InvalidBicException} if validation fails.
+     * Validates the input character sequence, throwing {@link InvalidBicException} if validation
+     * fails, and returning normally if it succeeds.
+     * <p>
+     * Unlike {@link #parse(CharSequence)}, this method does not allocate a {@code Bic} instance,
+     * making it the preferred choice when the validated value is not needed afterwards — for
+     * example in Bean Validation constraints or simple guard checks.
+     *
+     * @param bic the BIC character sequence
+     * @throws InvalidBicException if the BIC is invalid
+     *
+     * @since 1.8.7
+     */
+    public static void validate(final CharSequence bic) throws InvalidBicException {
+        BicValidationResult result = BicValidator.validate(bic);
+        if (!result.isValid()) {
+            throw InvalidBicException.of(result.error, bic);
+        }
+    }
+
+    /**
+     * Parses and validates the input character sequence in order to return a {@code Bic} instance,
+     * throwing {@link InvalidBicException} if validation fails.
      *
      * @param bic the BIC character sequence
      * @return a valid, immutable {@code Bic} instance
@@ -348,6 +372,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Convenience shorthand for {@code getCurrency().getAlphaCode()}.
      *
      * @return the currency code string
+     * @throws NullPointerException if {@link #getCurrency()} returns {@code null}
+     *         (see its contract for the conditions under which that can occur)
      *
      * @since 1.8.5
      */

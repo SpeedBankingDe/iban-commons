@@ -3276,8 +3276,11 @@ public enum IbanRegistry {
 
     /**
      * Returns the month and year the registry data was last updated by the source.
+     * <p>
+     * Not all registry entries carry an update date; manually maintained entries
+     * (e.g. {@code AO}, {@code CV}, {@code GA}) return {@code null}.
      *
-     * @return the {@code YearMonth} of the last update
+     * @return the {@code YearMonth} of the last update, or {@code null} if unknown
      */
     public YearMonth getLastUpdate() {
         return metaData.lastUpdate;
@@ -3289,12 +3292,13 @@ public enum IbanRegistry {
      * Equivalent to {@code getLastUpdate().getYear()} but avoids a dependency on
      * {@link java.time.YearMonth}, which requires API level 26 on Android.
      *
-     * @return the four-digit year of the last update (e.g., {@code 2025})
+     * @return the four-digit year of the last update (e.g., {@code 2025}),
+     *         or {@code 0} if the last-update date is unknown
      *
      * @since 1.8.3
      */
     public int getLastUpdateYear() {
-        return metaData.lastUpdate.getYear();
+        return metaData.lastUpdate != null ? metaData.lastUpdate.getYear() : 0;
     }
 
     /**
@@ -3304,12 +3308,13 @@ public enum IbanRegistry {
      * Equivalent to {@code getLastUpdate().getMonthValue()} but avoids a dependency on
      * {@link java.time.YearMonth}, which requires API level 26 on Android.
      *
-     * @return the month of the last update (1–12)
+     * @return the month of the last update (1–12),
+     *         or {@code 0} if the last-update date is unknown
      *
      * @since 1.8.3
      */
     public int getLastUpdateMonth() {
-        return metaData.lastUpdate.getMonthValue();
+        return metaData.lastUpdate != null ? metaData.lastUpdate.getMonthValue() : 0;
     }
 
     /**
@@ -3326,13 +3331,16 @@ public enum IbanRegistry {
      * Returns the {@code IbanRegistry} entries that derive their data from this base country
      * (e.g., {@code FI} would return a list containing {@code AX}).
      *
-     * @return a list of derived {@code IbanRegistry} entries, or an empty list
+     * @return an unmodifiable list of derived {@code IbanRegistry} entries, or an empty list
      */
     List<IbanRegistry> getDerivedCountries() {
         return isBaseCountry()
             ? Arrays.stream(ALL_COUNTRIES)
                 .filter(cd -> this == cd.getBaseCountry())
-                .collect(toList())
+                .collect(collectingAndThen(
+                    toList(),
+                    Collections::unmodifiableList
+                ))
             : emptyList();
     }
 
@@ -3414,7 +3422,7 @@ public enum IbanRegistry {
      * @return the populated lookup array
      */
     private static IbanRegistry[] buildLookupArray(boolean baseCountriesOnly) {
-        IbanRegistry[] array = new IbanRegistry[26 * 26]; // 676 Einträge, alle null
+        IbanRegistry[] array = new IbanRegistry[26 * 26]; // 676 slots, all initially null
         for (IbanRegistry entry : ALL_COUNTRIES) {
             if (!baseCountriesOnly || entry.isBaseCountry()) {
                 String name = entry.name();
