@@ -22,12 +22,28 @@ package de.speedbanking.iban;
  * or an {@link IbanValidationError} (on failure) — never both, never neither.
  * <p>
  * Intentionally avoids {@link java.util.Optional} to keep the internal validation
- * path allocation-free on the failure side.
+ * path allocation-free on the failure side. Failure results are pre-allocated at
+ * class-load time (one singleton per {@link IbanValidationError} constant) so that
+ * {@link #invalid(IbanValidationError)} never allocates on the hot validation path.
  *
  * @since 1.8.6 (previously called IbanValidationSuccess)
  */
 @SuppressWarnings("VisibilityModifier")
 final class IbanValidationResult {
+
+    /**
+     * Pre-allocated failure results, indexed by {@link IbanValidationError#ordinal()}.
+     * Populated once at class-load time; never modified afterwards.
+     */
+    private static final IbanValidationResult[] INVALID_RESULTS;
+
+    static {
+        IbanValidationError[] errors = IbanValidationError.values();
+        INVALID_RESULTS = new IbanValidationResult[errors.length];
+        for (int i = 0; i < errors.length; i++) {
+            INVALID_RESULTS[i] = new IbanValidationResult(null, null, errors[i]);
+        }
+    }
 
     /** The normalized IBAN string; {@code null} on failure. */
     final CharSequence        normIban;
@@ -60,12 +76,15 @@ final class IbanValidationResult {
 
     /**
      * Factory method for a failed validation result.
+     * <p>
+     * Returns a pre-allocated singleton for the given error; never allocates.
      *
      * @param error the reason for the validation failure (must not be {@code null})
-     * @return a result carrying the error reason
+     * @return the cached result for the given error constant
      */
+    @SuppressWarnings("EnumOrdinal")
     static IbanValidationResult invalid(IbanValidationError error) {
-        return new IbanValidationResult(null, null, error);
+        return INVALID_RESULTS[error.ordinal()];
     }
 
     /**
