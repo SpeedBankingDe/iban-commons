@@ -107,7 +107,6 @@ public final class IbanValidator {
      * <p>
      * The capacity is set to {@code MAX_IBAN_LENGTH}, the longest possible unformatted IBAN.
      */
-    @SuppressWarnings("java:S5164") // ThreadLocal used as a tiny persistent buffer to avoid GC pressure
     private static final ThreadLocal<char[]> VALIDATION_BUFFER = ThreadLocal
         .withInitial(() -> new char[MAX_IBAN_LENGTH]);
 

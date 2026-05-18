@@ -30,6 +30,7 @@ import de.speedbanking.util.Iso3166Alpha2;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -2918,12 +2919,19 @@ public enum IbanRegistry {
     static final int                    MIN_IBAN_BASE_LENGTH = 4;
 
     /** ISO 13616 standard minimum. */
-    static final int                    MIN_IBAN_LENGTH      = Arrays.stream(ALL_COUNTRIES)
-        .mapToInt(IbanRegistry::getIbanLength).min().orElse(MIN_IBAN_BASE_LENGTH);
+    static final int                    MIN_IBAN_LENGTH;
 
     /** ISO 13616 standard maximum. */
-    public static final int             MAX_IBAN_LENGTH      = Arrays.stream(ALL_COUNTRIES)
-        .mapToInt(IbanRegistry::getIbanLength).max().orElse(34);
+    public static final int             MAX_IBAN_LENGTH;
+
+    static {
+        IntSummaryStatistics stats = Arrays.stream(ALL_COUNTRIES)
+            .mapToInt(IbanRegistry::getIbanLength)
+            .summaryStatistics();
+
+        MIN_IBAN_LENGTH = stats.getCount() > 0 ? stats.getMin() : MIN_IBAN_BASE_LENGTH;
+        MAX_IBAN_LENGTH = stats.getCount() > 0 ? stats.getMax() : 34;
+    }
 
     /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
     static final int                    INDEX_CHECK_DIGIT1   = 2;
