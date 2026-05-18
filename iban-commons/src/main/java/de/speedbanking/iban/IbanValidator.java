@@ -107,7 +107,6 @@ public final class IbanValidator {
      * <p>
      * The capacity is set to {@code MAX_IBAN_LENGTH}, the longest possible unformatted IBAN.
      */
-    @SuppressWarnings("java:S5164") // ThreadLocal used as a tiny persistent buffer to avoid GC pressure
     private static final ThreadLocal<char[]> VALIDATION_BUFFER = ThreadLocal
         .withInitial(() -> new char[MAX_IBAN_LENGTH]);
 
@@ -596,8 +595,8 @@ public final class IbanValidator {
      *             is passed, it is mutated in place, otherwise a copy is created
      * @return the same {@code StringBuilder} instance with the correct check digits applied
      * @throws IllegalArgumentException if {@code iban} is {@code null} or its length is outside
-     *                                  the valid IBAN range [{@value IbanRegistry#MIN_IBAN_LENGTH},
-     *                                  {@value IbanRegistry#MAX_IBAN_LENGTH}]
+     *                                  the valid IBAN range [{@link IbanRegistry#MIN_IBAN_LENGTH},
+     *                                  {@link IbanRegistry#MAX_IBAN_LENGTH}]
      */
     public static StringBuilder fixCheckDigits(final CharSequence iban) {
         if (iban == null) {
