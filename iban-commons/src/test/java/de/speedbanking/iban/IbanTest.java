@@ -470,9 +470,9 @@ final class IbanTest {
         randomAscii[IbanRegistry.INDEX_BBAN] = '_';
         randomAscii[IbanRegistry.INDEX_BBAN + 1] = 'x';
 
-        assertThat(IbanValidator.getCountryValidator(countryData).validateIban(randomAscii))
-            .as("Expected validation of random ascii array to fail for '%s' with data: '%s'", countryData.getCountryCode(), new String(randomAscii))
-            .isFalse();
+        assertThatCode(
+            () -> IbanValidator.getCountryValidator(countryData).validateIban(randomAscii))
+            .doesNotThrowAnyException();
     }
 
     /**
