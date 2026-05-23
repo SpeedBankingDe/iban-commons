@@ -60,6 +60,7 @@
     <modules>
         <module>iban-commons</module>
         <module>iban-commons-junit</module>
+        <module>iban-commons-validation</module>
     </modules>
 
     <scm>
