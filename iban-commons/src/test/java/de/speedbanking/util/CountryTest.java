@@ -16,7 +16,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * JUnit tests for {@link Country}.
+ * JUnit tests for {@link Country} and its relation to {@link Continent}.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 final class CountryTest {
@@ -244,6 +244,79 @@ final class CountryTest {
         }
     }
 
+    // =========================================================================
+    // Continent Tests
+    // =========================================================================
+
+    @DisplayName("getContinent() returns the correct Continent instance for verified key countries")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
+    @CsvSource(delimiter = '|', value = {
+        "DE | EUROPE",
+        "FR | EUROPE",
+        "JP | ASIA",
+        "CN | ASIA",
+        "US | NORTH_AMERICA",
+        "CA | NORTH_AMERICA",
+        "BR | SOUTH_AMERICA",
+        "AR | SOUTH_AMERICA",
+        "ZA | AFRICA",
+        "EG | AFRICA",
+        "AU | OCEANIA",
+        "NZ | OCEANIA",
+        "AQ | ANTARCTICA"
+    })
+    void getContinent_knownConstants_returnsCorrectContinent(Country country, Continent expectedContinent) {
+        assertThat(country.getContinent())
+            .as("%s.getContinent()", country.name())
+            .isEqualTo(expectedContinent);
+    }
+
+    @DisplayName("Every assigned Country has a Continent reference set")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @EnumSource(Country.class)
+    void getContinent_allConstants_neverNull(Country c) {
+        assertThat(c.getContinent())
+            .as("Continent mapping for %s must not be null", c.name())
+            .isNotNull();
+    }
+
+    @DisplayName("Continent.fromCode() resolves the correct continent instance from its code")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
+    @CsvSource(delimiter = '|', value = {
+        "EU | EUROPE",
+        "AS | ASIA",
+        "NA | NORTH_AMERICA",
+        "SA | SOUTH_AMERICA",
+        "AF | AFRICA",
+        "OC | OCEANIA",
+        "AN | ANTARCTICA"
+    })
+    void continentFromCode_validCodes_returnsCorrectConstant(String code, Continent expected) {
+        assertThat(Continent.fromCode(code)).isSameAs(expected);
+    }
+
+    @DisplayName("Continent.fromCode() returns null for unknown, empty, or null inputs")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @NullAndEmptySource
+    @ValueSource(strings = {"XX", "eu", "EU "})
+    void continentFromCode_invalidCodes_returnsNull(String code) {
+        assertThat(Continent.fromCode(code)).isNull();
+    }
+
+    @DisplayName("Continent structural properties are healthy")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @EnumSource(Continent.class)
+    void continent_properties_areValidAndConsistent(Continent continent) {
+        assertThat(continent.getCode()).matches("^[A-Z]{2}$");
+        assertThat(continent.getContinentName()).isNotBlank();
+        assertThat(continent.toString()).isEqualTo("%s[%s]",
+            continent.getDeclaringClass().getSimpleName(), continent.name());
+    }
+
+    // =========================================================================
+    // fromCode()
+    // =========================================================================
+
     @DisplayName("fromCode() returns the correct constant for every assigned code")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {
@@ -307,7 +380,7 @@ final class CountryTest {
             .isNull();
     }
 
-    @DisplayName("fromCode() returns null for whitespace-padded two-character inputs — length is 2 but no whitespace key exists in the LOOKUP")
+    @DisplayName("fromCode() returns null for whitespace-padded two-character inputs")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {" D", "D "})
     void fromCode_whitespacePadded_returnsNull(String code) {
@@ -437,7 +510,6 @@ final class CountryTest {
         "0 | 0 | false",
         "_ | _ | false"
     })
-
     void isAssigned_primitiveChars_worksCorrectly(char c1, char c2, boolean expectedResult) {
         assertThat(Country.isAssigned(c1, c2)).isEqualTo(expectedResult);
     }

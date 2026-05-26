@@ -17,7 +17,7 @@ package de.speedbanking.util;
 
 import static java.util.Collections.unmodifiableMap;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -25,8 +25,9 @@ import java.util.Map;
  * as published by the ISO 3166 Maintenance Agency.
  * <p>
  * Each constant carries the two-letter code (the enum name itself), the
- * corresponding English short name as specified in ISO 3166-1, and the
- * primary ISO 4217 currency code used in that country or territory.
+ * corresponding English short name as specified in ISO 3166-1, the
+ * primary ISO 4217 currency code used in that country or territory, and the
+ * associated continent.
  * <p>
  * The list contains all <strong>249 currently assigned</strong> Alpha-2 codes
  * (status: 2025). It intentionally excludes:
@@ -69,608 +70,608 @@ public enum Country {
     // A
     // -------------------------------------------------------------------------
     /** Andorra */
-    AD("Andorra",                                              Currency.EUR),
+    AD("Andorra",                                              Currency.EUR, Continent.EUROPE),
     /** United Arab Emirates */
-    AE("United Arab Emirates",                                 Currency.AED),
+    AE("United Arab Emirates",                                 Currency.AED, Continent.ASIA),
     /** Afghanistan */
-    AF("Afghanistan",                                          Currency.AFN),
+    AF("Afghanistan",                                          Currency.AFN, Continent.ASIA),
     /** Antigua and Barbuda */
-    AG("Antigua and Barbuda",                                  Currency.XCD),
+    AG("Antigua and Barbuda",                                  Currency.XCD, Continent.NORTH_AMERICA),
     /** Anguilla */
-    AI("Anguilla",                                             Currency.XCD),
+    AI("Anguilla",                                             Currency.XCD, Continent.NORTH_AMERICA),
     /** Albania */
-    AL("Albania",                                              Currency.ALL),
+    AL("Albania",                                              Currency.ALL, Continent.EUROPE),
     /** Armenia */
-    AM("Armenia",                                              Currency.AMD),
+    AM("Armenia",                                              Currency.AMD, Continent.ASIA),
     /** Angola */
-    AO("Angola",                                               Currency.AOA),
+    AO("Angola",                                               Currency.AOA, Continent.AFRICA),
     /** Antarctica — no currency in use */
-    AQ("Antarctica",                                           null),
+    AQ("Antarctica",                                           null,         Continent.ANTARCTICA),
     /** Argentina */
-    AR("Argentina",                                            Currency.ARS),
+    AR("Argentina",                                            Currency.ARS, Continent.SOUTH_AMERICA),
     /** American Samoa */
-    AS("American Samoa",                                       Currency.USD),
+    AS("American Samoa",                                       Currency.USD, Continent.OCEANIA),
     /** Austria */
-    AT("Austria",                                              Currency.EUR),
+    AT("Austria",                                              Currency.EUR, Continent.EUROPE),
     /** Australia */
-    AU("Australia",                                            Currency.AUD),
+    AU("Australia",                                            Currency.AUD, Continent.OCEANIA),
     /** Aruba */
-    AW("Aruba",                                                Currency.AWG),
+    AW("Aruba",                                                Currency.AWG, Continent.NORTH_AMERICA),
     /** Åland Islands */
-    AX("Åland Islands",                                        Currency.EUR),
+    AX("Åland Islands",                                        Currency.EUR, Continent.EUROPE),
     /** Azerbaijan */
-    AZ("Azerbaijan",                                           Currency.AZN),
+    AZ("Azerbaijan",                                           Currency.AZN, Continent.ASIA),
 
     // -------------------------------------------------------------------------
     // B
     // -------------------------------------------------------------------------
     /** Bosnia and Herzegovina */
-    BA("Bosnia and Herzegovina",                               Currency.BAM),
+    BA("Bosnia and Herzegovina",                               Currency.BAM, Continent.EUROPE),
     /** Barbados */
-    BB("Barbados",                                             Currency.BBD),
+    BB("Barbados",                                             Currency.BBD, Continent.NORTH_AMERICA),
     /** Bangladesh */
-    BD("Bangladesh",                                           Currency.BDT),
+    BD("Bangladesh",                                           Currency.BDT, Continent.ASIA),
     /** Belgium */
-    BE("Belgium",                                              Currency.EUR),
+    BE("Belgium",                                              Currency.EUR, Continent.EUROPE),
     /** Burkina Faso */
-    BF("Burkina Faso",                                         Currency.XOF),
+    BF("Burkina Faso",                                         Currency.XOF, Continent.AFRICA),
     /** Bulgaria */
-    BG("Bulgaria",                                             Currency.BGN),
+    BG("Bulgaria",                                             Currency.BGN, Continent.EUROPE),
     /** Bahrain */
-    BH("Bahrain",                                              Currency.BHD),
+    BH("Bahrain",                                              Currency.BHD, Continent.ASIA),
     /** Burundi */
-    BI("Burundi",                                              Currency.BIF),
+    BI("Burundi",                                              Currency.BIF, Continent.AFRICA),
     /** Benin */
-    BJ("Benin",                                                Currency.XOF),
+    BJ("Benin",                                                Currency.XOF, Continent.AFRICA),
     /** Saint Barthélemy */
-    BL("Saint Barthélemy",                                     Currency.EUR),
+    BL("Saint Barthélemy",                                     Currency.EUR, Continent.NORTH_AMERICA),
     /** Bermuda */
-    BM("Bermuda",                                              Currency.BMD),
+    BM("Bermuda",                                              Currency.BMD, Continent.NORTH_AMERICA),
     /** Brunei Darussalam */
-    BN("Brunei Darussalam",                                    Currency.BND),
+    BN("Brunei Darussalam",                                    Currency.BND, Continent.ASIA),
     /** Bolivia (Plurinational State of) */
-    BO("Bolivia",                                              Currency.BOB),
+    BO("Bolivia",                                              Currency.BOB, Continent.SOUTH_AMERICA),
     /** Bonaire, Sint Eustatius and Saba */
-    BQ("Bonaire, Sint Eustatius and Saba",                     Currency.USD),
+    BQ("Bonaire, Sint Eustatius and Saba",                     Currency.USD, Continent.NORTH_AMERICA),
     /** Brazil */
-    BR("Brazil",                                               Currency.BRL),
+    BR("Brazil",                                               Currency.BRL, Continent.SOUTH_AMERICA),
     /** Bahamas */
-    BS("Bahamas",                                              Currency.BSD),
+    BS("Bahamas",                                              Currency.BSD, Continent.NORTH_AMERICA),
     /** Bhutan */
-    BT("Bhutan",                                               Currency.BTN),
+    BT("Bhutan",                                               Currency.BTN, Continent.ASIA),
     /** Bouvet Island */
-    BV("Bouvet Island",                                        Currency.NOK),
+    BV("Bouvet Island",                                        Currency.NOK, Continent.ANTARCTICA),
     /** Botswana */
-    BW("Botswana",                                             Currency.BWP),
+    BW("Botswana",                                             Currency.BWP, Continent.AFRICA),
     /** Belarus */
-    BY("Belarus",                                              Currency.BYN),
+    BY("Belarus",                                              Currency.BYN, Continent.EUROPE),
     /** Belize */
-    BZ("Belize",                                               Currency.BZD),
+    BZ("Belize",                                               Currency.BZD, Continent.NORTH_AMERICA),
 
     // -------------------------------------------------------------------------
     // C
     // -------------------------------------------------------------------------
     /** Canada */
-    CA("Canada",                                               Currency.CAD),
+    CA("Canada",                                               Currency.CAD, Continent.NORTH_AMERICA),
     /** Cocos (Keeling) Islands */
-    CC("Cocos (Keeling) Islands",                              Currency.AUD),
+    CC("Cocos (Keeling) Islands",                              Currency.AUD, Continent.OCEANIA),
     /** Congo, Democratic Republic of the */
-    CD("Congo, Democratic Republic of the",                    Currency.CDF),
+    CD("Congo, Democratic Republic of the",                    Currency.CDF, Continent.AFRICA),
     /** Central African Republic */
-    CF("Central African Republic",                             Currency.XAF),
+    CF("Central African Republic",                             Currency.XAF, Continent.AFRICA),
     /** Congo */
-    CG("Congo",                                                Currency.XAF),
+    CG("Congo",                                                Currency.XAF, Continent.AFRICA),
     /** Switzerland */
-    CH("Switzerland",                                          Currency.CHF),
+    CH("Switzerland",                                          Currency.CHF, Continent.EUROPE),
     /** Côte d'Ivoire */
-    CI("Côte d'Ivoire",                                        Currency.XOF),
+    CI("Côte d'Ivoire",                                        Currency.XOF, Continent.AFRICA),
     /** Cook Islands */
-    CK("Cook Islands",                                         Currency.NZD),
+    CK("Cook Islands",                                         Currency.NZD, Continent.OCEANIA),
     /** Chile */
-    CL("Chile",                                                Currency.CLP),
+    CL("Chile",                                                Currency.CLP, Continent.SOUTH_AMERICA),
     /** Cameroon */
-    CM("Cameroon",                                             Currency.XAF),
+    CM("Cameroon",                                             Currency.XAF, Continent.AFRICA),
     /** China */
-    CN("China",                                                Currency.CNY),
+    CN("China",                                                Currency.CNY, Continent.ASIA),
     /** Colombia */
-    CO("Colombia",                                             Currency.COP),
+    CO("Colombia",                                             Currency.COP, Continent.SOUTH_AMERICA),
     /** Costa Rica */
-    CR("Costa Rica",                                           Currency.CRC),
+    CR("Costa Rica",                                           Currency.CRC, Continent.NORTH_AMERICA),
     /** Cuba */
-    CU("Cuba",                                                 Currency.CUP),
+    CU("Cuba",                                                 Currency.CUP, Continent.NORTH_AMERICA),
     /** Cabo Verde */
-    CV("Cabo Verde",                                           Currency.CVE),
+    CV("Cabo Verde",                                           Currency.CVE, Continent.AFRICA),
     /** Curaçao */
-    CW("Curaçao",                                              Currency.ANG),
+    CW("Curaçao",                                              Currency.ANG, Continent.NORTH_AMERICA),
     /** Christmas Island */
-    CX("Christmas Island",                                     Currency.AUD),
+    CX("Christmas Island",                                     Currency.AUD, Continent.OCEANIA),
     /** Cyprus */
-    CY("Cyprus",                                               Currency.EUR),
+    CY("Cyprus",                                               Currency.EUR, Continent.EUROPE),
     /** Czechia */
-    CZ("Czechia",                                              Currency.CZK),
+    CZ("Czechia",                                              Currency.CZK, Continent.EUROPE),
 
     // -------------------------------------------------------------------------
     // D
     // -------------------------------------------------------------------------
     /** Germany */
-    DE("Germany",                                              Currency.EUR),
+    DE("Germany",                                              Currency.EUR, Continent.EUROPE),
     /** Djibouti */
-    DJ("Djibouti",                                             Currency.DJF),
+    DJ("Djibouti",                                             Currency.DJF, Continent.AFRICA),
     /** Denmark */
-    DK("Denmark",                                              Currency.DKK),
+    DK("Denmark",                                              Currency.DKK, Continent.EUROPE),
     /** Dominica */
-    DM("Dominica",                                             Currency.XCD),
+    DM("Dominica",                                             Currency.XCD, Continent.NORTH_AMERICA),
     /** Dominican Republic */
-    DO("Dominican Republic",                                   Currency.DOP),
+    DO("Dominican Republic",                                   Currency.DOP, Continent.NORTH_AMERICA),
     /** Algeria */
-    DZ("Algeria",                                              Currency.DZD),
+    DZ("Algeria",                                              Currency.DZD, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // E
     // -------------------------------------------------------------------------
     /** Ecuador */
-    EC("Ecuador",                                              Currency.USD),
+    EC("Ecuador",                                              Currency.USD, Continent.SOUTH_AMERICA),
     /** Estonia */
-    EE("Estonia",                                              Currency.EUR),
+    EE("Estonia",                                              Currency.EUR, Continent.EUROPE),
     /** Egypt */
-    EG("Egypt",                                                Currency.EGP),
+    EG("Egypt",                                                Currency.EGP, Continent.AFRICA),
     /** Western Sahara */
-    EH("Western Sahara",                                       Currency.MAD),
+    EH("Western Sahara",                                       Currency.MAD, Continent.AFRICA),
     /** Eritrea */
-    ER("Eritrea",                                              Currency.ERN),
+    ER("Eritrea",                                              Currency.ERN, Continent.AFRICA),
     /** Spain */
-    ES("Spain",                                                Currency.EUR),
+    ES("Spain",                                                Currency.EUR, Continent.EUROPE),
     /** Ethiopia */
-    ET("Ethiopia",                                             Currency.ETB),
+    ET("Ethiopia",                                             Currency.ETB, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // F
     // -------------------------------------------------------------------------
     /** Finland */
-    FI("Finland",                                              Currency.EUR),
+    FI("Finland",                                              Currency.EUR, Continent.EUROPE),
     /** Fiji */
-    FJ("Fiji",                                                 Currency.FJD),
+    FJ("Fiji",                                                 Currency.FJD, Continent.OCEANIA),
     /** Falkland Islands (Malvinas) */
-    FK("Falkland Islands (Malvinas)",                          Currency.FKP),
+    FK("Falkland Islands (Malvinas)",                          Currency.FKP, Continent.SOUTH_AMERICA),
     /** Micronesia (Federated States of) */
-    FM("Micronesia (Federated States of)",                     Currency.USD),
+    FM("Micronesia (Federated States of)",                     Currency.USD, Continent.OCEANIA),
     /** Faroe Islands */
-    FO("Faroe Islands",                                        Currency.DKK),
+    FO("Faroe Islands",                                        Currency.DKK, Continent.EUROPE),
     /** France */
-    FR("France",                                               Currency.EUR),
+    FR("France",                                               Currency.EUR, Continent.EUROPE),
 
     // -------------------------------------------------------------------------
     // G
     // -------------------------------------------------------------------------
     /** Gabon */
-    GA("Gabon",                                                Currency.XAF),
+    GA("Gabon",                                                Currency.XAF, Continent.AFRICA),
     /** United Kingdom of Great Britain and Northern Ireland */
-    GB("United Kingdom of Great Britain and Northern Ireland", Currency.GBP),
+    GB("United Kingdom of Great Britain and Northern Ireland", Currency.GBP, Continent.EUROPE),
     /** Grenada */
-    GD("Grenada",                                              Currency.XCD),
+    GD("Grenada",                                              Currency.XCD, Continent.NORTH_AMERICA),
     /** Georgia */
-    GE("Georgia",                                              Currency.GEL),
+    GE("Georgia",                                              Currency.GEL, Continent.ASIA),
     /** French Guiana */
-    GF("French Guiana",                                        Currency.EUR),
+    GF("French Guiana",                                        Currency.EUR, Continent.SOUTH_AMERICA),
     /** Guernsey */
-    GG("Guernsey",                                             Currency.GBP),
+    GG("Guernsey",                                             Currency.GBP, Continent.EUROPE),
     /** Ghana */
-    GH("Ghana",                                                Currency.GHS),
+    GH("Ghana",                                                Currency.GHS, Continent.AFRICA),
     /** Gibraltar */
-    GI("Gibraltar",                                            Currency.GIP),
+    GI("Gibraltar",                                            Currency.GIP, Continent.EUROPE),
     /** Greenland */
-    GL("Greenland",                                            Currency.DKK),
+    GL("Greenland",                                            Currency.DKK, Continent.NORTH_AMERICA),
     /** Gambia */
-    GM("Gambia",                                               Currency.GMD),
+    GM("Gambia",                                               Currency.GMD, Continent.AFRICA),
     /** Guinea */
-    GN("Guinea",                                               Currency.GNF),
+    GN("Guinea",                                               Currency.GNF, Continent.AFRICA),
     /** Guadeloupe */
-    GP("Guadeloupe",                                           Currency.EUR),
+    GP("Guadeloupe",                                           Currency.EUR, Continent.NORTH_AMERICA),
     /** Equatorial Guinea */
-    GQ("Equatorial Guinea",                                    Currency.XAF),
+    GQ("Equatorial Guinea",                                    Currency.XAF, Continent.AFRICA),
     /** Greece */
-    GR("Greece",                                               Currency.EUR),
+    GR("Greece",                                               Currency.EUR, Continent.EUROPE),
     /** Guatemala */
-    GT("Guatemala",                                            Currency.GTQ),
+    GT("Guatemala",                                            Currency.GTQ, Continent.NORTH_AMERICA),
     /** Guam */
-    GU("Guam",                                                 Currency.USD),
+    GU("Guam",                                                 Currency.USD, Continent.OCEANIA),
     /** Guinea-Bissau */
-    GW("Guinea-Bissau",                                        Currency.XOF),
+    GW("Guinea-Bissau",                                        Currency.XOF, Continent.AFRICA),
     /** Guyana */
-    GY("Guyana",                                               Currency.GYD),
+    GY("Guyana",                                               Currency.GYD, Continent.SOUTH_AMERICA),
 
     // -------------------------------------------------------------------------
     // H
     // -------------------------------------------------------------------------
     /** Hong Kong */
-    HK("Hong Kong",                                            Currency.HKD),
+    HK("Hong Kong",                                            Currency.HKD, Continent.ASIA),
     /** Heard Island and McDonald Islands */
-    HM("Heard Island and McDonald Islands",                    Currency.AUD),
+    HM("Heard Island and McDonald Islands",                    Currency.AUD, Continent.ANTARCTICA),
     /** Honduras */
-    HN("Honduras",                                             Currency.HNL),
+    HN("Honduras",                                             Currency.HNL, Continent.NORTH_AMERICA),
     /** Croatia */
-    HR("Croatia",                                              Currency.EUR),
+    HR("Croatia",                                              Currency.EUR, Continent.EUROPE),
     /** Haiti */
-    HT("Haiti",                                                Currency.HTG),
+    HT("Haiti",                                                Currency.HTG, Continent.NORTH_AMERICA),
     /** Hungary */
-    HU("Hungary",                                              Currency.HUF),
+    HU("Hungary",                                              Currency.HUF, Continent.EUROPE),
 
     // -------------------------------------------------------------------------
     // I
     // -------------------------------------------------------------------------
     /** Indonesia */
-    ID("Indonesia",                                            Currency.IDR),
+    ID("Indonesia",                                            Currency.IDR, Continent.ASIA),
     /** Ireland */
-    IE("Ireland",                                              Currency.EUR),
+    IE("Ireland",                                              Currency.EUR, Continent.EUROPE),
     /** Israel */
-    IL("Israel",                                               Currency.ILS),
+    IL("Israel",                                               Currency.ILS, Continent.ASIA),
     /** Isle of Man */
-    IM("Isle of Man",                                          Currency.GBP),
+    IM("Isle of Man",                                          Currency.GBP, Continent.EUROPE),
     /** India */
-    IN("India",                                                Currency.INR),
+    IN("India",                                                Currency.INR, Continent.ASIA),
     /** British Indian Ocean Territory */
-    IO("British Indian Ocean Territory",                       Currency.USD),
+    IO("British Indian Ocean Territory",                       Currency.USD, Continent.ASIA),
     /** Iraq */
-    IQ("Iraq",                                                 Currency.IQD),
+    IQ("Iraq",                                                 Currency.IQD, Continent.ASIA),
     /** Iran (Islamic Republic of) */
-    IR("Iran (Islamic Republic of)",                           Currency.IRR),
+    IR("Iran (Islamic Republic of)",                           Currency.IRR, Continent.ASIA),
     /** Iceland */
-    IS("Iceland",                                              Currency.ISK),
+    IS("Iceland",                                              Currency.ISK, Continent.EUROPE),
     /** Italy */
-    IT("Italy",                                                Currency.EUR),
+    IT("Italy",                                                Currency.EUR, Continent.EUROPE),
 
     // -------------------------------------------------------------------------
     // J
     // -------------------------------------------------------------------------
     /** Jersey */
-    JE("Jersey",                                               Currency.GBP),
+    JE("Jersey",                                               Currency.GBP, Continent.EUROPE),
     /** Jamaica */
-    JM("Jamaica",                                              Currency.JMD),
+    JM("Jamaica",                                              Currency.JMD, Continent.NORTH_AMERICA),
     /** Jordan */
-    JO("Jordan",                                               Currency.JOD),
+    JO("Jordan",                                               Currency.JOD,  Continent.ASIA),
     /** Japan */
-    JP("Japan",                                                Currency.JPY),
+    JP("Japan",                                                Currency.JPY, Continent.ASIA),
 
     // -------------------------------------------------------------------------
     // K
     // -------------------------------------------------------------------------
     /** Kenya */
-    KE("Kenya",                                                Currency.KES),
+    KE("Kenya",                                                Currency.KES, Continent.AFRICA),
     /** Kyrgyzstan */
-    KG("Kyrgyzstan",                                           Currency.KGS),
+    KG("Kyrgyzstan",                                           Currency.KGS, Continent.ASIA),
     /** Cambodia */
-    KH("Cambodia",                                             Currency.KHR),
+    KH("Cambodia",                                             Currency.KHR, Continent.ASIA),
     /** Kiribati */
-    KI("Kiribati",                                             Currency.AUD),
+    KI("Kiribati",                                             Currency.AUD, Continent.OCEANIA),
     /** Comoros */
-    KM("Comoros",                                              Currency.KMF),
+    KM("Comoros",                                              Currency.KMF, Continent.AFRICA),
     /** Saint Kitts and Nevis */
-    KN("Saint Kitts and Nevis",                                Currency.XCD),
+    KN("Saint Kitts and Nevis",                                Currency.XCD, Continent.NORTH_AMERICA),
     /** Korea (Democratic People's Republic of) */
-    KP("Korea (Democratic People's Republic of)",              Currency.KPW),
+    KP("Korea (Democratic People's Republic of)",              Currency.KPW, Continent.ASIA),
     /** Korea, Republic of */
-    KR("Korea, Republic of",                                   Currency.KRW),
+    KR("Korea, Republic of",                                   Currency.KRW, Continent.ASIA),
     /** Kuwait */
-    KW("Kuwait",                                               Currency.KWD),
+    KW("Kuwait",                                               Currency.KWD, Continent.ASIA),
     /** Cayman Islands */
-    KY("Cayman Islands",                                       Currency.KYD),
+    KY("Cayman Islands",                                       Currency.KYD, Continent.NORTH_AMERICA),
     /** Kazakhstan */
-    KZ("Kazakhstan",                                           Currency.KZT),
+    KZ("Kazakhstan",                                           Currency.KZT, Continent.ASIA),
 
     // -------------------------------------------------------------------------
     // L
     // -------------------------------------------------------------------------
     /** Lao People's Democratic Republic */
-    LA("Lao People's Democratic Republic",                     Currency.LAK),
+    LA("Lao People's Democratic Republic",                     Currency.LAK, Continent.ASIA),
     /** Lebanon */
-    LB("Lebanon",                                              Currency.LBP),
+    LB("Lebanon",                                              Currency.LBP, Continent.ASIA),
     /** Saint Lucia */
-    LC("Saint Lucia",                                          Currency.XCD),
+    LC("Saint Lucia",                                          Currency.XCD, Continent.NORTH_AMERICA),
     /** Liechtenstein */
-    LI("Liechtenstein",                                        Currency.CHF),
+    LI("Liechtenstein",                                        Currency.CHF, Continent.EUROPE),
     /** Sri Lanka */
-    LK("Sri Lanka",                                            Currency.LKR),
+    LK("Sri Lanka",                                            Currency.LKR, Continent.ASIA),
     /** Liberia */
-    LR("Liberia",                                              Currency.LRD),
+    LR("Liberia",                                              Currency.LRD, Continent.AFRICA),
     /** Lesotho */
-    LS("Lesotho",                                              Currency.LSL),
+    LS("Lesotho",                                              Currency.LSL, Continent.AFRICA),
     /** Lithuania */
-    LT("Lithuania",                                            Currency.EUR),
+    LT("Lithuania",                                            Currency.EUR, Continent.EUROPE),
     /** Luxembourg */
-    LU("Luxembourg",                                           Currency.EUR),
+    LU("Luxembourg",                                           Currency.EUR, Continent.EUROPE),
     /** Latvia */
-    LV("Latvia",                                               Currency.EUR),
+    LV("Latvia",                                               Currency.EUR, Continent.EUROPE),
     /** Libya */
-    LY("Libya",                                                Currency.LYD),
+    LY("Libya",                                                Currency.LYD, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // M
     // -------------------------------------------------------------------------
     /** Morocco */
-    MA("Morocco",                                              Currency.MAD),
+    MA("Morocco",                                              Currency.MAD, Continent.AFRICA),
     /** Monaco */
-    MC("Monaco",                                               Currency.EUR),
+    MC("Monaco",                                               Currency.EUR, Continent.EUROPE),
     /** Moldova, Republic of */
-    MD("Moldova, Republic of",                                 Currency.MDL),
+    MD("Moldova, Republic of",                                 Currency.MDL, Continent.EUROPE),
     /** Montenegro */
-    ME("Montenegro",                                           Currency.EUR),
+    ME("Montenegro",                                           Currency.EUR, Continent.EUROPE),
     /** Saint Martin (French part) */
-    MF("Saint Martin (French part)",                           Currency.EUR),
+    MF("Saint Martin (French part)",                           Currency.EUR, Continent.NORTH_AMERICA),
     /** Madagascar */
-    MG("Madagascar",                                           Currency.MGA),
+    MG("Madagascar",                                           Currency.MGA, Continent.AFRICA),
     /** Marshall Islands */
-    MH("Marshall Islands",                                     Currency.USD),
+    MH("Marshall Islands",                                     Currency.USD, Continent.OCEANIA),
     /** North Macedonia */
-    MK("North Macedonia",                                      Currency.MKD),
+    MK("North Macedonia",                                      Currency.MKD, Continent.EUROPE),
     /** Mali */
-    ML("Mali",                                                 Currency.XOF),
+    ML("Mali",                                                 Currency.XOF, Continent.AFRICA),
     /** Myanmar */
-    MM("Myanmar",                                              Currency.MMK),
+    MM("Myanmar",                                              Currency.MMK, Continent.ASIA),
     /** Mongolia */
-    MN("Mongolia",                                             Currency.MNT),
+    MN("Mongolia",                                             Currency.MNT, Continent.ASIA),
     /** Macao */
-    MO("Macao",                                                Currency.MOP),
+    MO("Macao",                                                Currency.MOP, Continent.ASIA),
     /** Northern Mariana Islands */
-    MP("Northern Mariana Islands",                             Currency.USD),
+    MP("Northern Mariana Islands",                             Currency.USD, Continent.OCEANIA),
     /** Martinique */
-    MQ("Martinique",                                           Currency.EUR),
+    MQ("Martinique",                                           Currency.EUR, Continent.NORTH_AMERICA),
     /** Mauritania */
-    MR("Mauritania",                                           Currency.MRU),
+    MR("Mauritania",                                           Currency.MRU, Continent.AFRICA),
     /** Montserrat */
-    MS("Montserrat",                                           Currency.XCD),
+    MS("Montserrat",                                           Currency.XCD, Continent.NORTH_AMERICA),
     /** Malta */
-    MT("Malta",                                                Currency.EUR),
+    MT("Malta",                                                Currency.EUR, Continent.EUROPE),
     /** Mauritius */
-    MU("Mauritius",                                            Currency.MUR),
+    MU("Mauritius",                                            Currency.MUR, Continent.AFRICA),
     /** Maldives */
-    MV("Maldives",                                             Currency.MVR),
+    MV("Maldives",                                             Currency.MVR, Continent.ASIA),
     /** Malawi */
-    MW("Malawi",                                               Currency.MWK),
+    MW("Malawi",                                               Currency.MWK, Continent.AFRICA),
     /** Mexico */
-    MX("Mexico",                                               Currency.MXN),
+    MX("Mexico",                                               Currency.MXN, Continent.NORTH_AMERICA),
     /** Malaysia */
-    MY("Malaysia",                                             Currency.MYR),
+    MY("Malaysia",                                             Currency.MYR, Continent.ASIA),
     /** Mozambique */
-    MZ("Mozambique",                                           Currency.MZN),
+    MZ("Mozambique",                                           Currency.MZN, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // N
     // -------------------------------------------------------------------------
     /** Namibia */
-    NA("Namibia",                                              Currency.NAD),
+    NA("Namibia",                                              Currency.NAD, Continent.AFRICA),
     /** New Caledonia */
-    NC("New Caledonia",                                        Currency.XPF),
+    NC("New Caledonia",                                        Currency.XPF, Continent.OCEANIA),
     /** Niger */
-    NE("Niger",                                                Currency.XOF),
+    NE("Niger",                                                Currency.XOF, Continent.AFRICA),
     /** Norfolk Island */
-    NF("Norfolk Island",                                       Currency.AUD),
+    NF("Norfolk Island",                                       Currency.AUD, Continent.OCEANIA),
     /** Nigeria */
-    NG("Nigeria",                                              Currency.NGN),
+    NG("Nigeria",                                              Currency.NGN, Continent.AFRICA),
     /** Nicaragua */
-    NI("Nicaragua",                                            Currency.NIO),
+    NI("Nicaragua",                                            Currency.NIO, Continent.NORTH_AMERICA),
     /** Netherlands */
-    NL("Netherlands",                                          Currency.EUR),
+    NL("Netherlands",                                          Currency.EUR, Continent.EUROPE),
     /** Norway */
-    NO("Norway",                                               Currency.NOK),
+    NO("Norway",                                               Currency.NOK, Continent.EUROPE),
     /** Nepal */
-    NP("Nepal",                                                Currency.NPR),
+    NP("Nepal",                                                Currency.NPR, Continent.ASIA),
     /** Nauru */
-    NR("Nauru",                                                Currency.AUD),
+    NR("Nauru",                                                Currency.AUD, Continent.OCEANIA),
     /** Niue */
-    NU("Niue",                                                 Currency.NZD),
+    NU("Niue",                                                 Currency.NZD, Continent.OCEANIA),
     /** New Zealand */
-    NZ("New Zealand",                                          Currency.NZD),
+    NZ("New Zealand",                                          Currency.NZD, Continent.OCEANIA),
 
     // -------------------------------------------------------------------------
     // O
     // -------------------------------------------------------------------------
     /** Oman */
-    OM("Oman",                                                 Currency.OMR),
+    OM("Oman",                                                 Currency.OMR, Continent.ASIA),
 
     // -------------------------------------------------------------------------
     // P
     // -------------------------------------------------------------------------
     /** Panama */
-    PA("Panama",                                               Currency.USD),
+    PA("Panama",                                               Currency.USD, Continent.NORTH_AMERICA),
     /** Peru */
-    PE("Peru",                                                 Currency.PEN),
+    PE("Peru",                                                 Currency.PEN, Continent.SOUTH_AMERICA),
     /** French Polynesia */
-    PF("French Polynesia",                                     Currency.XPF),
+    PF("French Polynesia",                                     Currency.XPF, Continent.OCEANIA),
     /** Papua New Guinea */
-    PG("Papua New Guinea",                                     Currency.PGK),
+    PG("Papua New Guinea",                                     Currency.PGK, Continent.OCEANIA),
     /** Philippines */
-    PH("Philippines",                                          Currency.PHP),
+    PH("Philippines",                                          Currency.PHP, Continent.ASIA),
     /** Pakistan */
-    PK("Pakistan",                                             Currency.PKR),
+    PK("Pakistan",                                             Currency.PKR, Continent.ASIA),
     /** Poland */
-    PL("Poland",                                               Currency.PLN),
+    PL("Poland",                                               Currency.PLN, Continent.EUROPE),
     /** Saint Pierre and Miquelon */
-    PM("Saint Pierre and Miquelon",                            Currency.EUR),
+    PM("Saint Pierre and Miquelon",                            Currency.EUR, Continent.NORTH_AMERICA),
     /** Pitcairn */
-    PN("Pitcairn",                                             Currency.NZD),
+    PN("Pitcairn",                                             Currency.NZD, Continent.OCEANIA),
     /** Puerto Rico */
-    PR("Puerto Rico",                                          Currency.USD),
+    PR("Puerto Rico",                                          Currency.USD, Continent.NORTH_AMERICA),
     /** Palestine, State of */
-    PS("Palestine, State of",                                  Currency.ILS),
+    PS("Palestine, State of",                                  Currency.ILS, Continent.ASIA),
     /** Portugal */
-    PT("Portugal",                                             Currency.EUR),
+    PT("Portugal",                                             Currency.EUR, Continent.EUROPE),
     /** Palau */
-    PW("Palau",                                                Currency.USD),
+    PW("Palau",                                                Currency.USD, Continent.OCEANIA),
     /** Paraguay */
-    PY("Paraguay",                                             Currency.PYG),
+    PY("Paraguay",                                             Currency.PYG, Continent.SOUTH_AMERICA),
 
     // -------------------------------------------------------------------------
     // Q
     // -------------------------------------------------------------------------
     /** Qatar */
-    QA("Qatar",                                                Currency.QAR),
+    QA("Qatar",                                                Currency.QAR, Continent.ASIA),
 
     // -------------------------------------------------------------------------
     // R
     // -------------------------------------------------------------------------
     /** Réunion */
-    RE("Réunion",                                              Currency.EUR),
+    RE("Réunion",                                              Currency.EUR, Continent.AFRICA),
     /** Romania */
-    RO("Romania",                                              Currency.RON),
+    RO("Romania",                                              Currency.RON, Continent.EUROPE),
     /** Serbia */
-    RS("Serbia",                                               Currency.RSD),
+    RS("Serbia",                                               Currency.RSD, Continent.EUROPE),
     /** Russian Federation */
-    RU("Russian Federation",                                   Currency.RUB),
+    RU("Russian Federation",                                   Currency.RUB, Continent.EUROPE),
     /** Rwanda */
-    RW("Rwanda",                                               Currency.RWF),
+    RW("Rwanda",                                               Currency.RWF, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // S
     // -------------------------------------------------------------------------
     /** Saudi Arabia */
-    SA("Saudi Arabia",                                         Currency.SAR),
+    SA("Saudi Arabia",                                         Currency.SAR, Continent.ASIA),
     /** Solomon Islands */
-    SB("Solomon Islands",                                      Currency.SBD),
+    SB("Solomon Islands",                                      Currency.SBD, Continent.OCEANIA),
     /** Seychelles */
-    SC("Seychelles",                                           Currency.SCR),
+    SC("Seychelles",                                           Currency.SCR, Continent.AFRICA),
     /** Sudan */
-    SD("Sudan",                                                Currency.SDG),
+    SD("Sudan",                                                Currency.SDG, Continent.AFRICA),
     /** Sweden */
-    SE("Sweden",                                               Currency.SEK),
+    SE("Sweden",                                               Currency.SEK, Continent.EUROPE),
     /** Singapore */
-    SG("Singapore",                                            Currency.SGD),
+    SG("Singapore",                                            Currency.SGD, Continent.ASIA),
     /** Saint Helena, Ascension and Tristan da Cunha */
-    SH("Saint Helena, Ascension and Tristan da Cunha",         Currency.SHP),
+    SH("Saint Helena, Ascension and Tristan da Cunha",         Currency.SHP, Continent.AFRICA),
     /** Slovenia */
-    SI("Slovenia",                                             Currency.EUR),
+    SI("Slovenia",                                             Currency.EUR, Continent.EUROPE),
     /** Svalbard and Jan Mayen */
-    SJ("Svalbard and Jan Mayen",                               Currency.NOK),
+    SJ("Svalbard and Jan Mayen",                               Currency.NOK, Continent.EUROPE),
     /** Slovakia */
-    SK("Slovakia",                                             Currency.EUR),
+    SK("Slovakia",                                             Currency.EUR, Continent.EUROPE),
     /** Sierra Leone */
-    SL("Sierra Leone",                                         Currency.SLE),
+    SL("Sierra Leone",                                         Currency.SLE, Continent.AFRICA),
     /** San Marino */
-    SM("San Marino",                                           Currency.EUR),
+    SM("San Marino",                                           Currency.EUR, Continent.EUROPE),
     /** Senegal */
-    SN("Senegal",                                              Currency.XOF),
+    SN("Senegal",                                              Currency.XOF, Continent.AFRICA),
     /** Somalia */
-    SO("Somalia",                                              Currency.SOS),
+    SO("Somalia",                                              Currency.SOS, Continent.AFRICA),
     /** Suriname */
-    SR("Suriname",                                             Currency.SRD),
+    SR("Suriname",                                             Currency.SRD, Continent.SOUTH_AMERICA),
     /** South Sudan */
-    SS("South Sudan",                                          Currency.SSP),
+    SS("South Sudan",                                          Currency.SSP, Continent.AFRICA),
     /** São Tomé and Príncipe */
-    ST("São Tomé and Príncipe",                                Currency.STN),
+    ST("São Tomé and Príncipe",                                Currency.STN, Continent.AFRICA),
     /** El Salvador */
-    SV("El Salvador",                                          Currency.USD),
+    SV("El Salvador",                                          Currency.USD, Continent.NORTH_AMERICA),
     /** Sint Maarten (Dutch part) */
-    SX("Sint Maarten (Dutch part)",                            Currency.ANG),
+    SX("Sint Maarten (Dutch part)",                            Currency.ANG, Continent.NORTH_AMERICA),
     /** Syrian Arab Republic */
-    SY("Syrian Arab Republic",                                 Currency.SYP),
+    SY("Syrian Arab Republic",                                 Currency.SYP, Continent.ASIA),
     /** Eswatini */
-    SZ("Eswatini",                                             Currency.SZL),
+    SZ("Eswatini",                                             Currency.SZL, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // T
     // -------------------------------------------------------------------------
     /** Turks and Caicos Islands */
-    TC("Turks and Caicos Islands",                             Currency.USD),
+    TC("Turks and Caicos Islands",                             Currency.USD, Continent.NORTH_AMERICA),
     /** Chad */
-    TD("Chad",                                                 Currency.XAF),
+    TD("Chad",                                                 Currency.XAF, Continent.AFRICA),
     /** French Southern Territories */
-    TF("French Southern Territories",                          Currency.EUR),
+    TF("French Southern Territories",                          Currency.EUR, Continent.ANTARCTICA),
     /** Togo */
-    TG("Togo",                                                 Currency.XOF),
+    TG("Togo",                                                 Currency.XOF, Continent.AFRICA),
     /** Thailand */
-    TH("Thailand",                                             Currency.THB),
+    TH("Thailand",                                             Currency.THB, Continent.ASIA),
     /** Tajikistan */
-    TJ("Tajikistan",                                           Currency.TJS),
+    TJ("Tajikistan",                                           Currency.TJS, Continent.ASIA),
     /** Tokelau */
-    TK("Tokelau",                                              Currency.NZD),
+    TK("Tokelau",                                              Currency.NZD, Continent.OCEANIA),
     /** Timor-Leste */
-    TL("Timor-Leste",                                          Currency.USD),
+    TL("Timor-Leste",                                          Currency.USD, Continent.ASIA),
     /** Turkmenistan */
-    TM("Turkmenistan",                                         Currency.TMT),
+    TM("Turkmenistan",                                         Currency.TMT, Continent.ASIA),
     /** Tunisia */
-    TN("Tunisia",                                              Currency.TND),
+    TN("Tunisia",                                              Currency.TND, Continent.AFRICA),
     /** Tonga */
-    TO("Tonga",                                                Currency.TOP),
+    TO("Tonga",                                                Currency.TOP, Continent.ASIA),
     /** Türkiye */
-    TR("Türkiye",                                              Currency.TRY),
+    TR("Türkiye",                                              Currency.TRY, Continent.ASIA),
     /** Trinidad and Tobago */
-    TT("Trinidad and Tobago",                                  Currency.TTD),
+    TT("Trinidad and Tobago",                                  Currency.TTD, Continent.NORTH_AMERICA),
     /** Tuvalu */
-    TV("Tuvalu",                                               Currency.AUD),
+    TV("Tuvalu",                                               Currency.AUD, Continent.OCEANIA),
     /** Taiwan, Province of China */
-    TW("Taiwan, Province of China",                            Currency.TWD),
+    TW("Taiwan, Province of China",                            Currency.TWD, Continent.ASIA),
     /** Tanzania, United Republic of */
-    TZ("Tanzania, United Republic of",                         Currency.TZS),
+    TZ("Tanzania, United Republic of",                         Currency.TZS, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // U
     // -------------------------------------------------------------------------
     /** Ukraine */
-    UA("Ukraine",                                              Currency.UAH),
+    UA("Ukraine",                                              Currency.UAH, Continent.EUROPE),
     /** Uganda */
-    UG("Uganda",                                               Currency.UGX),
+    UG("Uganda",                                               Currency.UGX, Continent.AFRICA),
     /** United States Minor Outlying Islands */
-    UM("United States Minor Outlying Islands",                 Currency.USD),
+    UM("United States Minor Outlying Islands",                 Currency.USD, Continent.OCEANIA),
     /** United States of America */
-    US("United States of America",                             Currency.USD),
+    US("United States of America",                             Currency.USD, Continent.NORTH_AMERICA),
     /** Uruguay */
-    UY("Uruguay",                                              Currency.UYU),
+    UY("Uruguay",                                              Currency.UYU, Continent.SOUTH_AMERICA),
     /** Uzbekistan */
-    UZ("Uzbekistan",                                           Currency.UZS),
+    UZ("Uzbekistan",                                           Currency.UZS, Continent.ASIA),
 
     // -------------------------------------------------------------------------
     // V
     // -------------------------------------------------------------------------
     /** Holy See */
-    VA("Holy See",                                             Currency.EUR),
+    VA("Holy See",                                             Currency.EUR, Continent.EUROPE),
     /** Saint Vincent and the Grenadines */
-    VC("Saint Vincent and the Grenadines",                     Currency.XCD),
+    VC("Saint Vincent and the Grenadines",                     Currency.XCD, Continent.NORTH_AMERICA),
     /** Venezuela (Bolivarian Republic of) */
-    VE("Venezuela (Bolivarian Republic of)",                   Currency.VES),
+    VE("Venezuela (Bolivarian Republic of)",                   Currency.VES, Continent.SOUTH_AMERICA),
     /** Virgin Islands (British) */
-    VG("Virgin Islands (British)",                             Currency.USD),
+    VG("Virgin Islands (British)",                             Currency.USD, Continent.NORTH_AMERICA),
     /** Virgin Islands (U.S.) */
-    VI("Virgin Islands (U.S.)",                                Currency.USD),
+    VI("Virgin Islands (U.S.)",                                Currency.USD, Continent.NORTH_AMERICA),
     /** Viet Nam */
-    VN("Viet Nam",                                             Currency.VND),
+    VN("Viet Nam",                                             Currency.VND, Continent.ASIA),
     /** Vanuatu */
-    VU("Vanuatu",                                              Currency.VUV),
+    VU("Vanuatu",                                              Currency.VUV, Continent.OCEANIA),
 
     // -------------------------------------------------------------------------
     // W
     // -------------------------------------------------------------------------
     /** Wallis and Futuna */
-    WF("Wallis and Futuna",                                    Currency.XPF),
+    WF("Wallis and Futuna",                                    Currency.XPF, Continent.OCEANIA),
     /** Samoa */
-    WS("Samoa",                                                Currency.WST),
+    WS("Samoa",                                                Currency.WST, Continent.OCEANIA),
 
     // -------------------------------------------------------------------------
     // X  (user-assigned, but widely adopted in banking)
     // -------------------------------------------------------------------------
     /** Kosovo (user-assigned; widely adopted in banking and payment systems) */
-    XK("Kosovo",                                               Currency.EUR),
+    XK("Kosovo",                                               Currency.EUR, Continent.EUROPE),
 
     // -------------------------------------------------------------------------
     // Y
     // -------------------------------------------------------------------------
     /** Yemen */
-    YE("Yemen",                                                Currency.YER),
+    YE("Yemen",                                                Currency.YER, Continent.ASIA),
     /** Mayotte */
-    YT("Mayotte",                                              Currency.EUR),
+    YT("Mayotte",                                              Currency.EUR, Continent.AFRICA),
 
     // -------------------------------------------------------------------------
     // Z
     // -------------------------------------------------------------------------
     /** South Africa */
-    ZA("South Africa",                                         Currency.ZAR),
+    ZA("South Africa",                                         Currency.ZAR, Continent.AFRICA),
     /** Zambia */
-    ZM("Zambia",                                               Currency.ZMW),
+    ZM("Zambia",                                               Currency.ZMW, Continent.AFRICA),
     /** Zimbabwe */
-    ZW("Zimbabwe",                                             Currency.ZWL);
+    ZW("Zimbabwe",                                             Currency.ZWL, Continent.AFRICA);
 
     /**
      * Constant for length of two-letter code.
      */
-    private static final int                        CODE_LEN = 2;
+    private static final int                   CODE_LEN = 2;
 
     /**
      * Internal unmodifiable primitive-friendly lookup map from packed two-letter code to enum constant.
@@ -678,18 +679,24 @@ public enum Country {
     private static final Map<Integer, Country> LOOKUP   = buildLookupMap();
 
     /** The English short country name as defined in ISO 3166-1. */
-    private final String                            countryName;
+    private final String                       countryName;
 
     /**
      * The primary ISO 4217 currency used in this country or territory.
      * <p>
      * {@code null} only for {@link #AQ} (Antarctica), which has no currency in use.
      */
-    private final Currency                          currency;
+    private final Currency                     currency;
 
-    Country(final String countryName, final Currency currency) {
+    /**
+     * The continent of this country or territory.
+     */
+    private final Continent                    continent;
+
+    Country(final String countryName, final Currency currency, final Continent continent) {
         this.countryName = countryName;
         this.currency    = currency;
+        this.continent   = continent;
     }
 
     /**
@@ -706,7 +713,7 @@ public enum Country {
     private static Map<Integer, Country> buildLookupMap() {
         Country[] values = values();
         int capacity = (int) (values.length / 0.75f) + 1;
-        Map<Integer, Country> map = new HashMap<>(capacity);
+        Map<Integer, Country> map = new LinkedHashMap<>(capacity);
         for (final Country c : values) {
             String name = c.name();
             map.put(pack(name.charAt(0), name.charAt(1)), c);
@@ -746,6 +753,15 @@ public enum Country {
      */
     public Currency getCurrency() {
         return currency;
+    }
+
+    /**
+     * Returns the continent of this country or territory.
+     *
+     * @since 1.8.8
+     */
+    public Continent getContinent() {
+        return continent;
     }
 
     /**
