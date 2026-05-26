@@ -173,7 +173,7 @@ final class IbanRegistrySourceTest {
     @IbanRegistrySource(currency = "EUR")
     void currency_EUR_yieldsOnlyEuroEntries(IbanRegistry entry) {
         // verify that each returned entry's country code resolves to EUR
-        de.speedbanking.util.Iso3166Alpha2 iso = de.speedbanking.util.Iso3166Alpha2.fromCode(entry.name());
+        de.speedbanking.util.Country iso = de.speedbanking.util.Country.fromCode(entry.name());
         assertThat(iso).isNotNull();
         assertThat(iso.getCurrency().getAlphaCode()).isEqualTo("EUR");
     }
@@ -230,7 +230,7 @@ final class IbanRegistrySourceTest {
                         filterMode = IbanRegistrySource.FilterMode.ALL)
     void filterMode_ALL_sepaAndEur_yieldsOnlyEurozone(IbanRegistry entry) {
         assertThat(entry.isSepa()).isTrue();
-        de.speedbanking.util.Iso3166Alpha2 iso = de.speedbanking.util.Iso3166Alpha2.fromCode(entry.name());
+        de.speedbanking.util.Country iso = de.speedbanking.util.Country.fromCode(entry.name());
         assertThat(iso).isNotNull();
         assertThat(iso.getCurrency().getAlphaCode()).isEqualTo("EUR");
     }

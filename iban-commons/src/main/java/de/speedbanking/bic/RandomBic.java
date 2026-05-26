@@ -17,7 +17,7 @@ package de.speedbanking.bic;
 
 import static java.util.Objects.requireNonNull;
 
-import de.speedbanking.util.Iso3166Alpha2;
+import de.speedbanking.util.Country;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -68,7 +68,7 @@ public final class RandomBic {
     private static final String          ALPHANUMERIC  = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /** Cached array of all assigned ISO 3166-1 Alpha-2 codes to avoid repeated {@code values()} allocations. */
-    private static final Iso3166Alpha2[] ALL_COUNTRIES = Iso3166Alpha2.values();
+    private static final Country[] ALL_COUNTRIES = Country.values();
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -227,7 +227,7 @@ public final class RandomBic {
      * Resolves the effective country code for generation.
      * <p>
      * If {@code countryCode} is {@code null}, a random country is selected from
-     * {@link Iso3166Alpha2#values()}. Otherwise the given code is validated and returned
+     * {@link Country#values()}. Otherwise the given code is validated and returned
      * as-is (case-sensitive: only uppercase codes are accepted).
      *
      * @param countryCode the caller-supplied country code, or {@code null}
@@ -239,7 +239,7 @@ public final class RandomBic {
         if (countryCode == null) {
             return ALL_COUNTRIES[random.nextInt(ALL_COUNTRIES.length)].name();
         }
-        requireNonNull(Iso3166Alpha2.fromCode(countryCode),
+        requireNonNull(Country.fromCode(countryCode),
             "Supported ISO 3166-1 Alpha-2 country code required");
         return countryCode;
     }

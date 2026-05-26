@@ -17,9 +17,9 @@ package de.speedbanking.iban;
 
 import static java.util.Objects.requireNonNull;
 
+import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
-import de.speedbanking.util.Iso3166Alpha2;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -315,17 +315,17 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Returns the primary {@link Currency} used in this country.
      * <p>
-     * The currency is resolved via {@link Iso3166Alpha2#getCurrency()}, keyed by this
+     * The currency is resolved via {@link Country#getCurrency()}, keyed by this
      * entry's ISO 3166-1 Alpha-2 country code.
      * <p>
      * Returns {@code null} for derived country codes that are not present in
-     * {@link Iso3166Alpha2} (none in the current registry, but defensively handled).
+     * {@link Country} (none in the current registry, but defensively handled).
      *
      * @return the {@link Currency} constant for this country, or {@code null} if unresolvable
      *
      * @since 1.8.5
      *
-     * @see Iso3166Alpha2#getCurrency()
+     * @see Country#getCurrency()
      */
     public Currency getCurrency() {
         return countryData.getCurrency();

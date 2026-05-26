@@ -16,7 +16,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * JUnit tests for {@link CountryUtil}.
  * <p>
  * Note: {@link CountryUtil#isValidCountryCode(CharSequence)} now delegates to
- * {@link Iso3166Alpha2#isAssigned(CharSequence)} and therefore performs a full
+ * {@link Country#isAssigned(CharSequence)} and therefore performs a full
  * registry lookup — not merely a format check.
  */
 @SuppressWarnings("checkstyle:MethodName")

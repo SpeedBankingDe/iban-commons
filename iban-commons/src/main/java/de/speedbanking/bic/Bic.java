@@ -17,9 +17,9 @@ package de.speedbanking.bic;
 
 import static java.util.Objects.requireNonNull;
 
+import de.speedbanking.util.Country;
 import de.speedbanking.util.CountryUtil;
 import de.speedbanking.util.Currency;
-import de.speedbanking.util.Iso3166Alpha2;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -274,7 +274,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     /**
      * Returns the full English country name associated with this BIC's country code.
      * <p>
-     * Resolved via {@link Iso3166Alpha2#getCountryName()}.
+     * Resolved via {@link Country#getCountryName()}.
      * <p>
      * Examples:
      * <ul>
@@ -287,7 +287,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.5
      */
     public String getCountryName() {
-        return Iso3166Alpha2.fromCode(getCountryCode()).getCountryName();
+        return Country.fromCode(getCountryCode()).getCountryName();
     }
 
     /**
@@ -355,14 +355,14 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Returns the primary {@link Currency} used in the country
      * associated with this BIC.
      * <p>
-     * Resolved via {@link Iso3166Alpha2#getCurrency()}.
+     * Resolved via {@link Country#getCurrency()}.
      *
      * @return the {@link Currency} constant for this country
      *
      * @since 1.8.5
      */
     public Currency getCurrency() {
-        return Iso3166Alpha2.fromCode(getCountryCode()).getCurrency();
+        return Country.fromCode(getCountryCode()).getCurrency();
     }
 
     /**

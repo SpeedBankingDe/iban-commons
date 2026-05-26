@@ -16,10 +16,10 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * JUnit tests for {@link Iso3166Alpha2}.
+ * JUnit tests for {@link Country}.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
-final class Iso3166Alpha2Test {
+final class CountryTest {
 
     @DisplayName("getCode() returns the two-letter enum name")
     @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
@@ -36,13 +36,13 @@ final class Iso3166Alpha2Test {
         "TR | TR"
     })
     void getCode_knownConstants_returnsEnumName(String code, String expected) {
-        assertThat(Iso3166Alpha2.valueOf(code).getCode()).isEqualTo(expected);
+        assertThat(Country.valueOf(code).getCode()).isEqualTo(expected);
     }
 
     @DisplayName("getCode() is identical to name() for all constants")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void getCode_equalsName_forAllConstants(Iso3166Alpha2 c) {
+    @EnumSource(Country.class)
+    void getCode_equalsName_forAllConstants(Country c) {
         assertThat(c.getCode())
             .as("%s.getCode() must equal name()", c.name())
             .isEqualTo(c.name());
@@ -68,14 +68,14 @@ final class Iso3166Alpha2Test {
         "PS | Palestine, State of"
     })
     void getCountryName_knownConstants_returnsCorrectName(String code, String expectedName) {
-        assertThat(Iso3166Alpha2.valueOf(code).getCountryName())
+        assertThat(Country.valueOf(code).getCountryName())
             .isEqualTo(expectedName);
     }
 
     @DisplayName("getCountryName() is non-null and non-blank for every constant")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void getCountryName_allConstants_neverNullOrBlank(Iso3166Alpha2 c) {
+    @EnumSource(Country.class)
+    void getCountryName_allConstants_neverNullOrBlank(Country c) {
         assertThat(c.getCountryName())
             .as("%s.getCountryName()", c.name())
             .isNotNull()
@@ -182,7 +182,7 @@ final class Iso3166Alpha2Test {
         "SV | USD",
         "TL | USD"
     })
-    void getCurrencyCode_knownConstants_returnsCorrectCode(Iso3166Alpha2 code, String expectedCurrency) {
+    void getCurrencyCode_knownConstants_returnsCorrectCode(Country code, String expectedCurrency) {
         assertThat(code.getCurrency().getAlphaCode())
             .as("%s.getCurrency().getAlphaCode()", code)
             .isEqualTo(expectedCurrency);
@@ -191,13 +191,13 @@ final class Iso3166Alpha2Test {
     @DisplayName("getCurrencyCode() returns null for Antarctica (AQ) — the only currency-less entry")
     @Test
     void getCurrencyCode_antarctica_returnsNull() {
-        assertThat(Iso3166Alpha2.AQ.getCurrency()).isNull();
+        assertThat(Country.AQ.getCurrency()).isNull();
     }
 
     @DisplayName("getCurrencyCode() is non-null and non-blank for every constant except AQ")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(value = Iso3166Alpha2.class, names = "AQ", mode = EnumSource.Mode.EXCLUDE)
-    void getCurrencyCode_allConstantsExceptAQ_neverNullOrBlank(Iso3166Alpha2 c) {
+    @EnumSource(value = Country.class, names = "AQ", mode = EnumSource.Mode.EXCLUDE)
+    void getCurrencyCode_allConstantsExceptAQ_neverNullOrBlank(Country c) {
         assertThat(c.getCurrency().getAlphaCode())
             .as("%s.getCurrency().getAlphaCode()", c.name())
             .isNotNull()
@@ -206,8 +206,8 @@ final class Iso3166Alpha2Test {
 
     @DisplayName("getCurrencyCode() returns a 3-letter uppercase alphabetic code when non-null")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void getCurrencyCode_whenNonNull_matchesIso4217Format(Iso3166Alpha2 c) {
+    @EnumSource(Country.class)
+    void getCurrencyCode_whenNonNull_matchesIso4217Format(Country c) {
         Currency currency = c.getCurrency();
         if (currency != null) {
             assertThat(currency.getAlphaCode())
@@ -223,7 +223,7 @@ final class Iso3166Alpha2Test {
         // and that no unexpected code has been accidentally assigned EUR.
         // This is a smoke-test — it will catch copy-paste accidents between adjacent constants.
         Set<String> eurCodes = new LinkedHashSet<>();
-        for (Iso3166Alpha2 c : Iso3166Alpha2.values()) {
+        for (Country c : Country.values()) {
             Currency cur = c.getCurrency();
             if (cur != null && "EUR".equals(cur.getAlphaCode())) {
                 eurCodes.add(c.getCode());
@@ -283,10 +283,10 @@ final class Iso3166Alpha2Test {
         "ZA", "ZM", "ZW"
     })
     void fromCode_assignedCode_returnsConstantWithMatchingCode(String code) {
-        assertThat(Iso3166Alpha2.fromCode(code))
+        assertThat(Country.fromCode(code))
             .as("fromCode(\"%s\")", code)
             .isNotNull()
-            .extracting(Iso3166Alpha2::getCode)
+            .extracting(Country::getCode)
             .isEqualTo(code);
     }
 
@@ -294,7 +294,7 @@ final class Iso3166Alpha2Test {
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @NullAndEmptySource
     void fromCode_null_returnsNull(String c) {
-        assertThat(Iso3166Alpha2.fromCode(c))
+        assertThat(Country.fromCode(c))
             .isNull();
     }
 
@@ -302,7 +302,7 @@ final class Iso3166Alpha2Test {
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"D", "DEU", "DEUS"})
     void fromCode_wrongLength_returnsNull(String code) {
-        assertThat(Iso3166Alpha2.fromCode(code))
+        assertThat(Country.fromCode(code))
             .as("fromCode(\"%s\") with wrong length", code)
             .isNull();
     }
@@ -311,7 +311,7 @@ final class Iso3166Alpha2Test {
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {" D", "D "})
     void fromCode_whitespacePadded_returnsNull(String code) {
-        assertThat(Iso3166Alpha2.fromCode(code))
+        assertThat(Country.fromCode(code))
             .as("fromCode(\"%s\") with whitespace padding", code)
             .isNull();
     }
@@ -327,7 +327,7 @@ final class Iso3166Alpha2Test {
         "AN"  // deleted (former Netherlands Antilles)
     })
     void fromCode_unassignedCode_returnsNull(String code) {
-        assertThat(Iso3166Alpha2.fromCode(code))
+        assertThat(Country.fromCode(code))
             .as("'%s' is not assigned", code)
             .isNull();
     }
@@ -336,7 +336,7 @@ final class Iso3166Alpha2Test {
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"ni", "cu", "Ni", "cU"})
     void fromCode_lowercase_returnsNull(String code) {
-        assertThat(Iso3166Alpha2.fromCode(code))
+        assertThat(Country.fromCode(code))
             .as("fromCode(\"%s\") must be case-sensitive", code)
             .isNull();
     }
@@ -345,7 +345,7 @@ final class Iso3166Alpha2Test {
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"D1", "1D", "$$", "D-"})
     void fromCode_nonAlphabeticCode_returnsNull(String code) {
-        assertThat(Iso3166Alpha2.fromCode(code))
+        assertThat(Country.fromCode(code))
             .as("fromCode(\"%s\") with non-alphabetic chars", code)
             .isNull();
     }
@@ -359,8 +359,8 @@ final class Iso3166Alpha2Test {
         "ZA | ZA"
     })
     @SuppressWarnings("UnnecessaryStringBuilder")
-    void fromCode_stringBuilder_returnsCorrectConstant(String code, Iso3166Alpha2 iso3166Alpha2) {
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder(code))).isSameAs(iso3166Alpha2);
+    void fromCode_stringBuilder_returnsCorrectConstant(String code, Country country) {
+        assertThat(Country.fromCode(new StringBuilder(code))).isSameAs(country);
     }
 
     @DisplayName("fromCode() accepts StringBuffer and returns the correct constant")
@@ -370,20 +370,20 @@ final class Iso3166Alpha2Test {
         "JP | JP"
     })
     @SuppressWarnings("JdkObsolete")
-    void fromCode_stringBuffer_returnsCorrectConstant(String code, Iso3166Alpha2 iso3166Alpha2) {
-        assertThat(Iso3166Alpha2.fromCode(new StringBuffer(code))).isSameAs(iso3166Alpha2);
+    void fromCode_stringBuffer_returnsCorrectConstant(String code, Country country) {
+        assertThat(Country.fromCode(new StringBuffer(code))).isSameAs(country);
     }
 
     @DisplayName("fromCode() returns null for null or wrong-length StringBuilder/StringBuffer inputs")
     @Test
     @SuppressWarnings({"UnnecessaryStringBuilder", "JdkObsolete"})
     void fromCode_charSequenceEdgeCases_returnsNull() {
-        assertThat(Iso3166Alpha2.fromCode((CharSequence) null)).isNull();
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder())).isNull();           // empty
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("D"))).isNull();        // too short
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("DEU"))).isNull();      // too long
-        assertThat(Iso3166Alpha2.fromCode(new StringBuilder("de"))).isNull();       // lowercase
-        assertThat(Iso3166Alpha2.fromCode(new StringBuffer(" D"))).isNull();        // whitespace
+        assertThat(Country.fromCode((CharSequence) null)).isNull();
+        assertThat(Country.fromCode(new StringBuilder())).isNull();           // empty
+        assertThat(Country.fromCode(new StringBuilder("D"))).isNull();        // too short
+        assertThat(Country.fromCode(new StringBuilder("DEU"))).isNull();      // too long
+        assertThat(Country.fromCode(new StringBuilder("de"))).isNull();       // lowercase
+        assertThat(Country.fromCode(new StringBuffer(" D"))).isNull();        // whitespace
     }
 
     // =========================================================================
@@ -394,7 +394,7 @@ final class Iso3166Alpha2Test {
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"KP", "SY", "IR", "CU", "VE", "RU", "NI", "BY", "DZ", "JP", "AF", "RE", "CW"})
     void isAssigned_assignedCodes_returnsTrue(CharSequence code) {
-        assertThat(Iso3166Alpha2.isAssigned(code))
+        assertThat(Country.isAssigned(code))
             .as("'%s' should be assigned", code)
             .isTrue();
     }
@@ -409,7 +409,7 @@ final class Iso3166Alpha2Test {
         "D1"                          // non-alphabetic
     })
     void isAssigned_invalidOrUnassigned_returnsFalse(String code) {
-        assertThat(Iso3166Alpha2.isAssigned(code))
+        assertThat(Country.isAssigned(code))
             .as("'%s' should not be assigned", code)
             .isFalse();
     }
@@ -418,11 +418,11 @@ final class Iso3166Alpha2Test {
     @Test
     @SuppressWarnings({"UnnecessaryStringBuilder", "JdkObsolete"})
     void isAssigned_charSequenceTypes_workCorrectly() {
-        assertThat(Iso3166Alpha2.isAssigned(new StringBuilder("DE"))).isTrue();
-        assertThat(Iso3166Alpha2.isAssigned(new StringBuilder("AA"))).isFalse();
-        assertThat(Iso3166Alpha2.isAssigned(new StringBuffer("FR"))).isTrue();
-        assertThat(Iso3166Alpha2.isAssigned(new StringBuffer("ZZ"))).isFalse();
-        assertThat(Iso3166Alpha2.isAssigned((CharSequence) null)).isFalse();
+        assertThat(Country.isAssigned(new StringBuilder("DE"))).isTrue();
+        assertThat(Country.isAssigned(new StringBuilder("AA"))).isFalse();
+        assertThat(Country.isAssigned(new StringBuffer("FR"))).isTrue();
+        assertThat(Country.isAssigned(new StringBuffer("ZZ"))).isFalse();
+        assertThat(Country.isAssigned((CharSequence) null)).isFalse();
     }
 
     @DisplayName("isAssigned(char, char) returns true for valid pairs and false for invalid ones")
@@ -439,7 +439,7 @@ final class Iso3166Alpha2Test {
     })
 
     void isAssigned_primitiveChars_worksCorrectly(char c1, char c2, boolean expectedResult) {
-        assertThat(Iso3166Alpha2.isAssigned(c1, c2)).isEqualTo(expectedResult);
+        assertThat(Country.isAssigned(c1, c2)).isEqualTo(expectedResult);
     }
 
     // =========================================================================
@@ -457,14 +457,14 @@ final class Iso3166Alpha2Test {
         "XK | XK (Kosovo)",
         "AX | AX (Åland Islands)"
     })
-    void toString_knownConstants_returnsFormattedString(Iso3166Alpha2 code, String expected) {
+    void toString_knownConstants_returnsFormattedString(Country code, String expected) {
         assertThat(code).hasToString(expected);
     }
 
     @DisplayName("toString() follows \"<CODE> (<countryName>)\" pattern for all constants")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void toString_allConstants_followsPattern(Iso3166Alpha2 code) {
+    @EnumSource(Country.class)
+    void toString_allConstants_followsPattern(Country code) {
         assertThat(code.toString())
             .as("%s.toString()", code.name())
             .startsWith(code.name() + " (")
@@ -478,14 +478,14 @@ final class Iso3166Alpha2Test {
     @DisplayName("values() contains exactly 249 constants")
     @Test
     void enum_values_contains249Constants() {
-        assertThat(Iso3166Alpha2.values()).hasSize(249);
+        assertThat(Country.values()).hasSize(249);
     }
 
     @DisplayName("valueOf() resolves every constant from its code string")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void enum_valueOf_resolvesEveryConstant(Iso3166Alpha2 c) {
-        assertThat(Iso3166Alpha2.valueOf(c.name()))
+    @EnumSource(Country.class)
+    void enum_valueOf_resolvesEveryConstant(Country c) {
+        assertThat(Country.valueOf(c.name()))
             .as("valueOf(\"%s\")", c.name())
             .isSameAs(c);
     }
@@ -494,7 +494,7 @@ final class Iso3166Alpha2Test {
     @Test
     void enum_valueOf_unknownName_throwsIllegalArgumentException() {
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> Iso3166Alpha2.valueOf("XX"));
+            .isThrownBy(() -> Country.valueOf("XX"));
     }
 
     // =========================================================================
@@ -503,8 +503,8 @@ final class Iso3166Alpha2Test {
 
     @DisplayName("Every code is exactly 2 characters long")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void invariant_allCodes_areExactlyTwoChars(Iso3166Alpha2 c) {
+    @EnumSource(Country.class)
+    void invariant_allCodes_areExactlyTwoChars(Country c) {
         assertThat(c.getCode())
             .as("%s.getCode()", c.name())
             .hasSize(2);
@@ -512,8 +512,8 @@ final class Iso3166Alpha2Test {
 
     @DisplayName("Every code consists of two uppercase ASCII letters (A–Z)")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void invariant_allCodes_areUpperCaseAsciiLetters(Iso3166Alpha2 c) {
+    @EnumSource(Country.class)
+    void invariant_allCodes_areUpperCaseAsciiLetters(Country c) {
         assertThat(c.getCode())
             .as("%s.getCode() must be two uppercase ASCII letters", c.name())
             .matches("^[A-Z]{2}$");
@@ -523,7 +523,7 @@ final class Iso3166Alpha2Test {
     @Test
     void invariant_allCodes_areUnique() {
         Set<String> seen = new LinkedHashSet<>();
-        for (Iso3166Alpha2 c : Iso3166Alpha2.values()) {
+        for (Country c : Country.values()) {
             assertThat(seen.add(c.getCode()))
                 .as("Duplicate code detected: %s", c.getCode())
                 .isTrue();
@@ -532,9 +532,9 @@ final class Iso3166Alpha2Test {
 
     @DisplayName("Lookup round-trip: fromCode(c.getCode()) returns the identical instance")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @EnumSource(Iso3166Alpha2.class)
-    void invariant_lookupRoundTrip_returnsIdenticalInstance(Iso3166Alpha2 c) {
-        assertThat(Iso3166Alpha2.fromCode(c.getCode()))
+    @EnumSource(Country.class)
+    void invariant_lookupRoundTrip_returnsIdenticalInstance(Country c) {
+        assertThat(Country.fromCode(c.getCode()))
             .as("fromCode(\"%s\") round-trip", c.getCode())
             .isSameAs(c);
     }
@@ -542,9 +542,9 @@ final class Iso3166Alpha2Test {
     @DisplayName("XK (Kosovo) is included as the only non-standard code and is correctly labelled")
     @Test
     void invariant_xk_isIncludedAndCorrectlyLabelled() {
-        assertThat(Iso3166Alpha2.fromCode("XK"))
+        assertThat(Country.fromCode("XK"))
             .isNotNull()
-            .extracting(Iso3166Alpha2::getCode, Iso3166Alpha2::getCountryName)
+            .extracting(Country::getCode, Country::getCountryName)
             .containsExactly("XK", "Kosovo");
     }
 
@@ -552,7 +552,7 @@ final class Iso3166Alpha2Test {
     @Test
     void invariant_deletedOrReservedCodes_areAbsent() {
         for (String code : Arrays.asList("AA", "ZZ", "CS", "AN", "QM", "XA", "EU", "UN")) {
-            assertThat(Iso3166Alpha2.fromCode(code))
+            assertThat(Country.fromCode(code))
                 .as("'%s' must not be in the enum", code)
                 .isNull();
         }
@@ -561,20 +561,20 @@ final class Iso3166Alpha2Test {
     @DisplayName("AQ is the only constant with a null currency code")
     @Test
     void invariant_onlyAQ_hasNullCurrencyCode() {
-        long nullCount = Arrays.stream(Iso3166Alpha2.values())
+        long nullCount = Arrays.stream(Country.values())
             .filter(c -> c.getCurrency() == null)
             .count();
         assertThat(nullCount)
             .as("Exactly one constant (AQ) should have a null currency code")
             .isEqualTo(1L);
-        assertThat(Iso3166Alpha2.AQ.getCurrency()).isNull();
+        assertThat(Country.AQ.getCurrency()).isNull();
     }
 
     @DisplayName("No two constants share an identical country name")
     @Test
     void invariant_allCountryNames_areUnique() {
         Set<String> seen = new LinkedHashSet<>();
-        for (Iso3166Alpha2 c : Iso3166Alpha2.values()) {
+        for (Country c : Country.values()) {
             assertThat(seen.add(c.getCountryName()))
                 .as("Duplicate country name detected: '%s' (%s)", c.getCountryName(), c.getCode())
                 .isTrue();

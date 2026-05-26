@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 import de.speedbanking.iban.IbanRegistry;
-import de.speedbanking.util.Iso3166Alpha2;
+import de.speedbanking.util.Country;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
@@ -136,9 +136,9 @@ public @interface IbanRegistrySource {
     /**
      * Filter by ISO 4217 currency code(s) (e.g., {@code "EUR"}, {@code {"EUR", "GBP"}}).
      * <p>
-     * The currency code is resolved via {@link Iso3166Alpha2#getCurrency()}, keyed by the
+     * The currency code is resolved via {@link Country#getCurrency()}, keyed by the
      * entry's two-letter country code. Entries whose country code cannot be resolved in
-     * {@link Iso3166Alpha2} (e.g. non-standard territory codes) are excluded when this filter
+     * {@link Country} (e.g. non-standard territory codes) are excluded when this filter
      * is active.
      * <p>
      * An empty array (the default) means no restriction by currency.
@@ -320,7 +320,7 @@ public @interface IbanRegistrySource {
                 predicates.add(e -> e.getIbanLength() <= max);
             }
 
-            // currency (ISO 4217) — resolved via Iso3166Alpha2
+            // currency (ISO 4217) — resolved via Country enum
             if (config.currency().length > 0) {
                 Set<String> currencyCodes = new LinkedHashSet<>(Arrays.asList(config.currency()));
                 predicates.add(e -> {
@@ -333,16 +333,16 @@ public @interface IbanRegistrySource {
         }
 
         /**
-         * Resolves the ISO 4217 currency code for a given registry entry via {@link Iso3166Alpha2}.
+         * Resolves the ISO 4217 currency code for a given registry entry via {@link Country}.
          * <p>
-         * Returns {@code null} if the entry's country code is not present in {@link Iso3166Alpha2}
+         * Returns {@code null} if the entry's country code is not present in {@link Country}
          * (e.g., non-standard territory codes that are not ISO 3166-1 members).
          *
          * @param entry the registry entry to resolve
          * @return the ISO 4217 currency code, or {@code null} if unresolvable
          */
         private static String resolveCurrencyCode(IbanRegistry entry) {
-            Iso3166Alpha2 countryCode = Iso3166Alpha2.fromCode(entry.name());
+            Country countryCode = Country.fromCode(entry.name());
             return countryCode == null ? null : countryCode.getCurrency().getAlphaCode();
         }
 

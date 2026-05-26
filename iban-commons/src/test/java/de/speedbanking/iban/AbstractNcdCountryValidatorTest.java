@@ -3,7 +3,7 @@ package de.speedbanking.iban;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import de.speedbanking.util.Iso3166Alpha2;
+import de.speedbanking.util.Country;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -131,7 +131,7 @@ final class AbstractNcdCountryValidatorTest {
         assertThat(validator.toString())
             .contains("PT[Portugal]")
             .contains(IbanRegistry.PT.getCountryName())
-            .contains(Iso3166Alpha2.PT.getCountryName());
+            .contains(Country.PT.getCountryName());
     }
 }
 

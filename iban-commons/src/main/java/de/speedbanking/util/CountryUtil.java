@@ -20,7 +20,7 @@ package de.speedbanking.util;
  *
  * @since 1.8.0
  *
- * @see Iso3166Alpha2
+ * @see Country
  */
 public final class CountryUtil {
 
@@ -35,7 +35,7 @@ public final class CountryUtil {
 
     /**
      * Checks if the given string is a valid, officially assigned ISO 3166-1 Alpha-2
-     * country code by performing an exact lookup against the full {@link Iso3166Alpha2}
+     * country code by performing an exact lookup against the full {@link Country}
      * enumeration.
      * <p>
      * A pure format check (two uppercase letters A–Z) is <em>not</em> sufficient:
@@ -49,7 +49,7 @@ public final class CountryUtil {
      * @since 1.8.0
      */
     public static boolean isValidCountryCode(final CharSequence countryCode) {
-        return Iso3166Alpha2.isAssigned(countryCode);
+        return Country.isAssigned(countryCode);
     }
 
     /**

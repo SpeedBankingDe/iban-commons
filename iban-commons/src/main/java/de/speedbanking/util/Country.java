@@ -61,9 +61,9 @@ import java.util.Map;
  * For more information, see:
  * <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha-2 Specification</a>
  *
- * @since 1.8.4
+ * @since 1.8.8 (perviously named Iso3166Alpha2 - since 1.8.4)
  */
-public enum Iso3166Alpha2 {
+public enum Country {
 
     // -------------------------------------------------------------------------
     // A
@@ -675,7 +675,7 @@ public enum Iso3166Alpha2 {
     /**
      * Internal unmodifiable primitive-friendly lookup map from packed two-letter code to enum constant.
      */
-    private static final Map<Integer, Iso3166Alpha2> LOOKUP   = buildLookupMap();
+    private static final Map<Integer, Country> LOOKUP   = buildLookupMap();
 
     /** The English short country name as defined in ISO 3166-1. */
     private final String                            countryName;
@@ -687,7 +687,7 @@ public enum Iso3166Alpha2 {
      */
     private final Currency                          currency;
 
-    Iso3166Alpha2(final String countryName, final Currency currency) {
+    Country(final String countryName, final Currency currency) {
         this.countryName = countryName;
         this.currency    = currency;
     }
@@ -703,11 +703,11 @@ public enum Iso3166Alpha2 {
      * Builds the lookup map at class-load time.<br>
      * The initial capacity is sized to avoid any rehashing.
      */
-    private static Map<Integer, Iso3166Alpha2> buildLookupMap() {
-        Iso3166Alpha2[] values = values();
+    private static Map<Integer, Country> buildLookupMap() {
+        Country[] values = values();
         int capacity = (int) (values.length / 0.75f) + 1;
-        Map<Integer, Iso3166Alpha2> map = new HashMap<>(capacity);
-        for (final Iso3166Alpha2 c : values) {
+        Map<Integer, Country> map = new HashMap<>(capacity);
+        for (final Country c : values) {
             String name = c.name();
             map.put(pack(name.charAt(0), name.charAt(1)), c);
         }
@@ -762,10 +762,10 @@ public enum Iso3166Alpha2 {
      *
      * @param code the two-letter ISO 3166-1 Alpha-2 code (case-sensitive, e.g., {@code "LV"});
      *             may be any {@link CharSequence}
-     * @return the matching {@link Iso3166Alpha2} constant,
+     * @return the matching {@link Country} constant,
      *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown
      */
-    public static Iso3166Alpha2 fromCode(final CharSequence code) {
+    public static Country fromCode(final CharSequence code) {
         return code == null || code.length() != CODE_LEN ? null : LOOKUP.get(pack(code.charAt(0), code.charAt(1)));
     }
 

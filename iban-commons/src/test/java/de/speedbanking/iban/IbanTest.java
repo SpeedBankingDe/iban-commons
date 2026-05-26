@@ -17,7 +17,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import de.speedbanking.iban.junit.jupiter.params.converter.BooleanConverter;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.test.TestUtil;
-import de.speedbanking.util.Iso3166Alpha2;
+import de.speedbanking.util.Country;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -388,7 +388,7 @@ final class IbanTest {
             .hasLength(expectedIbanLength)
             .hasCountryCode(expectedCountryCode)
             .hasCountryFlag(expectedCountryFlag)
-            .hasCurrency(Iso3166Alpha2.fromCode(expectedCountryCode).getCurrency())
+            .hasCurrency(Country.fromCode(expectedCountryCode).getCurrency())
             .hasCheckDigits(expectedCheckDigits)
             .hasBban(expectedBban)
             .hasBankCode(expectedBankCode)
@@ -1014,7 +1014,7 @@ final class IbanTest {
      * in the registry.
      * <p>
      * This sweeps all {@link IbanRegistry} entries to ensure no constant is
-     * accidentally misconfigured in {@link de.speedbanking.util.Iso3166Alpha2}.
+     * accidentally misconfigured in {@link de.speedbanking.util.Country}.
      */
     @DisplayName("getCurrencyCode() is consistent with getCurrency().getAlphaCode() — all countries")
     @ParameterizedTest(name = "[{index}] {0}")
@@ -1039,7 +1039,7 @@ final class IbanTest {
     /**
      * Verifies that {@link Iban#getCurrency()} returns a non-null value for all
      * countries currently in the registry — none of them correspond to the only
-     * currency-less {@link de.speedbanking.util.Iso3166Alpha2} entry ({@code AQ}).
+     * currency-less {@link de.speedbanking.util.Country} entry ({@code AQ}).
      */
     @DisplayName("getCurrency() is non-null for all IbanRegistry entries")
     @ParameterizedTest(name = "[{index}] {0}")

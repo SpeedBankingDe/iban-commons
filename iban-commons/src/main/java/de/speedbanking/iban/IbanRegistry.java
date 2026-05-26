@@ -22,10 +22,10 @@ import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
 import de.speedbanking.iban.util.IbanPatternConverter;
+import de.speedbanking.util.Country;
 import de.speedbanking.util.CountryUtil;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
-import de.speedbanking.util.Iso3166Alpha2;
 
 import java.time.YearMonth;
 import java.util.Arrays;
@@ -3054,17 +3054,17 @@ public enum IbanRegistry {
     /**
      * Returns the primary {@link Currency} used in this country.
      * <p>
-     * The currency is resolved via {@link Iso3166Alpha2#getCurrency()}, keyed by this
+     * The currency is resolved via {@link Country#getCurrency()}, keyed by this
      * entry's ISO 3166-1 Alpha-2 country code.
      *
      * @return the {@link Currency} constant for this country
      *
      * @since 1.8.5
      *
-     * @see Iso3166Alpha2#getCurrency()
+     * @see Country#getCurrency()
      */
     public Currency getCurrency() {
-        return Iso3166Alpha2.fromCode(getCountryCode()).getCurrency();
+        return Country.fromCode(getCountryCode()).getCurrency();
     }
 
     /**

@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
+import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
-import de.speedbanking.util.Iso3166Alpha2;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
@@ -259,11 +259,11 @@ final class IbanRegistryTest {
         assertThat(IbanRegistry.DE).hasToString(expected);
     }
 
-    @DisplayName("All entries must exist in Iso3166Alpha2")
+    @DisplayName("All entries must exist in Country Enum")
     @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanRegistry.class)
-    void allEntries_mustExistInIso3166Alpha2(IbanRegistry entry) {
-        assertThat(Iso3166Alpha2.fromCode(entry.getCountryCode())).isNotNull();
+    void allEntries_mustExistInCountryEnum(IbanRegistry entry) {
+        assertThat(Country.fromCode(entry.getCountryCode())).isNotNull();
     }
 
     @DisplayName("All entries must have null or valid lastUpdate date")

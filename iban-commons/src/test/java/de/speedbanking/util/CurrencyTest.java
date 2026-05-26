@@ -241,10 +241,10 @@ final class CurrencyTest {
         }
     }
 
-    @DisplayName("Every constant in Iso3166Alpha2 with a non-null currency resolves to a valid Currency constant")
+    @DisplayName("Every constant in Country with a non-null currency resolves to a valid Currency constant")
     @Test
-    void invariant_iso3166Alpha2_currencyRoundTrip() {
-        for (Iso3166Alpha2 country : Iso3166Alpha2.values()) {
+    void invariant_country_currencyRoundTrip() {
+        for (Country country : Country.values()) {
             Currency currency = country.getCurrency();
             if (currency != null) {
                 // Round-trip: Currency.valueOf(currency.name()) must return the same instance
@@ -256,16 +256,16 @@ final class CurrencyTest {
         }
     }
 
-    @DisplayName("Exactly one Iso3166Alpha2 constant (AQ) has a null currency")
+    @DisplayName("Exactly one Country constant (AQ) has a null currency")
     @Test
-    void invariant_exactlyOneIso3166Alpha2Entry_hasNullCurrency() {
-        long nullCount = Arrays.stream(Iso3166Alpha2.values())
+    void invariant_exactlyOneCountryEntry_hasNullCurrency() {
+        long nullCount = Arrays.stream(Country.values())
             .filter(c -> c.getCurrency() == null)
             .count();
         assertThat(nullCount)
-            .as("Exactly one Iso3166Alpha2 constant should have a null Currency")
+            .as("Exactly one Country constant should have a null Currency")
             .isEqualTo(1L);
-        assertThat(Iso3166Alpha2.AQ.getCurrency()).isNull();
+        assertThat(Country.AQ.getCurrency()).isNull();
     }
 
 }

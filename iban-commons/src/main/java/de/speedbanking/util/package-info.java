@@ -14,10 +14,10 @@
  *     ({@link de.speedbanking.util.Mod97#isValid(CharSequence)}).
  *     Useful for any identifier based on ISO 7064, such as IBAN or the SEPA Creditor Identifier.
  *   </dd>
- *   <dt>{@link de.speedbanking.util.Iso3166Alpha2}</dt>
+ *   <dt>{@link de.speedbanking.util.Country}</dt>
  *   <dd>Enum of all officially assigned ISO 3166-1 Alpha-2 country codes with their English names
  *     and primary currencies. Zero-allocation lookup via
- *     {@link de.speedbanking.util.Iso3166Alpha2#isAssigned(char, char)}.</dd>
+ *     {@link de.speedbanking.util.Country#isAssigned(char, char)}.</dd>
  *   <dt>{@link de.speedbanking.util.Currency}</dt>
  *   <dd>Enum of ISO 4217 currency codes linked to their issuing countries.</dd>
  *   <dt>{@link de.speedbanking.util.CharUtil}</dt>

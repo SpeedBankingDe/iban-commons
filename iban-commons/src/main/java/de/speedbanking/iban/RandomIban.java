@@ -20,8 +20,8 @@ import static java.util.Objects.requireNonNull;
 import de.speedbanking.iban.util.IbanCharType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
+import de.speedbanking.util.Country;
 import de.speedbanking.util.IndexRange;
-import de.speedbanking.util.Iso3166Alpha2;
 
 import java.util.List;
 import java.util.Random;
@@ -343,7 +343,7 @@ public final class RandomIban {
      *   <li><strong>Invalid country code</strong> – the first two characters are replaced with
      *       {@code "XY"}, a non-registered ISO 3166 Alpha-2 code.</li>
      *   <li><strong>Mismatched ISO code</strong> – the first two characters are replaced with a
-     *       valid but randomly chosen {@link Iso3166Alpha2} code that does not match the
+     *       valid but randomly chosen {@link Country} code that does not match the
      *       existing BBAN format.</li>
      *   <li><strong>Structural violation in BBAN</strong> – a letter ({@code 'A'}) is injected
      *       at a random position within the BBAN section to break the expected character
@@ -382,7 +382,7 @@ public final class RandomIban {
                 iban.setCharAt(1, 'Y');
                 break;
             case MISMATCHED_COUNTRY_CODE:
-                Iso3166Alpha2[] countries = Iso3166Alpha2.values();
+                Country[] countries = Country.values();
                 String randomIso = countries[random.nextInt(countries.length)].name();
                 iban.setCharAt(0, randomIso.charAt(0));
                 iban.setCharAt(1, randomIso.charAt(1));

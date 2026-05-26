@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import de.speedbanking.test.TestUtil;
-import de.speedbanking.util.Iso3166Alpha2;
+import de.speedbanking.util.Country;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -217,14 +217,14 @@ final class RandomBicTest {
         assertThat(first.toString()).isNotEqualTo(second.toString());
     }
 
-    static Stream<Iso3166Alpha2> provideAllIsoCountries() {
-        return Arrays.stream(Iso3166Alpha2.values());
+    static Stream<Country> provideAllIsoCountries() {
+        return Arrays.stream(Country.values());
     }
 
     @DisplayName("of(String) should generate a valid BIC-8 for every ISO 3166-1 Alpha-2 country")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideAllIsoCountries")
-    void of_shouldGenerateValidBic8_forEveryIsoCountry(Iso3166Alpha2 country) {
+    void of_shouldGenerateValidBic8_forEveryIsoCountry(Country country) {
         Bic bic = RandomBic.of(country.getCode(), new Random(4711L));
 
         assertThat(bic)
@@ -237,7 +237,7 @@ final class RandomBicTest {
     @DisplayName("ofBic11(String) should generate a valid BIC-11 for every ISO 3166-1 Alpha-2 country")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideAllIsoCountries")
-    void ofBic11_shouldGenerateValidBic11_forEveryIsoCountry(Iso3166Alpha2 country) {
+    void ofBic11_shouldGenerateValidBic11_forEveryIsoCountry(Country country) {
         Bic bic = RandomBic.ofBic11(country.getCode(), new Random(4711L));
 
         assertThat(bic)

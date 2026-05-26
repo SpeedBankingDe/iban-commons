@@ -16,7 +16,7 @@
 package de.speedbanking.util;
 
 /**
- * ISO 4217 currency codes referenced by the countries and territories in {@link Iso3166Alpha2}.
+ * ISO 4217 currency codes referenced by the countries and territories in {@link Country}.
  * <p>
  * Each constant represents a circulating, officially assigned ISO 4217 currency.
  * The enum name is the three-letter alphabetic code (e.g., {@code EUR}, {@code GBP});
@@ -31,7 +31,7 @@ package de.speedbanking.util;
  *   <li>{@link #XPF} — CFP Franc (Pacific territories)</li>
  * </ul>
  * <p>
- * The enum covers exactly the currency codes assigned in {@link Iso3166Alpha2}; it does
+ * The enum covers exactly the currency codes assigned in {@link Country}; it does
  * <em>not</em> claim to be a complete ISO 4217 registry. In particular, precious-metal
  * codes ({@code XAU}, {@code XAG}, …) and the testing code {@code XTS} are absent.
  * <p>
@@ -41,7 +41,7 @@ package de.speedbanking.util;
  *
  * @since 1.8.5
  *
- * @see Iso3166Alpha2
+ * @see Country
  * @see <a href="https://www.iso.org/iso-4217-currency-codes.html">ISO 4217</a>
  */
 public enum Currency {

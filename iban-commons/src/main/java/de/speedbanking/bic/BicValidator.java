@@ -18,7 +18,7 @@ package de.speedbanking.bic;
 import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isNotUpperCase;
 
-import de.speedbanking.util.Iso3166Alpha2;
+import de.speedbanking.util.Country;
 
 /**
  * The core engine for BIC validation.
@@ -91,7 +91,7 @@ public final class BicValidator {
                     return BicValidationError.INVALID_COUNTRY;
                 }
             } else if (i == Bic.COUNTRY_CODE_START + 1) { // country code part 2 & full ISO check
-                if (!Iso3166Alpha2.isAssigned(rawBic.charAt(i - 1), c)) {
+                if (!Country.isAssigned(rawBic.charAt(i - 1), c)) {
                     return BicValidationError.INVALID_COUNTRY;
                 }
             } else if (!isDigitOrUpperCase(c)) { // Location & Branch Code
