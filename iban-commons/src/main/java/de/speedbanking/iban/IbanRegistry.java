@@ -3202,6 +3202,17 @@ public enum IbanRegistry {
     }
 
     /**
+     * Returns the fixed length of the account number for this country.
+     *
+     * @return the account number length
+     *
+     * @since 1.8.8
+     */
+    public int getAccountNumberLength() {
+        return structureData.accountNumberIndexRange.length();
+    }
+
+    /**
      * Returns the index range defining the position of the Account Number within the IBAN.
      *
      * @return the {@code IndexRange} for the account number

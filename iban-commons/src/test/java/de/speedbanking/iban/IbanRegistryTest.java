@@ -135,6 +135,10 @@ final class IbanRegistryTest {
         softly.assertThat(registryDe.getBranchCodeIndexRange()).isNull();
         softly.assertThat(registryDe.hasBranchCode()).isFalse();
 
+        softly.assertThat(registryDe.getAccountNumberLength())
+            .isEqualTo(10)
+            .isEqualTo(registryDe.getAccountNumberIndexRange().length());
+
         softly.assertThat(registryDe.getAccountNumberIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
@@ -186,6 +190,10 @@ final class IbanRegistryTest {
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(9, 14);
         softly.assertThat(registryFr.hasBranchCode()).isTrue();
+
+        softly.assertThat(registryFr.getAccountNumberLength())
+            .isEqualTo(11)
+            .isEqualTo(registryFr.getAccountNumberIndexRange().length());
 
         softly.assertThat(registryFr.getAccountNumberIndexRange())
             .isNotNull()
