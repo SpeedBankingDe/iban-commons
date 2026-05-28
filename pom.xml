@@ -91,6 +91,8 @@
     <properties>
         <javaVersion>8</javaVersion>
 
+        <child.project.url.inherit.append.path>false</child.project.url.inherit.append.path>
+
         <project.dist.name>iban-commons</project.dist.name>
 
         <project.copyrightYear>2026</project.copyrightYear>
