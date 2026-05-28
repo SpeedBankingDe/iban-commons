@@ -11,6 +11,7 @@
   <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci_jdk17_ubuntu.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_ubuntu.yml?label=Build%20(JDK%2011%20Linux)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
   <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci_jdk17_win.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_win.yml?label=Build%20(JDK%2011%20Win)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
   <a href="https://javadoc.io/doc/de.speedbanking/iban-commons"><img src="https://javadoc.io/badge2/de.speedbanking/iban-commons/javadoc.svg?style=flat-square" alt="Javadoc"></a>
+  <a href="https://apidia.net/mvn/de.speedbanking/iban-commons"><img src="https://apidia.net/mvn/de.speedbanking/iban-commons/badge_flat_square.svg" alt="APIdia"></a>
 </div>
 
 **[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [📚 Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
