@@ -16,13 +16,16 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons-parent</artifactId>
     <version>1.8.8-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <name>${project.organization.name} IBAN Commons Parent</name>
     <description>
         Parent POM for the IBAN Commons multi-module project. Provides shared dependency
@@ -38,7 +41,7 @@
 
     <licenses>
         <license>
-            <name>The Apache License, Version 2.0</name>
+            <name>Apache License, Version 2.0</name>
             <url>https://www.apache.org/licenses/LICENSE-2.0</url>
             <distribution>repo</distribution>
         </license>
@@ -89,7 +92,8 @@
     </distributionManagement>
 
     <properties>
-        <javaVersion>8</javaVersion>
+        <releaseJavaVersion>8</releaseJavaVersion>
+        <buildJavaVersion>17</buildJavaVersion>
 
         <child.project.url.inherit.append.path>false</child.project.url.inherit.append.path>
 
@@ -249,7 +253,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${dep.plugin.compiler.version}</version>
                     <configuration>
-                        <release>${javaVersion}</release>
+                        <release>${releaseJavaVersion}</release>
                         <debug>true</debug>
                         <debuglevel>lines,vars,source</debuglevel>
                         <showWarnings>true</showWarnings>
@@ -326,7 +330,7 @@
 
                             <manifestEntries>
                                 <Build-Time>${maven.build.timestamp}</Build-Time>
-                                <Project-Java-Version>${javaVersion}</Project-Java-Version>
+                                <Project-Java-Version>${releaseJavaVersion}</Project-Java-Version>
                                 <Project-Url>${project.url}</Project-Url>
                                 <Project-Inception-Year>${project.inceptionYear}</Project-Inception-Year>
                                 <Creation-User>${developer1Id} (${developer1Name}), ${developer2Id} (${developer2Name})</Creation-User>
@@ -341,8 +345,8 @@
                     <version>${dep.plugin.javadoc.version}</version>
                     <configuration>
                         <failOnError>true</failOnError>
-                        <release>${javaVersion}</release>
-                        <source>${javaVersion}</source>
+                        <release>${releaseJavaVersion}</release>
+                        <source>${releaseJavaVersion}</source>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <maxmemory>1024m</maxmemory>
                         <doclint>all,-missing</doclint>
@@ -527,7 +531,7 @@
                                 <version>[3.9.0,)</version>
                             </requireMavenVersion>
                             <requireJavaVersion>
-                                <version>[17,)</version>
+                                <version>[${buildJavaVersion},)</version>
                             </requireJavaVersion>
 
                             <requirePluginVersions>

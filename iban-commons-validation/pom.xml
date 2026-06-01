@@ -27,6 +27,7 @@
 
     <artifactId>iban-commons-validation</artifactId>
     <packaging>jar</packaging>
+
     <name>${project.organization.name} IBAN Commons Validation</name>
     <description>
         Jakarta Bean Validation (JSR 380) constraints for IBAN and BIC.
