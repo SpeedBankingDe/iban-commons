@@ -32,11 +32,11 @@ import java.util.regex.Pattern;
 /**
  * Entry point for AssertJ custom assertions for the {@link Bic} class,
  * including the concrete assertion implementation {@link BicAssert}.
- *
- * <p>To use, import statically:
+ * <p>
+ * To use, import statically:
  * <pre>{@code import static de.speedbanking.bic.BicAssertions.*;}</pre>
- *
- * <p>Example usage:
+ * <p>
+ * Example usage:
  * <pre>{@code
  * assertThat(Bic.of("MARKDEFF"))
  *     .isBic8()

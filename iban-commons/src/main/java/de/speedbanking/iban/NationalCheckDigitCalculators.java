@@ -25,8 +25,8 @@ import java.util.stream.IntStream;
 /**
  * Container class for all country-specific {@link NationalCheckDigitCalculator}
  * implementations.
- *
- * <p>Contains all National Check Digit (NCD) algorithms used in IBAN structures.
+ * <p>
+ * Contains all National Check Digit (NCD) algorithms used in IBAN structures.
  *
  * <h3>Design rules</h3>
  * <ul>

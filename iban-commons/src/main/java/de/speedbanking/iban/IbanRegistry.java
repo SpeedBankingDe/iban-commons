@@ -46,7 +46,6 @@ import java.util.regex.Pattern;
  * <p>
  * The **International Organization for Standardization (ISO)** designated **SWIFT** as the
  * Registration Authority for ISO 13616.
- *
  * <p>
  * **BBAN Pattern Notation** (defined in ISO 13616):
  * <ul>
