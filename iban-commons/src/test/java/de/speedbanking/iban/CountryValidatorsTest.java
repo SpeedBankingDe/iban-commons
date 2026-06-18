@@ -103,9 +103,19 @@ final class CountryValidatorsTest {
             IndexRange ncdIndexRange = countryData.getNationalCheckDigitIndexRange();
             for (int idx = ncdIndexRange.getBegin(); idx < ncdIndexRange.getEnd(); idx++) {
                 char c = badNcdIban.charAt(idx);
-                badNcdIban.setCharAt(idx, c == '0' ? '1' : '0');
+
+                if (Character.isDigit(c)) {
+                    badNcdIban.setCharAt(idx, c == '0' ? '1' : '0');
+                } else {
+                    badNcdIban.setCharAt(idx, c == 'Z' ? 'A' : (char) (c + 1));
+                }
             }
+
+            IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
+
             IbanValidator.fixCheckDigits(badNcdIban);
+
+            IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
 
             assertThat(validator.validateIban(badNcdIban))
                 .as("Validation should fail for %s using iban with invalid NCD '%s'", countryData.name(), badNcdIban)

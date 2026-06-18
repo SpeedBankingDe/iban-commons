@@ -48,21 +48,18 @@ public final class BicValidator {
      * @since 1.8.0
      */
     static BicValidationResult validate(final CharSequence rawBic) {
-
         if (rawBic == null || rawBic.length() == 0) {
             return BicValidationResult.invalid(BicValidationError.EMPTY);
         }
 
-        final int len = rawBic.length();
+        int len = rawBic.length();
 
         if (len != Bic.BIC8_LENGTH && len != Bic.BIC11_LENGTH) {
             return BicValidationResult.invalid(BicValidationError.INCORRECT_LENGTH);
         }
 
         BicValidationError error = validateCharacters(rawBic, len);
-        final BicValidationError reason = error;
-
-        return error == null ? BicValidationResult.valid(rawBic) : BicValidationResult.invalid(reason);
+        return error == null ? BicValidationResult.valid(rawBic) : BicValidationResult.invalid(error);
     }
 
     /**
@@ -77,7 +74,7 @@ public final class BicValidator {
      * @param len the pre-calculated length of the sequence
      * @return the first encountered {@link BicValidationError}, or {@code null} if all characters are valid
      */
-    private static BicValidationError validateCharacters(final CharSequence rawBic, final int len) {
+    static BicValidationError validateCharacters(final CharSequence rawBic, final int len) {
         for (int i = 0; i < len; i++) {
             char c = rawBic.charAt(i);
 

@@ -72,15 +72,20 @@ import java.util.Arrays;
  */
 public final class IbanValidator {
 
-    /** Sentinel value indicating a normalization or validation error. */
-    static final int                         INVALID_INPUT     = -1;
-
     /**
      * Return value for a failed Mod 97-10 calculation.
      * <p>
      * Delegates to {@link Mod97#INVALID_REMAINDER} for a consistent sentinel across the API.
      */
-    static final int                         INVALID_MOD97     = Mod97.INVALID_REMAINDER;
+    static final int                         INVALID_MOD97            = Mod97.INVALID_REMAINDER;
+
+    /** Sentinel value indicating a normalization or validation error. */
+    @SuppressWarnings("EnumOrdinal")
+    private static final int                 INPUT_ILLEGAL_CHARACTERS = -IbanValidationError.ILLEGAL_CHARACTERS.ordinal();
+
+    /** Sentinel value indicating that the input length exceeded the maximum allowed bounds. */
+    @SuppressWarnings("EnumOrdinal")
+    private static final int                 INPUT_INCORRECT_LENGTH   = -IbanValidationError.INCORRECT_LENGTH.ordinal();
 
     /**
      * Internal cache of all country-specific validators, indexed by the ordinal
@@ -89,7 +94,7 @@ public final class IbanValidator {
      * This field is thread-safe as the array and the contained {@link CountryValidator}
      * instances are effectively immutable.
      */
-    private static final CountryValidator[]  VALIDATORS        =
+    private static final CountryValidator[]  VALIDATORS =
         Arrays.stream(IbanRegistry.values())
             .map(IbanRegistry::name)
             .map(IbanValidator::loadCountryValidator)
@@ -165,8 +170,9 @@ public final class IbanValidator {
      * @param output     the destination array; must hold at least {@code inputLen} characters
      * @param allowSpace if {@code true}, space characters are silently omitted from the output
      * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
-     * @return the number of characters written to {@code outputBuffer},
-     *         or {@value #INVALID_INPUT} if an illegal character was encountered
+     * @return the number of characters written to {@code output},
+     *         {@value #INPUT_INCORRECT_LENGTH} if the input exceeds {@value #MAX_IBAN_LENGTH} or
+     *         {@value #INPUT_ILLEGAL_CHARACTERS} if an illegal character was encountered
      *
      * @since 1.8.5
      */
@@ -176,12 +182,12 @@ public final class IbanValidator {
 
         if (!allowSpace && !allowLower) {
             if (inputLen > MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
+                return INPUT_INCORRECT_LENGTH;
             }
             for (int i = 0; i < inputLen; i++) {
                 output[i] = input.charAt(i);
                 if (!isDigitOrUpperCase(output[i])) {
-                    return INVALID_INPUT;
+                    return INPUT_ILLEGAL_CHARACTERS;
                 }
             }
             return inputLen;
@@ -194,14 +200,14 @@ public final class IbanValidator {
                 output[targetIdx++] = c;
             } else if (isLowerCase(c)) {
                 if (!allowLower) {
-                    return INVALID_INPUT;
+                    return INPUT_ILLEGAL_CHARACTERS;
                 }
                 output[targetIdx++] = (char) (c - 32);
             } else if (c != ' ' || !allowSpace) {
-                return INVALID_INPUT;
+                return INPUT_ILLEGAL_CHARACTERS;
             }
             if (targetIdx >= MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
+                return INPUT_INCORRECT_LENGTH;
             }
         }
         return targetIdx;
@@ -223,7 +229,8 @@ public final class IbanValidator {
      * @param allowSpace if {@code true}, space characters are silently omitted from the output
      * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
      * @return the number of characters written to {@code output},
-     *         or {@value #INVALID_INPUT} if an illegal character was encountered
+     *         {@value #INPUT_INCORRECT_LENGTH} if the input exceeds {@value #MAX_IBAN_LENGTH} or
+     *         {@value #INPUT_ILLEGAL_CHARACTERS} if an illegal character was encountered
      *
      * @since 1.8.5
      */
@@ -233,7 +240,7 @@ public final class IbanValidator {
 
         if (!allowSpace && !allowLower) {
             if (inputLen > MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
+                return INPUT_INCORRECT_LENGTH;
             }
 
             // Fast path: one combined pass — validate and copy simultaneously.
@@ -243,7 +250,7 @@ public final class IbanValidator {
             for (int i = 0; i < inputLen; i++) {
                 output[i] = input.charAt(i);
                 if (!isDigitOrUpperCase(output[i])) {
-                    return INVALID_INPUT;
+                    return INPUT_ILLEGAL_CHARACTERS;
                 }
             }
             return inputLen;
@@ -259,14 +266,14 @@ public final class IbanValidator {
                 output[targetIdx++] = c;
             } else if (isLowerCase(c)) {
                 if (!allowLower) {
-                    return INVALID_INPUT;
+                    return INPUT_ILLEGAL_CHARACTERS;
                 }
                 output[targetIdx++] = (char) (c - 32);
             } else if (c != ' ' || !allowSpace) {
-                return INVALID_INPUT;
+                return INPUT_ILLEGAL_CHARACTERS;
             }
             if (targetIdx >= MAX_IBAN_LENGTH) {
-                return INVALID_INPUT;
+                return INPUT_INCORRECT_LENGTH;
             }
         }
         return targetIdx;
@@ -412,15 +419,15 @@ public final class IbanValidator {
             normIban,
             allowSpace, IbanConfig.isAllowLowercase());
 
-        if (normLen == INVALID_INPUT) {
+        if (normLen == INPUT_ILLEGAL_CHARACTERS) {
             return IbanValidationResult.invalid(IbanValidationError.ILLEGAL_CHARACTERS);
-        }
-
-        // check min/max lengths
-        if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
-            return normLen == 0
-                ? IbanValidationResult.invalid(IbanValidationError.EMPTY)
-                : IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
+        } else if (normLen == INPUT_INCORRECT_LENGTH) {
+            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
+        } else if (normLen < MIN_IBAN_LENGTH) { // check empty and min length
+            if (normLen == 0) {
+                return IbanValidationResult.invalid(IbanValidationError.EMPTY);
+            }
+            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
@@ -505,7 +512,7 @@ public final class IbanValidator {
             normIban,
             allowSpace, IbanConfig.isAllowLowercase());
 
-        if (normLen == INVALID_INPUT) {
+        if (normLen == INPUT_ILLEGAL_CHARACTERS) {
             return IbanValidationResult.invalid(IbanValidationError.ILLEGAL_CHARACTERS);
         }
 
@@ -584,40 +591,39 @@ public final class IbanValidator {
 
     /**
      * Calculates the correct ISO 7064 Mod 97-10 check digits for the given IBAN string
-     * and overwrites the placeholders (usually {@code "00"}) at the check digit positions
-     * (index 2 and 3).
+     * and overwrites the digits at the check digit positions (index 2 and 3).
      * <p>
      * This method temporarily sets the check digits to {@code "00"} to calculate the
      * required remainder {@code R}, then determines the final check digits {@code CD = 98 - R}.
+     * <p>
+     * Note: If the input argument is an instance of {@link StringBuilder}, it will be
+     * modified in-place to achieve zero-allocation performance.
      *
      * @param iban the IBAN character sequence (must already be of the full IBAN length,
      *             with placeholders at the check digit position); if a {@code StringBuilder}
      *             is passed, it is mutated in place, otherwise a copy is created
-     * @return the same {@code StringBuilder} instance with the correct check digits applied
-     * @throws IllegalArgumentException if {@code iban} is {@code null} or its length is outside
-     *                                  the valid IBAN range [{@link IbanRegistry#MIN_IBAN_LENGTH},
-     *                                  {@link IbanRegistry#MAX_IBAN_LENGTH}]
+     * @return a {@code StringBuilder} instance with the correct check digits applied
+     * @throws InvalidIbanException if the structural validation fails for reasons other than the checksum
      */
     public static StringBuilder fixCheckDigits(final CharSequence iban) {
-        if (iban == null) {
-            throw new IllegalArgumentException("IBAN must not be null");
-        }
-        final int len = iban.length();
-        if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
-            throw new IllegalArgumentException(
-                "IBAN length " + len + " is outside the valid range [" + MIN_IBAN_LENGTH + ", " + MAX_IBAN_LENGTH + "]");
+        IbanValidationResult result = validate(iban);
+
+        if (result.error != null && result.error != IbanValidationError.INVALID_CHECKSUM) {
+            throw InvalidIbanException.of(result.error, iban);
         }
 
-        final StringBuilder sb = iban instanceof StringBuilder
-            ? (StringBuilder) iban
-            : new StringBuilder(iban);
+        StringBuilder sb = iban instanceof StringBuilder ? (StringBuilder) iban : new StringBuilder(iban);
+
+        if (result.isValid()) {
+            return sb;
+        }
 
         // set placeholders to "00" (required for correct calculation context)
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, '0');
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, '0');
 
         // calculate the required check digits value (98 - modulo result)
-        final int checkDigitsValue = 98 - Mod97.calculate(sb);
+        int checkDigitsValue = 98 - Mod97.calculate(sb);
 
         // manual zero-padding: faster than String.format
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, (char) ('0' + (checkDigitsValue / 10)));

@@ -8,6 +8,7 @@ import static de.speedbanking.iban.IbanValidationError.INVALID_CHECKSUM;
 import static de.speedbanking.iban.IbanValidationError.INVALID_CHECK_DIGITS;
 import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
 import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -379,12 +380,15 @@ final class IbanValidatorTest {
             .isEqualTo(IbanValidator.INVALID_MOD97);
     }
 
-    @DisplayName("fixCheckDigits: should throw IllegalArgumentException when input is null")
+    @DisplayName("fixCheckDigits: should throw InvalidIbanException when input is null")
     @Test
     void fixCheckDigits_shouldThrowException_whenInputIsNull() {
-        assertThatThrownBy(() -> IbanValidator.fixCheckDigits(null))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("IBAN must not be null");
+        assertThatInvalidIbanException()
+            .isThrownBy(() -> IbanValidator.fixCheckDigits(null))
+            .withCause(null)
+            .withMessage("%s (%s)",
+                EMPTY.getText(), EMPTY)
+            .hasFieldOrPropertyWithValue("reason", EMPTY);
     }
 
     @DisplayName("fixCheckDigits: should throw IllegalArgumentException when length is out of bounds")
@@ -394,9 +398,12 @@ final class IbanValidatorTest {
         "DE0044447777111111114747111100471191234" // too long (above MAX_IBAN_LENGTH)
     })
     void fixCheckDigits_shouldThrowException_whenLengthIsOutOfBounds(String invalidIban) {
-        assertThatThrownBy(() -> IbanValidator.fixCheckDigits(invalidIban))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageStartingWith("IBAN length ");
+        assertThatInvalidIbanException()
+            .isThrownBy(() -> IbanValidator.fixCheckDigits(invalidIban))
+            .withCause(null)
+            .withMessage("%s (%s): '%s'",
+                INCORRECT_LENGTH.getText(), INCORRECT_LENGTH, invalidIban)
+            .hasFieldOrPropertyWithValue("reason", INCORRECT_LENGTH);
     }
 
     @DisplayName("fixCheckDigits: should reuse existing StringBuilder instance to prevent re-allocation")
