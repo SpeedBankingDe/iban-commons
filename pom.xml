@@ -593,10 +593,13 @@
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <pushChanges>false</pushChanges>
                         <localCheckout>true</localCheckout>
-                        <preparationGoals>clean install</preparationGoals>
+                        <preparationGoals>clean verify</preparationGoals>
                         <useReleaseProfile>false</useReleaseProfile>
                         <goals>deploy</goals>
                         <releaseProfiles>release</releaseProfiles>
+                        <scmReleaseCommitComment>chore(release): prepare release @{releaseLabel}</scmReleaseCommitComment>
+                        <scmDevelopmentCommitComment>chore(release): prepare for next development iteration</scmDevelopmentCommitComment>
+                        <scmBranchCommitComment>chore(release): branch @{releaseLabel}</scmBranchCommitComment>
                     </configuration>
                 </plugin>
 
