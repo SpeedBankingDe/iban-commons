@@ -1,6 +1,7 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsValid;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanString;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
@@ -53,7 +54,9 @@ final class IbanTest {
     static void prepareIbanConfig() {
         IbanConfig.reset(IbanConfig.builder()
             .validateNcd(true)
-            .calculateNcd(true).build());
+            .calculateNcd(true)
+            .allowSpace(true)
+            .build());
     }
 
     @AfterAll
@@ -74,7 +77,6 @@ final class IbanTest {
         "GB33 BUKB 2020 1555 5555 55",              // United Kingdom
         "NL91 ABNA 0417 1643 00"                    // Netherlands
     })
-    @ResourceLock(IbanConfigTest.RESOURCE_NAME)
     void of_shouldReturnIban_whenIbanIsValid(String ibanInput) {
         String ibanInputNorm = ibanInput.replace(" ", "");
 
@@ -124,6 +126,24 @@ final class IbanTest {
             IbanConfig.reset();
         }
 
+    }
+
+    @DisplayName("isValid: should validate maximum length (33 chars) IBANs when space or lowercase is allowed")
+    @Test
+    void isValid_shouldValidateMaxLengthIban_withSpacesOrLowercase() {
+        String maxLengthIbanSpaced = "RU03 0445 2522 5408 1781 0538 0913 1041 9";
+        String maxLengthIbanLower = "ru0304452522540817810538091310419";
+        try {
+            IbanConfig.reset(IbanConfig.builder()
+                .allowSpace(true)
+                .allowLowercase(true)
+                .build());
+
+            assertThatIbanIsValid(maxLengthIbanSpaced);
+            assertThatIbanIsValid(maxLengthIbanLower);
+        } finally {
+            IbanConfig.reset();
+        }
     }
 
     /**
@@ -213,6 +233,17 @@ final class IbanTest {
         assertThat(countryData.getIbanExample())
             .as("Valid IBAN for %s should match pattern", countryData.getCountryCode())
             .matches(ibanPattern);
+    }
+
+    @DisplayName("Example IBAN string variants should be valid")
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("provideBaseCountries")
+    void exampleIbanStringVariants_shouldBeValid(IbanRegistry countryData) {
+        String ibanStr = countryData.getIbanExample();
+        assertThatIbanIsValid(ibanStr);
+        Iban iban = Iban.of(ibanStr);
+        assertThatIbanIsValid(iban.toFormattedString());
+        assertThatIbanIsValid(iban.toComponentString());
     }
 
     /**

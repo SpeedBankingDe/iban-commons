@@ -1,5 +1,7 @@
 package de.speedbanking.iban;
 
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.*;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -302,11 +304,12 @@ final class IbanRegistryTest {
     @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanRegistry.class)
     void allEntries_mustHaveValidIbanExample(IbanRegistry entry) {
-        assertThat(entry.getIbanExample())
+        String ibanExample = entry.getIbanExample();
+        assertThatIbanString(ibanExample)
             .as("Example IBAN missing for %s", entry.getCountryCode())
-            .isNotNull();
+            .isValid();
 
-        assertThatCode(() -> Iban.of(entry.getIbanExample())).doesNotThrowAnyException();
+        assertThatCode(() -> Iban.of(ibanExample)).doesNotThrowAnyException();
     }
 
     @DisplayName("Should verify ContactData properties and immutability")

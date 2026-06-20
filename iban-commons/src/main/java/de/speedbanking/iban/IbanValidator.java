@@ -197,17 +197,20 @@ public final class IbanValidator {
         for (int i = 0; i < inputLen; i++) {
             char c = input.charAt(i);
             if (isDigitOrUpperCase(c)) {
+                if (targetIdx >= MAX_IBAN_LENGTH) {
+                    return INPUT_INCORRECT_LENGTH;
+                }
                 output[targetIdx++] = c;
             } else if (isLowerCase(c)) {
                 if (!allowLower) {
                     return INPUT_ILLEGAL_CHARACTERS;
                 }
+                if (targetIdx >= MAX_IBAN_LENGTH) {
+                    return INPUT_INCORRECT_LENGTH;
+                }
                 output[targetIdx++] = (char) (c - 32);
             } else if (c != ' ' || !allowSpace) {
                 return INPUT_ILLEGAL_CHARACTERS;
-            }
-            if (targetIdx >= MAX_IBAN_LENGTH) {
-                return INPUT_INCORRECT_LENGTH;
             }
         }
         return targetIdx;
@@ -263,17 +266,20 @@ public final class IbanValidator {
         for (int i = 0; i < inputLen; i++) {
             char c = input.charAt(i);
             if (isDigitOrUpperCase(c)) {
+                if (targetIdx >= MAX_IBAN_LENGTH) {
+                    return INPUT_INCORRECT_LENGTH;
+                }
                 output[targetIdx++] = c;
             } else if (isLowerCase(c)) {
                 if (!allowLower) {
                     return INPUT_ILLEGAL_CHARACTERS;
                 }
+                if (targetIdx >= MAX_IBAN_LENGTH) {
+                    return INPUT_INCORRECT_LENGTH;
+                }
                 output[targetIdx++] = (char) (c - 32);
             } else if (c != ' ' || !allowSpace) {
                 return INPUT_ILLEGAL_CHARACTERS;
-            }
-            if (targetIdx >= MAX_IBAN_LENGTH) {
-                return INPUT_INCORRECT_LENGTH;
             }
         }
         return targetIdx;
