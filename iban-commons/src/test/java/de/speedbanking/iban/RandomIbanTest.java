@@ -1,5 +1,7 @@
 package de.speedbanking.iban;
 
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanString;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,7 +10,6 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 
-import de.speedbanking.iban.junit.jupiter.api.IbanAssertions;
 import de.speedbanking.iban.util.IbanCharType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
@@ -69,13 +70,13 @@ final class RandomIbanTest {
     void of_shouldReturnValidIban_whenInvokedByCountryCode(String countryCode) {
         Iban iban = RandomIban.of(countryCode);
 
-        IbanAssertions.assertThat(iban)
+        assertThatIban(iban)
             .isNotNull()
             .hasCountryCode(countryCode);
 
-        assertThat(IbanValidator.isValid(iban.toString()))
+        assertThatIbanString(iban.toString())
             .as("Expected valid IBAN for country %s but got: %s", countryCode, iban)
-            .isTrue();
+            .isValid();
     }
 
     @Test
@@ -90,12 +91,12 @@ final class RandomIbanTest {
     void of_byRegistry_returnsValidIban(IbanRegistry country) {
         Iban iban = RandomIban.of(country);
 
-        IbanAssertions.assertThat(iban)
+        assertThatIban(iban)
             .isNotNull();
 
-        assertThat(IbanValidator.isValid(iban.toString()))
+        assertThatIbanString(iban.toString())
             .as("Expected valid IBAN for %s but got: %s", country, iban)
-            .isTrue();
+            .isValid();
     }
 
     @Test
@@ -105,11 +106,11 @@ final class RandomIbanTest {
         for (int i = 0; i < 20; i++) {
             Iban iban = RandomIban.ofSepa();
 
-            IbanAssertions.assertThat(iban).isNotNull();
+            assertThatIban(iban).isNotNull();
 
-            assertThat(IbanValidator.isValid(iban.toString()))
+            assertThatIbanString(iban.toString())
                 .as("ofSepa() returned an invalid IBAN: %s", iban)
-                .isTrue();
+                .isValid();
 
             IbanRegistry entry = IbanRegistry.getByCode(iban.getCountryCode());
             assertThat(sepaCountries)
@@ -122,20 +123,18 @@ final class RandomIbanTest {
     void any_returnsValidIban() {
         Iban iban = RandomIban.any();
 
-        IbanAssertions.assertThat(iban)
-            .isNotNull();
-        assertThat(IbanValidator.isValid(iban.toString())).isTrue();
+        assertThatIban(iban).isNotNull();
+        assertThatIbanString(iban.toString()).isValid();
         assertThat(IbanValidator.isValid(iban)).isTrue();
 
-        IbanAssertions.assertThatIbanIsValid(iban.toString());
-
+        assertThatIbanString(iban.toString()).isValid();
     }
 
     @Test
     void builder_country_byString_buildsValidIban() {
         Iban iban = RandomIban.builder().country("DE").build();
 
-        IbanAssertions.assertThat(iban)
+        assertThatIban(iban)
             .isNotNull()
             .hasCountryCode("DE");
         assertThat(IbanValidator.isValid(iban.toString())).isTrue();
@@ -153,7 +152,7 @@ final class RandomIbanTest {
     void builder_country_byRegistry_buildsValidIban() {
         Iban iban = RandomIban.builder().country(IbanRegistry.FR).build();
 
-        IbanAssertions.assertThat(iban)
+        assertThatIban(iban)
             .isNotNull()
             .hasCountryCode("FR");
         assertThat(IbanValidator.isValid(iban.toString())).isTrue();
@@ -173,7 +172,7 @@ final class RandomIbanTest {
         for (int i = 0; i < 20; i++) {
             Iban iban = RandomIban.builder().sepaOnly().build();
 
-            IbanAssertions.assertThat(iban).isNotNull();
+            assertThatIban(iban).isNotNull();
             assertThat(IbanValidator.isValid(iban.toString())).isTrue();
             IbanRegistry entry = IbanRegistry.getByCode(iban.getCountryCode());
             assertThat(sepaCountries)

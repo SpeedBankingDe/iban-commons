@@ -2,6 +2,7 @@ package de.speedbanking.iban.junit.jupiter.api;
 
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsValid;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanString;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -70,7 +71,7 @@ final class IbanAssertionsTest {
     @DisplayName("assertThatIban(Iban) - null is forwarded as-is; isNull() succeeds")
     @Test
     void assertThat_iban_null_isNullSucceeds() {
-        assertThatIban(null).isNull();
+        assertThatIban((Iban) null).isNull();
     }
 
     @DisplayName("assertThat(Iban) - static factory overload wraps a pre-parsed Iban directly")
@@ -459,7 +460,86 @@ final class IbanAssertionsTest {
             .hasMessage("The IBAN to compare against must not be null");
     }
 
-    @DisplayName("SoftAssertions - using() proxy collects failures without throwing immediately")
+    @DisplayName("isSepa() - convenience shorthand for isSepa(true) — success path")
+    @Test
+    void isSepa_noArg_success() {
+        assertThatIban(VALID_CY).isSepa();
+    }
+
+    @DisplayName("isNotSepa() - convenience shorthand for isSepa(false) — success path")
+    @Test
+    void isNotSepa_success() {
+        // Pakistan (PK) is not a SEPA country
+        assertThatIban("PK36SCBL0000001123456702").isNotSepa();
+    }
+
+    @DisplayName("isSepa() - fails with descriptive message for non-SEPA IBAN")
+    @Test
+    void isSepa_noArg_fail() {
+        Iban iban = Iban.of("PK36SCBL0000001123456702");
+        assertThatThrownBy(() -> assertThatIban(iban).isSepa())
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected SEPA participation to be 'true'");
+    }
+
+    @DisplayName("isNotSepa() - fails with descriptive message for SEPA IBAN")
+    @Test
+    void isNotSepa_fail() {
+        Iban iban = Iban.of(VALID_CY);
+        assertThatThrownBy(() -> assertThatIban(iban).isNotSepa())
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected SEPA participation to be 'false'");
+    }
+
+    @DisplayName("assertThatIbanString(CharSequence).isValid() - valid IBAN succeeds")
+    @Test
+    void assertThatIbanString_isValid_success() {
+        assertThatIbanString(VALID_DE).isValid();
+    }
+
+    @DisplayName("assertThatIbanString(CharSequence).isNotValid() - invalid IBAN succeeds")
+    @Test
+    void assertThatIbanString_isNotValid_success() {
+        assertThatIbanString("INVALID").isNotValid();
+    }
+
+    @DisplayName("assertThatIbanString(CharSequence).isNotValid() - null is treated as not valid")
+    @Test
+    void assertThatIbanString_isNotValid_null_succeeds() {
+        assertThatIbanString(null).isNotValid();
+    }
+
+    @DisplayName("assertThatIbanString(CharSequence).isValid() - null fails with isNotNull()")
+    @Test
+    void assertThatIbanString_isValid_null_fails() {
+        assertThatThrownBy(() -> assertThatIbanString(null).isValid())
+            .isInstanceOf(AssertionError.class);
+    }
+
+    @DisplayName("assertThatIbanString(CharSequence).isValid() - invalid IBAN fails with descriptive message")
+    @Test
+    void assertThatIbanString_isValid_invalid_fails() {
+        assertThatThrownBy(() -> assertThatIbanString("INVALID").isValid())
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected 'INVALID' to be a valid IBAN but it was not");
+    }
+
+    @DisplayName("assertThatIbanString(CharSequence).isNotValid() - valid IBAN fails with descriptive message")
+    @Test
+    void assertThatIbanString_isNotValid_valid_fails() {
+        assertThatThrownBy(() -> assertThatIbanString(VALID_DE).isNotValid())
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Expected '" + VALID_DE + "' to be an invalid IBAN but it was valid");
+    }
+
+    @DisplayName("assertThatIbanString - supports CharSequence (StringBuilder)")
+    @Test
+    @SuppressWarnings("UnnecessaryStringBuilder")
+    void assertThatIbanString_charSequence_stringBuilder() {
+        assertThatIbanString(new StringBuilder(VALID_DE)).isValid();
+        assertThatIbanString(new StringBuilder("NOPE")).isNotValid();
+    }
+
     @Test
     void softAssertions_using_proxy() {
         SoftAssertions softly = new SoftAssertions();

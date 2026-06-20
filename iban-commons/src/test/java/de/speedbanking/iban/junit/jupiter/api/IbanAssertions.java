@@ -58,6 +58,42 @@ public class IbanAssertions extends Assertions {
     }
 
     /**
+     * Creates a new {@link IbanAssert} wrapping an already-parsed {@link Iban} instance.
+     * <p>
+     * Convenience overload of {@link #assertThat(Iban)} that allows a consistent
+     * {@code assertThatIban(…)} call style regardless of whether the caller holds a
+     * raw {@link CharSequence} or an already-parsed {@link Iban} object.
+     *
+     * @param actual the {@link Iban} instance to assert on, or {@code null}
+     * @return the custom assertion object
+     *
+     * @since 1.8.8
+     */
+    public static IbanAssert assertThatIban(Iban actual) {
+        return new IbanAssert(actual);
+    }
+
+    /**
+     * Creates a new {@link IbanStringAssert} for validating a raw character sequence
+     * <em>without</em> parsing it into an {@link Iban} instance first.
+     * <p>
+     * Use this entry point when the string under test may be invalid and the assertion
+     * should check validity as part of the test — e.g. {@code assertThatIban("INVALID").isNotValid()}.
+     * <p>
+     * Unlike {@link #assertThatIban(CharSequence)}, this method never throws an
+     * {@link AssertionError} during construction; validity is evaluated lazily by the
+     * assertion methods {@link IbanStringAssert#isValid()} and {@link IbanStringAssert#isNotValid()}.
+     *
+     * @param actual the IBAN character sequence to assert on, or {@code null}
+     * @return the string-level assertion object
+     *
+     * @since 1.8.8
+     */
+    public static IbanStringAssert assertThatIbanString(CharSequence actual) {
+        return new IbanStringAssert(actual);
+    }
+
+    /**
      * @deprecated Use {@link #assertThatIban(CharSequence)} instead.
      */
     @Deprecated // (since = "1.8.7", forRemoval = true)
@@ -465,6 +501,32 @@ public class IbanAssertions extends Assertions {
         }
 
         /**
+         * Asserts that the IBAN's country participates in SEPA.
+         * <p>
+         * Convenience shorthand for {@link #isSepa(boolean) isSepa(true)}.
+         *
+         * @return {@code this} assertion object for method chaining
+         *
+         * @since 1.8.8
+         */
+        public IbanAssert isSepa() {
+            return isSepa(true);
+        }
+
+        /**
+         * Asserts that the IBAN's country does <em>not</em> participate in SEPA.
+         * <p>
+         * Convenience shorthand for {@link #isSepa(boolean) isSepa(false)}.
+         *
+         * @return {@code this} assertion object for method chaining
+         *
+         * @since 1.8.8
+         */
+        public IbanAssert isNotSepa() {
+            return isSepa(false);
+        }
+
+        /**
          * Asserts that this IBAN compares as equal to the given {@code other} IBAN via
          * {@link Iban#compareTo(Iban)}, i.e. {@code compareTo} returns {@code 0}.
          * <p>
@@ -488,4 +550,55 @@ public class IbanAssertions extends Assertions {
 
     }
 
+    /**
+     * AssertJ assertions for a raw IBAN character sequence, evaluated <em>without</em>
+     * prior parsing.
+     * <p>
+     * Obtain an instance via {@link IbanAssertions#assertThatIbanString(CharSequence)}.
+     * The primary use-cases are validity checks on potentially-invalid input:
+     * <pre>{@code
+     * assertThatIbanString("DE89370400440532013000").isValid();
+     * assertThatIbanString("INVALID").isNotValid();
+     * }</pre>
+     *
+     * @since 1.8.8
+     */
+    public static class IbanStringAssert extends AbstractObjectAssert<IbanStringAssert, CharSequence> {
+
+        public IbanStringAssert(CharSequence actual) {
+            super(actual, IbanStringAssert.class);
+        }
+
+        /**
+         * Asserts that the character sequence is a syntactically and structurally valid IBAN
+         * according to {@link Iban#isValid(CharSequence)}.
+         *
+         * @return {@code this} assertion object for method chaining
+         *
+         * @since 1.8.8
+         */
+        public IbanStringAssert isValid() {
+            isNotNull();
+            if (!Iban.isValid(actual)) {
+                failWithMessage("Expected '%s' to be a valid IBAN but it was not", actual);
+            }
+            return myself;
+        }
+
+        /**
+         * Asserts that the character sequence is <em>not</em> a valid IBAN according to
+         * {@link Iban#isValid(CharSequence)}.
+         *
+         * @return {@code this} assertion object for method chaining
+         *
+         * @since 1.8.8
+         */
+        public IbanStringAssert isNotValid() {
+            if (actual != null && Iban.isValid(actual)) {
+                failWithMessage("Expected '%s' to be an invalid IBAN but it was valid", actual);
+            }
+            return myself;
+        }
+
+    }
 }

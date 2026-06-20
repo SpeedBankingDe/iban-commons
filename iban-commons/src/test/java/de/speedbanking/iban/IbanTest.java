@@ -1,7 +1,7 @@
 package de.speedbanking.iban;
 
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
-import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsValid;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanString;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -115,7 +115,7 @@ final class IbanTest {
                 .isPresent()
                 .contains(iban1);
 
-            assertThatIbanIsValid(ibanInputNorm);
+            assertThatIbanString(ibanInputNorm).isValid();
 
             String invalidIban = ibanInput.substring(0, ibanInput.length() - 1) + "X";
             assertThat(Iban.isValid(invalidIban)).isFalse();
