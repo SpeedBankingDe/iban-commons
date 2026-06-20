@@ -76,8 +76,8 @@ final class ContinentTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(Continent.class)
     void toString_allConstants_matchesExpectedPattern(Continent continent) {
-        String expected = "Continent[" + continent.name() + "]";
-        assertThat(continent).hasToString(expected);
+        assertThat(continent).hasToString("%s[%s, code=%s, continentName=%s]",
+            continent.getDeclaringClass().getSimpleName(), continent.name(), continent.getCode(), continent.getContinentName());
     }
 
     @DisplayName("values() contains exactly 7 constants")

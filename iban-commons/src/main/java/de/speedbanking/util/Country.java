@@ -15,11 +15,6 @@
  */
 package de.speedbanking.util;
 
-import static java.util.Collections.unmodifiableMap;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Enumeration of all officially assigned ISO 3166-1 Alpha-2 country codes
  * as published by the ISO 3166 Maintenance Agency.
@@ -56,13 +51,10 @@ import java.util.Map;
  *       {@code BY} → {@link Currency#BYN}, {@code VE} → {@link Currency#VES}).</li>
  * </ul>
  * <p>
- * Lookup is O(1) via the internal {@link #LOOKUP} map; enum-name resolution via
- * {@link #valueOf(String)} is equally efficient.
- * <p>
  * For more information, see:
  * <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha-2 Specification</a>
  *
- * @since 1.8.8 (perviously named Iso3166Alpha2 - since 1.8.4)
+ * @since 1.8.8 (previously named Iso3166Alpha2 - since 1.8.4)
  */
 public enum Country {
 
@@ -669,56 +661,29 @@ public enum Country {
     ZW("Zimbabwe",                                             Currency.ZWL, Continent.AFRICA);
 
     /**
-     * Constant for length of two-letter code.
+     * Dedicated allocation-free registry lookup for {@code Country} constants mapped by their two-letter code.
      */
-    private static final int                   CODE_LEN = 2;
-
-    /**
-     * Internal unmodifiable primitive-friendly lookup map from packed two-letter code to enum constant.
-     */
-    private static final Map<Integer, Country> LOOKUP   = buildLookupMap();
+    private static final Alpha2EnumLookup<Country> LOOKUP = new Alpha2EnumLookup<>(Country.class, Country::name);
 
     /** The English short country name as defined in ISO 3166-1. */
-    private final String                       countryName;
+    private final String                           countryName;
 
     /**
      * The primary ISO 4217 currency used in this country or territory.
      * <p>
      * {@code null} only for {@link #AQ} (Antarctica), which has no currency in use.
      */
-    private final Currency                     currency;
+    private final Currency                         currency;
 
     /**
      * The continent of this country or territory.
      */
-    private final Continent                    continent;
+    private final Continent                        continent;
 
-    Country(final String countryName, final Currency currency, final Continent continent) {
+    Country(String countryName, Currency currency, Continent continent) {
         this.countryName = countryName;
         this.currency    = currency;
         this.continent   = continent;
-    }
-
-    /**
-     * Packs two characters into a single {@code int} using bit-shifting: {@code (char1 << 16) | char2}.
-     */
-    private static int pack(char c1, char c2) {
-        return (c1 << 16) | c2;
-    }
-
-    /**
-     * Builds the lookup map at class-load time.<br>
-     * The initial capacity is sized to avoid any rehashing.
-     */
-    private static Map<Integer, Country> buildLookupMap() {
-        Country[] values = values();
-        int capacity = (int) (values.length / 0.75f) + 1;
-        Map<Integer, Country> map = new LinkedHashMap<>(capacity);
-        for (final Country c : values) {
-            String name = c.name();
-            map.put(pack(name.charAt(0), name.charAt(1)), c);
-        }
-        return unmodifiableMap(map);
     }
 
     /**
@@ -772,7 +737,8 @@ public enum Country {
      * solely for this lookup.
      * <p>
      * The lookup is case-sensitive; only uppercase codes are recognized
-     * (e.g., {@code "LT"} matches, {@code "lt"} does not).<br>
+     * (e.g., {@code "LT"} matches, {@code "lt"} does not).
+     * <p>
      * Leading or trailing whitespace is <em>not</em> stripped — {@code " DE"} is not
      * a valid two-letter code and returns {@code null}.
      *
@@ -781,17 +747,17 @@ public enum Country {
      * @return the matching {@link Country} constant,
      *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown
      */
-    public static Country fromCode(final CharSequence code) {
-        return code == null || code.length() != CODE_LEN ? null : LOOKUP.get(pack(code.charAt(0), code.charAt(1)));
+    public static Country fromCode(CharSequence code) {
+        return LOOKUP.fromCode(code);
     }
 
     /**
      * High-performance check using primitive chars.
      * <p>
-     * Zero-allocation, no String creation.
+     * Zero-allocation, no String or Integer creation.
      */
     public static boolean isAssigned(char c1, char c2) {
-        return LOOKUP.containsKey(pack(c1, c2));
+        return LOOKUP.isAssigned(c1, c2);
     }
 
     /**
@@ -808,8 +774,8 @@ public enum Country {
      * @return {@code true} if the code is an officially assigned ISO 3166-1 Alpha-2 code;
      *         {@code false} otherwise
      */
-    public static boolean isAssigned(final CharSequence code) {
-        return code != null && code.length() == 2 && isAssigned(code.charAt(0), code.charAt(1));
+    public static boolean isAssigned(CharSequence code) {
+        return LOOKUP.fromCode(code) != null;
     }
 
     /**
@@ -821,7 +787,7 @@ public enum Country {
      */
     @Override
     public String toString() {
-        return name() + " (" + countryName + ')';
+        return getClass().getSimpleName() + '[' + name() + ", countryName=" + countryName + ']';
     }
 
 }

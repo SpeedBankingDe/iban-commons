@@ -244,10 +244,6 @@ final class CountryTest {
         }
     }
 
-    // =========================================================================
-    // Continent Tests
-    // =========================================================================
-
     @DisplayName("getContinent() returns the correct Continent instance for verified key countries")
     @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
@@ -309,13 +305,9 @@ final class CountryTest {
     void continent_properties_areValidAndConsistent(Continent continent) {
         assertThat(continent.getCode()).matches("^[A-Z]{2}$");
         assertThat(continent.getContinentName()).isNotBlank();
-        assertThat(continent.toString()).isEqualTo("%s[%s]",
-            continent.getDeclaringClass().getSimpleName(), continent.name());
+        assertThat(continent).hasToString("%s[%s, code=%s, continentName=%s]",
+            continent.getDeclaringClass().getSimpleName(), continent.name(), continent.getCode(), continent.getContinentName());
     }
-
-    // =========================================================================
-    // fromCode()
-    // =========================================================================
 
     @DisplayName("fromCode() returns the correct constant for every assigned code")
     @ParameterizedTest(name = "[{index}] ''{0}''")
@@ -459,10 +451,6 @@ final class CountryTest {
         assertThat(Country.fromCode(new StringBuffer(" D"))).isNull();        // whitespace
     }
 
-    // =========================================================================
-    // isAssigned(String)
-    // =========================================================================
-
     @DisplayName("isAssigned() returns true for officially assigned codes")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"KP", "SY", "IR", "CU", "VE", "RU", "NI", "BY", "DZ", "JP", "AF", "RE", "CW"})
@@ -514,38 +502,14 @@ final class CountryTest {
         assertThat(Country.isAssigned(c1, c2)).isEqualTo(expectedResult);
     }
 
-    // =========================================================================
-    // toString()
-    // =========================================================================
-
-    @DisplayName("toString() returns \"<CODE> (<countryName>)\" format")
-    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
-    @CsvSource(delimiter = '|', value = {
-        "NZ | NZ (New Zealand)",
-        "IS | IS (Iceland)",
-        "KE | KE (Kenya)",
-        "UY | UY (Uruguay)",
-        "SG | SG (Singapore)",
-        "XK | XK (Kosovo)",
-        "AX | AX (Åland Islands)"
-    })
-    void toString_knownConstants_returnsFormattedString(Country code, String expected) {
-        assertThat(code).hasToString(expected);
-    }
-
-    @DisplayName("toString() follows \"<CODE> (<countryName>)\" pattern for all constants")
+    @DisplayName("toString() follows 'getClass().getSimpleName()[NAME, countryName=COUNTRY_NAME]' pattern for all constants")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @EnumSource(Country.class)
     void toString_allConstants_followsPattern(Country code) {
-        assertThat(code.toString())
+        assertThat(code)
             .as("%s.toString()", code.name())
-            .startsWith(code.name() + " (")
-            .endsWith(")");
+            .hasToString("%s[%s, countryName=%s]", Country.class.getSimpleName(), code.name(), code.getCountryName());
     }
-
-    // =========================================================================
-    // Enum mechanics — values() / valueOf()
-    // =========================================================================
 
     @DisplayName("values() contains exactly 249 constants")
     @Test
@@ -568,10 +532,6 @@ final class CountryTest {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> Country.valueOf("XX"));
     }
-
-    // =========================================================================
-    // Invariants
-    // =========================================================================
 
     @DisplayName("Every code is exactly 2 characters long")
     @ParameterizedTest(name = "[{index}] ''{0}''")

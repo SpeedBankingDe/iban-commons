@@ -15,11 +15,6 @@
  */
 package de.speedbanking.util;
 
-import static java.util.Collections.unmodifiableMap;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Enumeration of the seven continents of the world.
  *
@@ -27,49 +22,32 @@ import java.util.Map;
  */
 public enum Continent {
 
-    /** Africa */
     AFRICA("AF", "Africa"),
-    /** Antarctica */
     ANTARCTICA("AN", "Antarctica"),
-    /** Asia */
     ASIA("AS", "Asia"),
-    /** Europe */
     EUROPE("EU", "Europe"),
-    /** North America */
     NORTH_AMERICA("NA", "North America"),
-    /** Oceania */
     OCEANIA("OC", "Oceania"),
-    /** South America */
     SOUTH_AMERICA("SA", "South America");
 
-    private static final Map<String, Continent> LOOKUP = buildLookupMap();
+    /**
+     * Dedicated allocation-free registry lookup for {@code Continent} constants mapped by their two-letter code.
+     */
+    private static final Alpha2EnumLookup<Continent> LOOKUP = new Alpha2EnumLookup<>(Continent.class, Continent::getCode);
 
     /**
      * The code of this continent.
      */
-    private final String                        code;
+    private final String                             code;
+
     /**
      * The name of this continent.
      */
-    private final String                        continentName;
+    private final String                             continentName;
 
-    Continent(final String code, final String continentName) {
-        this.code            = code;
-        this.continentName   = continentName;
-    }
-
-    /**
-     * Builds the lookup map at class-load time.<br>
-     * The initial capacity is sized to avoid any rehashing.
-     */
-    private static Map<String, Continent> buildLookupMap() {
-        Continent[] values = values();
-        int capacity = (int) (values.length / 0.75f) + 1;
-        Map<String, Continent> map = new LinkedHashMap<>(capacity);
-        for (final Continent c : values) {
-            map.put(c.getCode(), c);
-        }
-        return unmodifiableMap(map);
+    Continent(String code, String continentName) {
+        this.code = code;
+        this.continentName = continentName;
     }
 
     public String getCode() {
@@ -80,13 +58,23 @@ public enum Continent {
         return continentName;
     }
 
-    public static Continent fromCode(final String code) {
-        return code == null ? null : LOOKUP.get(code);
+    /**
+     * Looks up the enum constant for the given two-letter continent code.
+     * <p>
+     * Zero-allocation lookup supporting any {@link CharSequence}.
+     *
+     * @param code the two-letter continent code (case-sensitive, e.g., {@code "EU"});
+     * may be any {@link CharSequence}
+     * @return the matching {@link Continent} constant, or {@code null} if the code is null,
+     * does not match the required format or length, or is unassigned
+     */
+    public static Continent fromCode(CharSequence code) {
+        return LOOKUP.fromCode(code);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '[' + name() + ']';
+        return getClass().getSimpleName() + '[' + name() + ", code=" + code + ", continentName=" + continentName + ']';
     }
 
 }

@@ -189,10 +189,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public static Optional<Bic> tryParse(CharSequence bic) {
-        BicValidationResult result = BicValidator.validate(bic);
-        return result.isValid()
-            ? Optional.of(new Bic(result.bic))
-            : Optional.empty();
+        return BicValidator.isValid(bic) ? Optional.of(new Bic(bic)) : Optional.empty();
     }
 
     /**
@@ -204,7 +201,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public static boolean isValid(final CharSequence bic) {
-        return BicValidator.validate(bic).isValid();
+        return BicValidator.isValid(bic);
     }
 
     /**

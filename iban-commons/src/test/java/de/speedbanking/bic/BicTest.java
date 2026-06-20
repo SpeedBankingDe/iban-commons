@@ -145,7 +145,12 @@ final class BicTest {
      */
     @DisplayName("validate() completes without exception for valid BICs")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @ValueSource(strings = {"MARKDEFF", "MARKDEFFXXX", "BHLSDEM1", "NEDSZAJJ"})
+    @ValueSource(strings = {
+        "MARKDEFF",
+        "MARKDEFFXXX",
+        "BHLSDEM1",
+        "NEDSZAJJ"
+    })
     void validate_shouldCompleteWithoutException_whenBicIsValid(String bic) {
         assertThatNoException()
             .as("validate('%s') must not throw for a valid BIC", bic)
@@ -163,12 +168,12 @@ final class BicTest {
     @DisplayName("validate() throws InvalidBicException for invalid BICs")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        // BIC (Input)  | ValidationError (Enum) | Expected Message
-        "(null)         | EMPTY                  | BIC is null or empty (EMPTY)",
-        "''             | EMPTY                  | BIC is null or empty (EMPTY)",
-        "MARK00FF       | INVALID_COUNTRY        | BIC has invalid country code (INVALID_COUNTRY): 'MARK00FF'",
-        "SHORT12        | INCORRECT_LENGTH       | BIC has incorrect length (INCORRECT_LENGTH): 'SHORT12'",
-        "mARKDEFF       | INVALID_BANK_CODE      | Invalid bank code (INVALID_BANK_CODE): 'mARKDEFF'"
+        // BIC (Input) | ValidationError (Enum) | Expected Message
+        "(null)        | EMPTY                  | BIC is null or empty (EMPTY)",
+        "''            | EMPTY                  | BIC is null or empty (EMPTY)",
+        "MARK00FF      | INVALID_COUNTRY        | BIC has invalid country code (INVALID_COUNTRY): 'MARK00FF'",
+        "SHORT12       | INCORRECT_LENGTH       | BIC has incorrect length (INCORRECT_LENGTH): 'SHORT12'",
+        "mARKDEFF      | INVALID_BANK_CODE      | Invalid bank code (INVALID_BANK_CODE): 'mARKDEFF'"
     })
     void validate_shouldThrowException_whenBicIsInvalid(
             String bic, BicValidationError expectedValidationError, String expectedMessage) {
@@ -187,36 +192,45 @@ final class BicTest {
      */
     @DisplayName("validate() and of() throw identical exceptions for the same invalid input")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @ValueSource(strings = {"MARK00FF", "SHORT12", "mARKDEFF"})
+    @ValueSource(strings = {
+        "MARK00FF",
+        "SHORT12",
+        "mARKDEFF"
+    })
     void validate_shouldThrowSameExceptionAsOf_whenBicIsInvalid(String bic) {
-        InvalidBicException fromOf = null;
+        InvalidBicException exFromOf = null;
         try {
             Bic.of(bic);
         } catch (InvalidBicException ex) {
-            fromOf = ex;
+            exFromOf = ex;
         }
 
-        InvalidBicException fromValidate = null;
+        InvalidBicException exFromValidate = null;
         try {
             Bic.validate(bic);
         } catch (InvalidBicException ex) {
-            fromValidate = ex;
+            exFromValidate = ex;
         }
 
-        assertThat(fromOf).as("of() must throw for input '%s'", bic).isNotNull();
-        assertThat(fromValidate).as("validate() must throw for input '%s'", bic).isNotNull();
+        assertThat(exFromOf).as("of() must throw for input '%s'", bic).isNotNull();
+        assertThat(exFromValidate).as("validate() must throw for input '%s'", bic).isNotNull();
 
-        assertThat(fromValidate.getMessage())
+        assertThat(exFromValidate.getMessage())
             .as("validate() and of() must produce the same exception message")
-            .isEqualTo(fromOf.getMessage());
-        assertThat(fromValidate)
+            .isEqualTo(exFromOf.getMessage());
+        assertThat(exFromValidate)
             .as("validate() and of() must carry the same validation error")
-            .hasFieldOrPropertyWithValue("reason", fromOf.getReason());
+            .hasFieldOrPropertyWithValue("reason", exFromOf.getReason());
     }
 
     @DisplayName("tryParse() should return non-empty Optional for valid BIC")
     @ParameterizedTest(name = "[{index}] {0}")
-    @ValueSource(strings = {"BHLSDEM1", "BHLSDEM1XXX"})
+    @ValueSource(strings = {
+        "DABADKKK",
+        "DABADKKKXXX",
+        "NUNAGL22",
+        "NUNAGL22XXX"
+    })
     void tryParse_shouldReturnNonEmptyOptional_whenValidBic(String bic) {
         assertThat(Bic.tryParse(bic))
             .hasValue(Bic.of(bic));
@@ -333,24 +347,28 @@ final class BicTest {
             .isNotEqualTo(0);
     }
 
-    @DisplayName("equals() should not treat different branch codes as equal")
+    @DisplayName("equals/hashCode: should not be equal when using different South African BIC variants")
     @Test
     void equality_shouldNotBeEqual_whenDifferentBICs() {
-        Bic bic8 = Bic.of("MARKDEFF");
-        Bic bic11Branch1 = Bic.of("MARKDEFF500");
-        Bic bic11Branch2 = Bic.of("MARKDEFF100");
+        Bic bic8 = Bic.of("VBSBZAJJ");
+        Bic bic11Branch1 = Bic.of("VBSBZAJJ500");
+        Bic bic11Branch2 = Bic.of("VBSBZAJJ100");
 
-        assertThat(bic8).isNotEqualTo(bic11Branch1);
-        assertThat(bic11Branch1).isNotEqualTo(bic11Branch2);
+        assertThat(bic8)
+            .isNotEqualTo(bic11Branch1)
+            .doesNotHaveSameHashCodeAs(bic11Branch2);
+        assertThat(bic11Branch1)
+            .isNotEqualTo(bic11Branch2)
+            .doesNotHaveSameHashCodeAs(bic11Branch2);
     }
 
     @DisplayName("compareTo() should compare based on BIC-11 string and handle null")
     @Test
     void compareTo_shouldBeBasedOnBic11() {
-        Bic bicA = Bic.of("MARKDEFF");    // MARKDEFFXXX
-        Bic bicB = Bic.of("MARKDEFFXXX");
-        Bic bicC = Bic.of("MARKDEFF500"); // MARKDEFF500
-        Bic bicD = Bic.of("MARKUS33");    // MARKUS33XXX
+        Bic bicA = Bic.of("AKMIFI21");    // normalized to AKMIFI21XXX
+        Bic bicB = Bic.of("AKMIFI21XXX"); // explicit Head Office
+        Bic bicC = Bic.of("AKMIFI21500"); // Branch 500
+        Bic bicD = Bic.of("AKMIAX21");    // normalized to AKMIAX21XXX
 
         // first chain: equals (0) and null check
         assertThat(bicA.compareTo(bicB)).as("BICs should be equal by comparison").isEqualTo(0);
@@ -358,11 +376,11 @@ final class BicTest {
             .isInstanceOf(NullPointerException.class)
             .hasMessage("Cannot compare Bic to null");
 
-        // second chain: greater than (positive)
+        // second chain: greater than (positive) because 'X' (from XXX) comes after '5' (from 500)
         assertThat(bicA.compareTo(bicC)).isPositive();
 
-        // third chain: less than (negative)
-        assertThat(bicA.compareTo(bicD)).isNegative();
+        // third chain: greater than (positive) because 'F' (Finland) comes alphabetically after 'A' (Åland)
+        assertThat(bicA.compareTo(bicD)).isPositive();
     }
 
     @DisplayName("charAt() should return correct character and check bounds")
@@ -385,7 +403,7 @@ final class BicTest {
     @DisplayName("subSequence() should return correct substring and check bounds")
     @Test
     void subSequence_shouldReturnCorrectSubstring_andCheckBounds() {
-        Bic bic = Bic.of("MARKDEFF");
+        Bic bic = Bic.of("ECBFDEFFXXX");
 
         assertThat(bic)
             .extracting(
@@ -395,29 +413,29 @@ final class BicTest {
                 c -> c.subSequence(4, 4)
             )
             .containsExactly(
-                bic.toString(),
+                "ECBFDEFF",
                 "DE",
                 "FF",
                 ""
             );
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> bic.subSequence(-1, 2))
-            .withMessage("Start index should be >= 0 (was: -1) and end index (exclusive) <= 8 (was: 2)");
+            .withMessage("Start index should be >= 0 (was: -1) and end index (exclusive) <= 11 (was: 2)");
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> bic.subSequence(0, bic.toString().length() + 1))
-            .withMessage("Start index should be >= 0 (was: 0) and end index (exclusive) <= 8 (was: 9)");
+            .withMessage("Start index should be >= 0 (was: 0) and end index (exclusive) <= 11 (was: 12)");
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> bic.subSequence(5, 4))
-            .withMessage("Start index should be >= 0 (was: 5) and end index (exclusive) <= 8 (was: 4)");
+            .withMessage("Start index should be >= 0 (was: 5) and end index (exclusive) <= 11 (was: 4)");
     }
 
     @DisplayName("subSequence() should return correct substring when range crosses into branch code (BIC-11)")
     @ParameterizedTest(name = "[{index}] subSequence({1},{2}) on ''{0}'' → ''{3}''")
     @CsvSource(delimiter = '|', value = {
-        "MARKDEFF500 | 6  | 11 | FF500",
-        "MARKDEFF500 | 0  | 11 | MARKDEFF500",
-        "MARKDEFF500 | 8  | 11 | 500",
-        "MARKDEFFXXX | 6  | 11 | FFXXX"
+        "MARKDEFF500 | 6 | 11 | FF500",
+        "MARKDEFF500 | 0 | 11 | MARKDEFF500",
+        "MARKDEFF500 | 8 | 11 | 500",
+        "MARKDEFFXXX | 6 | 11 | FFXXX"
     })
     void subSequence_shouldReturnCorrectSubstring_whenRangeCrossesBoundaryBic11(String bicInput, int start, int end, String expected) {
         // exercises the toBic11() fallback path in subSequence() where end > BIC8_LENGTH
