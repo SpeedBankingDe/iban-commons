@@ -80,9 +80,11 @@ final class CountryValidatorsTest {
     @MethodSource("allNcdIbanRegistryEntries")
     @ResourceLock(IbanConfigTest.RESOURCE_NAME)
     void all_ncd_validators_are_invokable(IbanRegistry countryData) {
-        IbanConfig.reset(IbanConfig.builder().validateNcd(true).calculateNcd(true).build());
+        IbanConfig ibanConfig = IbanConfig.get();
 
         try {
+
+            IbanConfig.reset(IbanConfig.builder().validateNcd(true).calculateNcd(true).build());
 
             assertThat(IbanValidator.getCountryValidator(countryData))
                 .as("Validator for %s should be an NCD calculator", countryData)
@@ -122,7 +124,7 @@ final class CountryValidatorsTest {
                 .isFalse();
 
         } finally {
-            IbanConfig.reset();
+            IbanConfig.reset(ibanConfig);
         }
 
     }

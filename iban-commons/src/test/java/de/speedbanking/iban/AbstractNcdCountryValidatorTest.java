@@ -78,20 +78,32 @@ final class AbstractNcdCountryValidatorTest {
     @DisplayName("validateNationalCheckDigit should return true when validation is disabled")
     @Test
     void validateNationalCheckDigit_shouldReturnTrue_whenDisabled() {
-        IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
+        IbanConfig ibanConfig = IbanConfig.get();
 
-        AbstractNcdCountryValidator validator = new PT();
-        assertThat(validator.validateNationalCheckDigit(new char[0])).isTrue();
+        try {
+            IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
+
+            AbstractNcdCountryValidator validator = new PT();
+            assertThat(validator.validateNationalCheckDigit(new char[0])).isTrue();
+        } finally {
+            IbanConfig.reset(ibanConfig);
+        }
     }
 
     @DisplayName("calculateNationalCheckDigit should return range when calculation is disabled")
     @Test
     void calculateNationalCheckDigit_shouldReturnRange_whenDisabled() {
-        IbanConfig.reset(IbanConfig.builder().calculateNcd(false).build());
+        IbanConfig ibanConfig = IbanConfig.get();
 
-        AbstractNcdCountryValidator validator = new PT();
-        String iban = "PT50002700000001234567833";
-        assertThat(validator.calculateNationalCheckDigit(iban)).contains('3', '3');
+        try {
+            IbanConfig.reset(IbanConfig.builder().calculateNcd(false).build());
+
+            AbstractNcdCountryValidator validator = new PT();
+            String iban = "PT50002700000001234567833";
+            assertThat(validator.calculateNationalCheckDigit(iban)).contains('3', '3');
+        } finally {
+            IbanConfig.reset(ibanConfig);
+        }
     }
 
     @DisplayName("calculateNationalCheckDigit should return calculated value when enabled")

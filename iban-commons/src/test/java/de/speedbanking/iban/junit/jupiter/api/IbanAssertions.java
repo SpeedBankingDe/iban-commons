@@ -6,7 +6,6 @@ import de.speedbanking.iban.Iban;
 import de.speedbanking.iban.InvalidIbanException;
 import de.speedbanking.util.Currency;
 
-import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -94,15 +93,6 @@ public class IbanAssertions extends Assertions {
     }
 
     /**
-     * @deprecated Use {@link #assertThatIban(CharSequence)} instead.
-     */
-    @Deprecated // (since = "1.8.7", forRemoval = true)
-    @SuppressWarnings("InlineMeSuggester")
-    public static IbanAssert assertThatIbanOf(CharSequence actual) {
-        return assertThatIban(actual);
-    }
-
-    /**
      * Creates a new {@link IbanAssert} wrapping an already-parsed {@link Iban} instance.
      * <p>
      * This overload is provided for cases where an {@link Iban} object is already at hand
@@ -129,13 +119,25 @@ public class IbanAssertions extends Assertions {
     }
 
     /**
-     * Provides a boolean assertion for {@link Iban#isValid(CharSequence)}.
+     * Asserts that the given IBAN is valid per {@link Iban#isValid(CharSequence)}.
      *
-     * @param ibanValue the IBAN character sequence to validate
-     * @return a boolean assertion object
+     * @param ibanValue the IBAN to validate; may be {@code null}
+     * @see #assertThatIbanIsNotValid(CharSequence)
      */
-    public static AbstractBooleanAssert<?> assertThatIbanIsValid(CharSequence ibanValue) {
-        return assertThat(Iban.isValid(ibanValue));
+    public static void assertThatIbanIsValid(CharSequence ibanValue) {
+        assertThat(Iban.isValid(ibanValue)).isTrue();
+    }
+
+    /**
+     * Asserts that the given IBAN is <em>not</em> valid per {@link Iban#isValid(CharSequence)}.
+     *
+     * @param ibanValue the IBAN to validate; may be {@code null}
+     *
+     * @since 1.8.8
+     * @see #assertThatIbanIsValid(CharSequence)
+     */
+    public static void assertThatIbanIsNotValid(CharSequence ibanValue) {
+        assertThat(Iban.isValid(ibanValue)).isFalse();
     }
 
     /**

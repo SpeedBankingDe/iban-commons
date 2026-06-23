@@ -278,6 +278,8 @@ final class IbanValidatorTest {
     @DisplayName("isValid should return true for valid formatted (spaced) IBANs")
     @ResourceLock(IbanConfigTest.RESOURCE_NAME)
     void isValid_shouldReturnTrue_whenIbanIsFormattedWithSpaces(String formattedIban) {
+        IbanConfig ibanConfig = IbanConfig.get();
+
         try {
             IbanConfig.reset(IbanConfig.builder()
                 .allowSpace(true)
@@ -297,7 +299,7 @@ final class IbanValidatorTest {
             assertThat(IbanValidator.isValid((CharSequence) lowerCaseIban)).isTrue();
 
         } finally {
-            IbanConfig.reset();
+            IbanConfig.reset(ibanConfig);
         }
     }
 
@@ -353,6 +355,8 @@ final class IbanValidatorTest {
     })
     @NullAndEmptySource
     void isValid_shouldReturnFalse_whenInputIsInvalidWithSpacing(String input) {
+        IbanConfig ibanConfig = IbanConfig.get();
+
         try {
             IbanConfig.reset(IbanConfig.builder().allowSpace(true).build());
 
@@ -360,7 +364,7 @@ final class IbanValidatorTest {
             assertThat(IbanValidator.isValid((CharSequence) input)).isFalse();
 
         } finally {
-            IbanConfig.reset();
+            IbanConfig.reset(ibanConfig);
         }
     }
 

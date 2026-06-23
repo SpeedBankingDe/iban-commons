@@ -2,6 +2,7 @@ package de.speedbanking.bic.junit.jupiter.api;
 
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThat;
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBic;
+import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBicIsNotValid;
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatBicIsValid;
 import static de.speedbanking.bic.junit.jupiter.api.BicAssertions.assertThatInvalidBicException;
 
@@ -354,7 +355,11 @@ final class BicAssertionsTest {
         "TOO_SHORT   | false"
     })
     void validity_ShouldBeReflected_WhenInputIsChecked(String input, boolean expected) {
-        assertThatBicIsValid(input).isEqualTo(expected);
+        if (expected) {
+            assertThatBicIsValid(input);
+        } else {
+            assertThatBicIsNotValid(input);
+        }
     }
 
     @DisplayName("Should verify each BIC component and their failure messages")
@@ -425,9 +430,9 @@ final class BicAssertionsTest {
     @DisplayName("Should handle null, empty, and valid inputs in assertThatBicIsValid")
     @Test
     void factoryPoints_ShouldHandleEdgeCases() {
-        assertThatBicIsValid(null).isFalse();
-        assertThatBicIsValid("").isFalse();
-        assertThatBicIsValid("MARKDEFF").isTrue();
+        assertThatBicIsNotValid(null);
+        assertThatBicIsNotValid("");
+        assertThatBicIsValid("MARKDEFF");
 
         assertThatInvalidBicException()
             .isThrownBy(() -> {

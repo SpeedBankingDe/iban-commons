@@ -80,52 +80,44 @@ final class IbanTest {
     void of_shouldReturnIban_whenIbanIsValid(String ibanInput) {
         String ibanInputNorm = ibanInput.replace(" ", "");
 
-        try {
-            IbanConfig.reset(IbanConfig.builder().allowSpace(true).build());
+        assertThatCode(
+            () -> Iban.of(ibanInput))
+            .as("IBAN '%s' is valid and should be instantiable", ibanInput)
+            .doesNotThrowAnyException();
 
-            assertThatCode(
-                () -> Iban.of(ibanInput))
-                .as("IBAN '%s' is valid and should be instantiable", ibanInput)
-                .doesNotThrowAnyException();
+        Iban iban1 = assertThatIban(ibanInput)
+            .as("IBAN instance 1 must not be null and match input string")
+            .isNotNull()
+            .hasToString(ibanInputNorm)
+            .actual();
 
-            Iban iban1 = assertThatIban(ibanInput)
-                .as("IBAN instance 1 must not be null and match input string")
-                .isNotNull()
-                .hasToString(ibanInputNorm)
-                .actual();
+        assertThatCode(
+            () -> Iban.of(ibanInputNorm))
+            .as("Normalized IBAN '%s' is valid and should be instantiable", ibanInput)
+            .doesNotThrowAnyException();
 
-            assertThatCode(
-                () -> Iban.of(ibanInputNorm))
-                .as("Normalized IBAN '%s' is valid and should be instantiable", ibanInput)
-                .doesNotThrowAnyException();
+        assertThatCode(
+            () -> Iban.ofNormalized(ibanInputNorm))
+            .as("IBAN '%s' is valid and should be instantiable", ibanInput)
+            .doesNotThrowAnyException();
 
-            assertThatCode(
-                () -> Iban.ofNormalized(ibanInputNorm))
-                .as("IBAN '%s' is valid and should be instantiable", ibanInput)
-                .doesNotThrowAnyException();
+        Iban iban2 = assertThatIban(ibanInputNorm)
+            .as("IBAN instance 2 must not be null and match input string")
+            .isNotNull()
+            .hasToString(ibanInputNorm)
+            .isEqualTo(iban1)
+            .actual();
 
-            Iban iban2 = assertThatIban(ibanInputNorm)
-                .as("IBAN instance 2 must not be null and match input string")
-                .isNotNull()
-                .hasToString(ibanInputNorm)
-                .isEqualTo(iban1)
-                .actual();
+        assertThatComparable(iban1).isEqualTo(iban2);
 
-            assertThatComparable(iban1).isEqualTo(iban2);
+        assertThat(Iban.tryParse(ibanInput))
+            .isPresent()
+            .contains(iban1);
 
-            assertThat(Iban.tryParse(ibanInput))
-                .isPresent()
-                .contains(iban1);
+        assertThatIbanString(ibanInputNorm).isValid();
 
-            assertThatIbanString(ibanInputNorm).isValid();
-
-            String invalidIban = ibanInput.substring(0, ibanInput.length() - 1) + "X";
-            assertThat(Iban.isValid(invalidIban)).isFalse();
-
-        } finally {
-            IbanConfig.reset();
-        }
-
+        String invalidIban = ibanInput.substring(0, ibanInput.length() - 1) + "X";
+        assertThat(Iban.isValid(invalidIban)).isFalse();
     }
 
     @DisplayName("isValid: should validate maximum length (33 chars) IBANs when space or lowercase is allowed")
@@ -133,6 +125,9 @@ final class IbanTest {
     void isValid_shouldValidateMaxLengthIban_withSpacesOrLowercase() {
         String maxLengthIbanSpaced = "RU03 0445 2522 5408 1781 0538 0913 1041 9";
         String maxLengthIbanLower = "ru0304452522540817810538091310419";
+
+        IbanConfig ibanConfig = IbanConfig.get();
+
         try {
             IbanConfig.reset(IbanConfig.builder()
                 .allowSpace(true)
@@ -142,7 +137,7 @@ final class IbanTest {
             assertThatIbanIsValid(maxLengthIbanSpaced);
             assertThatIbanIsValid(maxLengthIbanLower);
         } finally {
-            IbanConfig.reset();
+            IbanConfig.reset(ibanConfig);
         }
     }
 
@@ -242,7 +237,17 @@ final class IbanTest {
         String ibanStr = countryData.getIbanExample();
         assertThatIbanIsValid(ibanStr);
         Iban iban = Iban.of(ibanStr);
+
+        assertThat(IbanConfig.isAllowSpace()).isTrue();
+
+        assertThatCode(
+            () -> Iban.validate(iban.toFormattedString()))
+            .doesNotThrowAnyException();
         assertThatIbanIsValid(iban.toFormattedString());
+
+        assertThatCode(
+            () -> Iban.validate(iban.toComponentString()))
+            .doesNotThrowAnyException();
         assertThatIbanIsValid(iban.toComponentString());
     }
 

@@ -1,6 +1,7 @@
 package de.speedbanking.iban.junit.jupiter.api;
 
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsNotValid;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanIsValid;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanString;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
@@ -321,7 +322,11 @@ final class IbanAssertionsTest {
         "INVALID                | false"
     })
     void assertThatIbanIsValid_reflectsValidity(String input, boolean expected) {
-        assertThatIbanIsValid(input).isEqualTo(expected);
+        if (expected) {
+            assertThatIbanIsValid(input);
+        } else {
+            assertThatIbanIsNotValid(input);
+        }
     }
 
     @DisplayName("assertThatInvalidIbanException - scoped to InvalidIbanException")
