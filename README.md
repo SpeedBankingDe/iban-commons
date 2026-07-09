@@ -43,13 +43,13 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.7</version>
+    <version>1.8.8</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.7'
+implementation 'de.speedbanking:iban-commons:1.8.8'
 ```
 
 ### 2. Validate & Parse
@@ -359,6 +359,19 @@ Each invalid IBAN is derived from a valid one by applying one of six sabotage st
 ### Benchmark Suite Repository
 
 All performance tests are fully open and available in the [SpeedBankingDe/iban-commons-benchmarks](https://github.com/SpeedBankingDe/iban-commons-benchmarks) repository.
+
+-----
+
+## 🆕 What's New in 1.8.8
+
+### Optimized BIC Validation Pipeline
+Extended the zero-allocation principles fully to the BIC parsing and validation pipeline.
+
+### Updated Performance Benchmarks
+Integrated the latest JMH benchmark results (June 2026) for both the IBAN and BIC validation paths, confirming zero-allocation (`0 B/op`) performance and leading execution speeds.
+
+### Internal Quality Refinements
+Fine-tuned internal validation rules and alignment with Error Prone guidelines.
 
 -----
 
