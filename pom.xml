@@ -97,6 +97,8 @@
 
         <project.dist.name>iban-commons</project.dist.name>
 
+        <project.rootDirectory>${maven.multiModuleProjectDirectory}</project.rootDirectory>
+
         <project.copyrightYear>2026</project.copyrightYear>
 
         <dep.junit.version>5.14.4</dep.junit.version>
@@ -121,10 +123,10 @@
 
         <dep.checkstyle.version>12.3.1</dep.checkstyle.version>
         <!-- Path relative to each sub-module; both modules share the same ruleset location -->
-        <check.checkstyle.ruleset>${maven.multiModuleProjectDirectory}/src/test/resources/team/checkstyle-rules.xml</check.checkstyle.ruleset>
+        <check.checkstyle.ruleset>${project.rootDirectory}/build/checkstyle-rules.xml</check.checkstyle.ruleset>
 
         <dep.pmd.version>7.26.0</dep.pmd.version>
-        <check.pmd.ruleset>${maven.multiModuleProjectDirectory}/src/test/resources/team/pmd-rules.xml</check.pmd.ruleset>
+        <check.pmd.ruleset>${project.rootDirectory}/build/pmd-rules.xml</check.pmd.ruleset>
 
         <!-- Plugin versions (alphabetically) -->
         <dep.plugin.central-publishing.version>0.11.0</dep.plugin.central-publishing.version>
@@ -701,6 +703,23 @@
     </build>
 
     <profiles>
+
+        <!--
+          activates ONLY when building the root parent directly
+          (where project.rootDirectory is not set by the reactor)
+        -->
+        <profile>
+            <id>is-root-parent</id>
+            <activation>
+                <file>
+                    <exists>build/checkstyle-rules.xml</exists>
+                </file>
+            </activation>
+            <properties>
+                <!-- inside the root parent, basedir IS the root directory -->
+                <project.rootDirectory>${project.basedir}</project.rootDirectory>
+            </properties>
+        </profile>
 
         <!-- profile to fail the build on Error Prone findings, active by default.
              To disable: mvn clean compile -D check.skip-errorprone=true
