@@ -229,8 +229,8 @@ public enum Currency {
     // -------------------------------------------------------------------------
     /** Kenyan Shilling — Kenya */
     KES("Kenyan Shilling",                      404),
-    /** Kyrgystani Som — Kyrgyzstan */
-    KGS("Kyrgystani Som",                       417),
+    /** Kyrgyzstani Som — Kyrgyzstan */
+    KGS("Kyrgyzstani Som",                      417),
     /** Cambodian Riel — Cambodia */
     KHR("Cambodian Riel",                       116),
     /** Comorian Franc — Comoros */
@@ -480,8 +480,8 @@ public enum Currency {
     ZAR("South African Rand",                   710),
     /** Zambian Kwacha — Zambia */
     ZMW("Zambian Kwacha",                       967),
-    /** Zimbabwean Dollar — Zimbabwe */
-    ZWL("Zimbabwean Dollar",                    932);
+    /** Zimbabwean Gold — Zimbabwe */
+    ZWG("Zimbabwean Gold",                      932);
 
     // -------------------------------------------------------------------------
 

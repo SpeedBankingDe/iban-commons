@@ -328,7 +328,7 @@ final class CountryTest {
         "JE", "JM", "JO", "JP",
         "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ",
         "LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY",
-        "MA", "MC", "MD", "MF", "MG", "MH", "MK", "ML", "MM", "MN", "MO",
+        "MA", "MC", "MD", "ME", "MF", "MG", "MH", "MK", "ML", "MM", "MN", "MO",
         "MP", "MQ", "MR", "MS", "MT", "MU", "MV", "MW", "MX", "MY", "MZ",
         "NA", "NC", "NE", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ",
         "OM",
@@ -508,7 +508,7 @@ final class CountryTest {
     void toString_allConstants_followsPattern(Country code) {
         assertThat(code)
             .as("%s.toString()", code.name())
-            .hasToString("%s[%s, countryName=%s]", Country.class.getSimpleName(), code.name(), code.getCountryName());
+            .hasToString("%s[%s, name=%s]", Country.class.getSimpleName(), code.name(), code.getCountryName());
     }
 
     @DisplayName("values() contains exactly 249 constants")

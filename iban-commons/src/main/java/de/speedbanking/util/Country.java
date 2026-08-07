@@ -122,7 +122,7 @@ public enum Country {
     /** Brunei Darussalam */
     BN("Brunei Darussalam",                                    Currency.BND, Continent.ASIA),
     /** Bolivia (Plurinational State of) */
-    BO("Bolivia",                                              Currency.BOB, Continent.SOUTH_AMERICA),
+    BO("Bolivia (Plurinational State of)",                     Currency.BOB, Continent.SOUTH_AMERICA),
     /** Bonaire, Sint Eustatius and Saba */
     BQ("Bonaire, Sint Eustatius and Saba",                     Currency.USD, Continent.NORTH_AMERICA),
     /** Brazil */
@@ -320,7 +320,7 @@ public enum Country {
     /** Jamaica */
     JM("Jamaica",                                              Currency.JMD, Continent.NORTH_AMERICA),
     /** Jordan */
-    JO("Jordan",                                               Currency.JOD,  Continent.ASIA),
+    JO("Jordan",                                               Currency.JOD, Continent.ASIA),
     /** Japan */
     JP("Japan",                                                Currency.JPY, Continent.ASIA),
 
@@ -582,7 +582,7 @@ public enum Country {
     /** Tunisia */
     TN("Tunisia",                                              Currency.TND, Continent.AFRICA),
     /** Tonga */
-    TO("Tonga",                                                Currency.TOP, Continent.ASIA),
+    TO("Tonga",                                                Currency.TOP, Continent.OCEANIA),
     /** Türkiye */
     TR("Türkiye",                                              Currency.TRY, Continent.ASIA),
     /** Trinidad and Tobago */
@@ -658,7 +658,7 @@ public enum Country {
     /** Zambia */
     ZM("Zambia",                                               Currency.ZMW, Continent.AFRICA),
     /** Zimbabwe */
-    ZW("Zimbabwe",                                             Currency.ZWL, Continent.AFRICA);
+    ZW("Zimbabwe",                                             Currency.ZWG, Continent.AFRICA);
 
     /**
      * Dedicated allocation-free registry lookup for {@code Country} constants mapped by their two-letter code.
@@ -700,7 +700,7 @@ public enum Country {
     /**
      * Returns the English short country name as defined in ISO 3166-1.
      *
-     * @return the English country name (e.g., {@code "Bolivia"})
+     * @return the English country name (e.g., {@code "Bolivia (Plurinational State of)"})
      */
     public String getCountryName() {
         return countryName;
@@ -781,13 +781,13 @@ public enum Country {
     /**
      * Returns a human-readable representation combining the code and country name.
      * <p>
-     * Example: {@code "IQ (Iraq)"}
+     * Example: {@code "Country[IQ, name=Iraq]"}
      *
      * @return the formatted string
      */
     @Override
     public String toString() {
-        return getClass().getSimpleName() + '[' + name() + ", countryName=" + countryName + ']';
+        return getClass().getSimpleName() + '[' + name() + ", name=" + countryName + ']';
     }
 
 }
