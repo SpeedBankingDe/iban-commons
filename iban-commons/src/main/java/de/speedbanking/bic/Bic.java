@@ -18,7 +18,6 @@ package de.speedbanking.bic;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.Country;
-import de.speedbanking.util.CountryUtil;
 import de.speedbanking.util.Currency;
 
 import java.io.IOException;
@@ -303,7 +302,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.0
      */
     public String getCountryFlag() {
-        return CountryUtil.createFlagEmoji(getCountryCode());
+        return Country.createFlagEmoji(getCountryCode());
     }
 
     /**

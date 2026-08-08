@@ -790,4 +790,36 @@ public enum Country {
         return getClass().getSimpleName() + '[' + name() + ", name=" + countryName + ']';
     }
 
+    /**
+     * Converts a two-letter ISO 3166-1 Alpha-2 country code (e.g., "DE", "PS")
+     * into its corresponding flag emoji representation (e.g., 🇩🇪, 🇵🇸).
+     * <p>
+     * This conversion relies on the Unicode Regional Indicator Symbol Letters (RIS)
+     * which are calculated by adding an offset to the uppercase ASCII value of the letters.
+     *
+     * @param countryCode the two-letter Alpha-2 country code (case-insensitive)
+     * @return the flag emoji string, or an empty string if the input code is invalid or null
+     * @throws IllegalArgumentException if the provided {@code countryCode} is not a valid two-letter uppercase code
+     *
+     * @since 1.8.9
+     */
+    public static String createFlagEmoji(String countryCode) {
+        if (countryCode == null
+            || countryCode.length() != 2
+            || !Character.isUpperCase(countryCode.charAt(0))
+            || !Character.isUpperCase(countryCode.charAt(1))) {
+            throw new IllegalArgumentException("Valid country code required: " + countryCode);
+        }
+
+        // the base Unicode value for the Regional Indicator Symbol Letter 'A'
+        int regionalIndicatorOffset = 0x1F1E6;
+
+        return new StringBuilder()
+            // convert the first letter: ('D' - 'A' + Offset) -> RIS 'D'
+            .appendCodePoint(countryCode.charAt(0) - 'A' + regionalIndicatorOffset)
+            // convert the second letter: ('E' - 'A' + Offset) -> RIS 'E'
+            .appendCodePoint(countryCode.charAt(1) - 'A' + regionalIndicatorOffset)
+            .toString();
+    }
+
 }

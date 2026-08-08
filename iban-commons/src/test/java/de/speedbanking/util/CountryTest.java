@@ -2,6 +2,7 @@ package de.speedbanking.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -611,6 +612,49 @@ final class CountryTest {
                 .as("Duplicate country name detected: '%s' (%s)", c.getCountryName(), c.getCode())
                 .isTrue();
         }
+    }
+
+    @DisplayName("createFlagEmoji() converts assigned country codes to their flag emoji")
+    @ParameterizedTest(name = "[{index}] {0} → {1}")
+    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
+        "DE | 🇩🇪",
+        "US | 🇺🇸",
+        "CH | 🇨🇭",
+        "PS | 🇵🇸",
+        "GB | 🇬🇧",
+        "FR | 🇫🇷",
+        "JP | 🇯🇵",
+        "ZA | 🇿🇦",
+        "XK | 🇽🇰",
+        "AU | 🇦🇺"
+    })
+    void createFlagEmoji_validCodes_returnsCorrectEmoji(String countryCode, String expectedEmoji) {
+        assertThat(Country.createFlagEmoji(countryCode))
+            .as("Emoji conversion of '%s' failed", countryCode)
+            .isEqualTo(expectedEmoji);
+    }
+
+    @DisplayName("createFlagEmoji() throws IllegalArgumentException for null or empty input")
+    @ParameterizedTest(name = "[{index}] null/empty input")
+    @NullAndEmptySource
+    void createFlagEmoji_nullOrEmpty_throwsIllegalArgumentException(String countryCode) {
+        assertThatThrownBy(() -> Country.createFlagEmoji(countryCode))
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("createFlagEmoji() throws IllegalArgumentException for invalid codes")
+    @ParameterizedTest(name = "[{index}] ''{0}'' is invalid")
+    @ValueSource(strings = {
+        "D",   // too short
+        "USA", // too long
+        "de",  // lowercase
+        "D1",  // contains digit
+        "?!"   // non-alphabetic
+    })
+    void createFlagEmoji_invalidCodes_throwsIllegalArgumentException(String countryCode) {
+        assertThatThrownBy(() -> Country.createFlagEmoji(countryCode))
+            .as("createFlagEmoji(\"%s\") should throw IllegalArgumentException", countryCode)
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
 }

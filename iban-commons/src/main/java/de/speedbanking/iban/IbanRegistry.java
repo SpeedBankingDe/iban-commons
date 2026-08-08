@@ -23,7 +23,6 @@ import static java.util.stream.Collectors.toList;
 
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.util.Country;
-import de.speedbanking.util.CountryUtil;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
 
@@ -2902,7 +2901,6 @@ public enum IbanRegistry {
     private final MetaData              metaData;
     private final ContactData           contactData;
 
-    private final String                countryFlag;
     private final Pattern               ibanRegex;
 
     private final IbanRegistry          baseCountry;
@@ -2983,8 +2981,6 @@ public enum IbanRegistry {
         this.contactData = Optional.ofNullable(contactData).orElse(ContactData.EMPTY);
         this.baseCountry = baseCountry;
 
-        this.countryFlag = CountryUtil.createFlagEmoji(name());
-
         String ibanPatternNoCountry = "2!n" + structureData.bbanPatternStr;
         this.ibanRegex = Pattern.compile('^' + name() + IbanPatternConverter.convertToRegex(ibanPatternNoCountry) + '$');
     }
@@ -3047,7 +3043,7 @@ public enum IbanRegistry {
      * @return the country flag emoji string
      */
     public String getCountryFlag() {
-        return countryFlag;
+        return Country.createFlagEmoji(name());
     }
 
     /**
