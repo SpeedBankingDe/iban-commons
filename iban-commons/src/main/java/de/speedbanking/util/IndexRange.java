@@ -72,6 +72,37 @@ public final class IndexRange implements java.io.Serializable, Comparable<IndexR
     }
 
     /**
+     * Creates a new {@code IndexRange} by applying the given offset to both {@code begin} and {@code end}.
+     *
+     * <p>
+     * If the provided {@code range} is {@code null}, this method returns {@code null}.
+     *
+     * @param range the index range to offset, may be {@code null}
+     * @param offset the value to add to both {@code begin} and {@code end}
+     * @return a new {@code IndexRange} instance with shifted indices, or {@code null} if input range was {@code null}
+     * @throws IllegalArgumentException if the resulting {@code begin} index is negative
+     */
+    public static IndexRange offset(IndexRange range, int offset) {
+        return range == null ? null : range.withOffset(offset);
+    }
+
+    /**
+     * Creates a new {@code IndexRange} by applying the given offset to both {@code begin} and {@code end}.
+     * <p>
+     * A positive offset shifts the range to the right, while a negative offset shifts it to the left.
+     *
+     * @param offset the value to add to both {@code begin} and {@code end}
+     * @return a new {@code IndexRange} instance with shifted indices, or {@code this} if offset is 0
+     * @throws IllegalArgumentException if the resulting {@code begin} index is negative
+     */
+    public IndexRange withOffset(int offset) {
+        if (offset == 0) {
+            return this;
+        }
+        return of(begin + offset, end + offset);
+    }
+
+    /**
      * Returns the begin index of the range (inclusive).
      * <p>
      * This is the index of the first character included in the range.

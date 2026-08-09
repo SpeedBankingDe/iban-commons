@@ -77,6 +77,70 @@ final class IndexRangeTest {
         assertThat(range.length()).isEqualTo(expectedLength);
     }
 
+    @DisplayName("Should shift indices correctly when applying an offset")
+    @ParameterizedTest(name = "[{index}] range {0} with offset {1}")
+    @CsvSource(delimiter = '|', value = {
+        " 8, 12 | -4 | 4 |  8",
+        " 0,  5 |  5 | 5 | 10",
+        " 4,  8 | -4 | 0 |  4"
+    })
+    void withOffset_shouldShiftIndices_whenOffsetIsGiven(
+        @ConvertWith(IndexRangeConverter.class) IndexRange range,
+        int offset,
+        int expectedBegin,
+        int expectedEnd
+    ) {
+        IndexRange shifted = range.withOffset(offset);
+
+        assertThat(shifted)
+            .isNotNull()
+            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .containsExactly(expectedBegin, expectedEnd);
+    }
+
+    @DisplayName("Should return same instance when offset is zero")
+    @Test
+    void withOffset_shouldReturnSameInstance_whenOffsetIsZero() {
+        IndexRange range = IndexRange.of(8, 12);
+
+        IndexRange shifted = range.withOffset(0);
+
+        assertThat(shifted).isSameAs(range);
+    }
+
+    @DisplayName("Should throw IllegalArgumentException when resulting begin index is negative")
+    @ParameterizedTest(name = "[{index}] range {0} with offset {1}")
+    @CsvSource(delimiter = '|', value = {
+        " 8, 12 | -9",
+        " 0,  5 | -1"
+    })
+    void withOffset_shouldThrowException_whenResultingBeginIsNegative(
+        @ConvertWith(IndexRangeConverter.class) IndexRange range,
+        int offset
+    ) {
+        assertThatIllegalArgumentException()
+            .isThrownBy(() -> range.withOffset(offset))
+            .withMessageContaining("must be non-negative");
+    }
+
+    @DisplayName("Should return null when calling static offset with null range")
+    @Test
+    void offset_shouldReturnNull_whenRangeIsNull() {
+        assertThat(IndexRange.offset(null, -4)).isNull();
+    }
+
+    @DisplayName("Should shift range when calling static offset with valid range")
+    @Test
+    void offset_shouldShiftIndices_whenStaticMethodIsCalled() {
+        IndexRange range = IndexRange.of(8, 12);
+        IndexRange shifted = IndexRange.offset(range, -4);
+
+        assertThat(shifted)
+            .isNotNull()
+            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .containsExactly(4, 8);
+    }
+
     @DisplayName("Should extract correct substring with applyTo(CharSequence)")
     @Test
     void applyTo_shouldExtractCorrectSubstring_whenCharSequenceIsGiven() {
@@ -129,7 +193,11 @@ final class IndexRangeTest {
         " 1, 5 | 1, 6 | -1", // begin equal, end is less
         " 1, 6 | 1, 5 |  1"  // begin equal, end is greater
     })
-    void compareTo_shouldSatisfyContract_whenRangesAreCompared(@ConvertWith(IndexRangeConverter.class) IndexRange range1, @ConvertWith(IndexRangeConverter.class) IndexRange range2, int expectedSign) {
+    void compareTo_shouldSatisfyContract_whenRangesAreCompared(
+        @ConvertWith(IndexRangeConverter.class) IndexRange range1,
+        @ConvertWith(IndexRangeConverter.class) IndexRange range2,
+        int expectedSign
+    ) {
         int result = range1.compareTo(range2);
 
         if (expectedSign == 0) {
@@ -171,7 +239,6 @@ final class IndexRangeTest {
     @DisplayName("Should return correct and descriptive toString format, handling null name")
     @Test
     void toString_shouldReturnCorrectFormat_whenRangeIsGiven() {
-         // Length 4. End-1 = 4
         assertThat(IndexRange.of(1, 5)).hasToString("IndexRange[1-4 (4)]");
     }
 
