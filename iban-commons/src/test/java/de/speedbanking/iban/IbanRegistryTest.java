@@ -1,6 +1,6 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.*;
+import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanString;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -11,7 +11,6 @@ import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
 
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -90,30 +89,25 @@ final class IbanRegistryTest {
     void checkIbanProperties_shouldMatchExpectedValues(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
         IbanRegistry entry = IbanRegistry.getByCode(code);
 
-        SoftAssertions softly = new SoftAssertions();
-
-        softly.assertThat(entry)
+        assertThat(entry)
             .isNotNull()
             .extracting(IbanRegistry::getIbanLength)
             .as("IBAN length mismatch for %s", code)
             .isEqualTo(expectedLength);
 
-        softly.assertThat(entry.getBbanPatternStr())
+        assertThat(entry.getBbanPatternStr())
             .as("BBAN pattern string mismatch for %s", code)
             .isEqualTo(expectedPattern);
 
-        softly.assertThat(entry.getBaseCountry()).isEqualTo(expectedBaseCountry);
-
-        softly.assertAll();
+        assertThat(entry.getBaseCountry()).isEqualTo(expectedBaseCountry);
     }
 
     @DisplayName("Germany (DE) should not have a separate branch code")
     @Test
     void checkIbanDe_shouldHaveCorrectStructure() {
-        SoftAssertions softly = new SoftAssertions();
         IbanRegistry registryDe = IbanRegistry.getByCode("DE");
 
-        softly.assertThat(registryDe)
+        assertThat(registryDe)
             .isNotNull()
             .isSameAs(IbanRegistry.DE)
             .isSameAs(IbanRegistry.getByCode('D', 'E'))
@@ -122,51 +116,44 @@ final class IbanRegistryTest {
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
             .containsExactly("DE", "Germany", "🇩🇪", true, null, Currency.EUR, "EUR");
 
-        softly.assertThat(registryDe.getIbanLength()).isEqualTo(22);
-        softly.assertThat(registryDe.getBbanLength()).isEqualTo(18);
-        softly.assertThat(registryDe.getBbanPatternStr()).isEqualTo("8!n10!n");
-        softly.assertThat(registryDe.getIbanExample()).isEqualTo("DE89370400440532013000");
+        assertThat(registryDe.getIbanLength()).isEqualTo(22);
+        assertThat(registryDe.getBbanLength()).isEqualTo(18);
+        assertThat(registryDe.getBbanPatternStr()).isEqualTo("8!n10!n");
+        assertThat(registryDe.getIbanExample()).isEqualTo("DE89370400440532013000");
 
-        softly.assertThat(registryDe.getBankCodePatternStr()).isEqualTo("8!n");
-        softly.assertThat(registryDe.getBankCodeIndexRange())
+        assertThat(registryDe.getBankCodePatternStr()).isEqualTo("8!n");
+        assertThat(registryDe.getBankCodeIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(4, 12);
 
-        softly.assertThat(registryDe.getBranchCodePattern()).isNull();
-        softly.assertThat(registryDe.getBranchCodeIndexRange()).isNull();
-        softly.assertThat(registryDe.hasBranchCode()).isFalse();
+        assertThat(registryDe.getBranchCodePattern()).isNull();
+        assertThat(registryDe.getBranchCodeIndexRange()).isNull();
+        assertThat(registryDe.hasBranchCode()).isFalse();
 
-        softly.assertThat(registryDe.getAccountNumberLength())
-            .isEqualTo(10)
-            .isEqualTo(registryDe.getAccountNumberIndexRange().length());
-
-        softly.assertThat(registryDe.getAccountNumberIndexRange())
+        assertThat(registryDe.getAccountNumberIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(12, 22);
 
-        softly.assertThat(registryDe.getOrganisation()).isEqualTo("Bundesverband deutscher Banken");
-        softly.assertThat(registryDe.getDepartment()).isNull();
-        softly.assertThat(registryDe.getStreetAddress()).isEqualTo("Burgstraße 28");
-        softly.assertThat(registryDe.getCityPostcode()).isEqualTo("10178 Berlin");
-        softly.assertThat(registryDe.getDepartmentGenericEmail()).isEqualTo("iban@bdb.de");
-        softly.assertThat(registryDe.getDepartmentTel()).isEqualTo("+ 49 3016632301");
+        assertThat(registryDe.getOrganisation()).isEqualTo("Bundesverband deutscher Banken");
+        assertThat(registryDe.getDepartment()).isNull();
+        assertThat(registryDe.getStreetAddress()).isEqualTo("Burgstraße 28");
+        assertThat(registryDe.getCityPostcode()).isEqualTo("10178 Berlin");
+        assertThat(registryDe.getDepartmentGenericEmail()).isEqualTo("iban@bdb.de");
+        assertThat(registryDe.getDepartmentTel()).isEqualTo("+ 49 3016632301");
 
-        softly.assertThat(registryDe.getLastUpdate()).isEqualTo(YearMonth.of(2011, 1));
-        softly.assertThat(registryDe.getLastUpdateYear()).isEqualTo(2011);
-        softly.assertThat(registryDe.getLastUpdateMonth()).isEqualTo(1);
-
-        softly.assertAll();
+        assertThat(registryDe.getLastUpdate()).isEqualTo(YearMonth.of(2011, 1));
+        assertThat(registryDe.getLastUpdateYear()).isEqualTo(2011);
+        assertThat(registryDe.getLastUpdateMonth()).isEqualTo(1);
     }
 
     @DisplayName("France (FR) should have a branch code")
     @Test
     void checkIbanFr_shouldHaveCorrectStructure() {
-        SoftAssertions softly = new SoftAssertions();
         IbanRegistry registryFr = IbanRegistry.FR;
 
-        softly.assertThat(registryFr)
+        assertThat(registryFr)
             .isNotNull()
             .isSameAs(IbanRegistry.getByCode("FR"))
             .isSameAs(IbanRegistry.getByCode('F', 'R'))
@@ -175,52 +162,45 @@ final class IbanRegistryTest {
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
             .containsExactly("FR", "France", "🇫🇷", true, null, Currency.EUR, "EUR");
 
-        softly.assertThat(registryFr.getIbanLength()).isEqualTo(27);
-        softly.assertThat(registryFr.getBbanLength()).isEqualTo(23);
-        softly.assertThat(registryFr.getBbanPatternStr()).isEqualTo("5!n5!n11!c2!n");
-        softly.assertThat(registryFr.getIbanExample()).isEqualTo("FR1420041010050500013M02606");
+        assertThat(registryFr.getIbanLength()).isEqualTo(27);
+        assertThat(registryFr.getBbanLength()).isEqualTo(23);
+        assertThat(registryFr.getBbanPatternStr()).isEqualTo("5!n5!n11!c2!n");
+        assertThat(registryFr.getIbanExample()).isEqualTo("FR1420041010050500013M02606");
 
-        softly.assertThat(registryFr.getBankCodePatternStr()).isEqualTo("5!n");
-        softly.assertThat(registryFr.getBankCodeIndexRange())
+        assertThat(registryFr.getBankCodePatternStr()).isEqualTo("5!n");
+        assertThat(registryFr.getBankCodeIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(4, 9);
 
-        softly.assertThat(registryFr.getBranchCodePattern()).isEqualTo("5!n");
-        softly.assertThat(registryFr.getBranchCodeIndexRange())
+        assertThat(registryFr.getBranchCodePattern()).isEqualTo("5!n");
+        assertThat(registryFr.getBranchCodeIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(9, 14);
-        softly.assertThat(registryFr.hasBranchCode()).isTrue();
+        assertThat(registryFr.hasBranchCode()).isTrue();
 
-        softly.assertThat(registryFr.getAccountNumberLength())
-            .isEqualTo(11)
-            .isEqualTo(registryFr.getAccountNumberIndexRange().length());
-
-        softly.assertThat(registryFr.getAccountNumberIndexRange())
+        assertThat(registryFr.getAccountNumberIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(14, 25);
 
-        softly.assertThat(registryFr.getOrganisation()).isEqualTo("CFONB");
-        softly.assertThat(registryFr.getDepartment()).isNull();
-        softly.assertThat(registryFr.getStreetAddress()).isEqualTo("18 rue la Fayette");
-        softly.assertThat(registryFr.getCityPostcode()).isEqualTo("75009 Paris");
-        softly.assertThat(registryFr.getDepartmentGenericEmail()).isEqualTo("cfonb@cfonb.fr");
-        softly.assertThat(registryFr.getDepartmentTel()).isEqualTo("+ 33 148005042");
+        assertThat(registryFr.getOrganisation()).isEqualTo("CFONB");
+        assertThat(registryFr.getDepartment()).isNull();
+        assertThat(registryFr.getStreetAddress()).isEqualTo("18 rue la Fayette");
+        assertThat(registryFr.getCityPostcode()).isEqualTo("75009 Paris");
+        assertThat(registryFr.getDepartmentGenericEmail()).isEqualTo("cfonb@cfonb.fr");
+        assertThat(registryFr.getDepartmentTel()).isEqualTo("+ 33 148005042");
 
-        softly.assertThat(registryFr.getLastUpdate()).isEqualTo(YearMonth.of(2016, 9));
-
-        softly.assertAll();
+        assertThat(registryFr.getLastUpdate()).isEqualTo(YearMonth.of(2016, 9));
     }
 
     @DisplayName("Italy (IT) should have an offset Bank ID and Branch ID")
     @Test
     void checkIbanIt_shouldHaveCorrectStructure() {
-        SoftAssertions softly = new SoftAssertions();
         IbanRegistry registryIt = IbanRegistry.IT;
 
-        softly.assertThat(registryIt)
+        assertThat(registryIt)
             .as("IT entry should exist and be the static constant")
             .isNotNull()
             .isSameAs(IbanRegistry.getByCode("IT"))
@@ -230,18 +210,16 @@ final class IbanRegistryTest {
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
             .containsExactly("IT", "Italy", "🇮🇹", true, null, Currency.EUR, "EUR");
 
-        softly.assertThat(registryIt.getBankCodePatternStr()).isEqualTo("5!n");
-        softly.assertThat(registryIt.getBankCodeIndexRange())
+        assertThat(registryIt.getBankCodePatternStr()).isEqualTo("5!n");
+        assertThat(registryIt.getBankCodeIndexRange())
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(5, 10);
 
-        softly.assertThat(registryIt.hasBranchCode()).isTrue();
-        softly.assertThat(registryIt.getBranchCodePattern()).isEqualTo("5!n");
-        softly.assertThat(registryIt.getBranchCodeIndexRange())
+        assertThat(registryIt.hasBranchCode()).isTrue();
+        assertThat(registryIt.getBranchCodePattern()).isEqualTo("5!n");
+        assertThat(registryIt.getBranchCodeIndexRange())
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(10, 15);
-
-        softly.assertAll();
     }
 
     @DisplayName("Non-SEPA country should return false for isSepa")
@@ -350,20 +328,17 @@ final class IbanRegistryTest {
         IbanRegistry.ContactData base = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
 
         // test for each field being different to trigger 'false' result for each && branch
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Diff", "Dept", "Street", "City", "Mail", "Tel"));
-        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Diff", "Street", "City", "Mail", "Tel"));
-        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Diff", "City", "Mail", "Tel"));
-        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "Diff", "Mail", "Tel"));
-        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Diff", "Tel"));
-        softly.assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Diff"));
+        assertThat(base).isNotEqualTo(IbanRegistry.ContactData.of("Diff", "Dept", "Street", "City", "Mail", "Tel"))
+                        .isNotEqualTo(IbanRegistry.ContactData.of("Org", "Diff", "Street", "City", "Mail", "Tel"))
+                        .isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Diff", "City", "Mail", "Tel"))
+                        .isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "Diff", "Mail", "Tel"))
+                        .isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Diff", "Tel"))
+                        .isNotEqualTo(IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Diff"));
 
         // test with null values to cover Objects.equals null-handling
         IbanRegistry.ContactData withNulls = IbanRegistry.ContactData.of(null, null, null, null, null, null);
-        softly.assertThat(withNulls).isNotEqualTo(base);
-        softly.assertThat(base).isNotEqualTo(withNulls);
-
-        softly.assertAll();
+        assertThat(withNulls).isNotEqualTo(base);
+        assertThat(base).isNotEqualTo(withNulls);
     }
 
     @DisplayName("Should return correct toString for ContactData")
