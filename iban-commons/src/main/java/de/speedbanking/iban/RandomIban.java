@@ -17,13 +17,8 @@ package de.speedbanking.iban;
 
 import static java.util.Objects.requireNonNull;
 
-import de.speedbanking.iban.util.IbanCharType;
-import de.speedbanking.iban.util.IbanPatternConverter;
-import de.speedbanking.iban.util.IbanPatternConverter.Segment;
 import de.speedbanking.util.Country;
-import de.speedbanking.util.IndexRange;
 
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -71,10 +66,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * }</pre>
  */
 public final class RandomIban {
-
-    private static final String         DIGITS         = "0123456789";
-    private static final String         LETTERS        = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static final String         ALPHANUMERIC   = DIGITS + LETTERS;
 
     /**
      * Cached array of SEPA-country registry entries.
@@ -298,7 +289,7 @@ public final class RandomIban {
      */
     static String invalidString(Random random) {
         requireRandom(random);
-        IbanRegistry country = IbanRegistry.ALL_COUNTRIES[random.nextInt(IbanRegistry.ALL_COUNTRIES.length)];
+        IbanRegistry country = IbanRegistry.ALL_COUNTRIES.get(random.nextInt(IbanRegistry.ALL_COUNTRIES.size()));
         return invalidString(country, random);
     }
 
@@ -562,169 +553,14 @@ public final class RandomIban {
             } else if (sepaOnly) {
                 return SEPA_COUNTRIES[rnd.nextInt(SEPA_COUNTRIES.length)];
             }
-            return IbanRegistry.ALL_COUNTRIES[rnd.nextInt(IbanRegistry.ALL_COUNTRIES.length)];
+            return IbanRegistry.ALL_COUNTRIES.get(rnd.nextInt(IbanRegistry.ALL_COUNTRIES.size()));
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Internal generation helpers
-    // -------------------------------------------------------------------------
-
-    /**
-     * Core IBAN generation method. All public entry points (builder and static methods)
-     * delegate here.
-     * <p>
-     * The generation process:
-     * <ol>
-     *   <li>Constructs the base IBAN string (country code + {@code "00"} placeholder + random BBAN).</li>
-     *   <li>Computes and writes the National Check Digit (NCD) if the country defines one
-     *       and its {@link CountryValidator} implements {@link NationalCheckDigitCalculator}.</li>
-     *   <li>Calculates the correct ISO 7064 Mod 97-10 check digits via
-     *       {@link IbanValidator#fixCheckDigits}.</li>
-     *   <li>Returns the validated {@link Iban}.</li>
-     * </ol>
-     *
-     * @param countryData the non-{@code null} registry entry for the target country
-     * @param random      the non-{@code null} {@link Random} instance to use
-     * @return a valid, randomly generated IBAN
-     */
     static Iban generate(IbanRegistry countryData, Random random) {
-
-        String countryCode = countryData.isBaseCountry()
-            ? countryData.getCountryCode()
-            : countryData.getBaseCountry().getCountryCode();
-
-        // 1. CC + "00" ISO check-digit placeholder + random BBAN
-        StringBuilder ibanBuilder = new StringBuilder()
-            .append(countryCode)
-            .append("00")
-            .append(generateRandomBban(countryData.getBbanPatternStr(), random));
-
-        // 2. Compute and write the National Check Digit (NCD) where applicable.
-        //    This MUST happen before fixCheckDigits(), because the ISO Mod-97 check
-        //    covers the complete IBAN including the NCD field.
-        if (IbanConfig.isCalculateNcd()) {
-            fixNationalCheckDigit(countryData, ibanBuilder);
-        }
-
-        // 3. Calculate and apply the correct ISO 7064 Mod 97-10 check digits
-        IbanValidator.fixCheckDigits(ibanBuilder);
-
-        // 4. Return the validated result
-        return Iban.of(ibanBuilder.toString());
-    }
-
-    /**
-     * Parses the BBAN pattern string (e.g., {@code "4!n4!n12!c"}) and generates a random BBAN
-     * string that matches the required length and character types for the national structure,
-     * using the provided {@link Random} instance.
-     * <p>
-     * The pattern components are:
-     * <ul>
-     *   <li>{@code n}: digits (numeric characters 0–9)</li>
-     *   <li>{@code a}: upper-case letters (alphabetic characters A–Z)</li>
-     *   <li>{@code c}: upper-case letters and digits (alphanumeric characters A–Z, 0–9)</li>
-     *   <li>{@code !}: indicates fixed length (e.g., {@code 4!n})</li>
-     * </ul>
-     *
-     * @param patternNotation the BBAN structure pattern string from {@link IbanRegistry}
-     * @param random          the {@link Random} instance to use for character selection
-     * @return a randomly generated string matching the BBAN structure
-     */
-    static String generateRandomBban(String patternNotation, Random random) {
-
-        List<Segment> segments = IbanPatternConverter.aggregateSegments(
-            IbanPatternConverter.parseSegments(patternNotation));
-
-        StringBuilder bbanBuilder = new StringBuilder();
-        for (Segment segment : segments) {
-            bbanBuilder.append(generateRandomSegment(segment, random));
-        }
-        return bbanBuilder.toString();
-    }
-
-    /**
-     * Generates a random string for a single BBAN {@link Segment}.
-     * <p>
-     * The character set is chosen by the segment's {@code CharType}:
-     * <ul>
-     *   <li>{@code NUMERIC}      → digits {@code 0–9}</li>
-     *   <li>{@code ALPHABETIC}   → upper-case letters {@code A–Z}</li>
-     *   <li>{@code ALPHANUMERIC} → digits and upper-case letters {@code 0–9, A–Z}</li>
-     * </ul>
-     *
-     * @param segment the pattern segment specifying the character type and length
-     * @param random  the {@link Random} instance to use for character selection
-     * @return a randomly generated string of {@link Segment#getLength()} characters
-     * @throws IllegalStateException if an unrecognised {@code CharType} is encountered
-     */
-    static String generateRandomSegment(Segment segment, Random random) {
-        requireNonNull(segment, "segment must not be null");
-        requireRandom(random);
-
-        String sourceChars;
-        if (IbanCharType.NUMERIC == segment.getCharType()) {
-            sourceChars = DIGITS;
-        } else if (IbanCharType.ALPHABETIC == segment.getCharType()) {
-            sourceChars = LETTERS;
-        } else if (IbanCharType.ALPHANUMERIC == segment.getCharType()) {
-            sourceChars = ALPHANUMERIC;
-        } else {
-            throw new IllegalStateException("Unrecognised IbanCharType: " + segment.getCharType());
-        }
-
-        int segmentLen = segment.getLength();
-        StringBuilder sb = new StringBuilder(segmentLen);
-        for (int i = 0; i < segmentLen; i++) {
-            sb.append(sourceChars.charAt(random.nextInt(sourceChars.length())));
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Overwrites the National Check Digit (NCD) field in {@code ibanBuilder} with the value
-     * computed by the country's {@link NationalCheckDigitCalculator}, if one is available.
-     * <p>
-     * This method is a no-op when:
-     * <ul>
-     *   <li>the country has no NCD field
-     *       ({@link IbanRegistry#getNationalCheckDigitIndexRange()} returns {@code null}), or</li>
-     *   <li>the country's {@link CountryValidator} does not implement
-     *       {@link NationalCheckDigitCalculator}.</li>
-     * </ul>
-     *
-     * @param countryData the registry entry for the country, may not be {@code null}
-     * @param ibanBuilder the mutable IBAN string with {@code "00"} ISO check-digit placeholders
-     *                    and a randomly generated BBAN; modified in-place; may not be {@code null}
-     * @return {@code ibanBuilder}, unmodified if no NCD field is defined for the country
-     *         or if the {@link CountryValidator} does not implement
-     *         {@link NationalCheckDigitCalculator}; otherwise the NCD field is
-     *         overwritten in-place and the same instance is returned
-     */
-    static StringBuilder fixNationalCheckDigit(IbanRegistry countryData, StringBuilder ibanBuilder) {
-        requireNonNull(countryData, "countryData must not be null");
-        requireNonNull(ibanBuilder, "ibanBuilder must not be null");
-
-        if (ibanBuilder.length() != countryData.getIbanLength()) {
-            throw InvalidIbanException.of(IbanValidationError.INCORRECT_LENGTH_COUNTRY, ibanBuilder);
-        }
-
-        // only countries with a registered NCD field are relevant
-        IndexRange ncdRange = countryData.getNationalCheckDigitIndexRange();
-        if (ncdRange == null) {
-            return ibanBuilder;
-        }
-
-        // countries with NCD must have a NationalCheckDigitCalculator
-        NationalCheckDigitCalculator calc = (NationalCheckDigitCalculator) IbanValidator.getCountryValidator(countryData);
-        char[] ncd = calc.calculateNationalCheckDigit(ibanBuilder);
-
-        // write the computed NCD into the StringBuilder
-        for (int idxIban = ncdRange.getBegin(), idxNcd = 0; idxIban < ncdRange.getEnd(); idxIban++, idxNcd++) {
-            ibanBuilder.setCharAt(idxIban, ncd[idxNcd]);
-        }
-
-        return ibanBuilder;
+        return countryData.builder()
+            .withRandom(random)
+            .build();
     }
 
 }

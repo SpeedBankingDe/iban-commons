@@ -20,7 +20,6 @@ import static java.util.stream.Collectors.toMap;
 
 import de.speedbanking.util.IndexRange;
 
-import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -42,7 +41,7 @@ public final class IbanPlusKey {
 
     /** Cache for pre-calculated extraction strategies per country code. */
     private static final Map<String, Strategy> STRATEGY_CACHE = unmodifiableMap(
-        Arrays.stream(IbanRegistry.ALL_COUNTRIES)
+        IbanRegistry.ALL_COUNTRIES.stream()
               .filter(IbanRegistry::isBaseCountry)
               .collect(toMap(
                   IbanRegistry::getCountryCode,
@@ -69,9 +68,6 @@ public final class IbanPlusKey {
         }
 
         Strategy strategy = STRATEGY_CACHE.get(iban.getCountryCode());
-        if (strategy == null) {
-            return null;
-        }
 
         StringBuilder sb = new StringBuilder(15)
             .append(iban.getBankCode());

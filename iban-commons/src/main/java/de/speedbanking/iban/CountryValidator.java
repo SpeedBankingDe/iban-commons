@@ -34,8 +34,8 @@ import de.speedbanking.util.CharUtil;
  *
  * <h3>Implementations</h3>
  * All country-specific implementations live in {@link CountryValidators} and are generated
- * by {@code CountryValidatorCodeGenerator}.  They are not intended to be referenced
- * directly — use {@link IbanValidator#getCountryValidator(IbanRegistry)} to obtain the validator for
+ * by a code generator. They are not intended to be referenced directly —  use
+ * {@link IbanValidator#getCountryValidator(IbanRegistry)} to obtain the validator for
  * a specific country.
  *
  * @since 1.8.0

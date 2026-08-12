@@ -20,8 +20,9 @@ import de.speedbanking.iban.util.InvalidBaseException;
 /**
  * Exception thrown when a string fails IBAN validation in the strict {@code Iban.of()} method.
  * <p>
- * Instances are typically created via the static factory methods {@link #of(IbanValidationError)}
- * or {@link #of(IbanValidationError, CharSequence)} rather than directly via constructors.
+ * Instances are typically created via the static factory methods {@link #of(IbanValidationError)},
+ * {@link #of(IbanValidationError, CharSequence)}, or {@link #of(IbanValidationError, CharSequence, String)}
+ * rather than directly via constructors.
  *
  * @since 1.8.0
  */
@@ -31,15 +32,17 @@ public class InvalidIbanException extends InvalidBaseException {
     private static final long serialVersionUID = 42L;
 
     /**
-     * Constructs a new exception with the specified validation failure reason and the erroneous input.
+     * Constructs a new exception with the specified validation failure reason, erroneous input, and country code.
      * The exception message is derived from the reason's text.
      *
-     * @param reason the specific {@code IbanValidationError} that occurred, must not be {@code null}
-     * @param input  the IBAN input string that caused the error, may be {@code null};
-     *               blank values are normalized to {@code null}
+     * @param reason      the specific {@code IbanValidationError} that occurred, must not be {@code null}
+     * @param input       the IBAN input string that caused the error, may be {@code null};
+     *                    blank values are normalized to {@code null}
+     * @param countryCode the ISO country code, may be {@code null};
+     *                    blank values are normalized to {@code null}
      */
-    InvalidIbanException(IbanValidationError reason, CharSequence input) {
-        super(reason, input);
+    InvalidIbanException(IbanValidationError reason, CharSequence input, String countryCode) {
+        super(reason, input, countryCode);
     }
 
     /**
@@ -49,7 +52,7 @@ public class InvalidIbanException extends InvalidBaseException {
      * @return a new {@code InvalidIbanException} instance
      */
     public static InvalidIbanException of(IbanValidationError reason) {
-        return new InvalidIbanException(reason, null);
+        return new InvalidIbanException(reason, null, null);
     }
 
     /**
@@ -62,7 +65,22 @@ public class InvalidIbanException extends InvalidBaseException {
      * @return a new {@code InvalidIbanException} instance
      */
     public static InvalidIbanException of(IbanValidationError reason, CharSequence input) {
-        return new InvalidIbanException(reason, input);
+        return new InvalidIbanException(reason, input, null);
+    }
+
+    /**
+     * Static factory method to create an {@code InvalidIbanException} with the specified reason,
+     * erroneous IBAN input, and country code.
+     *
+     * @param reason      the specific {@code IbanValidationError} that occurred, must not be {@code null}
+     * @param input       the IBAN input string that caused the error, may be {@code null};
+     *                    blank values are normalized to {@code null}
+     * @param countryCode the ISO country code, may be {@code null};
+     *                    blank values are normalized to {@code null}
+     * @return a new {@code InvalidIbanException} instance
+     */
+    public static InvalidIbanException of(IbanValidationError reason, CharSequence input, String countryCode) {
+        return new InvalidIbanException(reason, input, countryCode);
     }
 
     /**

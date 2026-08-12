@@ -156,7 +156,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         IbanValidationResult result = IbanValidator.validate(iban, false);
 
         if (!result.isValid()) {
-            throw InvalidIbanException.of(result.error, iban);
+            throw InvalidIbanException.of(result.error, iban, result.countryData == null ? null : result.countryData.getCountryCode());
         }
 
         return new Iban(result.normIban, result.countryData);
@@ -176,7 +176,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         IbanValidationResult result = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
 
         if (!result.isValid()) {
-            throw InvalidIbanException.of(result.error, iban);
+            throw InvalidIbanException.of(result.error, iban, result.countryData == null ? null : result.countryData.getCountryCode());
         }
 
         return new Iban(result.normIban, result.countryData);
@@ -215,7 +215,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     public static void validate(final CharSequence iban) throws InvalidIbanException {
         IbanValidationResult result = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
         if (!result.isValid()) {
-            throw InvalidIbanException.of(result.error, iban);
+            throw InvalidIbanException.of(result.error, iban, result.countryData == null ? null : result.countryData.getCountryCode());
         }
     }
 

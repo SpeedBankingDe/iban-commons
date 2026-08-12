@@ -39,12 +39,13 @@ final class IbanPlusKeyTest {
         "ES9121000418450200051332        | ES | 2100     | 0418  | 45 | 10",
         "FR1420041010050500013M02606     | FR | 20041    | 01005 |    | 10",
         "IT60X0542811101000000123456     | IT | 05428    | 11101 |    | 10",
-        "PL61109010140000071219812874    | PL | 109      | 0101  | 4  |  8",
+        "PL61109010140000071219812874    | PL | 109      | 0101  |    |  7",
         "SC18SSCB11010000000000001497USD | SC | SSCB11   | 01    |    |  8"
     })
-    void of_shouldExtractCorrectKey_whenCountryIsSupported(String ibanInput, String countryCode,
-                                                String bankCode, String branchCode,
-                                                String expectedNcd, int expectedIbanPlusLen) {
+    void of_shouldExtractCorrectKey_whenCountryIsSupported(
+                String ibanInput, String countryCode,
+                String bankCode, String branchCode,
+                String expectedNcd, int expectedIbanPlusLen) {
         String actualKey = IbanPlusKey.of(ibanInput);
 
         assertThat(actualKey)
@@ -62,7 +63,7 @@ final class IbanPlusKeyTest {
         //cc| iban                            | ibanPlusKey
         //--+---------------------------------+------------
         "DE | DE89370400440532013000          | 37040044",   // only BankCode
-        "PL | PL61109010140000071219812874    | 10901014",   // BC + Branch + NCD (appended)
+        "PL | PL61109010140000071219812874    | 1090101",    // BC + Branch
         "IT | IT60X0542811101000000123456     | 0542811101", // BC + Branch (NCD at start ignored)
         "ES | ES9121000418450200051332        | 2100041845", // BC + Branch + NCD (appended)
         "SC | SC18SSCB11010000000000001497USD | SSCB1101"    // alphanumeric routing

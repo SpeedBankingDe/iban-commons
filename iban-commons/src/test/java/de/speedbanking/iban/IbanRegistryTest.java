@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
+import de.speedbanking.iban.IbanRegistry.MetaData;
 import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
@@ -37,7 +38,7 @@ final class IbanRegistryTest {
             .as("DE should be found")
             .isNotNull()
             .extracting(IbanRegistry::getCountryName, IbanRegistry::isSepa, IbanRegistry::isNotSepa, IbanRegistry::getBaseCountry)
-            .containsExactly("Germany", true, false, null);
+            .containsExactly("Germany", true, false, IbanRegistry.DE);
     }
 
     @DisplayName("Should return null for an unsupported country code")
@@ -79,12 +80,12 @@ final class IbanRegistryTest {
     @DisplayName("Should have correct length and derived IBAN pattern string")
     @ParameterizedTest(name = "[{index}]: {0}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-            "DE | 22 | 8!n10!n       | (null)", // Deutschland: 18 Zeichen
-            "FR | 27 | 5!n5!n11!c2!n | (null)", // Frankreich: 23 Zeichen
-            "NO | 15 | 4!n6!n1!n     | (null)", // Norwegen: kürzeste IBAN
-            "MT | 31 | 4!a5!n18!c    | (null)", // Malta: längste IBAN
-            "AX | 18 | 3!n11!n       | FI",     // Åland Islands: base country Finland
-            "GP | 27 | 5!n5!n11!c2!n | FR"      // Guadeloupe: base country France"
+            "DE | 22 | 8!n10!n       | DE", // Germany: 18 chars
+            "FR | 27 | 5!n5!n11!c2!n | FR", // France: 23 chars
+            "NO | 15 | 4!n6!n1!n     | NO", // Norway: shortest IBAN
+            "MT | 31 | 4!a5!n18!c    | MT", // Malta: longest IBAN
+            "AX | 18 | 3!n11!n       | FI", // Åland Islands: base country Finland
+            "GP | 27 | 5!n5!n11!c2!n | FR"  // Guadeloupe: base country France"
     })
     void checkIbanProperties_shouldMatchExpectedValues(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
         IbanRegistry entry = IbanRegistry.getByCode(code);
@@ -95,7 +96,7 @@ final class IbanRegistryTest {
             .as("IBAN length mismatch for %s", code)
             .isEqualTo(expectedLength);
 
-        assertThat(entry.getBbanPatternStr())
+        assertThat(entry.getBbanPattern())
             .as("BBAN pattern string mismatch for %s", code)
             .isEqualTo(expectedPattern);
 
@@ -114,14 +115,14 @@ final class IbanRegistryTest {
             .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
                 IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
-            .containsExactly("DE", "Germany", "🇩🇪", true, null, Currency.EUR, "EUR");
+            .containsExactly("DE", "Germany", "🇩🇪", true, IbanRegistry.DE, Currency.EUR, "EUR");
 
         assertThat(registryDe.getIbanLength()).isEqualTo(22);
         assertThat(registryDe.getBbanLength()).isEqualTo(18);
-        assertThat(registryDe.getBbanPatternStr()).isEqualTo("8!n10!n");
+        assertThat(registryDe.getBbanPattern()).isEqualTo("8!n10!n");
         assertThat(registryDe.getIbanExample()).isEqualTo("DE89370400440532013000");
 
-        assertThat(registryDe.getBankCodePatternStr()).isEqualTo("8!n");
+        assertThat(registryDe.getBankCodePattern()).isEqualTo("8!n");
         assertThat(registryDe.getBankCodeIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
@@ -130,6 +131,10 @@ final class IbanRegistryTest {
         assertThat(registryDe.getBranchCodePattern()).isNull();
         assertThat(registryDe.getBranchCodeIndexRange()).isNull();
         assertThat(registryDe.hasBranchCode()).isFalse();
+
+        assertThat(registryDe.getAccountNumberLength())
+            .isEqualTo(10)
+            .isEqualTo(registryDe.getAccountNumberIndexRange().length());
 
         assertThat(registryDe.getAccountNumberIndexRange())
             .isNotNull()
@@ -160,14 +165,14 @@ final class IbanRegistryTest {
             .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
                 IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
-            .containsExactly("FR", "France", "🇫🇷", true, null, Currency.EUR, "EUR");
+            .containsExactly("FR", "France", "🇫🇷", true, IbanRegistry.FR, Currency.EUR, "EUR");
 
         assertThat(registryFr.getIbanLength()).isEqualTo(27);
         assertThat(registryFr.getBbanLength()).isEqualTo(23);
-        assertThat(registryFr.getBbanPatternStr()).isEqualTo("5!n5!n11!c2!n");
+        assertThat(registryFr.getBbanPattern()).isEqualTo("5!n5!n11!c2!n");
         assertThat(registryFr.getIbanExample()).isEqualTo("FR1420041010050500013M02606");
 
-        assertThat(registryFr.getBankCodePatternStr()).isEqualTo("5!n");
+        assertThat(registryFr.getBankCodePattern()).isEqualTo("5!n");
         assertThat(registryFr.getBankCodeIndexRange())
             .isNotNull()
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
@@ -179,6 +184,10 @@ final class IbanRegistryTest {
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(9, 14);
         assertThat(registryFr.hasBranchCode()).isTrue();
+
+        assertThat(registryFr.getAccountNumberLength())
+            .isEqualTo(11)
+            .isEqualTo(registryFr.getAccountNumberIndexRange().length());
 
         assertThat(registryFr.getAccountNumberIndexRange())
             .isNotNull()
@@ -195,7 +204,7 @@ final class IbanRegistryTest {
         assertThat(registryFr.getLastUpdate()).isEqualTo(YearMonth.of(2016, 9));
     }
 
-    @DisplayName("Italy (IT) should have an offset Bank ID and Branch ID")
+    @DisplayName("Italy (IT) should have correct structure")
     @Test
     void checkIbanIt_shouldHaveCorrectStructure() {
         IbanRegistry registryIt = IbanRegistry.IT;
@@ -208,9 +217,9 @@ final class IbanRegistryTest {
             .extracting(IbanRegistry::getCountryCode, IbanRegistry::getCountryName, IbanRegistry::getCountryFlag,
                 IbanRegistry::isSepa, IbanRegistry::getBaseCountry,
                 IbanRegistry::getCurrency, IbanRegistry::getCurrencyCode)
-            .containsExactly("IT", "Italy", "🇮🇹", true, null, Currency.EUR, "EUR");
+            .containsExactly("IT", "Italy", "🇮🇹", true, IbanRegistry.IT, Currency.EUR, "EUR");
 
-        assertThat(registryIt.getBankCodePatternStr()).isEqualTo("5!n");
+        assertThat(registryIt.getBankCodePattern()).isEqualTo("5!n");
         assertThat(registryIt.getBankCodeIndexRange())
             .extracting(IndexRange::getBegin, IndexRange::getEnd)
             .containsExactly(5, 10);
@@ -229,7 +238,7 @@ final class IbanRegistryTest {
             .as("PS (Palestine) entry should exist")
             .isNotNull()
             .extracting(IbanRegistry::getCountryName, IbanRegistry::isSepa, IbanRegistry::isNotSepa, IbanRegistry::getBaseCountry)
-            .containsExactly("Palestine", false, true, null);
+            .containsExactly("Palestine, State of", false, true, IbanRegistry.PS);
     }
 
     @DisplayName("toString() should contain essential data for DE")
@@ -352,6 +361,41 @@ final class IbanRegistryTest {
             + "cityPostcode=null, departmentGenericEmail=null, departmentTel=null]");
     }
 
+    @DisplayName("Should correctly evaluate isEmpty for ContactData")
+    @Test
+    void contactData_isEmpty_shouldReturnExpectedResult() {
+        // null reference
+        assertThat(IbanRegistry.ContactData.isEmpty(null)).isTrue();
+
+        // completely empty or whitespace-only instances
+        IbanRegistry.ContactData allNull = IbanRegistry.ContactData.of(null, null, null, null, null, null);
+
+        assertThat(IbanRegistry.ContactData.isEmpty(allNull)).isTrue();
+
+        // fully populated instance
+        IbanRegistry.ContactData fullyPopulated = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
+        assertThat(IbanRegistry.ContactData.isEmpty(fullyPopulated)).isFalse();
+
+        // partially populated instances (boundary testing each field)
+        assertThat(IbanRegistry.ContactData.isEmpty(IbanRegistry.ContactData.of("Org", null, null, null, null, null))).isFalse();
+        assertThat(IbanRegistry.ContactData.isEmpty(IbanRegistry.ContactData.of(null, "Dept", null, null, null, null))).isFalse();
+        assertThat(IbanRegistry.ContactData.isEmpty(IbanRegistry.ContactData.of(null, null, "Street", null, null, null))).isFalse();
+        assertThat(IbanRegistry.ContactData.isEmpty(IbanRegistry.ContactData.of(null, null, null, "City", null, null))).isFalse();
+        assertThat(IbanRegistry.ContactData.isEmpty(IbanRegistry.ContactData.of(null, null, null, null, "Mail", null))).isFalse();
+        assertThat(IbanRegistry.ContactData.isEmpty(IbanRegistry.ContactData.of(null, null, null, null, null, "Tel"))).isFalse();
+    }
+
+    @DisplayName("Should cover all getters of MetaData")
+    @Test
+    void metaData_getters_shouldReturnConfiguredValues() {
+        YearMonth now = YearMonth.now(ZoneId.systemDefault());
+        MetaData metaData = MetaData.of(true, "DE89370400440532013000", now);
+
+        assertThat(metaData.isSepa()).isTrue();
+        assertThat(metaData.getIbanExample()).isEqualTo("DE89370400440532013000");
+        assertThat(metaData.getLastUpdate()).isEqualTo(now);
+    }
+
     @DisplayName("Validate IBAN length is positive")
     @ParameterizedTest(name = "[{index}]: {0}")
     @ValueSource(ints = {-1, 0})
@@ -359,7 +403,7 @@ final class IbanRegistryTest {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(invalidLength)
             .withBbanPattern("4!n")
-            .withAccountNumber(IndexRange.of(4, 8));
+            .withAccountNumber("4!n", IndexRange.of(4, 8));
 
         // testing the validation logic inside the constructor (called by build())
         assertThatIllegalStateException()
@@ -372,7 +416,7 @@ final class IbanRegistryTest {
     void build_shouldThrowExceptionWhenBbanPatternIsMissing() {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(20)
-            .withAccountNumber(IndexRange.of(4, 20));
+            .withAccountNumber("16!n", IndexRange.of(4, 20));
 
         assertThatNullPointerException()
             .isThrownBy(builder::build);
@@ -385,7 +429,7 @@ final class IbanRegistryTest {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withIbanLength(invalidLength)
             .withBbanPattern("4!n")
-            .withAccountNumber(IndexRange.of(4, invalidLength));
+            .withAccountNumber("4!n", IndexRange.of(4, invalidLength));
 
         assertThatIllegalStateException()
             .isThrownBy(builder::build)

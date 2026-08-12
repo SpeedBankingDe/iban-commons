@@ -8,18 +8,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * JUnit test class for {@link InvalidIbanException}.<br>
- * Ensures the exception correctly stores the reason and uses the reason's
- * failure text as the exception message.
+ * JUnit test class for {@link InvalidIbanException}.
+ * <p>
+ * Ensures the exception correctly stores reason, input, and country code, and formats
+ * exception messages and string representations properly.
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 final class InvalidIbanExceptionTest {
-
-    // -------------------------------------------------------------------------
-    // Factory method: of(reason)
-    // -------------------------------------------------------------------------
 
     @DisplayName("of(reason) should store reason and derive message from reason text")
     @ParameterizedTest(name = "[{index}] {0}")
@@ -32,11 +30,15 @@ final class InvalidIbanExceptionTest {
             .isInstanceOf(RuntimeException.class)
             .as("Exception message must contain the reason's failure text")
             .hasMessage("%s (%s)", reason.getText(), reason)
-            .hasToString("InvalidIbanException[reason=" + reason + ", input=null]");
+            .hasToString("InvalidIbanException[reason=" + reason + ", input='null']");
 
         assertThat(exception.getReason())
             .as("getReason() should return the original ValidationError")
             .isEqualTo(reason);
+
+        assertThat(exception.getCountryCode())
+            .as("getCountryCode() should be null when omitted")
+            .isNull();
     }
 
     @DisplayName("of(reason) should yield no input")
@@ -49,10 +51,6 @@ final class InvalidIbanExceptionTest {
             .isNull();
     }
 
-    // -------------------------------------------------------------------------
-    // Factory method: of(reason, input)
-    // -------------------------------------------------------------------------
-
     @DisplayName("of(reason, input) should store both reason and input")
     @Test
     void of_shouldStoreReasonAndInput() {
@@ -61,30 +59,51 @@ final class InvalidIbanExceptionTest {
 
         InvalidIbanException exception = InvalidIbanException.of(reason, input);
 
-        assertThat(exception.getReason())
-            .isEqualTo(reason);
+        assertThat(exception.getReason()).isEqualTo(reason);
 
         assertThat(exception.getInput())
             .as("getInput() should return the supplied input")
             .isEqualTo(input);
 
-        assertThat(exception.toString())
-            .as("toString() should contain the input")
-            .endsWith("input=" + input + ']');
+        assertThat(exception.getCountryCode()).isNull();
+
+        assertThat(exception)
+            .hasToString("InvalidIbanException[reason=%s, input='%s']", reason, input);
     }
 
-    @DisplayName("of(reason, empty string) should treat empty input as absent")
+    @DisplayName("of(reason, input, countryCode) should store reason, input, and upper-cased countryCode")
+    @Test
+    void of_shouldStoreReasonInputAndCountryCode() {
+        IbanValidationError reason = IbanValidationError.INVALID_BANK_CODE;
+        String input = "DE00123456789012345678";
+        String countryCode = "de";
+
+        InvalidIbanException exception = InvalidIbanException.of(reason, input, countryCode);
+
+        String expectedCountryCode = "DE";
+
+        assertThat(exception.getReason()).isEqualTo(reason);
+        assertThat(exception.getInput()).isEqualTo(input);
+        assertThat(exception.getCountryCode())
+            .as("country code should be normalized to upper case")
+            .isEqualTo(expectedCountryCode);
+
+        assertThat(exception)
+            .hasMessage("%s (%s), country %s: '%s'", reason.getText(), reason, expectedCountryCode, input);
+
+        assertThat(exception).hasToString("%s[reason=%s, country=%s, input='%s']",
+            InvalidIbanException.class.getSimpleName(), reason, expectedCountryCode, input);
+    }
+
+    @DisplayName("of(reason, input, countryCode) should normalize null or blank countryCode to null")
     @ParameterizedTest
     @NullAndEmptySource
-    void of_shouldKeepInputEvenIfNullOrBlank(String input) {
-        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.EMPTY, input);
+    @ValueSource(strings = {"   "})
+    void of_shouldNormalizeNullOrBlankCountryCodeToNull(String countryCode) {
+        InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.EMPTY, "DE00123", countryCode);
 
-        assertThat(exception.getInput()).isEqualTo(input);
+        assertThat(exception.getCountryCode()).isNull();
     }
-
-    // -------------------------------------------------------------------------
-    // Null-safety
-    // -------------------------------------------------------------------------
 
     @DisplayName("of(null) should throw NullPointerException")
     @Test
@@ -102,35 +121,42 @@ final class InvalidIbanExceptionTest {
             .withMessage("reason required");
     }
 
-    // -------------------------------------------------------------------------
-    // equals / hashCode
-    // -------------------------------------------------------------------------
-
-    @DisplayName("equals() should be true for same reason and same input")
+    @DisplayName("equals() should be true for same reason, input, and countryCode")
     @Test
-    void equals_shouldBeTrueForSameReasonAndInput() {
+    void equals_shouldBeTrueForSameReasonInputAndCountryCode() {
         IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
+        String countryCode = "DE";
 
-        InvalidIbanException a = InvalidIbanException.of(reason, input);
-        InvalidIbanException b = InvalidIbanException.of(reason, input);
+        InvalidIbanException a = InvalidIbanException.of(reason, input, countryCode);
+        InvalidIbanException b = InvalidIbanException.of(reason, input, countryCode);
 
         assertThat(a)
             .isEqualTo(b)
             .hasSameHashCodeAs(b);
     }
 
-    @DisplayName("equals() should be true for same reason and both inputs null")
+    @DisplayName("equals() should be false when countryCode differs")
     @Test
-    void equals_shouldBeTrueForSameReasonAndNullInput() {
+    void equals_shouldBeFalseWhenCountryCodeDiffers() {
+        IbanValidationError reason = IbanValidationError.EMPTY;
+        String input = "DE00123456789012345678";
+
+        InvalidIbanException withCountry = InvalidIbanException.of(reason, input, "DE");
+        InvalidIbanException withoutCountry = InvalidIbanException.of(reason, input, null);
+
+        assertThat(withCountry).isNotEqualTo(withoutCountry);
+    }
+
+    @DisplayName("equals() should be false when input differs")
+    @Test
+    void equals_shouldBeFalseWhenInputDiffers() {
         IbanValidationError reason = IbanValidationError.EMPTY;
 
-        InvalidIbanException a = InvalidIbanException.of(reason, null);
-        InvalidIbanException b = InvalidIbanException.of(reason, null);
+        InvalidIbanException withInput = InvalidIbanException.of(reason, "DE00123456789012345678");
+        InvalidIbanException withoutInput = InvalidIbanException.of(reason);
 
-        assertThat(a)
-            .isEqualTo(b)
-            .hasSameHashCodeAs(b);
+        assertThat(withInput).isNotEqualTo(withoutInput);
     }
 
     @DisplayName("equals() should be false for different reasons")
@@ -144,17 +170,6 @@ final class InvalidIbanExceptionTest {
         InvalidIbanException b = InvalidIbanException.of(errors[1]);
 
         assertThat(a).isNotEqualTo(b);
-    }
-
-    @DisplayName("equals() should be false when one has input and the other does not")
-    @Test
-    void equals_shouldBeFalseWhenInputDiffers() {
-        IbanValidationError reason = IbanValidationError.EMPTY;
-
-        InvalidIbanException withInput = InvalidIbanException.of(reason, "DE00123456789012345678");
-        InvalidIbanException withoutInput = InvalidIbanException.of(reason);
-
-        assertThat(withInput).isNotEqualTo(withoutInput);
     }
 
     @DisplayName("equals() should be reflexive")
@@ -174,31 +189,28 @@ final class InvalidIbanExceptionTest {
             .isNotEqualTo("some string");
     }
 
-    // -------------------------------------------------------------------------
-    // toString
-    // -------------------------------------------------------------------------
-
-    @DisplayName("toString() should include class name, message, reason and input")
+    @DisplayName("toString() should include class name, reason, countryCode, and input")
     @Test
     void toString_shouldContainAllParts() {
         IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
+        String countryCode = "DE";
 
-        String result = InvalidIbanException.of(reason, input).toString();
+        String result = InvalidIbanException.of(reason, input, countryCode).toString();
 
-        assertThat(result)
-            .isEqualTo("InvalidIbanException[reason=%s, input=%s]", reason, input);
+        assertThat(result).isEqualTo("%s[reason=%s, country=%s, input='%s']",
+            InvalidIbanException.class.getSimpleName(), reason, countryCode, input);
     }
 
-    @DisplayName("toString() without input")
+    @DisplayName("toString() without countryCode and input")
     @Test
-    void toString_shouldHandleAbsentInput() {
+    void toString_shouldHandleAbsentCountryCodeAndInput() {
         IbanValidationError reason = IbanValidationError.EMPTY;
 
         String result = InvalidIbanException.of(reason).toString();
 
         assertThat(result)
-            .isEqualTo("InvalidIbanException[reason=EMPTY, input=null]");
+            .isEqualTo("InvalidIbanException[reason=EMPTY, input='null']");
     }
 
 }

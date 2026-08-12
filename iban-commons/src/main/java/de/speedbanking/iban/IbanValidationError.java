@@ -44,8 +44,20 @@ public enum IbanValidationError implements ValidationError {
     /** The check digits (positions 3 and 4) fail the initial verification (e.g., they are not digits). */
     INVALID_CHECK_DIGITS("IBAN has invalid check digits"),
 
-    /** The structure of the BBAN (country code specific part) does not match the expected format (e.g., incorrect length of bank code). */
+    /** The structure of the BBAN (country code specific part) does not match the expected format. */
     INVALID_STRUCTURE("IBAN violates country-specific structure rules"),
+
+    /** The BBAN structure is invalid. */
+    INVALID_BBAN("BBAN violates structure rules"),
+
+    /** The bank code structure is invalid. */
+    INVALID_BANK_CODE("Bank code violates structure rules"),
+
+    /** The branch code structure is invalid. */
+    INVALID_BRANCH_CODE("Branch code violates structure rules"),
+
+    /** The account number structure is invalid. */
+    INVALID_ACCOUNT_NUMBER("Account number violates structure rules"),
 
     /** The ISO 7064 Modulo 97-10 checksum calculation fails. */
     INVALID_CHECKSUM("IBAN violates ISO 7064 Mod 97-10 checksum check");

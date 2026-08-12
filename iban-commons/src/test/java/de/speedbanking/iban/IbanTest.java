@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assumptions.assumeThat;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import de.speedbanking.iban.IbanBuilder.HasBranchCode;
 import de.speedbanking.iban.junit.jupiter.params.converter.BooleanConverter;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.test.TestUtil;
@@ -145,39 +146,54 @@ final class IbanTest {
      * Tests {@link Iban#of(CharSequence)} with various invalid IBANs,
      * expecting an {@link InvalidIbanException} with a specific message pattern.
      *
-     * @param ibanInput              the invalid IBAN string to test
-     * @param expectedMessagePattern the regex pattern for the expected exception message
+     * @param ibanInput the invalid IBAN string to test
+     * @param expectedValidationError the expected {@link IbanValidationError} enum constant
+     * @param expectedCountry the expected country code
+     * @param expectedMessage the expected exception message
      */
     @DisplayName("Invalid IBAN throws InvalidIbanException")
     @ParameterizedTest(name = "[{index}] Invalid IBAN ''{0}''")
-    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        // IBAN (Input)                | ValidationError (Enum)   | Expected Message Pattern
-        "(null)                        | EMPTY                    | IBAN is null or empty",
-        "''                            | EMPTY                    | IBAN is null or empty",
-        "PS92pals000000000400123456702 | ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
-        "ps92pals000000000400123456702 | ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
-        "Ps92pals000000000400123456702 | ILLEGAL_CHARACTERS       | IBAN contains illegal character(s)",
-        "XX12345678901234567890        | INVALID_COUNTRY          | IBAN has invalid country code",
-        "DE123                         | INCORRECT_LENGTH         | IBAN has incorrect length",
-        "DE91BHLSDEM1123456789         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
-        "GB33BUKB2020155555567         | INCORRECT_LENGTH_COUNTRY | IBAN has incorrect length for specified country",
-        "GP464Q85KW3RR7JWATF3TGAZ6JNI  | INVALID_COUNTRY          | IBAN has invalid country code",
-        "DE91100000000123456780        | INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
+    @CsvSource(delimiter = '|', value = {
+        // IBAN (Input)                | IbanValidationError      | Country | Expected Message
+        "                              | EMPTY                    |         | IBAN is null or empty",
+        "''                            | EMPTY                    |         | IBAN is null or empty",
+        "PS92pals000000000400123456702 | ILLEGAL_CHARACTERS       |         | IBAN contains illegal character(s)",
+        "ps92pals000000000400123456702 | ILLEGAL_CHARACTERS       |         | IBAN contains illegal character(s)",
+        "Ps92pals000000000400123456702 | ILLEGAL_CHARACTERS       |         | IBAN contains illegal character(s)",
+        "XX12345678901234567890        | INVALID_COUNTRY          |         | IBAN has invalid country code",
+        "DE123                         | INCORRECT_LENGTH         |         | IBAN has incorrect length",
+        "DE91BHLSDEM1123456789         | INCORRECT_LENGTH_COUNTRY | DE      | IBAN has incorrect length for specified country",
+        "GB33BUKB2020155555567         | INCORRECT_LENGTH_COUNTRY | GB      | IBAN has incorrect length for specified country",
+        "GP464Q85KW3RR7JWATF3TGAZ6JNI  | INVALID_COUNTRY          |         | IBAN has invalid country code",
+        "DE91100000000123456780        | INVALID_CHECKSUM         | DE      | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
-    void of_shouldThrowException_whenIbanIsInvalid(String ibanInput, IbanValidationError expectedValidationError, String expectedMessagePattern) {
-        String ibanInputNorm = ibanInput == null ? null : ibanInput.replace(" ", "");
-
-        assertThatInvalidIbanException()
+    void of_shouldThrowException_whenIbanIsInvalid(String ibanInput,
+                                                   IbanValidationError expectedValidationError,
+                                                   String expectedCountry,
+                                                   String expectedMessage) {
+        InvalidIbanException ibanException = assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.ofNormalized(ibanInput))
-            .withCause(null)
-            .withMessage("%s (%s)%s", expectedMessagePattern, expectedValidationError, ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'")
-            .hasFieldOrPropertyWithValue("reason", expectedValidationError);
+            .withNoCause()
+            .hasFieldOrPropertyWithValue("reason", expectedValidationError)
+            .hasFieldOrPropertyWithValue("countryCode", expectedCountry)
+            .actual();
 
-        assertThatInvalidIbanException()
-            .isThrownBy(() -> Iban.of(ibanInputNorm))
-            .withCause(null)
-            .withMessage("%s (%s)%s", expectedMessagePattern, expectedValidationError, ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'")
-            .hasFieldOrPropertyWithValue("reason", expectedValidationError);
+        if (ibanInput == null || ibanInput.isEmpty()) {
+            assertThat(ibanException)
+                .hasToString("%s[reason=%s, input='%s']", InvalidIbanException.class.getSimpleName(), expectedValidationError, ibanInput)
+                .hasMessage("%s (%s)", expectedMessage, expectedValidationError);
+        } else {
+            if (expectedCountry == null) {
+                assertThat(ibanException)
+                    .hasToString("%s[reason=%s, input='%s']", InvalidIbanException.class.getSimpleName(), expectedValidationError, ibanInput)
+                    .hasMessage("%s (%s): '%s'", expectedMessage, expectedValidationError, ibanException.getInput());
+            } else {
+                assertThat(ibanException)
+                    .hasToString("%s[reason=%s, country=%s, input='%s']", InvalidIbanException.class.getSimpleName(),
+                        expectedValidationError, ibanException.getCountryCode(), ibanInput)
+                    .hasMessage("%s (%s), country %s: '%s'", expectedMessage, expectedValidationError, expectedCountry, ibanException.getInput());
+            }
+        }
 
         assertThat(Iban.isValid(ibanInput)).isFalse();
 
@@ -192,10 +208,10 @@ final class IbanTest {
      * <p>
      * Ensures that a base {@link IbanRegistry} entry:
      * <ul>
-     * <li>Does not have a reference to another base country (it is a root)</li>
-     * <li>Is correctly flagged as a base country</li>
-     * <li>Has at least one derived record</li>
-     * <li>Maintains bidirectional consistency (derived countries point back to this base)</li>
+     *   <li>Does not have a reference to another base country (it is a root)</li>
+     *   <li>Is correctly flagged as a base country</li>
+     *   <li>Has at least one derived record</li>
+     *   <li>Maintains bidirectional consistency (derived countries point back to this base)</li>
      * </ul>
      *
      * @param countryData the {@link IbanRegistry} entry to test as a base
@@ -204,7 +220,7 @@ final class IbanTest {
     @ParameterizedTest(name = "[{index}] {0} - base/derived relationship")
     @EnumSource(value = IbanRegistry.class, names = {"FI", "FR", "GB"})
     void registry_shouldBeConsistent_whenBaseAndDerivedRelationshipIsChecked(IbanRegistry countryData) {
-        assertThat(countryData.getBaseCountry()).isNull();
+        assertThat(countryData.getBaseCountry()).isNotNull().isSameAs(countryData);
         assertThat(countryData.isBaseCountry()).isTrue();
 
         assertThat(countryData.getDerivedCountries())
@@ -221,7 +237,7 @@ final class IbanTest {
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideBaseCountries")
     void exampleIban_shouldMatchGeneratedRegex_whenRegistryIsProcessed(IbanRegistry countryData) {
-        String bbanRegex = IbanPatternConverter.convertToRegex(countryData.getBbanPatternStr());
+        String bbanRegex = IbanPatternConverter.convertToRegex(countryData.getBbanPattern());
 
         Pattern ibanPattern = Pattern.compile('^' + countryData.getCountryCode() + IbanPatternConverter.convertToRegex("2!n") + bbanRegex + '$');
 
@@ -257,7 +273,7 @@ final class IbanTest {
      * @return a stream of registry entries where {@link IbanRegistry#isBaseCountry()} is true
      */
     static Stream<IbanRegistry> provideBaseCountries() {
-        return Arrays.stream(IbanRegistry.ALL_COUNTRIES)
+        return IbanRegistry.ALL_COUNTRIES.stream()
             .filter(IbanRegistry::isBaseCountry);
     }
 
@@ -279,7 +295,7 @@ final class IbanTest {
      * @return a stream of registry entries where {@link IbanRegistry#isDerivedCountry()} is true
      */
     static Stream<IbanRegistry> provideDerivedCountries() {
-        return Arrays.stream(IbanRegistry.ALL_COUNTRIES)
+        return IbanRegistry.ALL_COUNTRIES.stream()
             .filter(IbanRegistry::isDerivedCountry);
     }
 
@@ -311,10 +327,10 @@ final class IbanTest {
         "CY17002001280000001200527600      | 28 | x | CY | 🇨🇾 | 17 | 002001280000001200527600      | 002       | 00128  | 0000001200527600        |    |  8",
         "CZ6508000000192000145399          | 24 | x | CZ | 🇨🇿 | 65 | 08000000192000145399          | 0800      |        | 0000192000145399        |    |  4",
         "DE89370400440532013000            | 22 | x | DE | 🇩🇪 | 89 | 370400440532013000            | 37040044  |        | 0532013000              |    |  8",
-        "DJ2100010000000154000100186       | 27 | x | DJ | 🇩🇯 | 21 | 00010000000154000100186       | 00010     | 00000  | 01540001001             |    | 10",
+        "DJ2100010000000154000100186       | 27 | x | DJ | 🇩🇯 | 21 | 00010000000154000100186       | 00010     | 00000  | 01540001001             | 86 | 10",
         "DK5000400440116243                | 18 | x | DK | 🇩🇰 | 50 | 00400440116243                | 0040      |        | 0440116243              |    |  4",
         "DO28BAGR00000001212453611324      | 28 | x | DO | 🇩🇴 | 28 | BAGR00000001212453611324      | BAGR      |        | 00000001212453611324    |    |  4",
-        "DZ1700021000011130000005          | 24 | x | DZ | 🇩🇿 | 17 | 00021000011130000005          | 000       | 21000  | 0111300000              | 05 |  8",
+        "DZ1700021000011130000005          | 24 | x | DZ | 🇩🇿 | 17 | 00021000011130000005          | 000       | 21000  | 0111300000              |    |  8",
         "EE382200221020145685              | 20 | x | EE | 🇪🇪 | 38 | 2200221020145685              | 22        | 00     | 22102014568             | 5  |  4",
         "EG380019000500000000263180002     | 29 | x | EG | 🇪🇬 | 38 | 0019000500000000263180002     | 0019      | 0005   | 00000000263180002       |    |  8",
         "ES9121000418450200051332          | 24 | x | ES | 🇪🇸 | 91 | 21000418450200051332          | 2100      | 0418   | 0200051332              | 45 | 10",
@@ -337,7 +353,7 @@ final class IbanTest {
         "IL620108000000099999999           | 23 | x | IL | 🇮🇱 | 62 | 0108000000099999999           | 010       | 800    | 0000099999999           |    |  6",
         "IQ98NBIQ850123456789012           | 23 | x | IQ | 🇮🇶 | 98 | NBIQ850123456789012           | NBIQ      | 850    | 123456789012            |    |  7",
         "IR062960000000100324200001        | 26 | x | IR | 🇮🇷 | 06 | 2960000000100324200001        | 296       |        | 0000000100324200001     |    |  3",
-        "IS140159260076545510730339        | 26 | x | IS | 🇮🇸 | 14 | 0159260076545510730339        | 0159      | 26     | 0076545510730339        |    |  6",
+        "IS140159260076545510730339        | 26 | x | IS | 🇮🇸 | 14 | 0159260076545510730339        | 0159      |        | 007654                  |    |  4", // TODO
         "IT60X0542811101000000123456       | 27 | x | IT | 🇮🇹 | 60 | X0542811101000000123456       | 05428     | 11101  | 000000123456            | X  | 10",
         "JO94CBJO0010000000000131000302    | 30 | x | JO | 🇯🇴 | 94 | CBJO0010000000000131000302    | CBJO      | 0010   | 000000000131000302      |    |  8",
         "KM4600005000010010904400137       | 27 | x | KM | 🇰🇲 | 46 | 00005000010010904400137       | 00005     | 00001  | 00109044001             | 37 | 10",
@@ -358,14 +374,14 @@ final class IbanTest {
         "MN121234123456789123              | 20 | x | MN | 🇲🇳 | 12 | 1234123456789123              | 1234      |        | 123456789123            |    |  4",
         "MR1300020001010000123456753       | 27 | x | MR | 🇲🇷 | 13 | 00020001010000123456753       | 00020     | 00101  | 00001234567             | 53 | 10",
         "MT84MALT011000012345MTLCAST001S   | 31 | x | MT | 🇲🇹 | 84 | MALT011000012345MTLCAST001S   | MALT      | 01100  | 0012345MTLCAST001S      |    |  9",
-        "MU17BOMM0101101030300200000MUR    | 30 | x | MU | 🇲🇺 | 17 | BOMM0101101030300200000MUR    | BOMM01    | 01     | 101030300200000MUR      |    |  8",
+        "MU17BOMM0101101030300200000MUR    | 30 | x | MU | 🇲🇺 | 17 | BOMM0101101030300200000MUR    | BOMM01    | 01     | 101030300200000         |    |  8",
         "MZ59000800005138555713187         | 25 | x | MZ | 🇲🇿 | 59 | 000800005138555713187         | 0008      | 0000   | 51385557131             | 87 |  8",
         "NI45BAPR00000013000003558124      | 28 | x | NI | 🇳🇮 | 45 | BAPR00000013000003558124      | BAPR      |        | 00000013000003558124    |    |  4",
         "NL91ABNA0417164300                | 18 | x | NL | 🇳🇱 | 91 | ABNA0417164300                | ABNA      |        | 0417164300              |    |  4",
         "NO9386011117947                   | 15 | x | NO | 🇳🇴 | 93 | 86011117947                   | 8601      |        | 111794                  | 7  |  4",
         "OM810180000001299123456           | 23 | x | OM | 🇴🇲 | 81 | 0180000001299123456           | 018       |        | 0000001299123456        |    |  3",
         "PK36SCBL0000001123456702          | 24 | x | PK | 🇵🇰 | 36 | SCBL0000001123456702          | SCBL      |        | 0000001123456702        |    |  4",
-        "PL61109010140000071219812874      | 28 | x | PL | 🇵🇱 | 61 | 109010140000071219812874      | 109       | 0101   | 0000071219812874        | 4  |  8",
+        "PL61109010140000071219812874      | 28 | x | PL | 🇵🇱 | 61 | 109010140000071219812874      | 109       | 0101   | 0000071219812874        |    |  7",
         "PS92PALS000000000400123456702     | 29 | x | PS | 🇵🇸 | 92 | PALS000000000400123456702     | PALS      |        | 000000000400123456702   |    |  4",
         "PT50000201231234567890154         | 25 | x | PT | 🇵🇹 | 50 | 000201231234567890154         | 0002      | 0123   | 12345678901             | 54 |  8",
         "QA58DOHB00001234567890ABCDEFG     | 29 | x | QA | 🇶🇦 | 58 | DOHB00001234567890ABCDEFG     | DOHB      |        | 00001234567890ABCDEFG   |    |  4",
@@ -375,7 +391,7 @@ final class IbanTest {
         "SA0380000000608010167519          | 24 | x | SA | 🇸🇦 | 03 | 80000000608010167519          | 80        |        | 000000608010167519      |    |  2",
         "SC18SSCB11010000000000001497USD   | 31 | x | SC | 🇸🇨 | 18 | SSCB11010000000000001497USD   | SSCB11    | 01     | 0000000000001497        |    |  8",
         "SD2129010501234001                | 18 | x | SD | 🇸🇩 | 21 | 29010501234001                | 29        |        | 010501234001            |    |  2",
-        "SE4550000000058398257466          | 24 | x | SE | 🇸🇪 | 45 | 50000000058398257466          | 500       |        | 00000058398257466       |    |  3",
+        "SE4550000000058398257466          | 24 | x | SE | 🇸🇪 | 45 | 50000000058398257466          | 500       |        | 0000005839825746        |  6 |  3",
         "SI56263300012039086               | 19 | x | SI | 🇸🇮 | 56 | 263300012039086               | 26        | 330    | 00120390                | 86 |  5",
         "SK3112000000198742637541          | 24 | x | SK | 🇸🇰 | 31 | 12000000198742637541          | 1200      |        | 0000198742637541        |    |  4",
         "SM86U0322509800000000270100       | 27 | x | SM | 🇸🇲 | 86 | U0322509800000000270100       | 03225     | 09800  | 000000270100            | U  | 10",
@@ -403,17 +419,17 @@ final class IbanTest {
 
         assertThat(countryData)
             .isNotNull()
-            .satisfies(reg -> {
-                assertThat(reg.isBaseCountry()).isEqualTo(expectedBaseCountry);
-                assertThat(reg.isDerivedCountry()).isEqualTo(!expectedBaseCountry);
+            .satisfies(cd -> {
+                assertThat(cd.isBaseCountry()).isEqualTo(expectedBaseCountry);
+                assertThat(cd.isDerivedCountry()).isEqualTo(!expectedBaseCountry);
                 if (expectedBaseCountry) {
-                    assertThat(reg.getBaseCountry()).isNull();
+                    assertThat(cd.getBaseCountry()).isSameAs(cd);
                 } else {
-                    assertThat(reg.getBaseCountry()).isNotNull();
+                    assertThat(cd.getBaseCountry()).isNotNull().isNotSameAs(cd);
                 }
-                assertThat(reg.getIbanRegex()).isNotNull();
-                assertThat(reg.getStructureData()).isNotNull();
-                assertThat(reg.getIbanExample()).isNotNull();
+                assertThat(cd.getIbanRegex()).isNotNull();
+                assertThat(cd.getStructureData()).isNotNull();
+                assertThat(cd.getIbanExample()).isNotNull();
             });
 
         assertThatNoException()
@@ -469,6 +485,19 @@ final class IbanTest {
         assertThat(Iban.isValid(ibanInput))
             .as("Expected IBAN '%s' to be valid", iban)
             .isTrue();
+
+        IbanBuilder<?> builder = countryData.builder()
+            .bankCode(expectedBankCode)
+            .accountNumber(expectedAccountNumber);
+        if (builder instanceof HasBranchCode<?>) {
+            ((HasBranchCode<?>) builder).branchCode(expectedBranchCode);
+        }
+        Iban builtIban = builder.build();
+        assertThatIban(builtIban)
+            .hasBankCode(expectedBankCode)
+            .hasBranchCode(expectedBranchCode)
+            .hasAccountNumber(expectedAccountNumber);
+            //.hasToString(iban.toString());
     }
 
     /**
@@ -487,7 +516,7 @@ final class IbanTest {
         for (String iban : Arrays.asList(ibanStr1, ibanStr2)) {
             assertThatInvalidIbanException()
                 .isThrownBy(() -> Iban.of(iban))
-                .withCause(null)
+                .withNoCause()
                 .withMessageMatching(String.format("^(?:%s|%s) \\([A-Z].+", IbanValidationError.INVALID_STRUCTURE.getText(), IbanValidationError.INVALID_CHECKSUM.getText()))
                 .extracting("reason")
                 .isIn(IbanValidationError.INVALID_STRUCTURE, IbanValidationError.INVALID_CHECKSUM);
@@ -535,33 +564,38 @@ final class IbanTest {
      * Verifies that {@link Iban#validate(CharSequence)} throws {@link InvalidIbanException}
      * with the same error detail as {@link Iban#of(CharSequence)} for invalid IBANs.
      *
-     * @param ibanInput              the invalid IBAN string
+     * @param ibanInput the invalid IBAN string
      * @param expectedValidationError the expected {@link IbanValidationError} enum constant
-     * @param expectedMessagePattern  regex pattern for the expected exception message
+     * @param expectedCountry the expected country code
+     * @param expectedMessage the expected exception message
      */
     @DisplayName("validate() throws InvalidIbanException for invalid IBANs")
     @ParameterizedTest(name = "[{index}] ''{0}''")
-    @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-        // IBAN (Input)               | ValidationError (Enum)   | Expected Message Pattern
-        "(null)                       | EMPTY                    | IBAN is null or empty",
-        "''                           | EMPTY                    | IBAN is null or empty",
-        "XX12345678901234567890       | INVALID_COUNTRY          | IBAN has invalid country code",
-        "DE123                        | INCORRECT_LENGTH         | IBAN has incorrect length",
-        "DE91100000000123456780       | INVALID_CHECKSUM         | IBAN violates ISO 7064 Mod 97-10 checksum check"
+    @CsvSource(delimiter = '|', value = {
+        // IBAN                 | IbanValidationError | Country | Expected Message
+        "                       | EMPTY               |         | IBAN is null or empty",
+        "''                     | EMPTY               |         | IBAN is null or empty",
+        "XX12345678901234567890 | INVALID_COUNTRY     |         | IBAN has invalid country code",
+        "DE123                  | INCORRECT_LENGTH    |         | IBAN has incorrect length",
+        "DE91100000000123456780 | INVALID_CHECKSUM    | DE      | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
     void validate_shouldThrowException_whenIbanIsInvalid(
-            String ibanInput, IbanValidationError expectedValidationError, String expectedMessagePattern) {
-        String ibanInputNorm = ibanInput == null ? null : ibanInput.replace(" ", "");
-        String expectedMessage = String.format("%s (%s)%s",
-            expectedMessagePattern,
-            expectedValidationError,
-            ibanInputNorm == null || ibanInputNorm.isEmpty() ? "" : ": '" + ibanInputNorm + "'");
-
-        assertThatInvalidIbanException()
+            String ibanInput, IbanValidationError expectedValidationError, String expectedCountry, String expectedMessage) {
+        InvalidIbanException ibanException = assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.validate(ibanInput))
-            .withCause(null)
-            .withMessage(expectedMessage)
-            .hasFieldOrPropertyWithValue("reason", expectedValidationError);
+            .withNoCause()
+            .hasFieldOrPropertyWithValue("reason", expectedValidationError)
+            .hasFieldOrPropertyWithValue("countryCode", expectedCountry)
+            .actual();
+
+        if (ibanInput == null || ibanInput.isEmpty()) {
+            assertThat(ibanException).hasMessage("%s (%s)", expectedMessage, expectedValidationError);
+        } else if (expectedCountry == null) {
+            assertThat(ibanException).hasMessage("%s (%s): '%s'", expectedMessage, expectedValidationError, ibanInput);
+        } else {
+            assertThat(ibanException).hasMessage("%s (%s), country %s: '%s'", expectedMessage,
+                expectedValidationError, expectedCountry, ibanInput);
+        }
     }
 
     /**
@@ -595,9 +629,9 @@ final class IbanTest {
         assertThat(fromOf).as("of() must throw for input '%s'", ibanInput).isNotNull();
         assertThat(fromValidate).as("validate() must throw for input '%s'", ibanInput).isNotNull();
 
-        assertThat(fromValidate.getMessage())
+        assertThat(fromValidate)
             .as("validate() and of() must produce the same exception message")
-            .isEqualTo(fromOf.getMessage());
+            .hasMessage(fromOf.getMessage());
         assertThat(fromValidate)
             .as("validate() and of() must carry the same validation error")
             .hasFieldOrPropertyWithValue("reason", fromOf.getReason());

@@ -8,20 +8,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
- * JUnit test class for {@link InvalidBicException}.<br>
- * Ensures the exception correctly stores the reason and uses the reason's
- * failure text as the exception message.
+ * JUnit test class for {@link InvalidBicException}.
+ * <p>
+ * Ensures the exception correctly stores reason, input, and country code, and formats
+ * exception messages and string representations properly.
  *
  * @since 1.8.5
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 final class InvalidBicExceptionTest {
-
-    // -------------------------------------------------------------------------
-    // Factory method: of(reason)
-    // -------------------------------------------------------------------------
 
     @DisplayName("of(reason) should store reason and derive message from reason text")
     @ParameterizedTest(name = "[{index}] {0}")
@@ -37,12 +35,16 @@ final class InvalidBicExceptionTest {
             .as("getReason() should return the original BicValidationError")
             .isEqualTo(reason);
 
-        assertThat(exception.getMessage())
-            .as("Exception message must match the reason's failure text")
-            .isEqualTo("%s (%s)", reason.getText(), reason);
+        assertThat(exception.getCountryCode())
+            .as("getCountryCode() should be null when omitted")
+            .isNull();
 
         assertThat(exception)
-            .hasToString("InvalidBicException[reason=" + reason + ", input=null]");
+            .as("Exception message must match the reason's failure text")
+            .hasMessage("%s (%s)", reason.getText(), reason);
+
+        assertThat(exception)
+            .hasToString("InvalidBicException[reason=" + reason + ", input='null']");
     }
 
     @DisplayName("of(reason) should yield no input")
@@ -55,10 +57,6 @@ final class InvalidBicExceptionTest {
             .isNull();
     }
 
-    // -------------------------------------------------------------------------
-    // Factory method: of(reason, input)
-    // -------------------------------------------------------------------------
-
     @DisplayName("of(reason, input) should store both reason and input")
     @Test
     void of_shouldStoreInput_whenInputIsGiven() {
@@ -67,30 +65,49 @@ final class InvalidBicExceptionTest {
 
         InvalidBicException exception = InvalidBicException.of(reason, input);
 
-        assertThat(exception.getReason())
-            .isEqualTo(reason);
+        assertThat(exception.getReason()).isEqualTo(reason);
 
         assertThat(exception.getInput())
             .as("getInput() should return the supplied input")
             .isEqualTo(input);
 
-        assertThat(exception.toString())
-            .as("toString() should contain the input")
-            .endsWith("input=" + input + "]");
+        assertThat(exception.getCountryCode()).isNull();
+
+        assertThat(exception)
+            .hasToString("InvalidBicException[reason=%s, input='%s']", reason, input);
     }
 
-    @DisplayName("of(reason, <empty>) should keep input")
+    @DisplayName("of(reason, input, countryCode) should store reason, input, and upper-cased countryCode")
+    @Test
+    void of_shouldStoreReasonInputAndCountryCode() {
+        BicValidationError reason = BicValidationError.INVALID_COUNTRY;
+        String input = "DEUTXXDB";
+        String countryCode = "de";
+
+        InvalidBicException exception = InvalidBicException.of(reason, input, countryCode);
+
+        assertThat(exception.getReason()).isEqualTo(reason);
+        assertThat(exception.getInput()).isEqualTo(input);
+        assertThat(exception.getCountryCode())
+            .as("country code should be normalized to upper case")
+            .isEqualTo("DE");
+
+        assertThat(exception)
+            .hasMessage("%s (%s), country DE: '%s'", reason.getText(), reason, input);
+
+        assertThat(exception)
+            .hasToString("%s[reason=%s, country=DE, input='%s']", InvalidBicException.class.getSimpleName(), reason, input);
+    }
+
+    @DisplayName("of(reason, input, countryCode) should normalize null or blank countryCode to null")
     @ParameterizedTest(name = "[{index}] {0}")
     @NullAndEmptySource
-    void of_shouldKeepInput_whenInputIsNullOrEmpty(String input) {
-        InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY, input);
+    @ValueSource(strings = {"   "})
+    void of_shouldNormalizeNullOrBlankCountryCodeToNull(String countryCode) {
+        InvalidBicException exception = InvalidBicException.of(BicValidationError.EMPTY, "DEUTDEDB", countryCode);
 
-        assertThat(exception.getInput()).isEqualTo(input);
+        assertThat(exception.getCountryCode()).isNull();
     }
-
-    // -------------------------------------------------------------------------
-    // Null-safety
-    // -------------------------------------------------------------------------
 
     @DisplayName("of(null) should throw NullPointerException")
     @Test
@@ -108,35 +125,42 @@ final class InvalidBicExceptionTest {
             .withMessage("reason required");
     }
 
-    // -------------------------------------------------------------------------
-    // equals / hashCode
-    // -------------------------------------------------------------------------
-
-    @DisplayName("equals() should be true for same reason and same input")
+    @DisplayName("equals() should be true for same reason, input, and countryCode")
     @Test
-    void equals_shouldBeTrue_whenReasonAndInputAreEqual() {
+    void equals_shouldBeTrue_whenReasonInputAndCountryCodeAreEqual() {
         BicValidationError reason = BicValidationError.EMPTY;
         String input = "DEUTDEDB";
+        String countryCode = "DE";
 
-        InvalidBicException a = InvalidBicException.of(reason, input);
-        InvalidBicException b = InvalidBicException.of(reason, input);
+        InvalidBicException a = InvalidBicException.of(reason, input, countryCode);
+        InvalidBicException b = InvalidBicException.of(reason, input, countryCode);
 
         assertThat(a)
             .isEqualTo(b)
             .hasSameHashCodeAs(b);
     }
 
-    @DisplayName("equals() should be true for same reason and both inputs null")
+    @DisplayName("equals() should be false when countryCode differs")
     @Test
-    void equals_shouldBeTrue_whenReasonIsEqualAndInputIsNull() {
+    void equals_shouldBeFalse_whenCountryCodeDiffers() {
+        BicValidationError reason = BicValidationError.EMPTY;
+        String input = "DEUTDEDB";
+
+        InvalidBicException withCountry = InvalidBicException.of(reason, input, "DE");
+        InvalidBicException withoutCountry = InvalidBicException.of(reason, input, null);
+
+        assertThat(withCountry).isNotEqualTo(withoutCountry);
+    }
+
+    @DisplayName("equals() should be false when input differs")
+    @Test
+    void equals_shouldBeFalse_whenInputsDiffer() {
         BicValidationError reason = BicValidationError.EMPTY;
 
-        InvalidBicException a = InvalidBicException.of(reason, null);
-        InvalidBicException b = InvalidBicException.of(reason, null);
+        InvalidBicException withInput    = InvalidBicException.of(reason, "DEUTDEDB");
+        InvalidBicException withoutInput = InvalidBicException.of(reason);
 
-        assertThat(a)
-            .isEqualTo(b)
-            .hasSameHashCodeAs(b);
+        assertThat(withInput).isNotEqualTo(withoutInput);
     }
 
     @DisplayName("equals() should be false for different reasons")
@@ -150,17 +174,6 @@ final class InvalidBicExceptionTest {
         InvalidBicException b = InvalidBicException.of(errors[1]);
 
         assertThat(a).isNotEqualTo(b);
-    }
-
-    @DisplayName("equals() should be false when one has input and the other does not")
-    @Test
-    void equals_shouldBeFalse_whenInputsDiffer() {
-        BicValidationError reason = BicValidationError.EMPTY;
-
-        InvalidBicException withInput    = InvalidBicException.of(reason, "DEUTDEDB");
-        InvalidBicException withoutInput = InvalidBicException.of(reason);
-
-        assertThat(withInput).isNotEqualTo(withoutInput);
     }
 
     @DisplayName("equals() should be reflexive")
@@ -180,33 +193,29 @@ final class InvalidBicExceptionTest {
             .isNotEqualTo("some string");
     }
 
-    // -------------------------------------------------------------------------
-    // toString
-    // -------------------------------------------------------------------------
-
-    @DisplayName("toString() should include class name, message, reason and input")
+    @DisplayName("toString() should include class name, reason, countryCode, and input")
     @Test
-    void toString_shouldContainAllParts_whenInputIsGiven() {
+    void toString_shouldContainAllParts_whenInputAndCountryCodeAreGiven() {
         BicValidationError reason = BicValidationError.EMPTY;
         String input = "DEUTDEDB";
+        String countryCode = "DE";
 
-        String result = InvalidBicException.of(reason, input).toString();
+        String result = InvalidBicException.of(reason, input, countryCode).toString();
 
         assertThat(result)
-            .startsWith("InvalidBicException[")
-            .contains("reason=" + reason)
-            .contains("input=" + input);
+            .isEqualTo("%s[reason=%s, country=%s, input='%s']",
+                InvalidBicException.class.getSimpleName(), reason, countryCode, input);
     }
 
-    @DisplayName("toString() without input should not contain trailing colon segment")
+    @DisplayName("toString() without countryCode and input")
     @Test
-    void toString_shouldOmitInputSegment_whenInputIsAbsent() {
+    void toString_shouldHandleAbsentCountryCodeAndInput() {
         BicValidationError reason = BicValidationError.EMPTY;
 
         String result = InvalidBicException.of(reason).toString();
 
         assertThat(result)
-            .isEqualTo("InvalidBicException[reason=EMPTY, input=null]");
+            .isEqualTo("InvalidBicException[reason=EMPTY, input='null']");
     }
 
 }

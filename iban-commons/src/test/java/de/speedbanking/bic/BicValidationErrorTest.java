@@ -41,7 +41,7 @@ final class BicValidationErrorTest {
         assertThat(ex.toString())
             .contains(ex.getClass().getSimpleName())
             .contains(reason.toString())
-            .contains("[reason=" + ex.getReason() + ", input=null]");
+            .contains("[reason=" + ex.getReason() + ", input='null']");
     }
 
     @DisplayName("All failure texts and toString must match their expected descriptions")

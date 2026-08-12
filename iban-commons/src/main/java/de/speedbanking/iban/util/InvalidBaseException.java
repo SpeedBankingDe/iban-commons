@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.ValidationError;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -28,8 +29,8 @@ import java.util.Objects;
  * Concrete subclasses store a specific {@link ValidationError} enum constant as
  * the failure reason and override {@link #getReason()} with a covariant return
  * type to expose the concrete enum type to callers without casting.
- * All shared logic — input normalisation, {@code equals}, {@code hashCode}, and
- * {@code toString} — is implemented here exactly once.
+ * All shared logic — input normalisation, country code handling, {@code equals},
+ * {@code hashCode}, and {@code toString} — is implemented here exactly once.
  *
  * @since 1.8.5
  *
@@ -47,17 +48,54 @@ public abstract class InvalidBaseException extends RuntimeException {
     /** The optional input found to be erroneous, trimmed to {@code null} if blank. */
     private final String          input;
 
+    /** The optional ISO country code associated with the validation failure, trimmed and upper-cased to {@code null} if blank. */
+    private final String          countryCode;
+
+    /**
+     * Constructs a new exception with the specified validation failure reason, erroneous input, and optional country code.
+     * The exception message is derived from the reason's text.
+     *
+     * @param reason      the specific {@code ValidationError} that occurred, must not be {@code null}
+     * @param input       the input string that caused the error, may be {@code null}
+     * @param countryCode the ISO country code context, may be {@code null}
+     */
+    protected InvalidBaseException(ValidationError reason, CharSequence input, String countryCode) {
+        super(requireNonNull(requireNonNull(reason, "reason required").getText(), "reason text required"));
+        this.reason = reason;
+        this.input = input == null ? null : input.toString();
+        this.countryCode = isBlank(countryCode) ? null : countryCode.trim().toUpperCase(Locale.ROOT);
+    }
+
+    /**
+     * Checks whether a character sequence is {@code null}, empty, or contains only whitespace characters.
+     * <p>
+     * Emulates {@code String.isBlank()} for compatibility with Java 8.
+     *
+     * @param cs the character sequence to check, may be {@code null}
+     * @return {@code true} if the character sequence is {@code null}, empty, or whitespace-only
+     */
+    @SuppressWarnings("InnerAssignment")
+    private static boolean isBlank(CharSequence cs) {
+        int strLen;
+        if (cs == null || (strLen = cs.length()) == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Constructs a new exception with the specified validation failure reason and the erroneous input.
-     * The exception message is derived from the reason's text.
      *
      * @param reason the specific {@code ValidationError} that occurred, must not be {@code null}
      * @param input  the input string that caused the error, may be {@code null}
      */
     protected InvalidBaseException(ValidationError reason, CharSequence input) {
-        super(requireNonNull(requireNonNull(reason, "reason required").getText(), "reason text required"));
-        this.reason = reason;
-        this.input = input == null ? null : input.toString();
+        this(reason, input, null);
     }
 
     /**
@@ -83,9 +121,19 @@ public abstract class InvalidBaseException extends RuntimeException {
     }
 
     /**
+     * Returns the ISO country code associated with this validation failure, if available.
+     * The value is trimmed and converted to upper case; blank input is normalized to {@code null}.
+     *
+     * @return the ISO country code, or {@code null} if not set or blank
+     */
+    public final String getCountryCode() {
+        return countryCode;
+    }
+
+    /**
      * Indicates whether some other object is equal to this exception.
      * Two instances are considered equal if they are of the same concrete class
-     * and have the same {@code reason} and {@code input}.
+     * and have the same {@code reason}, {@code input}, and {@code countryCode}.
      *
      * @param obj the reference object with which to compare
      * @return {@code true} if this object is the same as {@code obj}
@@ -99,25 +147,25 @@ public abstract class InvalidBaseException extends RuntimeException {
         }
         InvalidBaseException other = (InvalidBaseException) obj;
         return reason == other.reason
-            && Objects.equals(input, other.input);
+            && Objects.equals(input, other.input)
+            && Objects.equals(countryCode, other.countryCode);
     }
 
     /**
-     * Returns a hash code value for this exception based on {@code reason} and {@code input}.
+     * Returns a hash code value for this exception based on {@code reason}, {@code input}, and {@code countryCode}.
      *
      * @return a hash code value
      */
     @Override
     public int hashCode() {
-        int result = 31 * 17 + reason.hashCode();
-        return 31 * result + Objects.hashCode(input);
+        return Objects.hash(reason, input, countryCode);
     }
 
     /**
      * Returns the detailed error message string of this exception.
      * <p>
      * The message includes the base error text from the underlying {@link ValidationError},
-     * the specific reason constant in parentheses, and the erroneous input if present.
+     * the specific reason constant in parentheses, the country code if present, and the erroneous input if present.
      *
      * @return the detailed error message
      */
@@ -126,6 +174,9 @@ public abstract class InvalidBaseException extends RuntimeException {
         StringBuilder sb = new StringBuilder(super.getMessage())
             .append(' ')
             .append('(').append(reason).append(')');
+        if (countryCode != null) {
+            sb.append(", country ").append(countryCode);
+        }
         if (input != null && !input.isEmpty()) {
             sb.append(": ").append('\'').append(input).append('\'');
         }
@@ -144,7 +195,8 @@ public abstract class InvalidBaseException extends RuntimeException {
         return getClass().getSimpleName()
             + '['
             + "reason=" + reason
-            + ", input=" + input
+            + (countryCode == null ? "" : ", country=" + countryCode)
+            + ", input='" + input + "'"
             + ']';
     }
 

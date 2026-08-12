@@ -23,7 +23,7 @@ public final class DatafakerFinanceIbanGenerator {
      */
     private DatafakerFinanceIbanGenerator() {
         throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", DatafakerFinanceIbanGenerator.class.getSimpleName()));
+            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
     }
 
     /**
@@ -50,7 +50,7 @@ public final class DatafakerFinanceIbanGenerator {
      * @return a formatted string line
      */
     static String formatEntry(IbanRegistry country) {
-        String bbanPattern = country.getBbanPatternStr();
+        String bbanPattern = country.getBbanPattern();
         String bbanRegex = IbanPatternConverter.convertToRegex(bbanPattern);
 
         String mapPut = String.format("ibanFormats.put(\"%s\", \"%s\");",

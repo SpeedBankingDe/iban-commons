@@ -20,8 +20,9 @@ import de.speedbanking.iban.util.InvalidBaseException;
 /**
  * Exception thrown when a string fails BIC validation in the strict {@link Bic#of(CharSequence)} method.
  * <p>
- * Instances are typically created via the static factory methods {@link #of(BicValidationError)}
- * or {@link #of(BicValidationError, CharSequence)} rather than directly via constructors.
+ * Instances are typically created via the static factory methods {@link #of(BicValidationError)},
+ * {@link #of(BicValidationError, CharSequence)}, or {@link #of(BicValidationError, CharSequence, String)}
+ * rather than directly via constructors.
  *
  * @since 1.8.0
  */
@@ -31,15 +32,28 @@ public class InvalidBicException extends InvalidBaseException {
     private static final long serialVersionUID = 42L;
 
     /**
-     * Constructs a new exception with the specified validation failure reason and the erroneous input.
+     * Constructs a new exception with the specified validation failure reason, erroneous input, and country code.
      * The exception message is derived from the reason's text.
+     *
+     * @param reason      the specific {@code BicValidationError} that occurred, must not be {@code null}
+     * @param input       the BIC input string that caused the error, may be {@code null};
+     *                    blank values are normalized to {@code null}
+     * @param countryCode the ISO country code, may be {@code null};
+     *                    blank values are normalized to {@code null}
+     */
+    InvalidBicException(BicValidationError reason, CharSequence input, String countryCode) {
+        super(reason, input, countryCode);
+    }
+
+    /**
+     * Constructs a new exception with the specified validation failure reason and erroneous input.
      *
      * @param reason the specific {@code BicValidationError} that occurred, must not be {@code null}
      * @param input  the BIC input string that caused the error, may be {@code null};
      *               blank values are normalized to {@code null}
      */
     InvalidBicException(BicValidationError reason, CharSequence input) {
-        super(reason, input);
+        super(reason, input, null);
     }
 
     /**
@@ -49,7 +63,7 @@ public class InvalidBicException extends InvalidBaseException {
      * @return a new {@code InvalidBicException} instance
      */
     public static InvalidBicException of(BicValidationError reason) {
-        return new InvalidBicException(reason, null);
+        return new InvalidBicException(reason, null, null);
     }
 
     /**
@@ -62,7 +76,22 @@ public class InvalidBicException extends InvalidBaseException {
      * @return a new {@code InvalidBicException} instance
      */
     public static InvalidBicException of(BicValidationError reason, CharSequence input) {
-        return new InvalidBicException(reason, input);
+        return new InvalidBicException(reason, input, null);
+    }
+
+    /**
+     * Static factory method to create an {@code InvalidBicException} with the specified reason,
+     * erroneous BIC input, and country code.
+     *
+     * @param reason      the specific {@code BicValidationError} that occurred, must not be {@code null}
+     * @param input       the BIC input string that caused the error, may be {@code null};
+     *                    blank values are normalized to {@code null}
+     * @param countryCode the ISO country code, may be {@code null};
+     *                    blank values are normalized to {@code null}
+     * @return a new {@code InvalidBicException} instance
+     */
+    public static InvalidBicException of(BicValidationError reason, CharSequence input, String countryCode) {
+        return new InvalidBicException(reason, input, countryCode);
     }
 
     /**

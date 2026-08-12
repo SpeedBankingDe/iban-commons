@@ -55,7 +55,7 @@ public final class PatternCache {
         private final int    flags;
 
         CacheKey(String regex, int flags) {
-            this.regex = requireNonNull(regex, "regex must not be null");
+            this.regex = requireNonNull(regex, "regex required");
             this.flags = flags;
         }
 

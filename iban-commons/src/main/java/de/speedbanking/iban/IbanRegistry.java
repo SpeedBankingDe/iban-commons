@@ -25,6 +25,7 @@ import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
 import de.speedbanking.util.IndexRange;
+import de.speedbanking.util.PatternCache;
 
 import java.time.YearMonth;
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 /**
@@ -62,8 +64,7 @@ import java.util.regex.Pattern;
 @SuppressWarnings("ImmutableEnumChecker")
 public enum IbanRegistry {
 
-    // --- BGN: Enum Constants (generated from IBAN Registry) ---
-
+    // --- BGN: Enum Constants (generated from Swift IBAN Registry) ---
     /**
      * <strong>Andorra ({@code AD})</strong><p>
      * IBAN Length: 24<br>
@@ -76,18 +77,17 @@ public enum IbanRegistry {
      * </pre>
      */
     AD(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("4!n4!n12!c")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 24))
-         .build(),
-       MetaData.of(
-           "Andorra", true, "AD1200012030200359100100",
-           YearMonth.of(2021, 3)),
-       ContactData.of(
-           "Associacio de Bancs Andorrans (ABA)", null, "C/ Ciutat de Consuegra, 16 Edifici l'Illa, esc. A, 2n pis",
-           "AD500 Andorra la Vella Principat d'Andorra", "aba@aba.ad", "376 80 71 10")
+            .withIbanLength(24)
+            .withBbanPattern("4!n4!n12!c")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("12!c", IndexRange.of(12, 24))
+            .build(),
+        MetaData.sepa("AD1200012030200359100100", YearMonth.of(2021, 3)),
+        ContactData.of(
+            "Associacio de Bancs Andorrans (ABA)", null, "C/ Ciutat de Consuegra, 16 Edifici l'Illa, esc. A, 2n pis",
+            "AD500 Andorra la Vella Principat d'Andorra", "aba@aba.ad", "376 80 71 10"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -102,17 +102,16 @@ public enum IbanRegistry {
      * </pre>
      */
     AE(StructureData.builder()
-         .withIbanLength(23)
-         .withBbanPattern("3!n16!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 23))
-         .build(),
-       MetaData.of(
-           "United Arab Emirates", false, "AE070331234567890123456",
-           YearMonth.of(2025, 2)),
-       ContactData.of(
-           "Central Bank of the United Arab Emirates", null, "Bainuna Street, Al Bateen",
-           "Abu Dhabi PO Box 854", null, null)
+            .withIbanLength(23)
+            .withBbanPattern("3!n16!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("16!n", IndexRange.of(7, 23))
+            .build(),
+        MetaData.nonSepa("AE070331234567890123456", YearMonth.of(2025, 2)),
+        ContactData.of(
+            "Central Bank of the United Arab Emirates", null, "Bainuna Street, Al Bateen",
+            "Abu Dhabi PO Box 854", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -127,44 +126,19 @@ public enum IbanRegistry {
      * </pre>
      */
     AL(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("8!n16!c")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("5!n", IndexRange.of(7, 11))
-         .withNationalCheckDigit(IndexRange.of(11, 12)) // AL
-         .withAccountNumber(IndexRange.of(12, 28))
-         .build(),
-       MetaData.of(
-           "Albania", false, "AL47212110090000000235698741",
-           YearMonth.of(2025, 6)),
-       ContactData.of(
-           "Bank of Albania", "Payment systems", "Kompleksi Halili Rruga e Dibres",
-           "1000 Tirana", null, null)
+            .withIbanLength(28)
+            .withBbanPattern("8!n16!c")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("4!n", IndexRange.of(7, 11))
+            .withNationalCheckDigit(IndexRange.of(11, 12))
+            .withAccountNumber("16!c", IndexRange.of(12, 28))
+            .build(),
+        MetaData.nonSepa("AL47212110090000000235698741", YearMonth.of(2025, 6)),
+        ContactData.of(
+            "Bank of Albania", "Payment systems", "Kompleksi Halili Rruga e Dibres",
+            "1000 Tirana", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
-
-    /**
-     * <strong>Angola ({@code AO})</strong><p>
-     * IBAN Length: 25<br>
-     * SEPA: No<br>
-     * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code AO06000600000100037131174}
-     *   formatted:   {@code AO06 0006 0000 0100 0371 3117 4}
-     *   components:  {@code AO 06 0006 0000 01000371311 74}
-     * </pre>
-     */
-    AO(StructureData.builder()
-         .withIbanLength(25)
-         .withBbanPattern("4!n4!n11!n2!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 23))
-         .withNationalCheckDigit(IndexRange.of(23, 25)) // AO
-         .build(),
-       MetaData.of(
-           "Angola", false, "AO06000600000100037131174",
-           null),
-       null),
 
     /**
      * <strong>Austria ({@code AT})</strong><p>
@@ -178,17 +152,16 @@ public enum IbanRegistry {
      * </pre>
      */
     AT(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("5!n11!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withAccountNumber(IndexRange.of(9, 20))
-         .build(),
-       MetaData.of(
-           "Austria", true, "AT611904300234573201",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "PSA Payement Services Austria GMBH", "Account Systems", "Rivergate 2, Handelskai 92",
-           "1200 Wien", "accountsystems@psa.at", "+ 43 15053280 / 0")
+            .withIbanLength(20)
+            .withBbanPattern("5!n11!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withAccountNumber("11!n", IndexRange.of(9, 20))
+            .build(),
+        MetaData.sepa("AT611904300234573201", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "PSA Payement Services Austria GMBH", "Account Systems", "Rivergate 2, Handelskai 92",
+            "1200 Wien", "accountsystems@psa.at", "+ 43 15053280 / 0"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -203,17 +176,16 @@ public enum IbanRegistry {
      * </pre>
      */
     AZ(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!a20!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 28))
-         .build(),
-       MetaData.of(
-           "Azerbaijan", false, "AZ21NABZ00000000137010001944",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Central Bank of the Republic of Azerbaijan", "Head Office", "32, R. Behbudov",
-           "AZ 1014 Baku", "payment_systems@cbar.az", "+ 994 124931122")
+            .withIbanLength(28)
+            .withBbanPattern("4!a20!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("20!c", IndexRange.of(8, 28))
+            .build(),
+        MetaData.nonSepa("AZ21NABZ00000000137010001944", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Central Bank of the Republic of Azerbaijan", "Head Office", "32, R. Behbudov",
+            "AZ 1014 Baku", "payment_systems@cbar.az", "+ 994 124931122"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -228,19 +200,18 @@ public enum IbanRegistry {
      * </pre>
      */
     BA(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("3!n3!n8!n2!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("3!n", IndexRange.of(7, 10))
-         .withAccountNumber(IndexRange.of(10, 18))
-         .withNationalCheckDigit(IndexRange.of(18, 20)) // BA
-         .build(),
-       MetaData.of(
-           "Bosnia and Herzegovina", false, "BA391290079401028494",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Centralna banka Bosne i Hercegovine", "Payment Systems Division", "25 Maršala Tita Street",
-           "71000 Sarajevo, Bosnia and Herzegovina", null, null)
+            .withIbanLength(20)
+            .withBbanPattern("3!n3!n8!n2!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("3!n", IndexRange.of(7, 10))
+            .withAccountNumber("8!n", IndexRange.of(10, 18))
+            .withNationalCheckDigit(IndexRange.of(18, 20))
+            .build(),
+        MetaData.nonSepa("BA391290079401028494", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Centralna banka Bosne i Hercegovine", "Payment Systems Division", "25 Maršala Tita Street",
+            "71000 Sarajevo, Bosnia and Herzegovina", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -255,18 +226,17 @@ public enum IbanRegistry {
      * </pre>
      */
     BE(StructureData.builder()
-         .withIbanLength(16)
-         .withBbanPattern("3!n7!n2!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 14))
-         .withNationalCheckDigit(IndexRange.of(14, 16)) // BE
-         .build(),
-       MetaData.of(
-           "Belgium", true, "BE68539007547034",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Febelfin", "Payments & Operations", "Aarlenstraat 82",
-           "1040 Brussels", "info@febelfin.be", "+ 32 25076811")
+            .withIbanLength(16)
+            .withBbanPattern("3!n7!n2!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("7!n", IndexRange.of(7, 14))
+            .withNationalCheckDigit(IndexRange.of(14, 16))
+            .build(),
+        MetaData.sepa("BE68539007547034", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Febelfin", "Payments & Operations", "Aarlenstraat 82",
+            "1040 Brussels", "info@febelfin.be", "+ 32 25076811"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -281,18 +251,17 @@ public enum IbanRegistry {
      * </pre>
      */
     BG(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("4!a4!n2!n8!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(14, 22))
-         .build(),
-       MetaData.of(
-           "Bulgaria", true, "BG80BNBG96611020345678",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Bulgarian National Bank", "Payment Systems and Minimum Reserves Directorate", "1, Knyaz Alexander I Sq.",
-           "1000 Sofia, Bulgaria", "rtgs@bnbank.org", "+ 359 29145761")
+            .withIbanLength(22)
+            .withBbanPattern("4!a4!n2!n8!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("8!c", IndexRange.of(14, 22))
+            .build(),
+        MetaData.sepa("BG80BNBG96611020345678", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Bulgarian National Bank", "Payment Systems and Minimum Reserves Directorate", "1, Knyaz Alexander I Sq.",
+            "1000 Sofia, Bulgaria", "rtgs@bnbank.org", "+ 359 29145761"),
+        IbanBuilder.BgIbanBuilder::new
     ),
 
     /**
@@ -307,17 +276,16 @@ public enum IbanRegistry {
      * </pre>
      */
     BH(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("4!a14!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 22))
-         .build(),
-       MetaData.of(
-           "Bahrain", false, "BH67BMAG00001299123456",
-           YearMonth.of(2012, 1)),
-       ContactData.of(
-           "Central Bank of Bahrain", "Banking Services Directorate", "King Faisal Highway, Block 317, Road 1702, Building 96",
-           "Manama", null, null)
+            .withIbanLength(22)
+            .withBbanPattern("4!a14!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("14!c", IndexRange.of(8, 22))
+            .build(),
+        MetaData.nonSepa("BH67BMAG00001299123456", YearMonth.of(2012, 1)),
+        ContactData.of(
+            "Central Bank of Bahrain", "Banking Services Directorate", "King Faisal Highway, Block 317, Road 1702, Building 96",
+            "Manama", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -332,18 +300,17 @@ public enum IbanRegistry {
      * </pre>
      */
     BI(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 27))
-         .build(),
-       MetaData.of(
-           "Burundi", false, "BI4210000100010000332045181",
-           YearMonth.of(2021, 10)),
-       ContactData.of(
-           "Banque de la Republique du Burundi", null, "1, Avenue du Gouvernement PO BOX 705",
-           "Bujumbura", "brb@brb.bi", null)
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("13!n", IndexRange.of(14, 27))
+            .build(),
+        MetaData.nonSepa("BI4210000100010000332045181", YearMonth.of(2021, 10)),
+        ContactData.of(
+            "Banque de la Republique du Burundi", null, "1, Avenue du Gouvernement PO BOX 705",
+            "Bujumbura", "brb@brb.bi", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -358,18 +325,17 @@ public enum IbanRegistry {
      * </pre>
      */
     BR(StructureData.builder()
-         .withIbanLength(29)
-         .withBbanPattern("8!n5!n10!n1!a1!c")
-         .withBankCode("8!n", IndexRange.of(4, 12))
-         .withBranchCode("5!n", IndexRange.of(12, 17))
-         .withAccountNumber(IndexRange.of(17, 27))
-         .build(),
-       MetaData.of(
-           "Brazil", false, "BR1800360305000010009795493C1",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Banco Central do Brasil", "DEBAN - Departamento de Operações Bancárias e de Sistema de Pagamentos", "SBS Quadra 3 Bloco B",
-           "71.070-900 Brasília", "iban@bcb.gov.br", "+ 55 (61)34142666 / + 55 (51)32157339")
+            .withIbanLength(29)
+            .withBbanPattern("8!n5!n10!n1!a1!c")
+            .withBankCode("8!n", IndexRange.of(4, 12))
+            .withBranchCode("5!n", IndexRange.of(12, 17))
+            .withAccountNumber("10!n", IndexRange.of(17, 27))
+            .build(),
+        MetaData.nonSepa("BR1800360305000010009795493C1", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Banco Central do Brasil", "DEBAN - Departamento de Operações Bancárias e de Sistema de Pagamentos", "SBS Quadra 3 Bloco B",
+            "71.070-900 Brasília", "iban@bcb.gov.br", "+ 55 (61)34142666 / + 55 (51)32157339"),
+        IbanBuilder.BrIbanBuilder::new
     ),
 
     /**
@@ -384,18 +350,17 @@ public enum IbanRegistry {
      * </pre>
      */
     BY(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!c4!n16!c")
-         .withBankCode("4!c", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 28))
-         .build(),
-       MetaData.of(
-           "Belarus", false, "BY13NBRB3600900000002Z00AB00",
-           YearMonth.of(2024, 2)),
-       ContactData.of(
-           "National Bank of the Republic of Belarus", "Payment system and digital technologies directorate", "Nezavisimosty Avenue, 20",
-           "220008 Minsk", null, null)
+            .withIbanLength(28)
+            .withBbanPattern("4!c4!n16!c")
+            .withBankCode("4!c", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("16!c", IndexRange.of(12, 28))
+            .build(),
+        MetaData.nonSepa("BY13NBRB3600900000002Z00AB00", YearMonth.of(2024, 2)),
+        ContactData.of(
+            "National Bank of the Republic of Belarus", "Payment system and digital technologies directorate", "Nezavisimosty Avenue, 20",
+            "220008 Minsk", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -410,17 +375,16 @@ public enum IbanRegistry {
      * </pre>
      */
     CH(StructureData.builder()
-         .withIbanLength(21)
-         .withBbanPattern("5!n12!c")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withAccountNumber(IndexRange.of(9, 21))
-         .build(),
-       MetaData.of(
-           "Switzerland", true, "CH9300762011623852957",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "SIX Interbank Clearing Ltd", "Zentrale Koordinationsstelle fuer IBAN/IPI - Technical Support", "Hardturmstrasse 201",
-           "CH-8021 ZURICH", "iban@six-group.com", "+ 41 583994420")
+            .withIbanLength(21)
+            .withBbanPattern("5!n12!c")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withAccountNumber("12!c", IndexRange.of(9, 21))
+            .build(),
+        MetaData.sepa("CH9300762011623852957", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "SIX Interbank Clearing Ltd", "Zentrale Koordinationsstelle fuer IBAN/IPI - Technical Support", "Hardturmstrasse 201",
+            "8021 Zürich", "iban@six-group.com", "+ 41 583994420"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -435,41 +399,17 @@ public enum IbanRegistry {
      * </pre>
      */
     CR(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("4!n14!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 22))
-         .build(),
-       MetaData.of(
-           "Costa Rica", false, "CR05015202001026284066",
-           YearMonth.of(2019, 1)),
-       ContactData.of(
-           "Banco Central de Costa Rica", "Sistema de Pagos", "Avenida Central y 1a. Calles 2 y 4",
-           "10058-1000 San José", null, null)
+            .withIbanLength(22)
+            .withBbanPattern("4!n14!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("14!n", IndexRange.of(8, 22))
+            .build(),
+        MetaData.nonSepa("CR05015202001026284066", YearMonth.of(2019, 1)),
+        ContactData.of(
+            "Banco Central de Costa Rica", "Sistema de Pagos", "Avenida Central y 1a. Calles 2 y 4",
+            "10058-1000 San José", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
-
-    /**
-     * <strong>Cabo Verde ({@code CV})</strong><p>
-     * IBAN Length: 25<br>
-     * SEPA: No<br>
-     * BBAN Structure: {@code 4!n4!n13!c}<br>
-     * Examples:<pre>
-     *   unformatted: {@code CV05123412341234123412341}
-     *   formatted:   {@code CV05 1234 1234 1234 1234 1234 1}
-     *   components:  {@code CV 05 1234 1234 1234123412341}
-     * </pre>
-     */
-    CV(StructureData.builder()
-         .withIbanLength(25)
-         .withBbanPattern("4!n4!n13!c")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 25))
-         .build(),
-       MetaData.of(
-           "Cape Verde", false, "CV05123412341234123412341",
-           null),
-       null),
 
     /**
      * <strong>Cyprus ({@code CY})</strong><p>
@@ -483,18 +423,17 @@ public enum IbanRegistry {
      * </pre>
      */
     CY(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("3!n5!n16!c")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("5!n", IndexRange.of(7, 12))
-         .withAccountNumber(IndexRange.of(12, 28))
-         .build(),
-       MetaData.of(
-           "Cyprus", true, "CY17002001280000001200527600",
-           YearMonth.of(2009, 8)),
-       ContactData.of(
-           "Central Bank of Cyprus", "Payment systems and Accounting Services", "80 Kennedy Avenue",
-           "P.O. Box 25529 CY-1395 Nicosia", "PaymentSystems@centralbank.gov.cy", null)
+            .withIbanLength(28)
+            .withBbanPattern("3!n5!n16!c")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("5!n", IndexRange.of(7, 12))
+            .withAccountNumber("16!c", IndexRange.of(12, 28))
+            .build(),
+        MetaData.sepa("CY17002001280000001200527600", YearMonth.of(2009, 8)),
+        ContactData.of(
+            "Central Bank of Cyprus", "Payment systems and Accounting Services", "80 Kennedy Avenue",
+            "P.O. Box 25529 CY-1395 Nicosia", "PaymentSystems@centralbank.gov.cy", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -509,17 +448,16 @@ public enum IbanRegistry {
      * </pre>
      */
     CZ(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("4!n6!n10!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 24))
-         .build(),
-       MetaData.of(
-           "Czechia", true, "CZ6508000000192000145399",
-           YearMonth.of(2025, 6)),
-       ContactData.of(
-           "Czech National Bank", "Cash and Payments Department", "Na Příkopě 28",
-           "Praha 1", "iban.info@cnb.cz", null)
+            .withIbanLength(24)
+            .withBbanPattern("4!n6!n10!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .build(),
+        MetaData.sepa("CZ6508000000192000145399", YearMonth.of(2025, 6)),
+        ContactData.of(
+            "Czech National Bank", "Cash and Payments Department", "Na Příkopě 28",
+            "Praha 1", "iban.info@cnb.cz", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -534,17 +472,16 @@ public enum IbanRegistry {
      * </pre>
      */
     DE(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("8!n10!n")
-         .withBankCode("8!n", IndexRange.of(4, 12))
-         .withAccountNumber(IndexRange.of(12, 22))
-         .build(),
-       MetaData.of(
-           "Germany", true, "DE89370400440532013000",
-           YearMonth.of(2011, 1)),
-       ContactData.of(
-           "Bundesverband deutscher Banken", null, "Burgstraße 28",
-           "10178 Berlin", "iban@bdb.de", "+ 49 3016632301")
+            .withIbanLength(22)
+            .withBbanPattern("8!n10!n")
+            .withBankCode("8!n", IndexRange.of(4, 12))
+            .withAccountNumber("10!n", IndexRange.of(12, 22))
+            .build(),
+        MetaData.sepa("DE89370400440532013000", YearMonth.of(2011, 1)),
+        ContactData.of(
+            "Bundesverband deutscher Banken", null, "Burgstraße 28",
+            "10178 Berlin", "iban@bdb.de", "+ 49 3016632301"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -555,22 +492,22 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code DJ2100010000000154000100186}
      *   formatted:   {@code DJ21 0001 0000 0001 5400 0100 186}
-     *   components:  {@code DJ 21 00010 00000 0154000100186}
+     *   components:  {@code DJ 21 00010 00000 01540001001 86}
      * </pre>
      */
     DJ(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .build(),
-       MetaData.of(
-           "Djibouti", false, "DJ2100010000000154000100186",
-           YearMonth.of(2022, 5)),
-       ContactData.of(
-           "Banque Centrale de Djibouti", null, "Avenue Cheick Osman P.O Box 705",
-           "Djibouti", "bndj@intnet.dj", null)
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.nonSepa("DJ2100010000000154000100186", YearMonth.of(2022, 5)),
+        ContactData.of(
+            "Banque Centrale de Djibouti", null, "Avenue Cheick Osman P.O Box 705",
+            "Djibouti", "bndj@intnet.dj", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -585,17 +522,16 @@ public enum IbanRegistry {
      * </pre>
      */
     DK(StructureData.builder()
-         .withIbanLength(18)
-         .withBbanPattern("4!n9!n1!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 18))
-         .build(),
-       MetaData.of(
-           "Denmark", true, "DK5000400440116243",
-           YearMonth.of(2018, 11)),
-       ContactData.of(
-           "Finance Denmark", null, "7 Amaliegade",
-           "DK 1256 Copenhagen K", "IBAN@FIDA.dk", null)
+            .withIbanLength(18)
+            .withBbanPattern("4!n9!n1!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("10!n", IndexRange.of(8, 18))
+            .build(),
+        MetaData.sepa("DK5000400440116243", YearMonth.of(2018, 11)),
+        ContactData.of(
+            "Finance Denmark", null, "7 Amaliegade",
+            "DK 1256 Copenhagen K", "IBAN@FIDA.dk", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -610,17 +546,16 @@ public enum IbanRegistry {
      * </pre>
      */
     DO(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!c20!n")
-         .withBankCode("4!c", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 28))
-         .build(),
-       MetaData.of(
-           "Dominican Republic", false, "DO28BAGR00000001212453611324",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Central Bank of the Dominican Republic", "Payment Systems", "Av. Pedro Henríquez Urena esq. Leopoldo Navarro",
-           "Santo Domingo", "sistema.pagos@bancentral.gov.do", "+ 1 8092219111 (ext. 3409)")
+            .withIbanLength(28)
+            .withBbanPattern("4!c20!n")
+            .withBankCode("4!c", IndexRange.of(4, 8))
+            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .build(),
+        MetaData.nonSepa("DO28BAGR00000001212453611324", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Central Bank of the Dominican Republic", "Payment Systems", "Av. Pedro Henríquez Urena esq. Leopoldo Navarro",
+            "Santo Domingo", "sistema.pagos@bancentral.gov.do", "+ 1 8092219111 (ext. 3409)"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -635,19 +570,18 @@ public enum IbanRegistry {
      * </pre>
      */
     EE(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("2!n14!n")
-         .withBankCode("2!n", IndexRange.of(4, 6))
-         .withBranchCode("2!n", IndexRange.of(6, 8))
-         .withAccountNumber(IndexRange.of(8, 19))
-         .withNationalCheckDigit(IndexRange.of(19, 20)) // EE
-         .build(),
-       MetaData.of(
-           "Estonia", true, "EE382200221020145685",
-           YearMonth.of(2024, 12)),
-       ContactData.of(
-           "Estonian Banking Association", null, "Maakri 30",
-           "10145 Tallinn", "pangaliit@pangaliit.ee", "+ 372 6116569")
+            .withIbanLength(20)
+            .withBbanPattern("2!n14!n")
+            .withBankCode("2!n", IndexRange.of(4, 6))
+            .withBranchCode("2!n", IndexRange.of(6, 8))
+            .withAccountNumber("11!n", IndexRange.of(8, 19))
+            .withNationalCheckDigit(IndexRange.of(19, 20))
+            .build(),
+        MetaData.sepa("EE382200221020145685", YearMonth.of(2024, 12)),
+        ContactData.of(
+            "Estonian Banking Association", null, "Maakri 30",
+            "10145 Tallinn", "pangaliit@pangaliit.ee", "+ 372 6116569"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -662,18 +596,17 @@ public enum IbanRegistry {
      * </pre>
      */
     EG(StructureData.builder()
-         .withIbanLength(29)
-         .withBbanPattern("4!n4!n17!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 29))
-         .build(),
-       MetaData.of(
-           "Egypt", false, "EG380019000500000000263180002",
-           YearMonth.of(2020, 1)),
-       ContactData.of(
-           "Central Bank of Egypt", "Operations Sector", "54 El Gomherya street",
-           "Cairo", "Operations.development@cbe.org.eg", "+ 20 16777 (ext. 3109)")
+            .withIbanLength(29)
+            .withBbanPattern("4!n4!n17!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("17!n", IndexRange.of(12, 29))
+            .build(),
+        MetaData.nonSepa("EG380019000500000000263180002", YearMonth.of(2020, 1)),
+        ContactData.of(
+            "Central Bank of Egypt", "Operations Sector", "54 El Gomherya street",
+            "Cairo", "Operations.development@cbe.org.eg", "+ 20 16777 (ext. 3109)"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -688,19 +621,18 @@ public enum IbanRegistry {
      * </pre>
      */
     ES(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("4!n4!n1!n1!n10!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withNationalCheckDigit(IndexRange.of(12, 14)) // ES
-         .withAccountNumber(IndexRange.of(14, 24))
-         .build(),
-       MetaData.of(
-           "Spain", true, "ES9121000418450200051332",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Asociación Española de Banca Privada (AEB)", null, "C/ Velázquez, 64 – 66",
-           "28001 Madrid", "asesoria.pagos@aebanca.es", "+ 34 917891311")
+            .withIbanLength(24)
+            .withBbanPattern("4!n4!n1!n1!n10!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withNationalCheckDigit(IndexRange.of(12, 14))
+            .withAccountNumber("10!n", IndexRange.of(14, 24))
+            .build(),
+        MetaData.sepa("ES9121000418450200051332", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Asociación Española de Banca Privada (AEB)", null, "C/ Velázquez, 64 - 66",
+            "28001 Madrid", "asesoria.pagos@aebanca.es", "+ 34 917891311"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -715,32 +647,25 @@ public enum IbanRegistry {
      * </pre>
      */
     FI(StructureData.builder()
-         .withIbanLength(18)
-         .withBbanPattern("3!n11!n")
-         .withBankCode("6!n", IndexRange.of(4, 10))
-         .withAccountNumber(IndexRange.of(10, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 18)) // FI
-         .build(),
-       MetaData.of(
-           "Finland", true, "FI2112345600000785",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Federation of Finnish Financial Services", null, "PO Box 1009",
-           "FIN-00101 Helsinki", "paymentsupport@finanssiala.fi", null)
+            .withIbanLength(18)
+            .withBbanPattern("3!n11!n")
+            .withBankCode("6!n", IndexRange.of(4, 10))
+            .withAccountNumber("7!n", IndexRange.of(10, 17))
+            .withNationalCheckDigit(IndexRange.of(17, 18))
+            .build(),
+        MetaData.sepa("FI2112345600000785", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Federation of Finnish Financial Services", null, "PO Box 1009",
+            "FIN-00101 Helsinki", "paymentsupport@finanssiala.fi", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
      * <strong>Åland Islands ({@code AX})</strong><p>
-     * IBAN Length: 18<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 3!n11!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FI2112345600000785}
-     *   formatted:   {@code FI21 1234 5600 0007 85}
-     *   components:  {@code FI 21 123456 0000078 5}
-     * </pre>
+     * Secondary country mapping of Finland ({@code FI}).
+     * @see #FI
      */
-    AX("Åland Islands", FI),
+    AX(FI),
 
     /**
      * <strong>Falkland Islands (Malvinas) ({@code FK})</strong><p>
@@ -754,17 +679,16 @@ public enum IbanRegistry {
      * </pre>
      */
     FK(StructureData.builder()
-         .withIbanLength(18)
-         .withBbanPattern("2!a12!n")
-         .withBankCode("2!a", IndexRange.of(4, 6))
-         .withAccountNumber(IndexRange.of(6, 18))
-         .build(),
-       MetaData.of(
-           "Falkland Islands", false, "FK88SC123456789012",
-           YearMonth.of(2023, 7)),
-       ContactData.of(
-           "Falkland Islands Government", "The Treasury", "Thatcher Drive",
-           "FIQQ 1ZZ Stanley", "treasury@sec.gov.fk", null)
+            .withIbanLength(18)
+            .withBbanPattern("2!a12!n")
+            .withBankCode("2!a", IndexRange.of(4, 6))
+            .withAccountNumber("12!n", IndexRange.of(6, 18))
+            .build(),
+        MetaData.nonSepa("FK88SC123456789012", YearMonth.of(2023, 7)),
+        ContactData.of(
+            "Falkland Islands Government", "The Treasury", "Thatcher Drive",
+            "FIQQ 1ZZ Stanley", "treasury@sec.gov.fk", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -779,16 +703,16 @@ public enum IbanRegistry {
      * </pre>
      */
     FO(StructureData.builder()
-         .withIbanLength(18)
-         .withBbanPattern("4!n9!n1!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 18)) // FO
-         .build(),
-       MetaData.of(
-           "Faroe Islands", false, "FO6264600001631634",
-           YearMonth.of(2017, 2)),
-       DK.contactData),
+            .withIbanLength(18)
+            .withBbanPattern("4!n9!n1!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("9!n", IndexRange.of(8, 17))
+            .withNationalCheckDigit(IndexRange.of(17, 18))
+            .build(),
+        MetaData.nonSepa("FO6264600001631634", YearMonth.of(2017, 2)),
+        DK.contactData,
+        IbanBuilder.StandardIbanBuilder::new
+    ),
 
     /**
      * <strong>France ({@code FR})</strong><p>
@@ -802,199 +726,103 @@ public enum IbanRegistry {
      * </pre>
      */
     FR(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!c2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27)) // FR
-         .build(),
-       MetaData.of(
-           "France", true, "FR1420041010050500013M02606",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "CFONB", null, "18 rue la Fayette",
-           "75009 Paris", "cfonb@cfonb.fr", "+ 33 148005042")
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!c2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!c", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.sepa("FR1420041010050500013M02606", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "CFONB", null, "18 rue la Fayette",
+            "75009 Paris", "cfonb@cfonb.fr", "+ 33 148005042"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
      * <strong>French Guiana ({@code GF})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    GF("French Guiana", FR),
+    GF(FR),
 
     /**
      * <strong>Guadeloupe ({@code GP})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    GP("Guadeloupe", FR),
+    GP(FR),
 
     /**
      * <strong>Martinique ({@code MQ})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    MQ("Martinique", FR),
+    MQ(FR),
 
     /**
      * <strong>Réunion ({@code RE})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    RE("Réunion", FR),
+    RE(FR),
 
     /**
      * <strong>French Polynesia ({@code PF})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    PF("French Polynesia", FR),
+    PF(FR),
 
     /**
      * <strong>French Southern Territories ({@code TF})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    TF("French Southern Territories", FR),
+    TF(FR),
 
     /**
      * <strong>Mayotte ({@code YT})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    YT("Mayotte", FR),
+    YT(FR),
 
     /**
      * <strong>New Caledonia ({@code NC})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    NC("New Caledonia", FR),
+    NC(FR),
 
     /**
      * <strong>Saint Barthélemy ({@code BL})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    BL("Saint Barthélemy", FR),
+    BL(FR),
 
     /**
      * <strong>Saint Martin (French part) ({@code MF})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    MF("Saint Martin (French part)", FR),
+    MF(FR),
 
     /**
      * <strong>Saint Pierre and Miquelon ({@code PM})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    PM("Saint Pierre and Miquelon", FR),
+    PM(FR),
 
     /**
      * <strong>Wallis and Futuna ({@code WF})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 5!n5!n11!c2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code FR1420041010050500013M02606}
-     *   formatted:   {@code FR14 2004 1010 0505 0001 3M02 606}
-     *   components:  {@code FR 14 20041 01005 0500013M026 06}
-     * </pre>
+     * Secondary country mapping of France ({@code FR}).
+     * @see #FR
      */
-    WF("Wallis and Futuna", FR),
-
-    /**
-     * <strong>Gabon ({@code GA})</strong><p>
-     * IBAN Length: 27<br>
-     * SEPA: No<br>
-     * BBAN Structure: {@code 5!n5!n13!c}<br>
-     * Examples:<pre>
-     *   unformatted: {@code GA2140021010032001890020126}
-     *   formatted:   {@code GA21 4002 1010 0320 0189 0020 126}
-     *   components:  {@code GA 21 40021 01003 2001890020126}
-     * </pre>
-     */
-    GA(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n13!c")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 27))
-         .build(),
-       MetaData.of(
-           "Gabon", false, "GA2140021010032001890020126",
-           null),
-       null),
+    WF(FR),
 
     /**
      * <strong>United Kingdom of Great Britain and Northern Ireland ({@code GB})</strong><p>
@@ -1008,58 +836,39 @@ public enum IbanRegistry {
      * </pre>
      */
     GB(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("4!a6!n8!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withBranchCode("6!n", IndexRange.of(8, 14))
-         .withAccountNumber(IndexRange.of(14, 22))
-         .build(),
-       MetaData.of(
-           "United Kingdom", true, "GB29NWBK60161331926819",
-           YearMonth.of(2017, 5)),
-       ContactData.of(
-           "Payments UK Management Ltd", "International Standards and Services", "14 Finsbury Square",
-           "London EC2A 1LQ", null, null)
+            .withIbanLength(22)
+            .withBbanPattern("4!a6!n8!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withBranchCode("6!n", IndexRange.of(8, 14))
+            .withAccountNumber("8!n", IndexRange.of(14, 22))
+            .build(),
+        MetaData.sepa("GB29NWBK60161331926819", YearMonth.of(2017, 5)),
+        ContactData.of(
+            "Payments UK Management Ltd", "International Standards and Services", "14 Finsbury Square",
+            "London EC2A 1LQ", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
      * <strong>Isle of Man ({@code IM})</strong><p>
-     * IBAN Length: 22<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code GB29NWBK60161331926819}
-     *   formatted:   {@code GB29 NWBK 6016 1331 9268 19}
-     *   components:  {@code GB 29 NWBK 601613 31926819}
-     * </pre>
+     * Secondary country mapping of United Kingdom of Great Britain and Northern Ireland ({@code GB}).
+     * @see #GB
      */
-    IM("Isle of Man", GB),
+    IM(GB),
 
     /**
      * <strong>Jersey ({@code JE})</strong><p>
-     * IBAN Length: 22<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code GB29NWBK60161331926819}
-     *   formatted:   {@code GB29 NWBK 6016 1331 9268 19}
-     *   components:  {@code GB 29 NWBK 601613 31926819}
-     * </pre>
+     * Secondary country mapping of United Kingdom of Great Britain and Northern Ireland ({@code GB}).
+     * @see #GB
      */
-    JE("Jersey", GB),
+    JE(GB),
 
     /**
      * <strong>Guernsey ({@code GG})</strong><p>
-     * IBAN Length: 22<br>
-     * SEPA: Yes<br>
-     * BBAN Structure: {@code 4!a6!n8!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code GB29NWBK60161331926819}
-     *   formatted:   {@code GB29 NWBK 6016 1331 9268 19}
-     *   components:  {@code GB 29 NWBK 601613 31926819}
-     * </pre>
+     * Secondary country mapping of United Kingdom of Great Britain and Northern Ireland ({@code GB}).
+     * @see #GB
      */
-    GG("Guernsey", GB),
+    GG(GB),
 
     /**
      * <strong>Georgia ({@code GE})</strong><p>
@@ -1073,17 +882,16 @@ public enum IbanRegistry {
      * </pre>
      */
     GE(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("2!a16!n")
-         .withBankCode("2!a", IndexRange.of(4, 6))
-         .withAccountNumber(IndexRange.of(6, 22))
-         .build(),
-       MetaData.of(
-           "Georgia", false, "GE29NB0000000101904917",
-           YearMonth.of(2023, 4)),
-       ContactData.of(
-           "National Bank of Georgia", "Payment Systems", "1, Zviad Gamsakhurdia Embankment",
-           "0114 Tbilisi", "RTGS@nbg.gov.ge", "+ 995 322406555")
+            .withIbanLength(22)
+            .withBbanPattern("2!a16!n")
+            .withBankCode("2!a", IndexRange.of(4, 6))
+            .withAccountNumber("16!n", IndexRange.of(6, 22))
+            .build(),
+        MetaData.nonSepa("GE29NB0000000101904917", YearMonth.of(2023, 4)),
+        ContactData.of(
+            "National Bank of Georgia", "Payment Systems", "1, Zviad Gamsakhurdia Embankment",
+            "0114 Tbilisi", "RTGS@nbg.gov.ge", "+ 995 322406555"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1098,17 +906,16 @@ public enum IbanRegistry {
      * </pre>
      */
     GI(StructureData.builder()
-         .withIbanLength(23)
-         .withBbanPattern("4!a15!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 23))
-         .build(),
-       MetaData.of(
-           "Gibraltar", true, "GI75NWBK000000007099453",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Financial Services Commission", null, "PO Box 940",
-           "Suite 3, Ground Floor, Atlantic Suites", "info@fsc.gi", "+350 20040283")
+            .withIbanLength(23)
+            .withBbanPattern("4!a15!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("15!c", IndexRange.of(8, 23))
+            .build(),
+        MetaData.sepa("GI75NWBK000000007099453", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Financial Services Commission", null, "PO Box 940",
+            "Suite 3, Ground Floor, Atlantic Suites", "info@fsc.gi", "+350 20040283"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1123,15 +930,15 @@ public enum IbanRegistry {
      * </pre>
      */
     GL(StructureData.builder()
-         .withIbanLength(18)
-         .withBbanPattern("4!n9!n1!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 18))
-         .build(),
-       MetaData.of(
-           "Greenland", false, "GL8964710001000206",
-           YearMonth.of(2017, 2)),
-       DK.contactData),
+            .withIbanLength(18)
+            .withBbanPattern("4!n9!n1!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("10!n", IndexRange.of(8, 18))
+            .build(),
+        MetaData.nonSepa("GL8964710001000206", YearMonth.of(2017, 2)),
+        DK.contactData,
+        IbanBuilder.StandardIbanBuilder::new
+    ),
 
     /**
      * <strong>Greece ({@code GR})</strong><p>
@@ -1145,18 +952,17 @@ public enum IbanRegistry {
      * </pre>
      */
     GR(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("3!n4!n16!c")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("4!n", IndexRange.of(7, 11))
-         .withAccountNumber(IndexRange.of(11, 27))
-         .build(),
-       MetaData.of(
-           "Greece", true, "GR1601101250000000012300695",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Hellenic Bank Association", "Payment Systems", "Amerikis 21A",
-           "10672 Athens", "hba@hba.gr", "+ 30 2103386500")
+            .withIbanLength(27)
+            .withBbanPattern("3!n4!n16!c")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("4!n", IndexRange.of(7, 11))
+            .withAccountNumber("16!c", IndexRange.of(11, 27))
+            .build(),
+        MetaData.sepa("GR1601101250000000012300695", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Hellenic Bank Association", "Payment Systems", "Amerikis 21A",
+            "10672 Athens", "hba@hba.gr", "+ 30 2103386500"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1171,17 +977,16 @@ public enum IbanRegistry {
      * </pre>
      */
     GT(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!c20!c")
-         .withBankCode("4!c", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 28))
-         .build(),
-       MetaData.of(
-           "Guatemala", false, "GT82TRAJ01020000001210029690",
-           YearMonth.of(2016, 10)),
-       ContactData.of(
-           "Banco de Guatemala", "Accounting and Payment System", "7 Avenue 22-01 Zone 1",
-           "01001 Guatemala", "contabilidad@banguat.gob.gt", "(502) 2429-6000 EXT. 4300 (502) 2253-5352")
+            .withIbanLength(28)
+            .withBbanPattern("4!c20!c")
+            .withBankCode("4!c", IndexRange.of(4, 8))
+            .withAccountNumber("20!c", IndexRange.of(8, 28))
+            .build(),
+        MetaData.nonSepa("GT82TRAJ01020000001210029690", YearMonth.of(2016, 10)),
+        ContactData.of(
+            "Banco de Guatemala", "Accounting and Payment System", "7 Avenue 22-01 Zone 1",
+            "01001 Guatemala", "contabilidad@banguat.gob.gt", "(502) 2429-6000 EXT. 4300 (502) 2253-5352"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1196,17 +1001,16 @@ public enum IbanRegistry {
      * </pre>
      */
     HN(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!a20!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 28))
-         .build(),
-       MetaData.of(
-           "Honduras", false, "HN88CABF00000000000250005469",
-           YearMonth.of(2024, 12)),
-       ContactData.of(
-           "Banco Central de Honduras", null, "Centro Cívico Gubernamental, Boulevard Fuerzas Armadas",
-           "Tegucigalpa, MDC 3165", "carlos.avila@bch.hn", null)
+            .withIbanLength(28)
+            .withBbanPattern("4!a20!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .build(),
+        MetaData.nonSepa("HN88CABF00000000000250005469", YearMonth.of(2024, 12)),
+        ContactData.of(
+            "Banco Central de Honduras", null, "Centro Cívico Gubernamental, Boulevard Fuerzas Armadas",
+            "Tegucigalpa, MDC 3165", "carlos.avila@bch.hn", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1221,17 +1025,16 @@ public enum IbanRegistry {
      * </pre>
      */
     HR(StructureData.builder()
-         .withIbanLength(21)
-         .withBbanPattern("7!n10!n")
-         .withBankCode("7!n", IndexRange.of(4, 11))
-         .withAccountNumber(IndexRange.of(11, 21))
-         .build(),
-       MetaData.of(
-           "Croatia", true, "HR1210010051863000160",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Croatian National Bank", "Payment Operations Area", "Trg hrvatskih velikana 3",
-           "Zagreb / 10002", "zpp@hnb.hr", "+ 385 14564992")
+            .withIbanLength(21)
+            .withBbanPattern("7!n10!n")
+            .withBankCode("7!n", IndexRange.of(4, 11))
+            .withAccountNumber("10!n", IndexRange.of(11, 21))
+            .build(),
+        MetaData.sepa("HR1210010051863000160", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Croatian National Bank", "Payment Operations Area", "Trg hrvatskih velikana 3",
+            "Zagreb / 10002", "zpp@hnb.hr", "+ 385 14564992"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1246,19 +1049,18 @@ public enum IbanRegistry {
      * </pre>
      */
     HU(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("3!n4!n1!n15!n1!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("4!n", IndexRange.of(7, 11))
-         .withAccountNumber(IndexRange.of(11, 27))
-         .withNationalCheckDigit(IndexRange.of(27, 28)) // HU
-         .build(),
-       MetaData.of(
-           "Hungary", true, "HU42117730161111101800000000",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Hungarian Banking Association", null, "József nádor tér 5-6",
-           "H-1051 Budapest", "hba@hba.org.hu", "+ 36 13276030")
+            .withIbanLength(28)
+            .withBbanPattern("3!n4!n1!n15!n1!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("4!n", IndexRange.of(7, 11))
+            .withAccountNumber("16!n", IndexRange.of(11, 27))
+            .withNationalCheckDigit(IndexRange.of(27, 28))
+            .build(),
+        MetaData.sepa("HU42117730161111101800000000", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Hungarian Banking Association", null, "József nádor tér 5-6",
+            "H-1051 Budapest", "hba@hba.org.hu", "+ 36 13276030"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1273,18 +1075,17 @@ public enum IbanRegistry {
      * </pre>
      */
     IE(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("4!a6!n8!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withBranchCode("6!n", IndexRange.of(8, 14))
-         .withAccountNumber(IndexRange.of(14, 22))
-         .build(),
-       MetaData.of(
-           "Ireland", true, "IE29AIBK93115212345678",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Banking & Payments Federation Ireland", null, "Floor 3 One Molesworth Street",
-           "Dublin 2 D02 RF29", "info@bpfi.ie", null)
+            .withIbanLength(22)
+            .withBbanPattern("4!a6!n8!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withBranchCode("6!n", IndexRange.of(8, 14))
+            .withAccountNumber("8!n", IndexRange.of(14, 22))
+            .build(),
+        MetaData.sepa("IE29AIBK93115212345678", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Banking & Payments Federation Ireland", null, "Floor 3 One Molesworth Street",
+            "Dublin 2 D02 RF29", "info@bpfi.ie", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1299,18 +1100,17 @@ public enum IbanRegistry {
      * </pre>
      */
     IL(StructureData.builder()
-         .withIbanLength(23)
-         .withBbanPattern("3!n3!n13!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("3!n", IndexRange.of(7, 10))
-         .withAccountNumber(IndexRange.of(10, 23))
-         .build(),
-       MetaData.of(
-           "Israel", false, "IL620108000000099999999",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Bank of Israel", "Payment and Settlement Systems", "Kaplan Street, Kyriat Ben Gurion",
-           "91007 Jerusalem", "zahav@boi.org.il", "+ 972 26552020")
+            .withIbanLength(23)
+            .withBbanPattern("3!n3!n13!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("3!n", IndexRange.of(7, 10))
+            .withAccountNumber("13!n", IndexRange.of(10, 23))
+            .build(),
+        MetaData.nonSepa("IL620108000000099999999", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Bank of Israel", "Payment and Settlement Systems", "Kaplan Street, Kyriat Ben Gurion",
+            "91007 Jerusalem", "zahav@boi.org.il", "+ 972 26552020"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1325,41 +1125,18 @@ public enum IbanRegistry {
      * </pre>
      */
     IQ(StructureData.builder()
-         .withIbanLength(23)
-         .withBbanPattern("4!a3!n12!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withBranchCode("3!n", IndexRange.of(8, 11))
-         .withAccountNumber(IndexRange.of(11, 23))
-         .build(),
-       MetaData.of(
-           "Iraq", false, "IQ98NBIQ850123456789012",
-           YearMonth.of(2016, 11)),
-       ContactData.of(
-           "Central Bank of Iraq", "SWIFT Department", "Rasheed Street",
-           "Baghdad", "cbi@cbi.iq", "+ 964 47903737479")
+            .withIbanLength(23)
+            .withBbanPattern("4!a3!n12!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withBranchCode("3!n", IndexRange.of(8, 11))
+            .withAccountNumber("12!n", IndexRange.of(11, 23))
+            .build(),
+        MetaData.nonSepa("IQ98NBIQ850123456789012", YearMonth.of(2016, 11)),
+        ContactData.of(
+            "Central Bank of Iraq", "SWIFT Department", "Rasheed Street",
+            "Baghdad", "cbi@cbi.iq", "+ 964 47903737479"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
-
-    /**
-     * <strong>Iran (Islamic Republic of) ({@code IR})</strong><p>
-     * IBAN Length: 26<br>
-     * SEPA: No<br>
-     * BBAN Structure: {@code 3!n19!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code IR062960000000100324200001}
-     *   formatted:   {@code IR06 2960 0000 0010 0324 2000 01}
-     *   components:  {@code IR 06 296 0000000100324200001}
-     * </pre>
-     */
-    IR(StructureData.builder()
-         .withIbanLength(26)
-         .withBbanPattern("3!n19!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 26))
-         .build(),
-       MetaData.of(
-           "Islamic Republic of Iran", false, "IR062960000000100324200001",
-           null),
-       null),
 
     /**
      * <strong>Iceland ({@code IS})</strong><p>
@@ -1369,22 +1146,20 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code IS140159260076545510730339}
      *   formatted:   {@code IS14 0159 2600 7654 5510 7303 39}
-     *   components:  {@code IS 14 0159 26 0076545510730339}
+     *   components:  {@code IS 14 015926 0076545510730339}
      * </pre>
      */
     IS(StructureData.builder()
-         .withIbanLength(26)
-         .withBbanPattern("4!n2!n6!n10!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("2!n", IndexRange.of(8, 10))
-         .withAccountNumber(IndexRange.of(10, 26))
-         .build(),
-       MetaData.of(
-           "Iceland", true, "IS140159260076545510730339",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Icelandic Banks Data Centre", null, "Katrinartun 2",
-           "105 Reykjavik", "hjalp@rb.is", "+ 354 5698877")
+            .withIbanLength(26)
+            .withBbanPattern("4!n2!n6!n10!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("6!n", IndexRange.of(10, 16))
+            .build(),
+        MetaData.sepa("IS140159260076545510730339", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Icelandic Banks Data Centre", null, "Katrinartun 2",
+            "105 Reykjavik", "hjalp@rb.is", "+ 354 5698877"),
+        IbanBuilder.IsIbanBuilder::new
     ),
 
     /**
@@ -1399,19 +1174,18 @@ public enum IbanRegistry {
      * </pre>
      */
     IT(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("1!a5!n5!n12!c")
-         .withNationalCheckDigit(IndexRange.of(4, 5)) // IT
-         .withBankCode("5!n", IndexRange.of(5, 10))
-         .withBranchCode("5!n", IndexRange.of(10, 15))
-         .withAccountNumber(IndexRange.of(15, 27))
-         .build(),
-       MetaData.of(
-           "Italy", true, "IT60X0542811101000000123456",
-           YearMonth.of(2013, 3)),
-       ContactData.of(
-           "Associazione Bancaria Italiana", "Head of Payment Systems and Services", "Via delle Botteghe Oscure, 46",
-           "00186 Rome – Italy", null, null)
+            .withIbanLength(27)
+            .withBbanPattern("1!a5!n5!n12!c")
+            .withNationalCheckDigit(IndexRange.of(4, 5))
+            .withBankCode("5!n", IndexRange.of(5, 10))
+            .withBranchCode("5!n", IndexRange.of(10, 15))
+            .withAccountNumber("12!c", IndexRange.of(15, 27))
+            .build(),
+        MetaData.sepa("IT60X0542811101000000123456", YearMonth.of(2013, 3)),
+        ContactData.of(
+            "Associazione Bancaria Italiana", "Head of Payment Systems and Services", "Via delle Botteghe Oscure, 46",
+            "00186 Rome – Italy", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1426,18 +1200,17 @@ public enum IbanRegistry {
      * </pre>
      */
     JO(StructureData.builder()
-         .withIbanLength(30)
-         .withBbanPattern("4!a4!n18!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 30))
-         .build(),
-       MetaData.of(
-           "Jordan", false, "JO94CBJO0010000000000131000302",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Central Bank of Jordan", "Financial", "King Hussein Street",
-           "11118 Amman – Capital", "finance@cbj.gov.jo", null)
+            .withIbanLength(30)
+            .withBbanPattern("4!a4!n18!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("18!c", IndexRange.of(12, 30))
+            .build(),
+        MetaData.nonSepa("JO94CBJO0010000000000131000302", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Central Bank of Jordan", "Financial", "King Hussein Street",
+            "11118 Amman – Capital", "finance@cbj.gov.jo", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1452,17 +1225,16 @@ public enum IbanRegistry {
      * </pre>
      */
     KW(StructureData.builder()
-         .withIbanLength(30)
-         .withBbanPattern("4!a22!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 30))
-         .build(),
-       MetaData.of(
-           "Kuwait", false, "KW81CBKU0000000000001234560101",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Central Bank of Kuwait", "Information Technology and Banking Operations Sector", "P.O. Box 526 Safat",
-           "13006 Safat", "bito@cbk.gov.kw", null)
+            .withIbanLength(30)
+            .withBbanPattern("4!a22!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("22!c", IndexRange.of(8, 30))
+            .build(),
+        MetaData.nonSepa("KW81CBKU0000000000001234560101", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Central Bank of Kuwait", "Information Technology and Banking Operations Sector", "P.O. Box 526 Safat",
+            "13006 Safat", "bito@cbk.gov.kw", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1477,17 +1249,16 @@ public enum IbanRegistry {
      * </pre>
      */
     KZ(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("3!n13!c")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 20))
-         .build(),
-       MetaData.of(
-           "Kazakhstan", false, "KZ86125KZT5004100100",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "National Bank of the Republic of Kazakhstan", "Payment Systems", "21, Koktem-3",
-           "050040 Almaty", null, null)
+            .withIbanLength(20)
+            .withBbanPattern("3!n13!c")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("13!c", IndexRange.of(7, 20))
+            .build(),
+        MetaData.nonSepa("KZ86125KZT5004100100", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "National Bank of the Republic of Kazakhstan", "Payment Systems", "21, Koktem-3",
+            "050040 Almaty", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1502,17 +1273,16 @@ public enum IbanRegistry {
      * </pre>
      */
     LB(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!n20!c")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 28))
-         .build(),
-       MetaData.of(
-           "Lebanon", false, "LB62099900000001001901229114",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Banque du Liban", "Payment Systems", "Masraf Lubnan street",
-           "11-5544 Beirut", "IBAN@bdl.gov.lb", "+961-1-343317")
+            .withIbanLength(28)
+            .withBbanPattern("4!n20!c")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("20!c", IndexRange.of(8, 28))
+            .build(),
+        MetaData.nonSepa("LB62099900000001001901229114", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Banque du Liban", "Payment Systems", "Masraf Lubnan street",
+            "11-5544 Beirut", "IBAN@bdl.gov.lb", "+961-1-343317"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1527,17 +1297,16 @@ public enum IbanRegistry {
      * </pre>
      */
     LC(StructureData.builder()
-         .withIbanLength(32)
-         .withBbanPattern("4!a24!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 32))
-         .build(),
-       MetaData.of(
-           "Saint Lucia", false, "LC55HEMM000100010012001200023015",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Saint Lucia Bureau of Standards", null, "Bisee Industrial Estate",
-           "Castries, PO Box CP 5412", "slbs@candw.lc; info@slbs.org", null)
+            .withIbanLength(32)
+            .withBbanPattern("4!a24!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("24!c", IndexRange.of(8, 32))
+            .build(),
+        MetaData.nonSepa("LC55HEMM000100010012001200023015", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Saint Lucia Bureau of Standards", null, "Bisee Industrial Estate",
+            "Castries, PO Box CP 5412", "slbs@candw.lc; info@slbs.org", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1552,17 +1321,16 @@ public enum IbanRegistry {
      * </pre>
      */
     LI(StructureData.builder()
-         .withIbanLength(21)
-         .withBbanPattern("5!n12!c")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withAccountNumber(IndexRange.of(9, 21))
-         .build(),
-       MetaData.of(
-           "Liechtenstein", true, "LI21088100002324013AA",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Liechtenstein Bankers Association", null, "P.O. Box 254",
-           "9490 Vaduz", null, null)
+            .withIbanLength(21)
+            .withBbanPattern("5!n12!c")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withAccountNumber("12!c", IndexRange.of(9, 21))
+            .build(),
+        MetaData.sepa("LI21088100002324013AA", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Liechtenstein Bankers Association", null, "P.O. Box 254",
+            "9490 Vaduz", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1577,17 +1345,16 @@ public enum IbanRegistry {
      * </pre>
      */
     LT(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("5!n11!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withAccountNumber(IndexRange.of(9, 20))
-         .build(),
-       MetaData.of(
-           "Lithuania", true, "LT121000011101001000",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Bank of Lithuania", "Operations and Payments Department", "Gedimino pr. 6",
-           "Vilnius, LT-01103", "tarpbank@lb.lt", "+ 370 52680604")
+            .withIbanLength(20)
+            .withBbanPattern("5!n11!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withAccountNumber("11!n", IndexRange.of(9, 20))
+            .build(),
+        MetaData.sepa("LT121000011101001000", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Bank of Lithuania", "Operations and Payments Department", "Gedimino pr. 6",
+            "Vilnius, LT-01103", "tarpbank@lb.lt", "+ 370 52680604"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1602,17 +1369,16 @@ public enum IbanRegistry {
      * </pre>
      */
     LU(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("3!n13!c")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 20))
-         .build(),
-       MetaData.of(
-           "Luxembourg", true, "LU280019400644750000",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "ABBL - Association des Banques et Banquiers Luxembourg", null, "Boîte Postale 13",
-           "L-2010 Luxembourg", null, null)
+            .withIbanLength(20)
+            .withBbanPattern("3!n13!c")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("13!c", IndexRange.of(7, 20))
+            .build(),
+        MetaData.sepa("LU280019400644750000", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "ABBL - Association des Banques et Banquiers Luxembourg", null, "Boîte Postale 13",
+            "L-2010 Luxembourg", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1627,17 +1393,16 @@ public enum IbanRegistry {
      * </pre>
      */
     LV(StructureData.builder()
-         .withIbanLength(21)
-         .withBbanPattern("4!a13!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 21))
-         .build(),
-       MetaData.of(
-           "Latvia", true, "LV80BANK0000435195001",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Bank of Latvia", "Payment Systems", "K. Valdemāra 2A",
-           "Riga, LV-1050", null, null)
+            .withIbanLength(21)
+            .withBbanPattern("4!a13!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("13!c", IndexRange.of(8, 21))
+            .build(),
+        MetaData.sepa("LV80BANK0000435195001", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Bank of Latvia", "Payment Systems", "K. Valdemāra 2A",
+            "Riga, LV-1050", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1652,42 +1417,18 @@ public enum IbanRegistry {
      * </pre>
      */
     LY(StructureData.builder()
-         .withIbanLength(25)
-         .withBbanPattern("3!n3!n15!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("3!n", IndexRange.of(7, 10))
-         .withAccountNumber(IndexRange.of(10, 25))
-         .build(),
-       MetaData.of(
-           "Libya", false, "LY83002048000020100120361",
-           YearMonth.of(2020, 9)),
-       ContactData.of(
-           "Central Bank of Libya", "Payment and Settlement Department", "Alfatah Road",
-           "1103 Tripoli", "info@cbl.gov.ly", "+218 912137654")
+            .withIbanLength(25)
+            .withBbanPattern("3!n3!n15!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("3!n", IndexRange.of(7, 10))
+            .withAccountNumber("15!n", IndexRange.of(10, 25))
+            .build(),
+        MetaData.nonSepa("LY83002048000020100120361", YearMonth.of(2020, 9)),
+        ContactData.of(
+            "Central Bank of Libya", "Payment and Settlement Department", "Alfatah Road",
+            "1103 Tripoli", "info@cbl.gov.ly", "+218 912137654"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
-
-    /**
-     * <strong>Morocco ({@code MA})</strong><p>
-     * IBAN Length: 28<br>
-     * SEPA: No<br>
-     * BBAN Structure: {@code 3!n5!n16!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code MA64360815000001793222001617}
-     *   formatted:   {@code MA64 3608 1500 0001 7932 2200 1617}
-     *   components:  {@code MA 64 360 81500 0001793222001617}
-     * </pre>
-     */
-    MA(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("3!n5!n16!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("5!n", IndexRange.of(7, 12))
-         .withAccountNumber(IndexRange.of(12, 28))
-         .build(),
-       MetaData.of(
-           "Morocco", false, "MA64360815000001793222001617",
-           null),
-       null),
 
     /**
      * <strong>Monaco ({@code MC})</strong><p>
@@ -1701,19 +1442,18 @@ public enum IbanRegistry {
      * </pre>
      */
     MC(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!c2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27)) // MC
-         .build(),
-       MetaData.of(
-           "Monaco", true, "MC5811222000010123456789030",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Principauté de Monaco", null, "7, rue du Gabian",
-           "MC98000", "amaf@amaf.mc", null)
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!c2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!c", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.sepa("MC5811222000010123456789030", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Principauté de Monaco", null, "7, rue du Gabian",
+            "MC98000", "amaf@amaf.mc", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1728,17 +1468,16 @@ public enum IbanRegistry {
      * </pre>
      */
     MD(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("2!c18!c")
-         .withBankCode("2!c", IndexRange.of(4, 6))
-         .withAccountNumber(IndexRange.of(6, 24))
-         .build(),
-       MetaData.of(
-           "Moldova", false, "MD24AG000225100013104168",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "National Bank of Moldova", "Payments System", "1 Grigore Vieru Avenue",
-           "MD-2005 Chisinau", null, null)
+            .withIbanLength(24)
+            .withBbanPattern("2!c18!c")
+            .withBankCode("2!c", IndexRange.of(4, 6))
+            .withAccountNumber("18!c", IndexRange.of(6, 24))
+            .build(),
+        MetaData.nonSepa("MD24AG000225100013104168", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "National Bank of Moldova", "Payments System", "1 Grigore Vieru Avenue",
+            "MD-2005 Chisinau", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1753,18 +1492,17 @@ public enum IbanRegistry {
      * </pre>
      */
     ME(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("3!n13!n2!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 20))
-         .withNationalCheckDigit(IndexRange.of(20, 22)) // ME
-         .build(),
-       MetaData.of(
-           "Montenegro", false, "ME25505000012345678951",
-           YearMonth.of(2010, 5)),
-       ContactData.of(
-           "Association of Montenegrin Banks", null, "Novaka Miloseva bb",
-           "81000 Podgorica", "udruzenjebanaka@t-com.me", "+ 381 81232028")
+            .withIbanLength(22)
+            .withBbanPattern("3!n13!n2!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("13!n", IndexRange.of(7, 20))
+            .withNationalCheckDigit(IndexRange.of(20, 22))
+            .build(),
+        MetaData.nonSepa("ME25505000012345678951", YearMonth.of(2010, 5)),
+        ContactData.of(
+            "Association of Montenegrin Banks", null, "Novaka Miloseva bb",
+            "81000 Podgorica", "udruzenjebanaka@t-com.me", "+ 381 81232028"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1779,18 +1517,17 @@ public enum IbanRegistry {
      * </pre>
      */
     MK(StructureData.builder()
-         .withIbanLength(19)
-         .withBbanPattern("3!n10!c2!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 19)) // MK
-         .build(),
-       MetaData.of(
-           "North Macedonia", false, "MK07250120000058984",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "National Bank of the Republic of Macedonia", null, "K.J.Pitu 1",
-           "1000 Skopje", null, null)
+            .withIbanLength(19)
+            .withBbanPattern("3!n10!c2!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("10!c", IndexRange.of(7, 17))
+            .withNationalCheckDigit(IndexRange.of(17, 19))
+            .build(),
+        MetaData.nonSepa("MK07250120000058984", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "National Bank of the Republic of Macedonia", null, "K.J.Pitu 1",
+            "1000 Skopje", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1805,17 +1542,16 @@ public enum IbanRegistry {
      * </pre>
      */
     MN(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("4!n12!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 20))
-         .build(),
-       MetaData.of(
-           "Mongolia", false, "MN121234123456789123",
-           YearMonth.of(2023, 4)),
-       ContactData.of(
-           "Bank of Mongolia (The Central Bank)", null, "Baga toiruu-3",
-           "15160 Ulaanbaatar", null, "976-11-327510")
+            .withIbanLength(20)
+            .withBbanPattern("4!n12!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("12!n", IndexRange.of(8, 20))
+            .build(),
+        MetaData.nonSepa("MN121234123456789123", YearMonth.of(2023, 4)),
+        ContactData.of(
+            "Bank of Mongolia (The Central Bank)", null, "Baga toiruu-3",
+            "15160 Ulaanbaatar", null, "976-11-327510"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1830,19 +1566,18 @@ public enum IbanRegistry {
      * </pre>
      */
     MR(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27)) // MR
-         .build(),
-       MetaData.of(
-           "Mauritania", false, "MR1300020001010000123456753",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Banque Centrale de Mauritanie", null, "Avenue de l'Indépendance",
-           "BP 623 Nouakchott", "info@bcm.mr", "+ 222 45255206")
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.nonSepa("MR1300020001010000123456753", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Banque Centrale de Mauritanie", null, "Avenue de l'Indépendance",
+            "BP 623 Nouakchott", "info@bcm.mr", "+ 222 45255206"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1857,18 +1592,17 @@ public enum IbanRegistry {
      * </pre>
      */
     MT(StructureData.builder()
-         .withIbanLength(31)
-         .withBbanPattern("4!a5!n18!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withBranchCode("5!n", IndexRange.of(8, 13))
-         .withAccountNumber(IndexRange.of(13, 31))
-         .build(),
-       MetaData.of(
-           "Malta", true, "MT84MALT011000012345MTLCAST001S",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Malta Bankers' Association", "The Secretary General", "48/2 Birkirkara Road",
-           "Attard ATD1210", "info@maltabankers.org", "+ 356 21412210 / + 356 21410572")
+            .withIbanLength(31)
+            .withBbanPattern("4!a5!n18!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withBranchCode("5!n", IndexRange.of(8, 13))
+            .withAccountNumber("18!c", IndexRange.of(13, 31))
+            .build(),
+        MetaData.sepa("MT84MALT011000012345MTLCAST001S", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Malta Bankers' Association", "The Secretary General", "48/2 Birkirkara Road",
+            "Attard ATD1210", "info@maltabankers.org", "+ 356 21412210 / + 356 21410572"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1883,43 +1617,18 @@ public enum IbanRegistry {
      * </pre>
      */
     MU(StructureData.builder()
-         .withIbanLength(30)
-         .withBbanPattern("4!a2!n2!n12!n3!n3!a")
-         .withBankCode("4!a2!n", IndexRange.of(4, 10))
-         .withBranchCode("2!n", IndexRange.of(10, 12))
-         .withAccountNumber(IndexRange.of(12, 30))
-         .build(),
-       MetaData.of(
-           "Mauritius", false, "MU17BOMM0101101030300200000MUR",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "The Central Bank of Mauritius", null, "Sir William Newton Street",
-           "Port Louis", null, null)
+            .withIbanLength(30)
+            .withBbanPattern("4!a2!n2!n12!n3!n3!a")
+            .withBankCode("4!a2!n", IndexRange.of(4, 10))
+            .withBranchCode("2!n", IndexRange.of(10, 12))
+            .withAccountNumber("15!n", IndexRange.of(12, 27))
+            .build(),
+        MetaData.nonSepa("MU17BOMM0101101030300200000MUR", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "The Central Bank of Mauritius", null, "Sir William Newton Street",
+            "Port Louis", null, null),
+        IbanBuilder.MuIbanBuilder::new
     ),
-
-    /**
-     * <strong>Mozambique ({@code MZ})</strong><p>
-     * IBAN Length: 25<br>
-     * SEPA: No<br>
-     * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
-     * Examples:<pre>
-     *   unformatted: {@code MZ59000800005138555713187}
-     *   formatted:   {@code MZ59 0008 0000 5138 5557 1318 7}
-     *   components:  {@code MZ 59 0008 0000 51385557131 87}
-     * </pre>
-     */
-    MZ(StructureData.builder()
-         .withIbanLength(25)
-         .withBbanPattern("4!n4!n11!n2!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 23))
-         .withNationalCheckDigit(IndexRange.of(23, 25)) // MZ
-         .build(),
-       MetaData.of(
-           "Mozambique", false, "MZ59000800005138555713187",
-           null),
-       null),
 
     /**
      * <strong>Nicaragua ({@code NI})</strong><p>
@@ -1933,17 +1642,16 @@ public enum IbanRegistry {
      * </pre>
      */
     NI(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!a20!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 28))
-         .build(),
-       MetaData.of(
-           "Nicaragua", false, "NI45BAPR00000013000003558124",
-           YearMonth.of(2024, 12)),
-       ContactData.of(
-           "Banco Central de Nicaragua", null, "Paso a Desnivel Nejapa, 100 metros al este, Pista Juan Pablo II",
-           "2252 - 2253 Managua", null, null)
+            .withIbanLength(28)
+            .withBbanPattern("4!a20!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .build(),
+        MetaData.nonSepa("NI45BAPR00000013000003558124", YearMonth.of(2024, 12)),
+        ContactData.of(
+            "Banco Central de Nicaragua", null, "Paso a Desnivel Nejapa, 100 metros al este, Pista Juan Pablo II",
+            "2252 - 2253 Managua", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1958,17 +1666,16 @@ public enum IbanRegistry {
      * </pre>
      */
     NL(StructureData.builder()
-         .withIbanLength(18)
-         .withBbanPattern("4!a10!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 18))
-         .build(),
-       MetaData.of(
-           "Netherlands", true, "NL91ABNA0417164300",
-           YearMonth.of(2020, 9)),
-       ContactData.of(
-           "Betaalvereniging Nederland", null, "P.O Box 83073",
-           "1080 AB Amsterdam", "sepa@betaalvereniging.nl", "+ 31 203051900")
+            .withIbanLength(18)
+            .withBbanPattern("4!a10!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("10!n", IndexRange.of(8, 18))
+            .build(),
+        MetaData.sepa("NL91ABNA0417164300", YearMonth.of(2020, 9)),
+        ContactData.of(
+            "Betaalvereniging Nederland", null, "P.O Box 83073",
+            "1080 AB Amsterdam", "sepa@betaalvereniging.nl - info@betaalvereniging.nl", "+ 31 203051900"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -1983,18 +1690,17 @@ public enum IbanRegistry {
      * </pre>
      */
     NO(StructureData.builder()
-         .withIbanLength(15)
-         .withBbanPattern("4!n6!n1!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 14))
-         .withNationalCheckDigit(IndexRange.of(14, 15)) // NO
-         .build(),
-       MetaData.of(
-           "Norway", true, "NO9386011117947",
-           YearMonth.of(2009, 8)),
-       ContactData.of(
-           "DnB NOR Bank", null, "p.o.box 7100",
-           "5020 Bergen", null, null)
+            .withIbanLength(15)
+            .withBbanPattern("4!n6!n1!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("6!n", IndexRange.of(8, 14))
+            .withNationalCheckDigit(IndexRange.of(14, 15))
+            .build(),
+        MetaData.sepa("NO9386011117947", YearMonth.of(2009, 8)),
+        ContactData.of(
+            "DnB NOR Bank", null, "p.o.box 7100",
+            "5020 Bergen", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2009,17 +1715,16 @@ public enum IbanRegistry {
      * </pre>
      */
     OM(StructureData.builder()
-         .withIbanLength(23)
-         .withBbanPattern("3!n16!c")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 23))
-         .build(),
-       MetaData.of(
-           "Oman", false, "OM810180000001299123456",
-           YearMonth.of(2024, 3)),
-       ContactData.of(
-           "Central Bank of Oman", null, "Head Office, Al Markazi, Building Number:44 P.O. Box 1161",
-           "112 Ruwi - Commercial Business District - Muscat", "cso@cbo.gov.om", null)
+            .withIbanLength(23)
+            .withBbanPattern("3!n16!c")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("16!c", IndexRange.of(7, 23))
+            .build(),
+        MetaData.nonSepa("OM810180000001299123456", YearMonth.of(2024, 3)),
+        ContactData.of(
+            "Central Bank of Oman", null, "Head Office, Al Markazi, Building Number:44 P.O. Box 1161",
+            "112 Ruwi - Commercial Business District - Muscat", "cso@cbo.gov.om", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2034,17 +1739,16 @@ public enum IbanRegistry {
      * </pre>
      */
     PK(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("4!a16!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 24))
-         .build(),
-       MetaData.of(
-           "Pakistan", false, "PK36SCBL0000001123456702",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "State Bank of Pakistan", "Payment Systems", "4th Floor, Main Building, I.I. Chundrigar Road.",
-           "74000 Karachi – Sindh – Pakistan", null, null)
+            .withIbanLength(24)
+            .withBbanPattern("4!a16!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .build(),
+        MetaData.nonSepa("PK36SCBL0000001123456702", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "State Bank of Pakistan", "Payment Systems", "4th Floor, Main Building, I.I. Chundrigar Road.",
+            "74000 Karachi – Sindh – Pakistan", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2055,23 +1759,21 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code PL61109010140000071219812874}
      *   formatted:   {@code PL61 1090 1014 0000 0712 1981 2874}
-     *   components:  {@code PL 61 109 0101 4 0000071219812874}
+     *   components:  {@code PL 61 109 01014 0000071219812874}
      * </pre>
      */
     PL(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("8!n16!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("4!n", IndexRange.of(7, 11))
-         .withNationalCheckDigit(IndexRange.of(11, 12)) // PL
-         .withAccountNumber(IndexRange.of(12, 28))
-         .build(),
-       MetaData.of(
-           "Poland", true, "PL61109010140000071219812874",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Narodowy Bank Polski", "Payment Systems Deparment", "Świętokrzyska 11/21",
-           "00 – 919 Warsaw", "sekretariat.dsp@nbp.pl", "48 22 185 27 25")
+            .withIbanLength(28)
+            .withBbanPattern("8!n16!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("4!n", IndexRange.of(7, 11))
+            .withAccountNumber("16!n", IndexRange.of(12, 28))
+            .build(),
+        MetaData.sepa("PL61109010140000071219812874", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Narodowy Bank Polski", "Payment Systems Deparment", "Świętokrzyska 11/21",
+            "00 – 919 Warsaw", "sekretariat.dsp@nbp.pl", "48 22 185 27 25"),
+        IbanBuilder.PlIbanBuilder::new
     ),
 
     /**
@@ -2086,17 +1788,16 @@ public enum IbanRegistry {
      * </pre>
      */
     PS(StructureData.builder()
-         .withIbanLength(29)
-         .withBbanPattern("4!a21!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 29))
-         .build(),
-       MetaData.of(
-           "Palestine", false, "PS92PALS000000000400123456702",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Palestine Monetary Authority", "Payment Systems", "Al-Ramouni Nablus Street",
-           "452 AL-BIREH", "psdsupport@pma.ps", null)
+            .withIbanLength(29)
+            .withBbanPattern("4!a21!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("21!c", IndexRange.of(8, 29))
+            .build(),
+        MetaData.nonSepa("PS92PALS000000000400123456702", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Palestine Monetary Authority", "Payment Systems", "Al-Ramouni Nablus Street",
+            "452 AL-BIREH", "psdsupport@pma.ps", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2111,19 +1812,18 @@ public enum IbanRegistry {
      * </pre>
      */
     PT(StructureData.builder()
-         .withIbanLength(25)
-         .withBbanPattern("4!n4!n11!n2!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 23))
-         .withNationalCheckDigit(IndexRange.of(23, 25)) // PT
-         .build(),
-       MetaData.of(
-           "Portugal", true, "PT50000201231234567890154",
-           YearMonth.of(2025, 12)),
-       ContactData.of(
-           "Banco de Portugal", "Payment Systems Department", "Rua do Comércio 148",
-           "1100-148 Lisboa", "dpg@bportugal.pt", "+ 351 217813000")
+            .withIbanLength(25)
+            .withBbanPattern("4!n4!n11!n2!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("11!n", IndexRange.of(12, 23))
+            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .build(),
+        MetaData.sepa("PT50000201231234567890154", YearMonth.of(2025, 12)),
+        ContactData.of(
+            "Banco de Portugal", "Payment Systems Department", "Rua do Comércio 148",
+            "1100-148 Lisboa", "dpg@bportugal.pt", "+ 351 217813000"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2138,17 +1838,16 @@ public enum IbanRegistry {
      * </pre>
      */
     QA(StructureData.builder()
-         .withIbanLength(29)
-         .withBbanPattern("4!a21!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 29))
-         .build(),
-       MetaData.of(
-           "Qatar", false, "QA58DOHB00001234567890ABCDEFG",
-           YearMonth.of(2014, 1)),
-       ContactData.of(
-           "Qatar Central Bank", "Banking Payments and Settlement System", "Abdulla Bin Jassim Street",
-           "1234 Doha", null, null)
+            .withIbanLength(29)
+            .withBbanPattern("4!a21!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("21!c", IndexRange.of(8, 29))
+            .build(),
+        MetaData.nonSepa("QA58DOHB00001234567890ABCDEFG", YearMonth.of(2014, 1)),
+        ContactData.of(
+            "Qatar Central Bank", "Banking Payments and Settlement System", "Abdulla Bin Jassim Street",
+            "1234 Doha", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2163,17 +1862,16 @@ public enum IbanRegistry {
      * </pre>
      */
     RO(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("4!a16!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 24))
-         .build(),
-       MetaData.of(
-           "Romania", true, "RO49AAAA1B31007593840000",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "National Bank of Romania", null, "Lipscani St.,25th",
-           "Sector 3, Bucharest 030031", null, null)
+            .withIbanLength(24)
+            .withBbanPattern("4!a16!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("16!c", IndexRange.of(8, 24))
+            .build(),
+        MetaData.sepa("RO49AAAA1B31007593840000", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "National Bank of Romania", null, "Lipscani St.,25th",
+            "Sector 3, Bucharest 030031", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2188,18 +1886,17 @@ public enum IbanRegistry {
      * </pre>
      */
     RS(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("3!n13!n2!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 20))
-         .withNationalCheckDigit(IndexRange.of(20, 22)) // RS
-         .build(),
-       MetaData.of(
-           "Serbia", false, "RS35260005601001611379",
-           YearMonth.of(2017, 3)),
-       ContactData.of(
-           "National bank of Serbia", null, "Nemanjina 17",
-           "11000 Belgrade", "platni.sistem@nbs.rs", null)
+            .withIbanLength(22)
+            .withBbanPattern("3!n13!n2!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("13!n", IndexRange.of(7, 20))
+            .withNationalCheckDigit(IndexRange.of(20, 22))
+            .build(),
+        MetaData.nonSepa("RS35260005601001611379", YearMonth.of(2017, 3)),
+        ContactData.of(
+            "National bank of Serbia", null, "Nemanjina 17",
+            "11000 Belgrade", "platni.sistem@nbs.rs", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2214,18 +1911,17 @@ public enum IbanRegistry {
      * </pre>
      */
     RU(StructureData.builder()
-         .withIbanLength(33)
-         .withBbanPattern("9!n5!n15!c")
-         .withBankCode("9!n", IndexRange.of(4, 13))
-         .withBranchCode("5!n", IndexRange.of(13, 18))
-         .withAccountNumber(IndexRange.of(18, 33))
-         .build(),
-       MetaData.of(
-           "Russia", false, "RU0304452522540817810538091310419",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "The Central Bank of the Russian Federation", null, "Neglinnaya Street, 12",
-           "Moscow", "svc_dnps_ornps@cbr.ru", null)
+            .withIbanLength(33)
+            .withBbanPattern("9!n5!n15!c")
+            .withBankCode("9!n", IndexRange.of(4, 13))
+            .withBranchCode("5!n", IndexRange.of(13, 18))
+            .withAccountNumber("15!c", IndexRange.of(18, 33))
+            .build(),
+        MetaData.nonSepa("RU0304452522540817810538091310419", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "The Central Bank of the Russian Federation", null, "Neglinnaya Street, 12",
+            "Moscow", "svc_dnps_ornps@cbr.ru", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2240,17 +1936,16 @@ public enum IbanRegistry {
      * </pre>
      */
     SA(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("2!n18!c")
-         .withBankCode("2!n", IndexRange.of(4, 6))
-         .withAccountNumber(IndexRange.of(6, 24))
-         .build(),
-       MetaData.of(
-           "Saudi Arabia", false, "SA0380000000608010167519",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "SAMA, Head Office", "General Department of Payment Systems", "P.O. BOX 2992",
-           "Riyadh 11169", "gdps@sama.gov.sa", "+ 966 114662015")
+            .withIbanLength(24)
+            .withBbanPattern("2!n18!c")
+            .withBankCode("2!n", IndexRange.of(4, 6))
+            .withAccountNumber("18!c", IndexRange.of(6, 24))
+            .build(),
+        MetaData.nonSepa("SA0380000000608010167519", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "SAMA, Head Office", "General Department of Payment Systems", "P.O. BOX 2992",
+            "Riyadh 11169", "gdps@sama.gov.sa", "+ 966 114662015"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2265,18 +1960,17 @@ public enum IbanRegistry {
      * </pre>
      */
     SC(StructureData.builder()
-         .withIbanLength(31)
-         .withBbanPattern("4!a2!n2!n16!n3!a")
-         .withBankCode("4!a2!n", IndexRange.of(4, 10))
-         .withBranchCode("2!n", IndexRange.of(10, 12))
-         .withAccountNumber(IndexRange.of(12, 28))
-         .build(),
-       MetaData.of(
-           "Seychelles", false, "SC18SSCB11010000000000001497USD",
-           YearMonth.of(2019, 10)),
-       ContactData.of(
-           "Central Bank of Seychelles", null, "Independence Avenue",
-           "Victoria - Mahe", "Psd@cbs.sc; BankingServices@cbs.sc", null)
+            .withIbanLength(31)
+            .withBbanPattern("4!a2!n2!n16!n3!a")
+            .withBankCode("4!a2!n", IndexRange.of(4, 10))
+            .withBranchCode("2!n", IndexRange.of(10, 12))
+            .withAccountNumber("16!n", IndexRange.of(12, 28))
+            .build(),
+        MetaData.nonSepa("SC18SSCB11010000000000001497USD", YearMonth.of(2019, 10)),
+        ContactData.of(
+            "Central Bank of Seychelles", null, "Independence Avenue",
+            "Victoria - Mahe", "Psd@cbs.sc; BankingServices@cbs.sc", null),
+        IbanBuilder.ScIbanBuilder::new
     ),
 
     /**
@@ -2291,17 +1985,16 @@ public enum IbanRegistry {
      * </pre>
      */
     SD(StructureData.builder()
-         .withIbanLength(18)
-         .withBbanPattern("2!n12!n")
-         .withBankCode("2!n", IndexRange.of(4, 6))
-         .withAccountNumber(IndexRange.of(6, 18))
-         .build(),
-       MetaData.of(
-           "Sudan", false, "SD2129010501234001",
-           YearMonth.of(2021, 10)),
-       ContactData.of(
-           "Central Bank of Sudan (CBOS)", null, "HQ Building of Central Bank of SudanAljammah St.",
-           "Khartoum 11111/313", null, null)
+            .withIbanLength(18)
+            .withBbanPattern("2!n12!n")
+            .withBankCode("2!n", IndexRange.of(4, 6))
+            .withAccountNumber("12!n", IndexRange.of(6, 18))
+            .build(),
+        MetaData.nonSepa("SD2129010501234001", YearMonth.of(2021, 10)),
+        ContactData.of(
+            "Central Bank of Sudan (CBOS)", null, "HQ Building of Central Bank of SudanAljammah St.",
+            "Khartoum 11111/313", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2312,21 +2005,21 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code SE4550000000058398257466}
      *   formatted:   {@code SE45 5000 0000 0583 9825 7466}
-     *   components:  {@code SE 45 500 00000058398257466}
+     *   components:  {@code SE 45 500 0000005839825746 6}
      * </pre>
      */
     SE(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("3!n16!n1!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 24))
-         .build(),
-       MetaData.of(
-           "Sweden", true, "SE4550000000058398257466",
-           YearMonth.of(2009, 8)),
-       ContactData.of(
-           "Swedish Bankers' Association", null, null,
-           "SE - 103 94 Stockholm", null, null)
+            .withIbanLength(24)
+            .withBbanPattern("3!n16!n1!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("16!n", IndexRange.of(7, 23))
+            .withNationalCheckDigit(IndexRange.of(23, 24))
+            .build(),
+        MetaData.sepa("SE4550000000058398257466", YearMonth.of(2009, 8)),
+        ContactData.of(
+            "Swedish Bankers' Association", null, null,
+            "SE - 103 94 Stockholm", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2341,19 +2034,18 @@ public enum IbanRegistry {
      * </pre>
      */
     SI(StructureData.builder()
-         .withIbanLength(19)
-         .withBbanPattern("2!n3!n8!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 6))
-         .withBranchCode("3!n", IndexRange.of(6, 9))
-         .withAccountNumber(IndexRange.of(9, 17))
-         .withNationalCheckDigit(IndexRange.of(17, 19)) // SI
-         .build(),
-       MetaData.of(
-           "Slovenia", true, "SI56263300012039086",
-           YearMonth.of(2016, 10)),
-       ContactData.of(
-           "Bank of Slovenia", "Payment and Settlement Systems", "Slovenska 35",
-           "SI-1505 Ljubljana", "Pomoc.PS@bsi.si", "+389 1 4719 568")
+            .withIbanLength(19)
+            .withBbanPattern("2!n3!n8!n2!n")
+            .withBankCode("2!n", IndexRange.of(4, 6))
+            .withBranchCode("3!n", IndexRange.of(6, 9))
+            .withAccountNumber("8!n", IndexRange.of(9, 17))
+            .withNationalCheckDigit(IndexRange.of(17, 19))
+            .build(),
+        MetaData.sepa("SI56263300012039086", YearMonth.of(2016, 10)),
+        ContactData.of(
+            "Bank of Slovenia", "Payment and Settlement Systems", "Slovenska 35",
+            "SI-1505 Ljubljana", "Pomoc.PS@bsi.si", "+389 1 4719 568"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2368,17 +2060,16 @@ public enum IbanRegistry {
      * </pre>
      */
     SK(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("4!n6!n10!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 24))
-         .build(),
-       MetaData.of(
-           "Slovakia", true, "SK3112000000198742637541",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "National Bank of Slovakia", null, "Imricha Karvaša 1",
-           "813 25 Bratislava 1", "info@nbs.sk", null)
+            .withIbanLength(24)
+            .withBbanPattern("4!n6!n10!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .build(),
+        MetaData.sepa("SK3112000000198742637541", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "National Bank of Slovakia", null, "Imricha Karvaša 1",
+            "813 25 Bratislava 1", "info@nbs.sk", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2393,19 +2084,18 @@ public enum IbanRegistry {
      * </pre>
      */
     SM(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("1!a5!n5!n12!c")
-         .withNationalCheckDigit(IndexRange.of(4, 5)) // SM
-         .withBankCode("5!n", IndexRange.of(5, 10))
-         .withBranchCode("5!n", IndexRange.of(10, 15))
-         .withAccountNumber(IndexRange.of(15, 27))
-         .build(),
-       MetaData.of(
-           "San Marino", true, "SM86U0322509800000000270100",
-           YearMonth.of(2016, 8)),
-       ContactData.of(
-           "Banca Centrale della Repubblica di San Marino", "Payments System", "Via del Voltone, 120",
-           "San Marino 47890", "sistemi.pagamento@bcsm.sm", "+ 378 882325")
+            .withIbanLength(27)
+            .withBbanPattern("1!a5!n5!n12!c")
+            .withNationalCheckDigit(IndexRange.of(4, 5))
+            .withBankCode("5!n", IndexRange.of(5, 10))
+            .withBranchCode("5!n", IndexRange.of(10, 15))
+            .withAccountNumber("12!c", IndexRange.of(15, 27))
+            .build(),
+        MetaData.sepa("SM86U0322509800000000270100", YearMonth.of(2016, 8)),
+        ContactData.of(
+            "Banca Centrale della Repubblica di San Marino", "Payments System", "Via del Voltone, 120",
+            "San Marino 47890", "sistemi.pagamento@bcsm.sm", "+ 378 882325"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2420,18 +2110,17 @@ public enum IbanRegistry {
      * </pre>
      */
     SO(StructureData.builder()
-         .withIbanLength(23)
-         .withBbanPattern("4!n3!n12!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("3!n", IndexRange.of(8, 11))
-         .withAccountNumber(IndexRange.of(11, 23))
-         .build(),
-       MetaData.of(
-           "Somalia", false, "SO211000001001000100141",
-           YearMonth.of(2025, 2)),
-       ContactData.of(
-           "Central Bank of Somalia", null, "Corso Somalia, 55 P.O Box 11",
-           "Mogadishu", "info@centralbank.gov.so", null)
+            .withIbanLength(23)
+            .withBbanPattern("4!n3!n12!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("3!n", IndexRange.of(8, 11))
+            .withAccountNumber("12!n", IndexRange.of(11, 23))
+            .build(),
+        MetaData.nonSepa("SO211000001001000100141", YearMonth.of(2025, 2)),
+        ContactData.of(
+            "Central Bank of Somalia", null, "Corso Somalia, 55 P.O Box 11",
+            "Mogadishu", "info@centralbank.gov.so", null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2446,18 +2135,17 @@ public enum IbanRegistry {
      * </pre>
      */
     ST(StructureData.builder()
-         .withIbanLength(25)
-         .withBbanPattern("4!n4!n11!n2!n")
-         .withBankCode("4!n", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 25))
-         .build(),
-       MetaData.of(
-           "Sao Tome and Principe", false, "ST23000100010051845310146",
-           YearMonth.of(2020, 5)),
-       ContactData.of(
-           "Banco Central de Sao Tome e Principe", "DSP", "Avenida Marginal 12 de Julho",
-           "CP 13 Sao Tome", "dsp@bcstp.st", "+239 2243700")
+            .withIbanLength(25)
+            .withBbanPattern("4!n4!n11!n2!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("13!n", IndexRange.of(12, 25))
+            .build(),
+        MetaData.nonSepa("ST23000100010051845310146", YearMonth.of(2020, 5)),
+        ContactData.of(
+            "Banco Central de Sao Tome e Principe", "DSP", "Avenida Marginal 12 de Julho",
+            "CP 13 Sao Tome", "dsp@bcstp.st", "+239 2243700"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2472,17 +2160,16 @@ public enum IbanRegistry {
      * </pre>
      */
     SV(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("4!a20!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 28))
-         .build(),
-       MetaData.of(
-           "El Salvador", false, "SV62CENR00000000000000700025",
-           YearMonth.of(2021, 3)),
-       ContactData.of(
-           "Banco Central de Reserva de El Salvador", "Departamento de Pagos y Valores", "1a Calle Poniente y 7Av. Nte. N 418",
-           "San Salvador", "maria.delgado@bcr.gov.sv", "503 2281 8831")
+            .withIbanLength(28)
+            .withBbanPattern("4!a20!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .build(),
+        MetaData.nonSepa("SV62CENR00000000000000700025", YearMonth.of(2021, 3)),
+        ContactData.of(
+            "Banco Central de Reserva de El Salvador", "Departamento de Pagos y Valores", "1a Calle Poniente y 7Av. Nte. N 418",
+            "San Salvador", "maria.delgado@bcr.gov.sv", "503 2281 8831"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2497,18 +2184,17 @@ public enum IbanRegistry {
      * </pre>
      */
     TL(StructureData.builder()
-         .withIbanLength(23)
-         .withBbanPattern("3!n14!n2!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 21))
-         .withNationalCheckDigit(IndexRange.of(21, 23)) // TL
-         .build(),
-       MetaData.of(
-           "Timor-Leste", false, "TL380080012345678910157",
-           YearMonth.of(2014, 11)),
-       ContactData.of(
-           "Banco Central de Timor-Leste", null, "Avenida Bispo Medeiros",
-           "Dili", null, null)
+            .withIbanLength(23)
+            .withBbanPattern("3!n14!n2!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("14!n", IndexRange.of(7, 21))
+            .withNationalCheckDigit(IndexRange.of(21, 23))
+            .build(),
+        MetaData.nonSepa("TL380080012345678910157", YearMonth.of(2014, 11)),
+        ContactData.of(
+            "Banco Central de Timor-Leste", null, "Avenida Bispo Medeiros",
+            "Dili", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2523,19 +2209,18 @@ public enum IbanRegistry {
      * </pre>
      */
     TN(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("2!n3!n13!n2!n")
-         .withBankCode("2!n", IndexRange.of(4, 6))
-         .withBranchCode("3!n", IndexRange.of(6, 9))
-         .withAccountNumber(IndexRange.of(9, 22))
-         .withNationalCheckDigit(IndexRange.of(22, 24)) // TN
-         .build(),
-       MetaData.of(
-           "Tunisia", false, "TN5910006035183598478831",
-           YearMonth.of(2016, 5)),
-       ContactData.of(
-           "Tunisia's Professional Association for Banks & Financial Institutions", null, null,
-           null, "info@apbt.org.tn", "+ 216 71904423")
+            .withIbanLength(24)
+            .withBbanPattern("2!n3!n13!n2!n")
+            .withBankCode("2!n", IndexRange.of(4, 6))
+            .withBranchCode("3!n", IndexRange.of(6, 9))
+            .withAccountNumber("13!n", IndexRange.of(9, 22))
+            .withNationalCheckDigit(IndexRange.of(22, 24))
+            .build(),
+        MetaData.nonSepa("TN5910006035183598478831", YearMonth.of(2016, 5)),
+        ContactData.of(
+            "Tunisia's Professional Association for Banks & Financial Institutions", null, null,
+            null, "info@apbt.org.tn", "+ 216 71904423"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2550,18 +2235,17 @@ public enum IbanRegistry {
      * </pre>
      */
     TR(StructureData.builder()
-         .withIbanLength(26)
-         .withBbanPattern("5!n1!n16!c")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withNationalCheckDigit(IndexRange.of(9, 10)) // TR
-         .withAccountNumber(IndexRange.of(10, 26))
-         .build(),
-       MetaData.of(
-           "Turkey", false, "TR330006100519786457841326",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Central Bank of the Republic of Turkey", "Payment Systems", "Anafartalar Mahallesi İstiklal Cad. No:10 Ulus Altındağ",
-           "Ankara / 06050", "paymentsystems@tcmb.gov.tr", "+ 90 3125077901 / 02")
+            .withIbanLength(26)
+            .withBbanPattern("5!n1!n16!c")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withNationalCheckDigit(IndexRange.of(9, 10))
+            .withAccountNumber("16!c", IndexRange.of(10, 26))
+            .build(),
+        MetaData.nonSepa("TR330006100519786457841326", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Central Bank of the Republic of Turkey", "Payment Systems", "Anafartalar Mahallesi İstiklal Cad. No:10 Ulus Altındağ",
+            "Ankara / 06050", "paymentsystems@tcmb.gov.tr", "+ 90 3125077901 / 02"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2576,17 +2260,16 @@ public enum IbanRegistry {
      * </pre>
      */
     UA(StructureData.builder()
-         .withIbanLength(29)
-         .withBbanPattern("6!n19!c")
-         .withBankCode("6!n", IndexRange.of(4, 10))
-         .withAccountNumber(IndexRange.of(10, 29))
-         .build(),
-       MetaData.of(
-           "Ukraine", false, "UA213223130000026007233566001",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Association UkrSWIFT", "Executive Board", "21A, Observatoma Str.",
-           "04053 Kiev", "ukrswift@ukrswift.org", null)
+            .withIbanLength(29)
+            .withBbanPattern("6!n19!c")
+            .withBankCode("6!n", IndexRange.of(4, 10))
+            .withAccountNumber("19!n", IndexRange.of(10, 29))
+            .build(),
+        MetaData.nonSepa("UA213223130000026007233566001", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Association UkrSWIFT", "Executive Board", "21A, Observatoma Str.",
+            "04053 Kiev", "ukrswift@ukrswift.org", null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2601,17 +2284,16 @@ public enum IbanRegistry {
      * </pre>
      */
     VA(StructureData.builder()
-         .withIbanLength(22)
-         .withBbanPattern("3!n15!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withAccountNumber(IndexRange.of(7, 22))
-         .build(),
-       MetaData.of(
-           "Vatican City State", true, "VA59001123000012345678",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "Financial Information Authority (Autorita di Informazione Finanziaria - AIF)", "Office for Supervision and Regulation", "Palazzo San Carlo",
-           " 00120", "uvr@aif.va", "+39 06 69871522")
+            .withIbanLength(22)
+            .withBbanPattern("3!n15!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("15!n", IndexRange.of(7, 22))
+            .build(),
+        MetaData.sepa("VA59001123000012345678", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "Financial Information Authority (Autorita di Informazione Finanziaria - AIF)", "Office for Supervision and Regulation", "Palazzo San Carlo",
+            "00120", "uvr@aif.va", "+39 06 69871522"),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2626,17 +2308,16 @@ public enum IbanRegistry {
      * </pre>
      */
     VG(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("4!a16!n")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withAccountNumber(IndexRange.of(8, 24))
-         .build(),
-       MetaData.of(
-           "Virgin Islands", false, "VG96VPVG0000012345678901",
-           YearMonth.of(2025, 10)),
-       ContactData.of(
-           "VP Bank House", null, "156 Mainstreet",
-           "VG1110 Road Town Tortola", null, null)
+            .withIbanLength(24)
+            .withBbanPattern("4!a16!n")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .build(),
+        MetaData.nonSepa("VG96VPVG0000012345678901", YearMonth.of(2025, 10)),
+        ContactData.of(
+            "VP Bank House", null, "156 Mainstreet",
+            "VG1110 Road Town Tortola", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2651,19 +2332,18 @@ public enum IbanRegistry {
      * </pre>
      */
     XK(StructureData.builder()
-         .withIbanLength(20)
-         .withBbanPattern("4!n10!n2!n")
-         .withBankCode("2!n", IndexRange.of(4, 6))
-         .withBranchCode("2!n", IndexRange.of(6, 8))
-         .withAccountNumber(IndexRange.of(8, 18))
-         .withNationalCheckDigit(IndexRange.of(18, 20)) // XK
-         .build(),
-       MetaData.of(
-           "Kosovo", false, "XK051212012345678906",
-           YearMonth.of(2016, 9)),
-       ContactData.of(
-           "Central Bank of the Republic of Kosovo", "Payment Systems", "Garibaldi 33",
-           "Prishtina / 10000", "payment.systems@bqk-kos.org", "+ 381 (0)38222055 (ext. 209, 210 and 211)")
+            .withIbanLength(20)
+            .withBbanPattern("4!n10!n2!n")
+            .withBankCode("2!n", IndexRange.of(4, 6))
+            .withBranchCode("2!n", IndexRange.of(6, 8))
+            .withAccountNumber("10!n", IndexRange.of(8, 18))
+            .withNationalCheckDigit(IndexRange.of(18, 20))
+            .build(),
+        MetaData.nonSepa("XK051212012345678906", YearMonth.of(2016, 9)),
+        ContactData.of(
+            "Central Bank of the Republic of Kosovo", "Payment Systems", "Garibaldi 33",
+            "Prishtina / 10000", "payment.systems@bqk-kos.org", "+ 381 (0)38222055 (ext. 209, 210 and 211)"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2678,66 +2358,95 @@ public enum IbanRegistry {
      * </pre>
      */
     YE(StructureData.builder()
-         .withIbanLength(30)
-         .withBbanPattern("4!a4!n18!c")
-         .withBankCode("4!a", IndexRange.of(4, 8))
-         .withBranchCode("4!n", IndexRange.of(8, 12))
-         .withAccountNumber(IndexRange.of(12, 30))
-         .build(),
-       MetaData.of(
-           "Yemen", false, "YE15CBYE0001018861234567891234",
-           YearMonth.of(2024, 7)),
-       ContactData.of(
-           "Central Bank of Yemen", "Payment Systems Depatment", "Crater Aledaroos Street 452",
-           "Aden", null, null)
+            .withIbanLength(30)
+            .withBbanPattern("4!a4!n18!c")
+            .withBankCode("4!a", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("18!c", IndexRange.of(12, 30))
+            .build(),
+        MetaData.nonSepa("YE15CBYE0001018861234567891234", YearMonth.of(2024, 7)),
+        ContactData.of(
+            "Central Bank of Yemen", "Payment Systems Depatment", "Crater Aledaroos Street 452",
+            "Aden", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
-
-    // --- END: Enum Constants (generated from IBAN Registry) ---
+    // --- END: Enum Constants (generated from Swift IBAN Registry) ---
 
     // --- BGN: Enum Constants (manually maintained) ---
+    /**
+     * <strong>Angola ({@code AO})</strong><p>
+     * IBAN Length: 25<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code AO06000600000100037131174}
+     *   formatted:   {@code AO06 0006 0000 0100 0371 3117 4}
+     *   components:  {@code AO 06 0006 0000 01000371311 74}
+     * </pre>
+     */
+    AO(StructureData.builder()
+            .withIbanLength(25)
+            .withBbanPattern("4!n4!n11!n2!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("11!n", IndexRange.of(12, 23))
+            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .build(),
+        MetaData.nonSepa("AO06000600000100037131174", null),
+        ContactData.of(
+            "Banco Nacional de Angola (BNA)", null, "Av. 4 de Fevereiro, n.º 151",
+            "Luanda", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
 
     /**
      * <strong>Burkina Faso ({@code BF})</strong><p>
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!c5!n11!n2!n}<br>
-     * Example: {@code BF21BF084010130046357400039}
+     * Examples:<pre>
+     *   unformatted: {@code BF21BF084010130046357400039}
+     *   formatted:   {@code BF21 BF08 4010 1300 4635 7400 039}
+     *   components:  {@code BF 21 BF084 01013 00463574000 39}
+     * </pre>
      */
     BF(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!c5!n11!n2!n")
-         .withBankCode("5!c", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
-         .build(),
-       MetaData.of(
-           "Burkina Faso", false, "BF21BF084010130046357400039", null),
-       ContactData.of(
-           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
-           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
+            .withIbanLength(27)
+            .withBbanPattern("5!c5!n11!n2!n")
+            .withBankCode("5!c", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.nonSepa("BF21BF084010130046357400039", null),
+        ContactData.of(
+            "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
+            "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
      * <strong>Benin ({@code BJ})</strong><p>
      * IBAN Length: 28<br>
      * SEPA: No<br>
-     * BBAN Structure: {@code 5!a5!n12!n2!n}<br>
-     * Example: {@code BJ66BJ0610100100144390000769}
+     * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code BJ66BJ0610100100144390000769}
+     *   formatted:   {@code BJ66 BJ06 1010 0100 1443 9000 0769}
+     *   components:  {@code BJ 66 BJ061 01001 001443900007 69}
+     * </pre>
      */
     BJ(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("5!c5!n12!n2!n")
-         .withBankCode("5!c", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 26))
-         .withNationalCheckDigit(IndexRange.of(26, 28))
-         .build(),
-       MetaData.of(
-           "Benin", false, "BJ66BJ0610100100144390000769", null),
-       ContactData.of(
-           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
-           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
+            .withIbanLength(28)
+            .withBbanPattern("5!c5!n12!n2!n")
+            .withBankCode("5!c", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("12!n", IndexRange.of(14, 26))
+            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .build(),
+        MetaData.nonSepa("BJ66BJ0610100100144390000769", null),
+        BF.contactData,
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2745,21 +2454,25 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
-     * Example: {@code CF4220001000010120069700160}
+     * Examples:<pre>
+     *   unformatted: {@code CF4220001000010120069700160}
+     *   formatted:   {@code CF42 2000 1000 0101 2006 9700 160}
+     *   components:  {@code CF 42 20001 00001 01200697001 60}
+     * </pre>
      */
     CF(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
-         .build(),
-       MetaData.of(
-           "Central African Republic", false, "CF4220001000010120069700160", null),
-       ContactData.of(
-           "BEAC", null, "B.P. 851 Bangui - RCA",
-           "Bangui", "beacbgf@beac.int", "+236 21 61 24 00")
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.nonSepa("CF4220001000010120069700160", null),
+        ContactData.of(
+            "BEAC", null, "B.P. 851 Bangui - RCA",
+            "Bangui", "beacbgf@beac.int", "+236 21 61 24 00"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2767,21 +2480,50 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
-     * Example: {@code CM2110003024000224016952238}
+     * Examples:<pre>
+     *   unformatted: {@code CM2110003024000224016952238}
+     *   formatted:   {@code CM21 1000 3024 0002 2401 6952 238}
+     *   components:  {@code CM 21 10003 02400 02240169522 38}
+     * </pre>
      */
     CM(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
-         .build(),
-       MetaData.of(
-           "Cameroon", false, "CM2110003024000224016952238", null),
-       ContactData.of(
-           "BEAC", null, "B.P. 1917 Yaoundé - Cameroun",
-           "Yaoundé", "beac@beac.int", "+237 222 23 40 30")
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.nonSepa("CM2110003024000224016952238", null),
+        ContactData.of(
+            "BEAC", null, "B.P. 1917 Yaoundé - Cameroun",
+            "Yaoundé", "beac@beac.int", "+237 222 23 40 30"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
+     * <strong>Cabo Verde ({@code CV})</strong><p>
+     * IBAN Length: 25<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 4!n4!n13!c}<br>
+     * Examples:<pre>
+     *   unformatted: {@code CV05123412341234123412341}
+     *   formatted:   {@code CV05 1234 1234 1234 1234 1234 1}
+     *   components:  {@code CV 05 1234 1234 1234123412341}
+     * </pre>
+     */
+    CV(StructureData.builder()
+            .withIbanLength(25)
+            .withBbanPattern("4!n4!n13!c")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("13!c", IndexRange.of(12, 25))
+            .build(),
+        MetaData.nonSepa("CV05123412341234123412341", null),
+        ContactData.of(
+            "Banco de Cabo Verde (BCV)", null, "Avenida Amílcar Cabral, C.P. 101",
+            "Praia", "bcv@bcv.cv", "+238 260 7000"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2789,21 +2531,49 @@ public enum IbanRegistry {
      * IBAN Length: 24<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 3!n5!n10!n2!n}<br>
-     * Example: {@code DZ1700021000011130000005}
+     * Examples:<pre>
+     *   unformatted: {@code DZ1700021000011130000005}
+     *   formatted:   {@code DZ17 0002 1000 0111 3000 0005}
+     *   components:  {@code DZ 17 000 21000 011130000005}
+     * </pre>
      */
     DZ(StructureData.builder()
-         .withIbanLength(24)
-         .withBbanPattern("3!n5!n10!n2!n")
-         .withBankCode("3!n", IndexRange.of(4, 7))
-         .withBranchCode("5!n", IndexRange.of(7, 12))
-         .withAccountNumber(IndexRange.of(12, 22))
-         .withNationalCheckDigit(IndexRange.of(22, 24))
-         .build(),
-       MetaData.of(
-           "Algeria", false, "DZ1700021000011130000005", null),
-       ContactData.of(
-           "Bank of Algeria", null, "38, Avenue Franklin Roosevelt, Sidi M'Hamed",
-           "Algiers", "communication@bank-of-algeria.dz", "+213 23 487 131")
+            .withIbanLength(24)
+            .withBbanPattern("3!n5!n10!n2!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("5!n", IndexRange.of(7, 12))
+            .withAccountNumber("10!n", IndexRange.of(12, 22))
+            .build(),
+        MetaData.nonSepa("DZ1700021000011130000005", null),
+        ContactData.of(
+            "Bank of Algeria", null, "38, Avenue Franklin Roosevelt, Sidi M'Hamed",
+            "Algiers", "communication@bank-of-algeria.dz", "+213 23 487 131"),
+        IbanBuilder.DzIbanBuilder::new
+    ),
+
+    /**
+     * <strong>Gabon ({@code GA})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n13!c}<br>
+     * Examples:<pre>
+     *   unformatted: {@code GA2140021010032001890020126}
+     *   formatted:   {@code GA21 4002 1010 0320 0189 0020 126}
+     *   components:  {@code GA 21 40021 01003 2001890020126}
+     * </pre>
+     */
+    GA(StructureData.builder()
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n13!c")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("13!c", IndexRange.of(14, 27))
+            .build(),
+        MetaData.nonSepa("GA2140021010032001890020126", null),
+        ContactData.of(
+            "BEAC", null, "B.P. 112",
+            "Libreville", null, null),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2811,21 +2581,49 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
-     * Example: {@code GQ7050002001003715228190196}
+     * Examples:<pre>
+     *   unformatted: {@code GQ7050002001003715228190196}
+     *   formatted:   {@code GQ70 5000 2001 0037 1522 8190 196}
+     *   components:  {@code GQ 70 50002 00100 37152281901 96}
+     * </pre>
      */
     GQ(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
-         .build(),
-       MetaData.of(
-           "Equatorial Guinea", false, "GQ7050002001003715228190196", null),
-       ContactData.of(
-           "BEAC", null, "B.P. 501 Malabo",
-           "Malabo", "beacmal@beac.int", "+240 333 09 59 30")
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.nonSepa("GQ7050002001003715228190196", null),
+        ContactData.of(
+            "BEAC", null, "B.P. 501 Malabo",
+            "Malabo", "beacmal@beac.int", "+240 333 09 59 30"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
+     * <strong>Iran (Islamic Republic of) ({@code IR})</strong><p>
+     * IBAN Length: 26<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 3!n19!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code IR062960000000100324200001}
+     *   formatted:   {@code IR06 2960 0000 0010 0324 2000 01}
+     *   components:  {@code IR 06 296 0000000100324200001}
+     * </pre>
+     */
+    IR(StructureData.builder()
+            .withIbanLength(26)
+            .withBbanPattern("3!n19!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withAccountNumber("19!n", IndexRange.of(7, 26))
+            .build(),
+        MetaData.nonSepa("IR062960000000100324200001", null),
+        ContactData.of(
+            "Central Bank of the Islamic Republic of Iran (Bank Markazi)", null, "No. 198, Mirdamad Boulevard",
+            "Tehran", null, null),
+        IbanBuilder.StandardIbanBuilder::new
     ),
 
     /**
@@ -2833,21 +2631,76 @@ public enum IbanRegistry {
      * IBAN Length: 27<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
-     * Example: {@code KM4600005000010010904400137}
+     * Examples:<pre>
+     *   unformatted: {@code KM4600005000010010904400137}
+     *   formatted:   {@code KM46 0000 5000 0100 1090 4400 137}
+     *   components:  {@code KM 46 00005 00001 00109044001 37}
+     * </pre>
      */
     KM(StructureData.builder()
-         .withIbanLength(27)
-         .withBbanPattern("5!n5!n11!n2!n")
-         .withBankCode("5!n", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 25))
-         .withNationalCheckDigit(IndexRange.of(25, 27))
-         .build(),
-       MetaData.of(
-           "Comoros", false, "KM4600005000010010904400137", null),
-       ContactData.of(
-           "Banque Centrale des Comores", null, "Place de France",
-           "405 Moroni", "secretariat@banque-comores.km", "+269 773-18-14")
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.nonSepa("KM4600005000010010904400137", null),
+        ContactData.of(
+            "Banque Centrale des Comores", null, "Place de France",
+            "405 Moroni", "secretariat@banque-comores.km", "+269 773-18-14"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
+     * <strong>Morocco ({@code MA})</strong><p>
+     * IBAN Length: 28<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 3!n5!n16!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code MA64360815000001793222001617}
+     *   formatted:   {@code MA64 3608 1500 0001 7932 2200 1617}
+     *   components:  {@code MA 64 360 81500 0001793222001617}
+     * </pre>
+     */
+    MA(StructureData.builder()
+            .withIbanLength(28)
+            .withBbanPattern("3!n5!n16!n")
+            .withBankCode("3!n", IndexRange.of(4, 7))
+            .withBranchCode("5!n", IndexRange.of(7, 12))
+            .withAccountNumber("16!n", IndexRange.of(12, 28))
+            .build(),
+        MetaData.nonSepa("MA64360815000001793222001617", null),
+        ContactData.of(
+            "Bank Al-Maghrib", null, "277, Avenue Mohammed V, B.P. 445",
+            "Rabat", "accueil@bkam.ma", "080 200 11 11"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
+     * <strong>Mozambique ({@code MZ})</strong><p>
+     * IBAN Length: 25<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 4!n4!n11!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code MZ59000800005138555713187}
+     *   formatted:   {@code MZ59 0008 0000 5138 5557 1318 7}
+     *   components:  {@code MZ 59 0008 0000 51385557131 87}
+     * </pre>
+     */
+    MZ(StructureData.builder()
+            .withIbanLength(25)
+            .withBbanPattern("4!n4!n11!n2!n")
+            .withBankCode("4!n", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("11!n", IndexRange.of(12, 23))
+            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .build(),
+        MetaData.nonSepa("MZ59000800005138555713187", null),
+        ContactData.of(
+            "Banco de Moçambique", null, "Av. 25 de Setembro, n.º 1695, C.P. 423",
+            "Maputo", "gci_mail@bancomoc.mz", "+258 21 354 600"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2855,22 +2708,23 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
-     * Example: {@code SN08SN1910100101260047607163}
+     * Examples:<pre>
+     *   unformatted: {@code SN08SN1910100101260047607163}
+     *   formatted:   {@code SN08 SN19 1010 0101 2600 4760 7163}
+     *   components:  {@code SN 08 SN191 01001 012600476071 63}
+     * </pre>
      */
     SN(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("5!c5!n12!n2!n")
-         .withBankCode("5!c", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 26))
-         .withNationalCheckDigit(IndexRange.of(26, 28))
-         .build(),
-       MetaData.of(
-           "Senegal", false, "SN08SN1910100101260047607163",
-           YearMonth.of(2015, 5)),
-       ContactData.of(
-           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
-           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
+            .withIbanLength(28)
+            .withBbanPattern("5!c5!n12!n2!n")
+            .withBankCode("5!c", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("12!n", IndexRange.of(14, 26))
+            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .build(),
+        MetaData.nonSepa("SN08SN1910100101260047607163", YearMonth.of(2015, 5)),
+        BF.contactData,
+        IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2878,26 +2732,28 @@ public enum IbanRegistry {
      * IBAN Length: 28<br>
      * SEPA: No<br>
      * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
-     * Example: {@code TG87TG0090100110232500400512}
+     * Examples:<pre>
+     *   unformatted: {@code TG87TG0090100110232500400512}
+     *   formatted:   {@code TG87 TG00 9010 0110 2325 0040 0512}
+     *   components:  {@code TG 87 TG009 01001 102325004005 12}
+     * </pre>
      */
     TG(StructureData.builder()
-         .withIbanLength(28)
-         .withBbanPattern("5!c5!n12!n2!n")
-         .withBankCode("5!c", IndexRange.of(4, 9))
-         .withBranchCode("5!n", IndexRange.of(9, 14))
-         .withAccountNumber(IndexRange.of(14, 26))
-         .withNationalCheckDigit(IndexRange.of(26, 28))
-         .build(),
-       MetaData.of(
-           "Togo", false, "TG87TG0090100110232500400512", null),
-       ContactData.of(
-           "Central Bank of West African States (BCEAO)", null, "Avenue Abdoulaye Fadiga",
-           "BP 3108 Dakar", "courrier.bceao@bceao.int", "+221 33 839 05 00")
+            .withIbanLength(28)
+            .withBbanPattern("5!c5!n12!n2!n")
+            .withBankCode("5!c", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("12!n", IndexRange.of(14, 26))
+            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .build(),
+        MetaData.nonSepa("TG87TG0090100110232500400512", null),
+        BF.contactData,
+        IbanBuilder.TgIbanBuilder::new
     );
-
     // --- END: Enum Constants (manually maintained) ---
 
     private final StructureData         structureData;
+
     private final MetaData              metaData;
     private final ContactData           contactData;
 
@@ -2905,12 +2761,17 @@ public enum IbanRegistry {
 
     private final IbanRegistry          baseCountry;
 
+    private final Function<IbanRegistry, IbanBuilder<?>> builderFactory;
+
     /**
-     * Cached array of all {@link IbanRegistry} entries, sorted alphabetically by their ISO country code.
+     * Cached read-only list of all {@link IbanRegistry} entries, sorted alphabetically by their ISO country code.
      */
-    static final IbanRegistry[]         ALL_COUNTRIES        = Arrays.stream(values())
+    static final List<IbanRegistry>     ALL_COUNTRIES        = Arrays.stream(values())
         .sorted(comparing(IbanRegistry::getCountryCode))
-        .toArray(IbanRegistry[]::new);
+        .collect(collectingAndThen(
+            toList(),
+            Collections::unmodifiableList
+        ));
 
     /** The minimum required length: Country Code (2) + Check Digits (2). */
     static final int                    MIN_IBAN_BASE_LENGTH = 4;
@@ -2922,7 +2783,7 @@ public enum IbanRegistry {
     public static final int             MAX_IBAN_LENGTH;
 
     static {
-        IntSummaryStatistics stats = Arrays.stream(ALL_COUNTRIES)
+        IntSummaryStatistics stats = ALL_COUNTRIES.stream()
             .mapToInt(IbanRegistry::getIbanLength)
             .summaryStatistics();
 
@@ -2962,61 +2823,102 @@ public enum IbanRegistry {
     /**
      * Main constructor for {@code IbanRegistry} enum constants.
      * <p>
-     * Initializes the country's IBAN structure, format details, and regulatory contact information.
+     * Initializes the country's IBAN structure, format details, regulatory contact information,
+     * and the builder factory function.
      *
-     * @param structureData the IBAN structure details object
-     * @param metaData      the metadata object
-     * @param contactData   the contact details object
-     * @param baseCountry   the base country entry
+     * @param structureData  the IBAN structure details object
+     * @param metaData       the metadata object
+     * @param contactData    the contact details object
+     * @param baseCountry    the base country entry
+     * @param builderFactory the factory function to instantiate the specific builder
      */
     IbanRegistry(
         StructureData structureData,
         MetaData metaData,
         ContactData contactData,
-        IbanRegistry baseCountry
-        ) {
+        IbanRegistry baseCountry,
+        Function<IbanRegistry, IbanBuilder<?>> builderFactory) {
 
         this.structureData = requireNonNull(structureData, "structureData required");
         this.metaData = requireNonNull(metaData, "metaData required");
         this.contactData = Optional.ofNullable(contactData).orElse(ContactData.EMPTY);
-        this.baseCountry = baseCountry;
-
+        this.baseCountry = baseCountry == null ? this : baseCountry;
+        this.builderFactory = requireNonNull(builderFactory, "builderFactory required");
         String ibanPatternNoCountry = "2!n" + structureData.bbanPatternStr;
-        this.ibanRegex = Pattern.compile('^' + name() + IbanPatternConverter.convertToRegex(ibanPatternNoCountry) + '$');
+        this.ibanRegex = PatternCache.getDefault().getPattern('^' + getCountryCode() + IbanPatternConverter.convertToRegex(ibanPatternNoCountry) + '$');
     }
 
     /**
      * Constructor for {@code IbanRegistry} enum constants.
+     * <p>
+     * Initializes the country's IBAN structure, format details, regulatory contact information,
+     * and the builder factory function.
      *
-     * @param structureData the IBAN structure details object
-     * @param metaData      the metadata object
-     * @param contactData   the contact details object
+     * @param structureData  the IBAN structure details object
+     * @param metaData       the metadata object
+     * @param contactData    the contact details object
+     * @param builderFactory the factory function to instantiate the specific builder
      */
-    IbanRegistry(StructureData structureData, MetaData metaData, ContactData contactData) {
-        this(structureData, metaData, contactData, null);
+    IbanRegistry(
+        StructureData structureData,
+        MetaData metaData,
+        ContactData contactData,
+        Function<IbanRegistry, IbanBuilder<?>> builderFactory) {
+        this(structureData, metaData, contactData, null, builderFactory);
     }
 
     /**
      * Secondary constructor for country codes that share their registry data with a base country.
      * <p>
-     * Copies all structural and contact data from the specified base country entry.
-     *
-     * @param countryName the full English name of the country
+     * Copies all structural and contact data, including the builder factory, from the base country.
      * @param baseCountry the {@code IbanRegistry} enum constant whose data is to be used
      */
-    IbanRegistry(String countryName, IbanRegistry baseCountry) {
+    IbanRegistry(IbanRegistry baseCountry) {
         // delegate to the main constructor using the objects from the base country entry
         this(
             baseCountry.structureData,
             MetaData.of(
-                countryName,
                 baseCountry.isSepa(),
                 baseCountry.getIbanExample(),
                 baseCountry.getLastUpdate()
             ),
             baseCountry.contactData,
-            baseCountry
+            baseCountry,
+            baseCountry.builderFactory
         );
+    }
+
+    /**
+     * Creates a new fluent builder tailored to this country's IBAN structure.
+     * <p>
+     * The generic return type allows assigning the result directly to specialized builder
+     * subclasses without explicit casting on the caller side.
+     *
+     * @param <T> the expected specific builder type
+     * @return a new IBAN builder instance
+     * @throws ClassCastException if the returned builder is assigned to an incompatible type
+     */
+    @SuppressWarnings({"unchecked", "TypeParameterUnusedInFormals"})
+    public <T extends IbanBuilder<T>> T builder() {
+        return (T) builderFactory.apply(this);
+    }
+
+    MetaData getMetaData() {
+        return metaData;
+    }
+
+    ContactData getContactData() {
+        return contactData;
+    }
+
+    /**
+     * Returns the factory for the fluent builder.
+     * @return builder factory
+     *
+     * @since 1.8.9
+     */
+    Function<IbanRegistry, IbanBuilder<?>> getBuilderFactory() {
+        return builderFactory;
     }
 
     /**
@@ -3034,7 +2936,7 @@ public enum IbanRegistry {
      * @return the country name
      */
     public String getCountryName() {
-        return metaData.countryName;
+        return Country.fromCode(getCountryCode()).getCountryName();
     }
 
     /**
@@ -3043,7 +2945,7 @@ public enum IbanRegistry {
      * @return the country flag emoji string
      */
     public String getCountryFlag() {
-        return Country.createFlagEmoji(name());
+        return Country.createFlagEmoji(getCountryCode());
     }
 
     /**
@@ -3138,7 +3040,7 @@ public enum IbanRegistry {
      *
      * @return the BBAN pattern string
      */
-    public String getBbanPatternStr() {
+    public String getBbanPattern() {
         return structureData.bbanPatternStr;
     }
 
@@ -3156,7 +3058,7 @@ public enum IbanRegistry {
      *
      * @return the bank code pattern string
      */
-    public String getBankCodePatternStr() {
+    public String getBankCodePattern() {
         return structureData.bankCodePatternStr;
     }
 
@@ -3167,6 +3069,10 @@ public enum IbanRegistry {
      */
     IndexRange getBankCodeIndexRange() {
         return structureData.bankCodeIndexRange;
+    }
+
+    public int getBankCodeLength() {
+        return getBankCodeIndexRange().length();
     }
 
     /**
@@ -3187,13 +3093,35 @@ public enum IbanRegistry {
         return structureData.branchCodeIndexRange;
     }
 
+    public int getBranchCodeLength() {
+        return getBranchCodeIndexRange() == null ? 0 : getBranchCodeIndexRange().length();
+    }
+
     /**
      * Returns whether the country's BBAN structure defines a separate Branch Code part.
      *
      * @return {@code true} if a branch code exists, {@code false} otherwise
      */
     public boolean hasBranchCode() {
-        return structureData.branchCodeIndexRange != null;
+        return getBranchCodeIndexRange() != null;
+    }
+
+    /**
+     * Returns the character pattern string for the account number.
+     *
+     * @return the branch code pattern string
+     */
+    public String getAccountNumberPattern() {
+        return structureData.accountNumberPatternStr;
+    }
+
+    /**
+     * Returns the index range defining the position of the Account Number within the IBAN.
+     *
+     * @return the {@code IndexRange} for the account number
+     */
+    IndexRange getAccountNumberIndexRange() {
+        return structureData.accountNumberIndexRange;
     }
 
     /**
@@ -3205,15 +3133,6 @@ public enum IbanRegistry {
      */
     public int getAccountNumberLength() {
         return structureData.accountNumberIndexRange.length();
-    }
-
-    /**
-     * Returns the index range defining the position of the Account Number within the IBAN.
-     *
-     * @return the {@code IndexRange} for the account number
-     */
-    IndexRange getAccountNumberIndexRange() {
-        return structureData.accountNumberIndexRange;
     }
 
     /**
@@ -3332,10 +3251,11 @@ public enum IbanRegistry {
     }
 
     /**
-     * Returns the base country {@code IbanRegistry} entry if this entry is a derived code
-     * that inherits data from another country (e.g., {@code AX} points to {@code FI}).
+     * Returns the base country {@code IbanRegistry} entry if this country entry
+     * is a derived from another country (e.g., {@code AX} points to {@code FI})
+     * or {@code this} if this is a base country.
      *
-     * @return the base country {@code IbanRegistry} entry, or {@code null} if this is a base country
+     * @return the base country {@code IbanRegistry} entry, or {@code this} if this is a base country
      */
     public IbanRegistry getBaseCountry() {
         return baseCountry;
@@ -3349,8 +3269,9 @@ public enum IbanRegistry {
      */
     List<IbanRegistry> getDerivedCountries() {
         return isBaseCountry()
-            ? Arrays.stream(ALL_COUNTRIES)
+            ? ALL_COUNTRIES.stream()
                 .filter(cd -> this == cd.getBaseCountry())
+                .filter(IbanRegistry::isDerivedCountry)
                 .collect(collectingAndThen(
                     toList(),
                     Collections::unmodifiableList
@@ -3359,23 +3280,23 @@ public enum IbanRegistry {
     }
 
     /**
-     * Returns {@code true} if this entry is a base country, i.e. it does not inherit data
+     * Returns {@code true} if this entry is a base country, i.e. its data is not derived
      * from another country (e.g., {@code FI}).
      *
      * @return {@code true} if this is a base country
      */
     public boolean isBaseCountry() {
-        return baseCountry == null;
+        return baseCountry == this;
     }
 
     /**
-     * Returns {@code true} if this entry is a derived code that inherits its IBAN
-     * structure from another country (e.g., {@code AX} inherits from {@code FI}).
+     * Returns {@code true} if this country entry is a derived
+     * from another country (e.g., {@code AX} inherits from {@code FI}).
      *
      * @return {@code true} if this is a derived country
      */
     public boolean isDerivedCountry() {
-        return baseCountry != null;
+        return baseCountry != this;
     }
 
     /**
@@ -3389,7 +3310,7 @@ public enum IbanRegistry {
             .add(getCountryCode() + " (" + getCountryName() + ")")
             .add("SEPA country: " + (isSepa() ? "Yes" : "No"))
             .add("IBAN len: " + getIbanLength())
-            .add("BBAN pattern: " + getBbanPatternStr())
+            .add("BBAN pattern: " + getBbanPattern())
             .add("Bank Code: " + getBankCodeIndexRange());
         if (getBranchCodeIndexRange() != null) {
             joiner.add("Branch Code: " + getBranchCodeIndexRange());
@@ -3492,7 +3413,7 @@ public enum IbanRegistry {
      * @return an unmodifiable list of SEPA country registries
      */
     public static List<IbanRegistry> getSepaCountries() {
-        return Arrays.stream(ALL_COUNTRIES)
+        return ALL_COUNTRIES.stream()
             .filter(IbanRegistry::isSepa)
             .collect(collectingAndThen(
                 toList(),
@@ -3507,21 +3428,31 @@ public enum IbanRegistry {
     static final class StructureData {
         private final int        ibanLength;
         private final String     bbanPatternStr;
+
         private final String     bankCodePatternStr;
         private final IndexRange bankCodeIndexRange;
+
         private final String     branchCodePatternStr;
         private final IndexRange branchCodeIndexRange;
+
+        private final String     accountNumberPatternStr;
         private final IndexRange accountNumberIndexRange;
+
         private final IndexRange nationalCheckDigitIndexRange;
 
-        private StructureData(Builder builder) {
+        StructureData(Builder builder) {
             this.ibanLength = builder.ibanLength;
             this.bbanPatternStr = requireNonNull(builder.bbanPatternStr, "bbanPatternStr required");
+
             this.bankCodePatternStr = builder.bankCodePatternStr;
             this.bankCodeIndexRange = builder.bankCodeIndexRange;
+
             this.branchCodePatternStr = builder.branchCodePatternStr;
             this.branchCodeIndexRange = builder.branchCodeIndexRange;
+
+            this.accountNumberPatternStr = builder.accountNumberPatternStr;
             this.accountNumberIndexRange = requireNonNull(builder.accountNumberIndexRange, "accountNumberIndexRange required");
+
             this.nationalCheckDigitIndexRange = builder.nationalCheckDigitIndexRange;
         }
 
@@ -3532,13 +3463,16 @@ public enum IbanRegistry {
         static final class Builder {
             private int        ibanLength;
             private String     bbanPatternStr;
-            private IndexRange accountNumberIndexRange;
 
-            // optional fields
             private String     bankCodePatternStr;
             private IndexRange bankCodeIndexRange;
+
             private String     branchCodePatternStr;
             private IndexRange branchCodeIndexRange;
+
+            private String     accountNumberPatternStr;
+            private IndexRange accountNumberIndexRange;
+
             private IndexRange nationalCheckDigitIndexRange;
 
             private Builder() {
@@ -3554,16 +3488,6 @@ public enum IbanRegistry {
                 return this;
             }
 
-            Builder withAccountNumber(IndexRange accountNumberIndexRange) {
-                this.accountNumberIndexRange = accountNumberIndexRange;
-                return this;
-            }
-
-            Builder withNationalCheckDigit(IndexRange nationalCheckDigitIndexRange) {
-                this.nationalCheckDigitIndexRange = nationalCheckDigitIndexRange;
-                return this;
-            }
-
             Builder withBankCode(String bankCodePatternStr, IndexRange bankCodeIndexRange) {
                 this.bankCodePatternStr = bankCodePatternStr;
                 this.bankCodeIndexRange = bankCodeIndexRange;
@@ -3576,6 +3500,17 @@ public enum IbanRegistry {
                 return this;
             }
 
+            Builder withAccountNumber(String accountNumberPatternStr, IndexRange accountNumberIndexRange) {
+                this.accountNumberPatternStr = accountNumberPatternStr;
+                this.accountNumberIndexRange = accountNumberIndexRange;
+                return this;
+            }
+
+            Builder withNationalCheckDigit(IndexRange nationalCheckDigitIndexRange) {
+                this.nationalCheckDigitIndexRange = nationalCheckDigitIndexRange;
+                return this;
+            }
+
             StructureData build() {
                 if (ibanLength <= 0) {
                     throw new IllegalStateException("IBAN length must be set and positive");
@@ -3583,6 +3518,7 @@ public enum IbanRegistry {
                     throw new IllegalStateException("IBAN length must be between 15 and 34");
                 }
                 requireNonNull(bbanPatternStr, "BBAN pattern must be set");
+                requireNonNull(bankCodeIndexRange, "Bank code index range must be set");
                 requireNonNull(accountNumberIndexRange, "Account number index range must be set");
 
                 return new StructureData(this);
@@ -3617,18 +3553,6 @@ public enum IbanRegistry {
             this.cityPostcode = cityPostcode;
             this.departmentGenericEmail = departmentGenericEmail;
             this.departmentTel = departmentTel;
-        }
-
-        static ContactData of(
-            String organisation,
-            String department,
-            String streetAddress,
-            String cityPostcode,
-            String departmentGenericEmail,
-            String departmentTel) {
-            return new ContactData(
-                organisation, department, streetAddress,
-                cityPostcode, departmentGenericEmail, departmentTel);
         }
 
         String getOrganisation() {
@@ -3699,35 +3623,87 @@ public enum IbanRegistry {
                 + ", departmentTel=" + departmentTel
                 + ']';
         }
+
+        static ContactData of(
+            String organisation,
+            String department,
+            String streetAddress,
+            String cityPostcode,
+            String departmentGenericEmail,
+            String departmentTel) {
+            return new ContactData(
+                organisation, department, streetAddress,
+                cityPostcode, departmentGenericEmail, departmentTel);
+        }
+
+        static boolean isEmpty(ContactData contactata) {
+            return contactata == null || EMPTY.equals(contactata);
+        }
     }
 
     /**
      * The immutable class defining the country name, SEPA status, example, and last update date.
      */
     static final class MetaData {
-        private final String    countryName;
         private final boolean   isSepa;
         private final String    ibanExample;
         private final YearMonth lastUpdate;
 
         private MetaData(
-            String countryName,
             boolean isSepa,
             String ibanExample,
             YearMonth lastUpdate) {
-            this.countryName = requireNonNull(countryName, "countryName required");
             this.isSepa = isSepa;
             this.ibanExample = requireNonNull(ibanExample, "ibanExample required");
             this.lastUpdate = lastUpdate;
         }
 
-        public static MetaData of(
-            String countryName,
+        boolean isSepa() {
+            return isSepa;
+        }
+
+        String getIbanExample() {
+            return ibanExample;
+        }
+
+        YearMonth getLastUpdate() {
+            return lastUpdate;
+        }
+
+        static MetaData of(
             boolean isSepa,
             String ibanExample,
             YearMonth lastUpdate) {
             return new MetaData(
-                countryName, isSepa, ibanExample, lastUpdate);
+                isSepa, ibanExample, lastUpdate);
+        }
+
+        /**
+         * Creates metadata for a country participating in SEPA.
+         *
+         * @param ibanExample a valid example IBAN for this country
+         * @param lastUpdate  the date this entry was last updated
+         * @return a new {@code MetaData} instance with {@code isSepa} set to {@code true}
+         */
+        static MetaData sepa(
+            String ibanExample,
+            YearMonth lastUpdate) {
+            return new MetaData(
+                true, ibanExample, lastUpdate);
+        }
+
+        /**
+         * Creates metadata for a country not participating in SEPA.
+         *
+         * @param ibanExample a valid example IBAN for this country
+         * @param lastUpdate  the date this entry was last updated
+         * @return a new {@code MetaData} instance with {@code isSepa} set to {@code false}
+         */
+        static MetaData nonSepa(
+            String ibanExample,
+            YearMonth lastUpdate) {
+            return new MetaData(
+                false, ibanExample, lastUpdate);
         }
     }
 

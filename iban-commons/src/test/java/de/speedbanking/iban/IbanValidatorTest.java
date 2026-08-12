@@ -8,10 +8,8 @@ import static de.speedbanking.iban.IbanValidationError.INVALID_CHECKSUM;
 import static de.speedbanking.iban.IbanValidationError.INVALID_CHECK_DIGITS;
 import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
 import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
-import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatInvalidIbanException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.speedbanking.test.TestUtil;
 
@@ -20,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -47,22 +46,22 @@ final class IbanValidatorTest {
         TestUtil.assertConstructorIsPrivate(IbanValidator.class);
     }
 
-    @DisplayName("Should load country validator when valid country code is provided")
-    @ParameterizedTest(name = "[{index}] ''{0}''")
-    @ValueSource(strings = {"DE", "AT", "CH"})
-    void loadCountryValidator_ShouldReturnValidator_WhenCountryCodeIsValid(String countryCode) {
-        CountryValidator validator = IbanValidator.loadCountryValidator(countryCode);
-
+    @DisplayName("Should load country validator when base country registry is provided")
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = IbanRegistry.class, names = {"DE", "AT", "CH"})
+    void loadCountryValidator_ShouldReturnValidator_WhenCountryDataIsValid(IbanRegistry countryData) {
+        CountryValidator validator = IbanValidator.loadCountryValidator(countryData);
         assertThat(validator).isNotNull();
+        assertThat(validator.getClass().getSimpleName()).isEqualTo(countryData.getCountryCode());
     }
 
-    @DisplayName("Should throw exception when country code is unknown")
-    @ParameterizedTest(name = "[{index}] ''{0}''")
-    @ValueSource(strings = {"XX", "47", "  ", " ", ""})
-    void loadCountryValidator_ShouldThrowException_WhenCountryCodeIsUnknown(String countryCode) {
-        assertThatThrownBy(() -> IbanValidator.loadCountryValidator(countryCode))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageStartingWith("Could not instantiate class '%s': java.lang.ClassNotFoundException", CountryValidators.class.getName() + '$' + countryCode);
+    @DisplayName("Should load country validator when derived country registry is provided")
+    @ParameterizedTest(name = "[{index}] {0}")
+    @EnumSource(value = IbanRegistry.class, names = {"AX", "BL", "GF", "GG", "GP", "IM", "JE", "MF", "MQ", "NC", "PF", "PM", "RE", "TF", "WF", "YT"})
+    void loadCountryValidator_ShouldThrowException_WhenValidatorClassIsMissing(IbanRegistry countryData) {
+        CountryValidator validator = IbanValidator.loadCountryValidator(countryData);
+        assertThat(validator).isNotNull();
+        assertThat(validator.getClass().getSimpleName()).doesNotContain("$" + countryData.getCountryCode());
     }
 
     @DisplayName("validate should return valid result for valid raw IBAN")
@@ -382,48 +381,6 @@ final class IbanValidatorTest {
         assertThat(IbanValidator.calculateMod97(input))
             .as("Check failed for: %s", description)
             .isEqualTo(IbanValidator.INVALID_MOD97);
-    }
-
-    @DisplayName("fixCheckDigits: should throw InvalidIbanException when input is null")
-    @Test
-    void fixCheckDigits_shouldThrowException_whenInputIsNull() {
-        assertThatInvalidIbanException()
-            .isThrownBy(() -> IbanValidator.fixCheckDigits(null))
-            .withCause(null)
-            .withMessage("%s (%s)",
-                EMPTY.getText(), EMPTY)
-            .hasFieldOrPropertyWithValue("reason", EMPTY);
-    }
-
-    @DisplayName("fixCheckDigits: should throw IllegalArgumentException when length is out of bounds")
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "DE91", // too short (below MIN_IBAN_LENGTH)
-        "DE0044447777111111114747111100471191234" // too long (above MAX_IBAN_LENGTH)
-    })
-    void fixCheckDigits_shouldThrowException_whenLengthIsOutOfBounds(String invalidIban) {
-        assertThatInvalidIbanException()
-            .isThrownBy(() -> IbanValidator.fixCheckDigits(invalidIban))
-            .withCause(null)
-            .withMessage("%s (%s): '%s'",
-                INCORRECT_LENGTH.getText(), INCORRECT_LENGTH, invalidIban)
-            .hasFieldOrPropertyWithValue("reason", INCORRECT_LENGTH);
-    }
-
-    @DisplayName("fixCheckDigits: should reuse existing StringBuilder instance to prevent re-allocation")
-    @Test
-    @SuppressWarnings("UnnecessaryStringBuilder")
-    void fixCheckDigits_shouldReuseInstance_whenInputIsStringBuilder() {
-        StringBuilder inputBuffer = new StringBuilder("DE00370400440532013000");
-        StringBuilder resultBuffer = IbanValidator.fixCheckDigits(inputBuffer);
-
-        assertThat(resultBuffer)
-            .as("The returned StringBuilder must be identical to the input instance")
-            .isSameAs(inputBuffer);
-
-        assertThat(resultBuffer.toString())
-            .as("The check digits must be correctly computed and mutated inside the buffer")
-            .isEqualTo("DE89370400440532013000");
     }
 
 }

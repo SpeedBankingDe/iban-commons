@@ -1,14 +1,6 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanValidationError.EMPTY;
-import static de.speedbanking.iban.IbanValidationError.ILLEGAL_CHARACTERS;
-import static de.speedbanking.iban.IbanValidationError.INCORRECT_LENGTH;
-import static de.speedbanking.iban.IbanValidationError.INCORRECT_LENGTH_COUNTRY;
-import static de.speedbanking.iban.IbanValidationError.INVALID_CHECKSUM;
-import static de.speedbanking.iban.IbanValidationError.INVALID_CHECK_DIGITS;
-import static de.speedbanking.iban.IbanValidationError.INVALID_COUNTRY;
-import static de.speedbanking.iban.IbanValidationError.INVALID_STRUCTURE;
-import static de.speedbanking.iban.IbanValidationError.values;
+import static de.speedbanking.iban.IbanValidationError.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,14 +51,19 @@ final class IbanValidationErrorTest {
     @Test
     void values_shouldContainAllConstants_whenEnumIsInspected() {
         assertThat(values())
-            .containsExactly(EMPTY,
-                             INCORRECT_LENGTH,
-                             ILLEGAL_CHARACTERS,
-                             INVALID_COUNTRY,
-                             INCORRECT_LENGTH_COUNTRY,
-                             INVALID_CHECK_DIGITS,
-                             INVALID_STRUCTURE,
-                             INVALID_CHECKSUM);
+            .containsExactly(
+                EMPTY,
+                INCORRECT_LENGTH,
+                ILLEGAL_CHARACTERS,
+                INVALID_COUNTRY,
+                INCORRECT_LENGTH_COUNTRY,
+                INVALID_CHECK_DIGITS,
+                INVALID_STRUCTURE,
+                INVALID_BBAN,
+                INVALID_BANK_CODE,
+                INVALID_BRANCH_CODE,
+                INVALID_ACCOUNT_NUMBER,
+                INVALID_CHECKSUM);
     }
 
 }

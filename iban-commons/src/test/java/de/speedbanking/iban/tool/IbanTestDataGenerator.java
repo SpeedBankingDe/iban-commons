@@ -20,7 +20,7 @@ final class IbanTestDataGenerator {
      */
     private IbanTestDataGenerator() {
         throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", IbanTestDataGenerator.class.getSimpleName()));
+            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
     }
 
     /**

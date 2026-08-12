@@ -14,7 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 /**
@@ -71,7 +70,7 @@ final class CountryValidatorsTest {
     }
 
     static Stream<IbanRegistry> allNcdIbanRegistryEntries() {
-        return Arrays.stream(IbanRegistry.ALL_COUNTRIES)
+        return IbanRegistry.ALL_COUNTRIES.stream()
             .filter(IbanRegistry::hasNationalCheckDigit);
     }
 
@@ -115,7 +114,7 @@ final class CountryValidatorsTest {
 
             IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
 
-            IbanValidator.fixCheckDigits(badNcdIban);
+            IbanBuilder.fixCheckDigits(badNcdIban);
 
             IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
 

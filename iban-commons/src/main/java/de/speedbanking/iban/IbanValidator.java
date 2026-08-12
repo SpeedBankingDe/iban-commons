@@ -88,16 +88,19 @@ public final class IbanValidator {
     private static final int                 INPUT_INCORRECT_LENGTH   = -IbanValidationError.INCORRECT_LENGTH.ordinal();
 
     /**
-     * Internal cache of all country-specific validators, indexed by the ordinal
+     * Internal cache of country-specific validators, indexed by the ordinal
      * of the {@link IbanRegistry} enumeration.
      * <p>
-     * This field is thread-safe as the array and the contained {@link CountryValidator}
+     * For performance optimization, this array contains pre-instantiated validators
+     * for base countries only (where {@link IbanRegistry#isBaseCountry()} returns {@code true}).
+     * Array positions corresponding to non-base countries are initialized with {@code null}.
+     * <p>
+     * This field is thread-safe as the array and its contained {@link CountryValidator}
      * instances are effectively immutable.
      */
-    private static final CountryValidator[]  VALIDATORS =
+    private static final CountryValidator[] VALIDATORS =
         Arrays.stream(IbanRegistry.values())
-            .map(IbanRegistry::name)
-            .map(IbanValidator::loadCountryValidator)
+            .map(cd -> cd.isBaseCountry() ? loadCountryValidator(cd) : null)
             .toArray(CountryValidator[]::new);
 
     /**
@@ -126,32 +129,33 @@ public final class IbanValidator {
 
     /**
      * Dynamically loads and instantiates the country-specific IBAN validator
-     * using reflection based on the two-letter country code.
+     * using reflection based on the country code extracted from the given IBAN registry entry.
      * <p>
      * This method expects the validator implementation to be defined as a public
-     * nested static class within the {@code CountryValidator} interface,
-     * named after the country code (e.g., {@code CountryValidator.AD} for "AD").
+     * nested static class within the {@code CountryValidators} class,
+     * named after the country code (e.g., {@code CountryValidators.AD} for "AD").
      *
-     * @param countryCode the two-letter country code (e.g., "DE", "AD")
+     * @param countryData the IBAN registry entry containing the target country code
      * @return the instantiated {@link CountryValidator} for the given country; never {@code null}
      * @throws IllegalStateException if the validator class cannot be found or instantiated
      *
      * @see CountryValidator
      * @see CountryValidators
+     * @see IbanRegistry
      */
-    static CountryValidator loadCountryValidator(final String countryCode) {
-        String className = CountryValidators.class.getName() + '$' + countryCode;
+    static CountryValidator loadCountryValidator(IbanRegistry countryData) {
+        String className = CountryValidators.class.getName() + '$' + countryData.getBaseCountry().getCountryCode();
         try {
             Class<?> cls = Class.forName(className);
             return (CountryValidator) cls.getDeclaredConstructor().newInstance();
         } catch (ReflectiveOperationException ex) {
-            throw new IllegalStateException("Could not instantiate class '" + className + "': " + ex);
+            throw new IllegalStateException("Could not instantiate class '" + className + "':", ex);
         }
     }
 
     @SuppressWarnings("EnumOrdinal")
     static CountryValidator getCountryValidator(IbanRegistry countryData) {
-        return VALIDATORS[countryData.ordinal()];
+        return VALIDATORS[countryData.getBaseCountry().ordinal()];
     }
 
     /**
@@ -444,22 +448,22 @@ public final class IbanValidator {
         }
 
         if (normLen != countryData.getIbanLength()) {
-            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
+            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH_COUNTRY, countryData);
         }
 
         if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
          || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
-            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS, countryData);
         }
 
         // check BBAN structure (country-specific)
         if (!getCountryValidator(countryData).validateIban(normIban)) {
-            return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE, countryData);
         }
 
         // check Mod 97 (most expensive operation — performed last)
         if (!Mod97.isValid(normIban, normLen)) {
-            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECKSUM);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECKSUM, countryData);
         }
 
         /*
@@ -535,20 +539,20 @@ public final class IbanValidator {
         }
 
         if (normLen != countryData.getIbanLength()) {
-            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH_COUNTRY);
+            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH_COUNTRY, countryData);
         }
 
         if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
          || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
-            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS, countryData);
         }
 
         if (!getCountryValidator(countryData).validateIban(normIban)) {
-            return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE, countryData);
         }
 
         if (!Mod97.isValid(normIban, normLen)) {
-            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECKSUM);
+            return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECKSUM, countryData);
         }
 
         return IbanValidationResult.valid(
@@ -579,7 +583,6 @@ public final class IbanValidator {
      * @param iban the normalized IBAN {@link CharSequence} (uppercase, no spaces)
      * @return the remainder (0–96), or {@link #INVALID_MOD97} on invalid input
      */
-    @SuppressWarnings("PMD.UselessParentheses")
     public static int calculateMod97(final CharSequence iban) {
         if (iban == null) {
             return INVALID_MOD97;
@@ -593,49 +596,6 @@ public final class IbanValidator {
 
         int result = Mod97.calculate(iban);
         return result == Mod97.INVALID_REMAINDER ? INVALID_MOD97 : result;
-    }
-
-    /**
-     * Calculates the correct ISO 7064 Mod 97-10 check digits for the given IBAN string
-     * and overwrites the digits at the check digit positions (index 2 and 3).
-     * <p>
-     * This method temporarily sets the check digits to {@code "00"} to calculate the
-     * required remainder {@code R}, then determines the final check digits {@code CD = 98 - R}.
-     * <p>
-     * Note: If the input argument is an instance of {@link StringBuilder}, it will be
-     * modified in-place to achieve zero-allocation performance.
-     *
-     * @param iban the IBAN character sequence (must already be of the full IBAN length,
-     *             with placeholders at the check digit position); if a {@code StringBuilder}
-     *             is passed, it is mutated in place, otherwise a copy is created
-     * @return a {@code StringBuilder} instance with the correct check digits applied
-     * @throws InvalidIbanException if the structural validation fails for reasons other than the checksum
-     */
-    public static StringBuilder fixCheckDigits(final CharSequence iban) {
-        IbanValidationResult result = validate(iban);
-
-        if (result.error != null && result.error != IbanValidationError.INVALID_CHECKSUM) {
-            throw InvalidIbanException.of(result.error, iban);
-        }
-
-        StringBuilder sb = iban instanceof StringBuilder ? (StringBuilder) iban : new StringBuilder(iban);
-
-        if (result.isValid()) {
-            return sb;
-        }
-
-        // set placeholders to "00" (required for correct calculation context)
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, '0');
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, '0');
-
-        // calculate the required check digits value (98 - modulo result)
-        int checkDigitsValue = 98 - Mod97.calculate(sb);
-
-        // manual zero-padding: faster than String.format
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, (char) ('0' + (checkDigitsValue / 10)));
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, (char) ('0' + (checkDigitsValue % 10)));
-
-        return sb;
     }
 
 }

@@ -215,9 +215,9 @@ final class BicTest {
         assertThat(exFromOf).as("of() must throw for input '%s'", bic).isNotNull();
         assertThat(exFromValidate).as("validate() must throw for input '%s'", bic).isNotNull();
 
-        assertThat(exFromValidate.getMessage())
+        assertThat(exFromValidate)
             .as("validate() and of() must produce the same exception message")
-            .isEqualTo(exFromOf.getMessage());
+            .hasMessage(exFromOf.getMessage());
         assertThat(exFromValidate)
             .as("validate() and of() must carry the same validation error")
             .hasFieldOrPropertyWithValue("reason", exFromOf.getReason());
