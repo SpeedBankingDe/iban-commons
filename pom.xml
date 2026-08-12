@@ -151,8 +151,6 @@
         <dep.plugin.surefire.version>3.5.6</dep.plugin.surefire.version>
         <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
 
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-
         <surefireArgLine /> <!-- placeholder; overridden by jacoco-prepare-agent -->
     </properties>
 
@@ -247,6 +245,23 @@
         <pluginManagement>
 
             <plugins>
+
+                <plugin>
+                    <groupId>io.github.spannm</groupId>
+                    <artifactId>figlet-maven-plugin</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <configuration>
+                         <content><![CDATA[
+                             <lineBreak/><lineBreak/><lineBreak/><lineBreak/>
+                             <figletFont name="chunky">${project.dist.name}</figletFont><lineBreak/>
+                             <figletFont name="graceful">${project.version}</figletFont><lineBreak/>
+                             <preserveWhitespace>                               built by ${user.name}
+
+                             </preserveWhitespace>
+                             <lineBreak/>
+                         ]]></content>
+                    </configuration>
+                </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -544,7 +559,8 @@
                                     org.apache.maven.plugins:maven-deploy-plugin,
                                     org.apache.maven.plugins:maven-install-plugin,
                                     org.apache.maven.plugins:maven-resources-plugin,
-                                    org.apache.maven.plugins:maven-site-plugin
+                                    org.apache.maven.plugins:maven-site-plugin,
+                                    io.github.spannm:figlet-maven-plugin
                                 </unCheckedPluginList>
                             </requirePluginVersions>
                         </rules>
