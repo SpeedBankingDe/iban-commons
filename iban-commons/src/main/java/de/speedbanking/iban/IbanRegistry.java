@@ -2476,6 +2476,58 @@ public enum IbanRegistry {
     ),
 
     /**
+     * <strong>Congo ({@code CG})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code CG3930011000101013451300019}
+     *   formatted:   {@code CG39 3001 1000 1010 1345 1300 019}
+     *   components:  {@code CG 39 30011 00010 10134513000 19}
+     * </pre>
+     */
+    CG(StructureData.builder()
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.of(
+            false, "CG3930011000101013451300019", null),
+        ContactData.of(
+            "BEAC", null, "Av. Sergent Malamine, B.P. 126",
+            "Brazzaville", "beacbzv@beac.int", "+242 22 281 10 73"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
+     * <strong>Côte d'Ivoire ({@code CI})</strong><p>
+     * IBAN Length: 28<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code CI93CI0080111301134291200589}
+     *   formatted:   {@code CI93 CI00 8011 1301 1342 9120 0589}
+     *   components:  {@code CI 93 CI008 01113 011342912005 89}
+     * </pre>
+     */
+    CI(StructureData.builder()
+            .withIbanLength(28)
+            .withBbanPattern("5!c5!n12!n2!n")
+            .withBankCode("5!c", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("12!n", IndexRange.of(14, 26))
+            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .build(),
+        MetaData.of(
+            false, "CI93CI0080111301134291200589", null),
+        BF.contactData,
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
      * <strong>Cameroon ({@code CM})</strong><p>
      * IBAN Length: 27<br>
      * SEPA: No<br>
@@ -2603,6 +2655,31 @@ public enum IbanRegistry {
     ),
 
     /**
+     * <strong>Guinea-Bissau ({@code GW})</strong><p>
+     * IBAN Length: 25<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 4!c4!n11!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code GW04GW1430010181800637601}
+     *   formatted:   {@code GW04 GW14 3001 0181 8006 3760 1}
+     *   components:  {@code GW 04 GW14 3001 01818006376 01}
+     * </pre>
+     */
+    GW(StructureData.builder()
+            .withIbanLength(25)
+            .withBbanPattern("4!c4!n11!n2!n")
+            .withBankCode("4!c", IndexRange.of(4, 8))
+            .withBranchCode("4!n", IndexRange.of(8, 12))
+            .withAccountNumber("11!n", IndexRange.of(12, 23))
+            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .build(),
+        MetaData.of(
+            false, "GW04GW1430010181800637601", null),
+        BF.contactData,
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
      * <strong>Iran (Islamic Republic of) ({@code IR})</strong><p>
      * IBAN Length: 26<br>
      * SEPA: No<br>
@@ -2678,6 +2755,58 @@ public enum IbanRegistry {
     ),
 
     /**
+     * <strong>Madagascar ({@code MG})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code MG4600005030071289421016045}
+     *   formatted:   {@code MG46 0000 5030 0712 8942 1016 045}
+     *   components:  {@code MG 46 00005 03007 12894210160 45}
+     * </pre>
+     */
+    MG(StructureData.builder()
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.of(
+            false, "MG4600005030071289421016045", null),
+        ContactData.of(
+            "Banky Foiben'i Madagasikara (Banque Centrale de Madagascar)", null, "B.P. 550, Lalana Revolisiona Sosialista Antaninarenina",
+            "101 Antananarivo", "banky-foibe@bfm.mg", "+261 20 22 217 51"),
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
+     * <strong>Mali ({@code ML})</strong><p>
+     * IBAN Length: 28<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code ML13ML0160120102600100668497}
+     *   formatted:   {@code ML13 ML01 6012 0102 6001 0066 8497}
+     *   components:  {@code ML 13 ML016 01201 026001006684 97}
+     * </pre>
+     */
+    ML(StructureData.builder()
+            .withIbanLength(28)
+            .withBbanPattern("5!c5!n12!n2!n")
+            .withBankCode("5!c", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("12!n", IndexRange.of(14, 26))
+            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .build(),
+        MetaData.of(
+            false, "ML13ML0160120102600100668497", null),
+        BF.contactData,
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
      * <strong>Mozambique ({@code MZ})</strong><p>
      * IBAN Length: 25<br>
      * SEPA: No<br>
@@ -2704,6 +2833,31 @@ public enum IbanRegistry {
     ),
 
     /**
+     * <strong>Niger ({@code NE})</strong><p>
+     * IBAN Length: 28<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!c5!n12!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code NE58NE0380100100130305000268}
+     *   formatted:   {@code NE58 NE03 8010 0100 1303 0500 0268}
+     *   components:  {@code NE 58 NE038 01001 001303050002 68}
+     * </pre>
+     */
+    NE(StructureData.builder()
+            .withIbanLength(28)
+            .withBbanPattern("5!c5!n12!n2!n")
+            .withBankCode("5!c", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("12!n", IndexRange.of(14, 26))
+            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .build(),
+        MetaData.of(
+            false, "NE58NE0380100100130305000268", null),
+        BF.contactData,
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
      * <strong>Senegal ({@code SN})</strong><p>
      * IBAN Length: 28<br>
      * SEPA: No<br>
@@ -2724,6 +2878,33 @@ public enum IbanRegistry {
             .build(),
         MetaData.nonSepa("SN08SN1910100101260047607163", YearMonth.of(2015, 5)),
         BF.contactData,
+        IbanBuilder.IbanBuilderWithBranchCode::new
+    ),
+
+    /**
+     * <strong>Chad ({@code TD})</strong><p>
+     * IBAN Length: 27<br>
+     * SEPA: No<br>
+     * BBAN Structure: {@code 5!n5!n11!n2!n}<br>
+     * Examples:<pre>
+     *   unformatted: {@code TD8960002000010271091600153}
+     *   formatted:   {@code TD89 6000 2000 0102 7109 1600 153}
+     *   components:  {@code TD 89 60002 00001 02710916001 53}
+     * </pre>
+     */
+    TD(StructureData.builder()
+            .withIbanLength(27)
+            .withBbanPattern("5!n5!n11!n2!n")
+            .withBankCode("5!n", IndexRange.of(4, 9))
+            .withBranchCode("5!n", IndexRange.of(9, 14))
+            .withAccountNumber("11!n", IndexRange.of(14, 25))
+            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .build(),
+        MetaData.of(
+            false, "TD8960002000010271091600153", null),
+        ContactData.of(
+            "BEAC", null, "B.P. 50",
+            "N'Djamena", "beacndj@beac.int", "+235 22 52 41 76"),
         IbanBuilder.IbanBuilderWithBranchCode::new
     ),
 

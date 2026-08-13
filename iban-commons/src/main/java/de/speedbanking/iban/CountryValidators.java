@@ -187,11 +187,29 @@ final class CountryValidators {
         }
     }
 
+    /** NCD-aware Validator for Congo (CG), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
+    static final class CG extends AbstractNcdCountryValidator {
+        @Override
+        public boolean validateIban(final char[] iban) {
+            return isAllDigits(iban, 4, 27)
+                && validateNationalCheckDigit(iban);
+        }
+    }
+
     /** Validator for Switzerland (CH), IBAN length: 21, BBAN pattern: {@code 5!n12!c} */
     static final class CH extends AbstractCountryValidator {
         @Override
         public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 9);
+        }
+    }
+
+    /** NCD-aware Validator for Côte d'Ivoire (CI), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
+    static final class CI extends AbstractNcdCountryValidator {
+        @Override
+        public boolean validateIban(final char[] iban) {
+            return isAllDigits(iban, 9, 28)
+                && validateNationalCheckDigit(iban);
         }
     }
 
@@ -407,6 +425,15 @@ final class CountryValidators {
         }
     }
 
+    /** NCD-aware Validator for Guinea-Bissau (GW), IBAN length: 25, BBAN pattern: {@code 4!c4!n11!n2!n} */
+    static final class GW extends AbstractNcdCountryValidator {
+        @Override
+        public boolean validateIban(final char[] iban) {
+            return isAllDigits(iban, 8, 25)
+                && validateNationalCheckDigit(iban);
+        }
+    }
+
     /** Validator for Honduras (HN), IBAN length: 28, BBAN pattern: {@code 4!a20!n} */
     static final class HN extends AbstractCountryValidator {
         @Override
@@ -610,12 +637,30 @@ final class CountryValidators {
         }
     }
 
+    /** NCD-aware Validator for Madagascar (MG), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
+    static final class MG extends AbstractNcdCountryValidator {
+        @Override
+        public boolean validateIban(final char[] iban) {
+            return isAllDigits(iban, 4, 27)
+                && validateNationalCheckDigit(iban);
+        }
+    }
+
     /** NCD-aware Validator for North Macedonia (MK), IBAN length: 19, BBAN pattern: {@code 3!n10!c2!n} */
     static final class MK extends AbstractNcdCountryValidator {
         @Override
         public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 7)
                 && isAllDigits(iban, 17, 19)
+                && validateNationalCheckDigit(iban);
+        }
+    }
+
+    /** NCD-aware Validator for Mali (ML), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
+    static final class ML extends AbstractNcdCountryValidator {
+        @Override
+        public boolean validateIban(final char[] iban) {
+            return isAllDigits(iban, 9, 28)
                 && validateNationalCheckDigit(iban);
         }
     }
@@ -661,6 +706,15 @@ final class CountryValidators {
         @Override
         public boolean validateIban(final char[] iban) {
             return isAllDigits(iban, 4, 25)
+                && validateNationalCheckDigit(iban);
+        }
+    }
+
+    /** NCD-aware Validator for Niger (NE), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
+    static final class NE extends AbstractNcdCountryValidator {
+        @Override
+        public boolean validateIban(final char[] iban) {
+            return isAllDigits(iban, 9, 28)
                 && validateNationalCheckDigit(iban);
         }
     }
@@ -859,6 +913,15 @@ final class CountryValidators {
         public boolean validateIban(final char[] iban) {
             return isAllUpperCase(iban, 4, 8)
                 && isAllDigits(iban, 8, 28);
+        }
+    }
+
+    /** NCD-aware Validator for Chad (TD), IBAN length: 27, BBAN pattern: {@code 5!n5!n11!n2!n} */
+    static final class TD extends AbstractNcdCountryValidator {
+        @Override
+        public boolean validateIban(final char[] iban) {
+            return isAllDigits(iban, 4, 27)
+                && validateNationalCheckDigit(iban);
         }
     }
 

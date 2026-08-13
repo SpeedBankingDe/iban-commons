@@ -697,6 +697,69 @@ final class NationalCheckDigitCalculators {
     static final class TG extends NoOpNcdCalculatorBase {
     }
 
+    /**
+     * National Check Digit calculator for <strong>Congo (CG)</strong>.
+     * <p>
+     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for CG.
+     * Validation accepts any well-formed IBAN of the correct length.
+     */
+    static final class CG extends NoOpNcdCalculatorBase {
+    }
+
+    /**
+     * National Check Digit calculator for <strong>Côte d'Ivoire (CI)</strong>.
+     * <p>
+     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for CI.
+     * Validation accepts any well-formed IBAN of the correct length.
+     */
+    static final class CI extends NoOpNcdCalculatorBase {
+    }
+
+    /**
+     * National Check Digit calculator for <strong>Guinea-Bissau (GW)</strong>.
+     * <p>
+     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for GW.
+     * Validation accepts any well-formed IBAN of the correct length.
+     */
+    static final class GW extends NoOpNcdCalculatorBase {
+    }
+
+    /**
+     * National Check Digit calculator for <strong>Madagascar (MG)</strong>.
+     * <p>
+     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for MG.
+     * Validation accepts any well-formed IBAN of the correct length.
+     */
+    static final class MG extends NoOpNcdCalculatorBase {
+    }
+
+    /**
+     * National Check Digit calculator for <strong>Mali (ML)</strong>.
+     * <p>
+     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for ML.
+     * Validation accepts any well-formed IBAN of the correct length.
+     */
+    static final class ML extends NoOpNcdCalculatorBase {
+    }
+
+    /**
+     * National Check Digit calculator for <strong>Niger (NE)</strong>.
+     * <p>
+     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for NE.
+     * Validation accepts any well-formed IBAN of the correct length.
+     */
+    static final class NE extends NoOpNcdCalculatorBase {
+    }
+
+    /**
+     * National Check Digit calculator for <strong>Chad (TD)</strong>.
+     * <p>
+     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for TD.
+     * Validation accepts any well-formed IBAN of the correct length.
+     */
+    static final class TD extends NoOpNcdCalculatorBase {
+    }
+
     // =========================================================================
     // Base classes
     // =========================================================================
