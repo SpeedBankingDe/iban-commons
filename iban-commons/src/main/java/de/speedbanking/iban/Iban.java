@@ -521,10 +521,16 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Returns the IBAN formatted into its components in order.
      * <p>
+     * Gap areas between known components (e.g. unknown sub-components) are
+     * identified automatically based on character index ranges and separated accordingly.
+     * <p>
      * Example:
      * <pre>
      * IBAN:      {@code "GL8964710001000206"}
      * Formatted: {@code "GL 89 6471 0001000206"}
+     *
+     * IBAN:      {@code "PL61109010140000071219812874"}
+     * Formatted: {@code "PL 61 109 0101 4 0000071219812874"}
      * </pre>
      *
      * @return the IBAN formatted into components (e.g., {@code "AT 61 19043 00234573201"})
@@ -532,24 +538,35 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.5
      */
     public String toComponentString() {
+        IndexRange bankRange = countryData.getBankCodeIndexRange();
         IndexRange branchRange = countryData.getBranchCodeIndexRange();
+        IndexRange accountRange = countryData.getAccountNumberIndexRange();
         IndexRange ncdRange = countryData.getNationalCheckDigitIndexRange();
 
-        // fixed-size stack array (max 6 entries) — no Stream, no boxing
-        int[] idx = new int[6];
+        // fixed-size stack array (max 12 entries)
+        int[] idx = new int[12];
         int count = 0;
+        idx[count++] = 0;
         idx[count++] = IbanRegistry.INDEX_CHECK_DIGIT1;
         idx[count++] = IbanRegistry.INDEX_BBAN;
-        idx[count++] = countryData.getBankCodeIndexRange().getBegin();
-        idx[count++] = countryData.getAccountNumberIndexRange().getBegin();
+
+        idx[count++] = bankRange.getBegin();
+        idx[count++] = bankRange.getEnd();
+
         if (branchRange != null) {
             idx[count++] = branchRange.getBegin();
-        }
-        if (ncdRange != null) {
-            idx[count++] = ncdRange.getBegin();
+            idx[count++] = branchRange.getEnd();
         }
 
-        // insertion sort - optimal for ≤6 elements, avoids Arrays.sort overhead
+        idx[count++] = accountRange.getBegin();
+        idx[count++] = accountRange.getEnd();
+
+        if (ncdRange != null) {
+            idx[count++] = ncdRange.getBegin();
+            idx[count++] = ncdRange.getEnd();
+        }
+
+        // insertion sort - optimal for small fixed arrays, avoids Arrays.sort overhead
         for (int i = 1; i < count; i++) {
             int key = idx[i];
             int j = i - 1;
@@ -565,14 +582,22 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         int prev = -1;
         for (int i = 0; i < count; i++) {
             int cut = idx[i];
-            if (cut == prev) {
+            if (cut <= last || cut == prev) {
                 continue;
+            }
+            if (cut > ibanStr.length()) {
+                break;
             }
             sb.append(ibanStr, last, cut).append(' ');
             last = cut;
             prev = cut;
         }
-        sb.append(ibanStr, last, ibanStr.length());
+
+        if (last < ibanStr.length()) {
+            sb.append(ibanStr, last, ibanStr.length());
+        } else if (sb.length() > 0 && sb.charAt(sb.length() - 1) == ' ') {
+            sb.setLength(sb.length() - 1);
+        }
 
         return sb.toString();
     }

@@ -247,7 +247,7 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code BG80BNBG96611020345678}
      *   formatted:   {@code BG80 BNBG 9661 1020 3456 78}
-     *   components:  {@code BG 80 BNBG 966110 20345678}
+     *   components:  {@code BG 80 BNBG 9661 10 20345678}
      * </pre>
      */
     BG(StructureData.builder()
@@ -321,7 +321,7 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code BR1800360305000010009795493C1}
      *   formatted:   {@code BR18 0036 0305 0000 1000 9795 493C 1}
-     *   components:  {@code BR 18 00360305 00001 0009795493C1}
+     *   components:  {@code BR 18 00360305 00001 0009795493 C1}
      * </pre>
      */
     BR(StructureData.builder()
@@ -1146,7 +1146,7 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code IS140159260076545510730339}
      *   formatted:   {@code IS14 0159 2600 7654 5510 7303 39}
-     *   components:  {@code IS 14 015926 0076545510730339}
+     *   components:  {@code IS 14 0159 26 007654 5510730339}
      * </pre>
      */
     IS(StructureData.builder()
@@ -1613,7 +1613,7 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code MU17BOMM0101101030300200000MUR}
      *   formatted:   {@code MU17 BOMM 0101 1010 3030 0200 000M UR}
-     *   components:  {@code MU 17 BOMM01 01 101030300200000MUR}
+     *   components:  {@code MU 17 BOMM01 01 101030300200000 MUR}
      * </pre>
      */
     MU(StructureData.builder()
@@ -1759,7 +1759,7 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code PL61109010140000071219812874}
      *   formatted:   {@code PL61 1090 1014 0000 0712 1981 2874}
-     *   components:  {@code PL 61 109 01014 0000071219812874}
+     *   components:  {@code PL 61 109 0101 4 0000071219812874}
      * </pre>
      */
     PL(StructureData.builder()
@@ -1956,7 +1956,7 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code SC18SSCB11010000000000001497USD}
      *   formatted:   {@code SC18 SSCB 1101 0000 0000 0000 1497 USD}
-     *   components:  {@code SC 18 SSCB11 01 0000000000001497USD}
+     *   components:  {@code SC 18 SSCB11 01 0000000000001497 USD}
      * </pre>
      */
     SC(StructureData.builder()
@@ -2586,7 +2586,7 @@ public enum IbanRegistry {
      * Examples:<pre>
      *   unformatted: {@code DZ1700021000011130000005}
      *   formatted:   {@code DZ17 0002 1000 0111 3000 0005}
-     *   components:  {@code DZ 17 000 21000 011130000005}
+     *   components:  {@code DZ 17 000 21000 0111300000 05}
      * </pre>
      */
     DZ(StructureData.builder()
