@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import de.speedbanking.iban.NationalCheckDigitCalculators.NoOpNcdCalculatorBase;
 import de.speedbanking.test.TestUtil;
-import de.speedbanking.util.IndexRange;
 
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
@@ -101,8 +100,8 @@ final class CountryValidatorsTest {
             Assumptions.assumeFalse(validator.getNcdCalculator() instanceof NoOpNcdCalculatorBase);
 
             StringBuilder badNcdIban = new StringBuilder(countryData.getIbanExample());
-            IndexRange ncdIndexRange = countryData.getNationalCheckDigitIndexRange();
-            for (int idx = ncdIndexRange.getBegin(); idx < ncdIndexRange.getEnd(); idx++) {
+            IbanComponent ncdComponent = countryData.getNationalCheckDigitComponent();
+            for (int idx = ncdComponent.getBeginIndex(); idx < ncdComponent.getEndIndex(); idx++) {
                 char c = badNcdIban.charAt(idx);
 
                 if (Character.isDigit(c)) {

@@ -23,7 +23,7 @@ import static de.speedbanking.util.CharUtil.isNotDigit;
 
 import de.speedbanking.util.Mod97;
 
-import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * The core engine for **International Bank Account Number (IBAN)** validation.
@@ -99,7 +99,7 @@ public final class IbanValidator {
      * instances are effectively immutable.
      */
     private static final CountryValidator[] VALIDATORS =
-        Arrays.stream(IbanRegistry.values())
+        Stream.of(IbanRegistry.values())
             .map(cd -> cd.isBaseCountry() ? loadCountryValidator(cd) : null)
             .toArray(CountryValidator[]::new);
 
@@ -125,6 +125,18 @@ public final class IbanValidator {
     private IbanValidator() {
         throw new UnsupportedOperationException(
             "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+    }
+
+    /**
+     * Removes the thread-local validation buffer for the calling thread.
+     * <p>
+     * Useful in managed thread pool environments (e.g. application servers)
+     * to prevent potential classloader memory leaks upon thread recycling/shutdown.
+     *
+     * @since 1.8.9
+     */
+    public static void clearThreadLocal() {
+        VALIDATION_BUFFER.remove();
     }
 
     /**
@@ -205,15 +217,12 @@ public final class IbanValidator {
                     return INPUT_INCORRECT_LENGTH;
                 }
                 output[targetIdx++] = c;
-            } else if (isLowerCase(c)) {
-                if (!allowLower) {
-                    return INPUT_ILLEGAL_CHARACTERS;
-                }
+            } else if (allowLower && isLowerCase(c)) {
                 if (targetIdx >= MAX_IBAN_LENGTH) {
                     return INPUT_INCORRECT_LENGTH;
                 }
-                output[targetIdx++] = (char) (c - 32);
-            } else if (c != ' ' || !allowSpace) {
+                output[targetIdx++] = (char) (c - 'a' + 'A');
+            } else if (!allowSpace || c != ' ') {
                 return INPUT_ILLEGAL_CHARACTERS;
             }
         }
@@ -274,15 +283,12 @@ public final class IbanValidator {
                     return INPUT_INCORRECT_LENGTH;
                 }
                 output[targetIdx++] = c;
-            } else if (isLowerCase(c)) {
-                if (!allowLower) {
-                    return INPUT_ILLEGAL_CHARACTERS;
-                }
+            } else if (allowLower && isLowerCase(c)) {
                 if (targetIdx >= MAX_IBAN_LENGTH) {
                     return INPUT_INCORRECT_LENGTH;
                 }
-                output[targetIdx++] = (char) (c - 32);
-            } else if (c != ' ' || !allowSpace) {
+                output[targetIdx++] = (char) (c - 'a' + 'A');
+            } else if (!allowSpace || c != ' ') {
                 return INPUT_ILLEGAL_CHARACTERS;
             }
         }
@@ -412,7 +418,7 @@ public final class IbanValidator {
      * @return an {@link IbanValidationResult} — never {@code null}
      * @since 1.8.5
      */
-    static IbanValidationResult validate(final CharSequence rawIban, boolean allowSpace) {
+    static IbanValidationResult validate(CharSequence rawIban, boolean allowSpace) {
         if (rawIban == null) {
             return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
@@ -422,22 +428,23 @@ public final class IbanValidator {
             return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
 
+        boolean allowLower = IbanConfig.isAllowLowercase();
+
         // normalize to char[] once — all downstream calls use direct array access
         char[] normIban = VALIDATION_BUFFER.get();
 
         int normLen = normalize(rawIban, rawLen,
             normIban,
-            allowSpace, IbanConfig.isAllowLowercase());
+            allowSpace, allowLower);
 
         if (normLen == INPUT_ILLEGAL_CHARACTERS) {
             return IbanValidationResult.invalid(IbanValidationError.ILLEGAL_CHARACTERS);
-        } else if (normLen == INPUT_INCORRECT_LENGTH) {
-            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
-        } else if (normLen < MIN_IBAN_LENGTH) { // check empty and min length
-            if (normLen == 0) {
-                return IbanValidationResult.invalid(IbanValidationError.EMPTY);
-            }
-            return IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
+        }
+
+        if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
+            return normLen == 0
+                ? IbanValidationResult.invalid(IbanValidationError.EMPTY)
+                : IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
@@ -473,7 +480,7 @@ public final class IbanValidator {
          * Otherwise, MUST create a stable copy from the transient validation buffer.
          */
         return IbanValidationResult.valid(
-            !allowSpace && !IbanConfig.isAllowLowercase()
+            !allowSpace && !allowLower
                 ? rawIban
                 : String.valueOf(normIban, 0, normLen),
             countryData);
@@ -516,11 +523,13 @@ public final class IbanValidator {
             return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
 
+        boolean allowLower = IbanConfig.isAllowLowercase();
+
         char[] normIban = VALIDATION_BUFFER.get();
 
         int normLen = normalize(rawIban, rawLen,
             normIban,
-            allowSpace, IbanConfig.isAllowLowercase());
+            allowSpace, allowLower);
 
         if (normLen == INPUT_ILLEGAL_CHARACTERS) {
             return IbanValidationResult.invalid(IbanValidationError.ILLEGAL_CHARACTERS);
@@ -556,7 +565,7 @@ public final class IbanValidator {
         }
 
         return IbanValidationResult.valid(
-            !allowSpace && !IbanConfig.isAllowLowercase()
+            !allowSpace && !allowLower
                 ? rawIban
                 : String.valueOf(normIban, 0, normLen),
             countryData);
@@ -594,8 +603,7 @@ public final class IbanValidator {
             return INVALID_MOD97;
         }
 
-        int result = Mod97.calculate(iban);
-        return result == Mod97.INVALID_REMAINDER ? INVALID_MOD97 : result;
+        return Mod97.calculate(iban);
     }
 
 }

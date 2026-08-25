@@ -1,9 +1,12 @@
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanBuilder.fixCheckDigits;
-import static de.speedbanking.iban.IbanBuilder.fixNationalCheckDigit;
-import static de.speedbanking.iban.IbanBuilder.padLeft;
-import static de.speedbanking.iban.IbanBuilder.requireCountry;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.ACCOUNT_NUMBER;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.ACCOUNT_TYPE;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.ACCOUNT_TYPE_AND_CONTROL;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.BANK_CODE;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.BRANCH_CODE;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.IDENTIFICATION_NUMBER;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.NATIONAL_CODE;
 import static de.speedbanking.iban.IbanValidationError.EMPTY;
 import static de.speedbanking.iban.IbanValidationError.INCORRECT_LENGTH;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIban;
@@ -14,8 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import de.speedbanking.iban.IbanBuilder.*;
-import de.speedbanking.iban.util.IbanCharType;
+import de.speedbanking.iban.IbanBuilder.AccountTypeAndControlIbanBuilderWithBranchCode;
+import de.speedbanking.iban.IbanBuilder.AccountTypeIbanBuilderWithBranchCode;
+import de.speedbanking.iban.IbanBuilder.IbanBuilderWithBranchCode;
+import de.speedbanking.iban.IbanBuilder.IdentificationNumberIbanBuilderWithBranchCode;
+import de.speedbanking.iban.IbanBuilder.NationalCodeIbanBuilderWithBranchCode;
+import de.speedbanking.iban.IbanBuilder.StandardIbanBuilder;
+import de.speedbanking.iban.IbanComponent.IbanComponentType;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,6 +39,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.Random;
 import java.util.stream.Stream;
 
+/**
+ * JUnit test class for {@link IbanBuilder}.
+ */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 @ResourceLock(IbanConfigTest.RESOURCE_NAME)
 final class IbanBuilderTest {
@@ -65,7 +76,7 @@ final class IbanBuilderTest {
     @DisplayName("requireCountry: returns actual when it exactly matches the expected base country")
     @Test
     void requireCountry_exactMatch_returnsActual() {
-        assertThat(requireCountry(IbanRegistry.BG, IbanRegistry.BG)).isSameAs(IbanRegistry.BG);
+        assertThat(IbanBuilder.requireCountry(IbanRegistry.BG, IbanRegistry.BG)).isSameAs(IbanRegistry.BG);
     }
 
     @DisplayName("requireCountry: returns actual when it is a country derived from the expected base country")
@@ -74,13 +85,13 @@ final class IbanBuilderTest {
         // AX (Åland Islands) ist in der Registry von FI (Finnland) abgeleitet; keines der acht
         // Custom-Builder-Länder hat aktuell eine abgeleitete Variante — daher hier bewusst
         // sachfremde, aber reale Registry-Daten, um genau diesen Zweig zu erreichen.
-        assertThat(requireCountry(IbanRegistry.AX, IbanRegistry.FI)).isSameAs(IbanRegistry.AX);
+        assertThat(IbanBuilder.requireCountry(IbanRegistry.AX, IbanRegistry.FI)).isSameAs(IbanRegistry.AX);
     }
 
     @DisplayName("requireCountry: throws IllegalArgumentException for an unrelated country")
     @Test
     void requireCountry_unrelatedCountry_throwsIllegalArgumentException() {
-        assertThatThrownBy(() -> requireCountry(IbanRegistry.DE, IbanRegistry.BG))
+        assertThatThrownBy(() -> IbanBuilder.requireCountry(IbanRegistry.DE, IbanRegistry.BG))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("This builder only supports BG or derived countries but was constructed with country data for DE");
     }
@@ -89,8 +100,17 @@ final class IbanBuilderTest {
     @Test
     void requireCountry_nullActual_throwsNPE() {
         assertThatNullPointerException()
-            .isThrownBy(() -> requireCountry(null, IbanRegistry.BG))
+            .isThrownBy(() -> IbanBuilder.requireCountry(null, IbanRegistry.BG))
             .withMessage("countryData must not be null");
+    }
+
+    @DisplayName("AbstractCustomIbanBuilder: throws NPE with descriptive message when component undefined for country")
+    @Test
+    void abstractCustomIbanBuilder_missingComponent_throwsNpeWithMessage() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> new NationalCodeIbanBuilderWithBranchCode(IbanRegistry.DE))
+            .withMessageContaining("NATIONAL_CODE")
+            .withMessageContaining("DE");
     }
 
     @DisplayName("build: random generation produces valid IBAN")
@@ -178,72 +198,34 @@ final class IbanBuilderTest {
         assertThatNullPointerException().isThrownBy(() -> Segment.of(null, 5));
     }
 
-    @DisplayName("generateRandom: NUMERIC segment produces expected length and only digits")
-    @Test
-    void generateRandom_numericType_producesOnlyDigits() {
-        Segment segment = Segment.of(IbanCharType.NUMERIC, 20);
-        IbanBuilder<?> builder = IbanRegistry.FO.builder();
-
-        String result = builder.generateRandom(segment);
-        assertThat(result).hasSize(20).matches("[0-9]+");
-    }
-
-    @DisplayName("generateRandom: ALPHABETIC segment produces expected length and upper-case letters")
-    @Test
-    void generateRandom_alphabeticType_producesOnlyLetters() {
-        Segment segment = Segment.of(IbanCharType.ALPHABETIC, 10);
-        IbanBuilder<?> builder = IbanRegistry.FO.builder();
-
-        String result = builder.generateRandom(segment);
-        assertThat(result).hasSize(10).matches("[A-Z]+");
-    }
-
-    @DisplayName("generateRandom: ALPHANUMERIC segment produces expected length and only alphanumeric characters")
-    @Test
-    void generateRandom_alphanumericType_producesOnlyAlphanumeric() {
-        Segment segment = Segment.of(IbanCharType.ALPHANUMERIC, 12);
-        IbanBuilder<?> builder = IbanRegistry.FO.builder();
-
-        String result = builder.generateRandom(segment);
-        assertThat(result).hasSize(12).matches("[0-9A-Z]+");
-    }
-
-    @DisplayName("generateRandom: passing null segment throws NullPointerException")
-    @Test
-    void generateRandom_nullSegment_throwsNPE() {
-        IbanBuilder<?> builder = IbanRegistry.FO.builder();
-
-        assertThatNullPointerException().isThrownBy(() -> builder.generateRandom(null));
-    }
-
     @DisplayName("padLeft: pads string with leading characters when shorter than target length")
     @Test
     void padLeft_shorterInput_padsWithGivenChar() {
-        assertThat(padLeft("123", 6, '0')).isEqualTo("000123");
+        assertThat(IbanBuilder.padLeft("123", 6, '0')).isEqualTo("000123");
     }
 
     @DisplayName("padLeft: returns input unchanged when already at or above target length")
     @Test
     void padLeft_inputAtOrAboveTargetLength_returnsUnchanged() {
-        assertThat(padLeft("123456", 6, '0')).isEqualTo("123456");
-        assertThat(padLeft("1234567", 6, '0')).isEqualTo("1234567");
+        assertThat(IbanBuilder.padLeft("123456", 6, '0')).isEqualTo("123456");
+        assertThat(IbanBuilder.padLeft("1234567", 6, '0')).isEqualTo("1234567");
     }
 
     @DisplayName("padLeft: returns null or empty input unchanged")
     @Test
     void padLeft_nullOrEmptyInput_returnsUnchanged() {
-        assertThat(padLeft(null, 6, '0')).isNull();
-        assertThat(padLeft("", 6, '0')).isEmpty();
+        assertThat(IbanBuilder.padLeft(null, 6, '0')).isNull();
+        assertThat(IbanBuilder.padLeft("", 6, '0')).isEmpty();
     }
 
     @DisplayName("resolveComponent: numeric input shorter than required length is left-padded with zeros")
     @Test
     void resolveComponent_shortNumericInput_isPadded() {
         IbanBuilder<?> builder = IbanRegistry.FO.builder();
+        IbanComponent component = builder.getCountryData().getStructureData().getComponent(ACCOUNT_NUMBER);
+        StringBuilder result = builder.resolveComponent(component, "12345");
 
-        String result = builder.resolveComponent(IbanComponent.ACCOUNT_NUMBER, "12345");
-
-        assertThat(result).hasSize(9).isEqualTo("000012345");
+        assertThat(result).hasSize(18).hasToString("        000012345 ");
     }
 
     @DisplayName("resolveComponent: invalid bank code input throws InvalidIbanException with INVALID_BANK_CODE")
@@ -272,7 +254,9 @@ final class IbanBuilderTest {
         IbanBuilder<?> builder = IbanRegistry.GL.builder();
 
         assertThatNullPointerException()
-            .isThrownBy(() -> builder.resolveComponent(null, "1234"));
+            .isThrownBy(() -> builder.resolveComponent(null, null, "1234"));
+        assertThatNullPointerException()
+            .isThrownBy(() -> builder.resolveComponent(new StringBuilder(), null, "1234"));
     }
 
     @DisplayName("resolveComponent: input with invalid characters for pattern throws InvalidIbanException")
@@ -290,8 +274,8 @@ final class IbanBuilderTest {
     @Test
     void resolveComponent_shortAlphabeticInput_failsValidation() {
         // SC nationalCode pattern is '3!a' (ALPHABETIC); input length (2) < requiredLength (3)
-        ScIbanBuilder builder = new ScIbanBuilder()
-            .bankCode("ABCD01")
+        NationalCodeIbanBuilderWithBranchCode builder = IbanRegistry.SC.builder();
+        builder.bankCode("ABCD01")
             .branchCode("23")
             .accountNumber("1234567890123456")
             .nationalCode("AB");
@@ -307,8 +291,12 @@ final class IbanBuilderTest {
         IbanBuilder<?> builder = IbanRegistry.GL.builder();
 
         assertThatInvalidIbanException()
-            .isThrownBy(() -> builder.resolveComponent("4!n", IbanValidationError.INVALID_BANK_CODE, "999X"))
+            .isThrownBy(() -> builder.resolveComponent(new IbanComponent(IbanComponentType.BANK_CODE, "4!n", 4, 4), "999X"))
             .hasFieldOrPropertyWithValue("reason", IbanValidationError.INVALID_BANK_CODE);
+
+        assertThatInvalidIbanException()
+            .isThrownBy(() -> builder.resolveComponent(IbanRegistry.GL.getStructureData().getComponent(IbanComponentType.BBAN), "###"))
+            .hasFieldOrPropertyWithValue("reason", IbanValidationError.INVALID_STRUCTURE);
     }
 
     /**
@@ -321,7 +309,7 @@ final class IbanBuilderTest {
     void fixCheckDigits_alreadyValid_returnsUnchangedEarly() {
         StringBuilder sb = new StringBuilder("GL2164711234567890");
 
-        StringBuilder result = fixCheckDigits(sb);
+        StringBuilder result = IbanBuilder.fixCheckDigits(sb);
 
         assertThat(result).isSameAs(sb)
             .hasToString(sb.toString());
@@ -354,8 +342,8 @@ final class IbanBuilderTest {
             .accountNumber("1234567890");
 
         assertThat(builder.toString())
-            .contains("bankCode=6471")
-            .contains("accountNumber=1234567890");
+            .contains(BANK_CODE.getLabel() + '=' + "6471")
+            .contains(ACCOUNT_NUMBER.getLabel() + '=' + "1234567890");
     }
 
     @DisplayName("toString: IbanBuilderWithBranchCode additionally includes the branch code")
@@ -368,9 +356,9 @@ final class IbanBuilderTest {
             .accountNumber("12345678901");
 
         assertThat(builder.toString())
-            .contains("bankCode=3000")
-            .contains("branchCode=00001")
-            .contains("accountNumber=12345678901");
+            .contains(BANK_CODE.getLabel() + '=' + "3000")
+            .contains(BRANCH_CODE.getLabel() + '=' + "00001")
+            .contains(ACCOUNT_NUMBER.getLabel() + '=' + "12345678901");
     }
 
     /**
@@ -407,7 +395,7 @@ final class IbanBuilderTest {
     @Test
     void fixCheckDigits_shouldThrowException_whenInputIsNull() {
         assertThatInvalidIbanException()
-            .isThrownBy(() -> fixCheckDigits(null))
+            .isThrownBy(() -> IbanBuilder.fixCheckDigits(null))
             .withNoCause()
             .withMessage("%s (%s)", EMPTY.getText(), EMPTY)
             .hasFieldOrPropertyWithValue("reason", EMPTY);
@@ -421,7 +409,7 @@ final class IbanBuilderTest {
     })
     void fixCheckDigits_shouldThrowException_whenLengthIsOutOfBounds(String invalidIban) {
         assertThatInvalidIbanException()
-            .isThrownBy(() -> fixCheckDigits(invalidIban))
+            .isThrownBy(() -> IbanBuilder.fixCheckDigits(invalidIban))
             .withNoCause()
             .withMessage("%s (%s): '%s'", INCORRECT_LENGTH.getText(), INCORRECT_LENGTH, invalidIban)
             .hasFieldOrPropertyWithValue("reason", INCORRECT_LENGTH);
@@ -437,7 +425,7 @@ final class IbanBuilderTest {
     @SuppressWarnings("UnnecessaryStringBuilder")
     void fixCheckDigits_shouldReuseInstance_whenInputIsStringBuilder() {
         StringBuilder inputBuffer = new StringBuilder("GL0064711234567890");
-        StringBuilder resultBuffer = fixCheckDigits(inputBuffer);
+        StringBuilder resultBuffer = IbanBuilder.fixCheckDigits(inputBuffer);
 
         assertThat(resultBuffer)
             .as("The returned StringBuilder must be identical to the input instance")
@@ -453,7 +441,7 @@ final class IbanBuilderTest {
     void fixCheckDigits_shouldCreateNewStringBuilder_whenInputIsString() {
         String input = "PS55RLKTIVUU04P3AF3VJKXZE9RAZ";
 
-        StringBuilder resultBuffer = fixCheckDigits(input);
+        StringBuilder resultBuffer = IbanBuilder.fixCheckDigits(input);
 
         assertThat(resultBuffer)
             .as("A new StringBuilder instance must be allocated with computed check digits")
@@ -464,10 +452,10 @@ final class IbanBuilderTest {
     @DisplayName("fixNationalCheckDigit: returns unchanged buffer for country without NCD requirement")
     @Test
     void fixNationalCheckDigit_noNcdField_returnsUnchanged() {
-        assertThat(IbanRegistry.GL.getNationalCheckDigitIndexRange()).isNull();
+        assertThat(IbanRegistry.GL.getNationalCheckDigitComponent()).isNull();
 
         StringBuilder sb = new StringBuilder("GL5864711234567890");
-        StringBuilder result = fixNationalCheckDigit(IbanRegistry.GL, sb);
+        StringBuilder result  = IbanBuilder.fixNationalCheckDigit(IbanRegistry.GL, sb);
 
         assertThat(result).isSameAs(sb)
                           .hasToString("GL5864711234567890");
@@ -481,7 +469,7 @@ final class IbanBuilderTest {
     @Test
     void fixNationalCheckDigit_wrongLength_throws() {
         assertThatInvalidIbanException()
-            .isThrownBy(() -> fixNationalCheckDigit(IbanRegistry.GL, new StringBuilder("GL00")))
+            .isThrownBy(() -> IbanBuilder.fixNationalCheckDigit(IbanRegistry.GL, new StringBuilder("GL00")))
             .withMessageStartingWith("IBAN has incorrect length for specified country");
     }
 
@@ -489,21 +477,21 @@ final class IbanBuilderTest {
     @Test
     void fixNationalCheckDigit_nullCountryData_throwsNPE() {
         assertThatNullPointerException()
-            .isThrownBy(() -> fixNationalCheckDigit(null, new StringBuilder()));
+            .isThrownBy(() -> IbanBuilder.fixNationalCheckDigit(null, new StringBuilder()));
     }
 
     @DisplayName("fixNationalCheckDigit: throws NullPointerException when ibanBuilder is null")
     @Test
     void fixNationalCheckDigit_nullIbanBuilder_throwsNPE() {
         assertThatNullPointerException()
-            .isThrownBy(() -> fixNationalCheckDigit(IbanRegistry.GL, null));
+            .isThrownBy(() -> IbanBuilder.fixNationalCheckDigit(IbanRegistry.GL, null));
     }
 
-    @DisplayName("BgIbanBuilder: builds valid Bulgarian IBAN and includes accountType in toString")
+    @DisplayName("AccountTypeIbanBuilderWithBranchCode: builds valid Bulgarian IBAN and includes accountType in toString")
     @Test
-    void bgIbanBuilder_buildsValidIbanAndFormatsToString() {
-        BgIbanBuilder builder = new BgIbanBuilder()
-            .bankCode("BNBG")
+    void accountTypeBuilder_bulgaria_buildsValidIbanAndFormatsToString() {
+        AccountTypeIbanBuilderWithBranchCode builder = IbanRegistry.BG.builder();
+        builder.bankCode("BNBG")
             .branchCode("9661")
             .accountNumber("12345678")
             .accountType("10");
@@ -513,20 +501,20 @@ final class IbanBuilderTest {
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid();
         assertThat(builder.toString())
-            .contains("BgIbanBuilder")
+            .contains("AccountTypeIbanBuilderWithBranchCode")
             .contains("country=BG")
-            .contains("bankCode=BNBG")
-            .contains("branchCode=9661")
-            .contains("accountNumber=12345678")
-            .contains("accountType=10");
+            .contains(BANK_CODE.getLabel() + "=BNBG")
+            .contains(BRANCH_CODE.getLabel() + "=9661")
+            .contains(ACCOUNT_NUMBER.getLabel() + "=12345678")
+            .contains(ACCOUNT_TYPE.getLabel() + "=10");
     }
 
-    @DisplayName("DzIbanBuilder: builds valid Algerian IBAN and includes nationalCode in toString")
+    @DisplayName("NationalCodeIbanBuilderWithBranchCode: builds valid Algerian IBAN and includes nationalCode in toString")
     @Test
-    void dzIbanBuilder_buildsValidIbanAndFormatsToString() {
+    void nationalCodeBuilder_algeria_buildsValidIbanAndFormatsToString() {
         String nationalCode = "12";
-        DzIbanBuilder builder = new DzIbanBuilder()
-            .bankCode("001")
+        NationalCodeIbanBuilderWithBranchCode builder = IbanRegistry.DZ.builder();
+        builder.bankCode("001")
             .branchCode("001")
             .accountNumber("1234567")
             .nationalCode(nationalCode);
@@ -536,51 +524,53 @@ final class IbanBuilderTest {
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid();
         assertThat(builder.toString())
-            .contains("DzIbanBuilder")
-            .contains("nationalCode=" + nationalCode);
+            .startsWith("NationalCodeIbanBuilderWithBranchCode")
+            .contains(NATIONAL_CODE.getLabel()  + '=' + nationalCode);
     }
 
-    @DisplayName("IsIbanBuilder: builds valid Icelandic IBAN without branchCode")
+    @DisplayName("IdentificationNumberIbanBuilder: builds valid Icelandic IBAN")
     @Test
-    void isIbanBuilder_buildsValidIbanWithoutBranchCode() {
-        IsIbanBuilder builder = new IsIbanBuilder()
-            .bankCode("0101")
+    void identificationNumberBuilder_iceland_buildsValidIban() {
+        String identificationNumber = "0101901239";
+        IdentificationNumberIbanBuilderWithBranchCode builder = IbanRegistry.IS.builder();
+        builder.bankCode("0101")
             .accountNumber("123456")
-            .identificationNumber("0101901239");
+            .identificationNumber(identificationNumber);
 
         Iban iban = builder.build();
 
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid();
         assertThat(builder.toString())
-            .contains(IsIbanBuilder.class.getSimpleName())
+            .startsWith(IdentificationNumberIbanBuilderWithBranchCode.class.getSimpleName())
             .contains("country=IS")
-            .contains("identificationNumber=0101901239");
+            .contains(IDENTIFICATION_NUMBER.getLabel() + '=' + identificationNumber);
     }
 
-    @DisplayName("MuIbanBuilder: builds valid Mauritian IBAN and includes nationalCode in toString")
+    @DisplayName("NationalCodeIbanBuilderWithBranchCode: builds valid Mauritian IBAN and includes nationalCode in toString")
     @Test
-    void muIbanBuilder_buildsValidIbanAndFormatsToString() {
-        MuIbanBuilder builder = new MuIbanBuilder()
-            .bankCode("BOMM01")
+    void nationalCodeBuilder_mauritius_buildsValidIbanAndFormatsToString() {
+        String nationalCode = "MUR";
+        NationalCodeIbanBuilderWithBranchCode builder = IbanRegistry.MU.builder();
+        builder.bankCode("BOMM01")
             .branchCode("01")
             .accountNumber("123456789101000")
-            .nationalCode("MUR");
+            .nationalCode(nationalCode);
 
         Iban iban = builder.build();
 
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid();
         assertThat(builder.toString())
-            .contains(MuIbanBuilder.class.getSimpleName())
-            .contains("nationalCode=MUR");
+            .startsWith(NationalCodeIbanBuilderWithBranchCode.class.getSimpleName())
+            .contains(NATIONAL_CODE.getLabel() + '=' + nationalCode);
     }
 
-    @DisplayName("PlIbanBuilder: builds valid Polish IBAN and includes nationalCode in toString")
+    @DisplayName("NationalCodeIbanBuilderWithBranchCode: builds valid Polish IBAN and includes nationalCode in toString")
     @Test
-    void plIbanBuilder_buildsValidIbanAndFormatsToString() {
-        PlIbanBuilder builder = new PlIbanBuilder()
-            .bankCode("105")
+    void nationalCodeBuilder_poland_buildsValidIbanAndFormatsToString() {
+        NationalCodeIbanBuilderWithBranchCode builder = IbanRegistry.PL.builder();
+        builder.bankCode("105")
             .branchCode("0009")
             .nationalCode("9")
             .accountNumber("7603123456789123");
@@ -590,16 +580,16 @@ final class IbanBuilderTest {
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid().isEqualTo("PL10105000997603123456789123");
         assertThat(builder.toString())
-            .contains(PlIbanBuilder.class.getSimpleName())
-            .contains("bankCode=105");
+            .startsWith(NationalCodeIbanBuilderWithBranchCode.class.getSimpleName())
+            .contains(BANK_CODE.getLabel() + "=105");
     }
 
-    @DisplayName("ScIbanBuilder: builds valid Seychellois IBAN and includes nationalCode in toString")
+    @DisplayName("NationalCodeIbanBuilderWithBranchCode: builds valid Seychellois IBAN and includes nationalCode in toString")
     @Test
-    void scIbanBuilder_buildsValidIbanAndFormatsToString() {
+    void nationalCodeBuilder_seychelles_buildsValidIbanAndFormatsToString() {
         String nationalCode = "SCR";
-        ScIbanBuilder builder = new ScIbanBuilder()
-            .bankCode("ABCD01")
+        NationalCodeIbanBuilderWithBranchCode builder = IbanRegistry.SC.builder();
+        builder.bankCode("ABCD01")
             .branchCode("23")
             .accountNumber("1234567890123456")
             .nationalCode(nationalCode);
@@ -609,34 +599,35 @@ final class IbanBuilderTest {
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid();
         assertThat(builder.toString())
-            .contains(ScIbanBuilder.class.getSimpleName())
-            .contains("nationalCode=" + nationalCode);
+            .startsWith(NationalCodeIbanBuilderWithBranchCode.class.getSimpleName())
+            .contains(NATIONAL_CODE.getLabel() + '=' + nationalCode);
     }
 
-    @DisplayName("TgIbanBuilder: builds valid Togolese IBAN and includes nationalCode in toString")
+    @DisplayName("NationalCodeIbanBuilderWithBranchCode: builds valid Togolese IBAN and includes nationalCode in toString")
     @Test
-    void tgIbanBuilder_buildsValidIbanAndFormatsToString() {
-        TgIbanBuilder builder = new TgIbanBuilder()
-            .bankCode("TG009")
+    void nationalCodeBuilder_togo_buildsValidIbanAndFormatsToString() {
+        String nationalCode = "12";
+        NationalCodeIbanBuilderWithBranchCode builder = IbanRegistry.TG.builder();
+        builder.bankCode("TG009")
             .branchCode("01001")
             .accountNumber("102325004005")
-            .nationalCode("12");
+            .nationalCode(nationalCode);
 
         Iban iban = builder.build();
 
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid();
         assertThat(builder.toString())
-            .contains(TgIbanBuilder.class.getSimpleName())
+            .startsWith(NationalCodeIbanBuilderWithBranchCode.class.getSimpleName())
             .contains("country=TG")
-            .contains("nationalCode=12");
+            .contains(NATIONAL_CODE.getLabel() + '=' + nationalCode);
     }
 
-    @DisplayName("BrIbanBuilder: builds valid Brazilian IBAN with combined accountTypeAndControl component")
+    @DisplayName("AccountTypeAndControlIbanBuilderWithBranchCode: builds valid Brazilian IBAN with combined accountTypeAndControl component")
     @Test
-    void brIbanBuilder_buildsValidIbanAndFormatsToString() {
-        BrIbanBuilder builder = new BrIbanBuilder()
-            .bankCode("00360305")
+    void accountTypeAndControlBuilder_brazil_buildsValidIbanAndFormatsToString() {
+        AccountTypeAndControlIbanBuilderWithBranchCode builder = IbanRegistry.BR.builder();
+        builder.bankCode("00360305")
             .branchCode("00001")
             .accountNumber("0009795493")
             .accountTypeAndControl("P1");
@@ -646,8 +637,8 @@ final class IbanBuilderTest {
         assertThatIban(iban).isNotNull();
         assertThatIbanString(iban.toString()).isValid();
         assertThat(builder.toString())
-            .contains(BrIbanBuilder.class.getSimpleName())
-            .contains("accountTypeAndControl=P1");
+            .contains(AccountTypeAndControlIbanBuilderWithBranchCode.class.getSimpleName())
+            .contains(ACCOUNT_TYPE_AND_CONTROL.getLabel() + "=P1");
     }
 
 }

@@ -238,42 +238,46 @@ final class IbanPatternConverterTest {
         assertThat(Segment.of(ALPHANUMERIC, 16).toPatternNotation()).isEqualTo("16!c");
     }
 
-    @DisplayName("Segment.isAllNumeric should correctly identify all-numeric lists")
+    @DisplayName("IbanPatternConverter.isAllNumeric should correctly identify all-numeric lists")
     @Test
     void isAllNumeric_shouldIdentifyNumericLists() {
         Segment num1 = Segment.of(NUMERIC, 4);
         Segment num2 = Segment.of(NUMERIC, 2);
         Segment alpha = Segment.of(ALPHABETIC, 4);
 
-        assertThat(Segment.isAllNumeric(emptyList())).isTrue();
-        assertThat(Segment.isAllNumeric(Arrays.asList(num1, num2))).isTrue();
-        assertThat(Segment.isAllNumeric(Arrays.asList(num1, alpha))).isFalse();
+        assertThat(IbanPatternConverter.isAllNumeric(emptyList())).isTrue();
+        assertThat(IbanPatternConverter.isAllNumeric(Arrays.asList(num1, num2))).isTrue();
+        assertThat(IbanPatternConverter.isAllNumeric(Arrays.asList(num1, alpha))).isFalse();
+
+        assertThatNullPointerException()
+            .isThrownBy(() -> IbanPatternConverter.isAllNumeric(null))
+            .withMessage("segments must not be null");
     }
 
-    @DisplayName("Segment.allMatch should validate inputs and evaluate predicate")
+    @DisplayName("IbanPatternConverter.allMatch should validate inputs and evaluate predicate")
     @Test
     void allMatch_shouldValidateInputsAndEvaluate() {
         Segment num1 = Segment.of(NUMERIC, 4);
 
         assertThatNullPointerException()
-            .isThrownBy(() -> Segment.allMatch(null, Segment::isNumeric))
+            .isThrownBy(() -> IbanPatternConverter.allMatch(null, Segment::isNumeric))
             .withMessage("segments must not be null");
 
         assertThatNullPointerException()
-            .isThrownBy(() -> Segment.allMatch(singletonList(num1), null))
+            .isThrownBy(() -> IbanPatternConverter.allMatch(singletonList(num1), null))
             .withMessage("predicate must not be null");
 
-        assertThat(Segment.allMatch(emptyList(), Segment::isNumeric)).isTrue();
+        assertThat(IbanPatternConverter.allMatch(emptyList(), Segment::isNumeric)).isTrue();
     }
 
-    @DisplayName("Segment.calculateTotalLength should sum lengths or handle nulls")
+    @DisplayName("IbanPatternConverter.calculateTotalLength should sum lengths or handle nulls")
     @Test
     void calculateTotalLength_shouldSumLengthsCorrectly() {
-        assertThat(Segment.calculateTotalLength(null)).isEqualTo(0);
-        assertThat(Segment.calculateTotalLength(emptyList())).isEqualTo(0);
+        assertThat(IbanPatternConverter.calculateTotalLength((Iterable<Segment>) null)).isEqualTo(0);
+        assertThat(IbanPatternConverter.calculateTotalLength(emptyList())).isEqualTo(0);
 
         List<Segment> listWithNull = Arrays.asList(Segment.of(NUMERIC, 4), null, Segment.of(ALPHABETIC, 6));
-        assertThat(Segment.calculateTotalLength(listWithNull)).isEqualTo(10);
+        assertThat(IbanPatternConverter.calculateTotalLength(listWithNull)).isEqualTo(10);
     }
 
     @DisplayName("Segment toString() should return expected format")

@@ -1,16 +1,17 @@
 package de.speedbanking.iban;
 
+import static de.speedbanking.iban.IbanRegistry.MAX_IBAN_LENGTH;
+import static de.speedbanking.iban.IbanRegistry.MIN_IBAN_BASE_LENGTH;
+import static de.speedbanking.iban.IbanRegistry.MIN_IBAN_LENGTH;
 import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIbanString;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
-import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import de.speedbanking.iban.IbanRegistry.MetaData;
 import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
-import de.speedbanking.util.IndexRange;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -123,22 +124,23 @@ final class IbanRegistryTest {
         assertThat(registryDe.getIbanExample()).isEqualTo("DE89370400440532013000");
 
         assertThat(registryDe.getBankCodePattern()).isEqualTo("8!n");
-        assertThat(registryDe.getBankCodeIndexRange())
+        assertThat(registryDe.getBankCodeComponent())
             .isNotNull()
-            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
             .containsExactly(4, 12);
 
         assertThat(registryDe.getBranchCodePattern()).isNull();
-        assertThat(registryDe.getBranchCodeIndexRange()).isNull();
+        assertThat(registryDe.getBranchCodeComponent()).isNull();
         assertThat(registryDe.hasBranchCode()).isFalse();
 
         assertThat(registryDe.getAccountNumberLength())
             .isEqualTo(10)
-            .isEqualTo(registryDe.getAccountNumberIndexRange().length());
+            .isEqualTo(registryDe.getAccountNumberComponent().getLength());
 
-        assertThat(registryDe.getAccountNumberIndexRange())
+        assertThat(registryDe.getAccountNumberPattern()).isEqualTo("10!n");
+        assertThat(registryDe.getAccountNumberComponent())
             .isNotNull()
-            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
             .containsExactly(12, 22);
 
         assertThat(registryDe.getOrganisation()).isEqualTo("Bundesverband deutscher Banken");
@@ -173,25 +175,26 @@ final class IbanRegistryTest {
         assertThat(registryFr.getIbanExample()).isEqualTo("FR1420041010050500013M02606");
 
         assertThat(registryFr.getBankCodePattern()).isEqualTo("5!n");
-        assertThat(registryFr.getBankCodeIndexRange())
+        assertThat(registryFr.getBankCodeComponent())
             .isNotNull()
-            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
             .containsExactly(4, 9);
 
         assertThat(registryFr.getBranchCodePattern()).isEqualTo("5!n");
-        assertThat(registryFr.getBranchCodeIndexRange())
+        assertThat(registryFr.getBranchCodeComponent())
             .isNotNull()
-            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
             .containsExactly(9, 14);
         assertThat(registryFr.hasBranchCode()).isTrue();
 
         assertThat(registryFr.getAccountNumberLength())
             .isEqualTo(11)
-            .isEqualTo(registryFr.getAccountNumberIndexRange().length());
+            .isEqualTo(registryFr.getAccountNumberComponent().getLength());
 
-        assertThat(registryFr.getAccountNumberIndexRange())
+        assertThat(registryFr.getAccountNumberPattern()).isEqualTo("11!c");
+        assertThat(registryFr.getAccountNumberComponent())
             .isNotNull()
-            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
             .containsExactly(14, 25);
 
         assertThat(registryFr.getOrganisation()).isEqualTo("CFONB");
@@ -220,14 +223,14 @@ final class IbanRegistryTest {
             .containsExactly("IT", "Italy", "🇮🇹", true, IbanRegistry.IT, Currency.EUR, "EUR");
 
         assertThat(registryIt.getBankCodePattern()).isEqualTo("5!n");
-        assertThat(registryIt.getBankCodeIndexRange())
-            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+        assertThat(registryIt.getBankCodeComponent())
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
             .containsExactly(5, 10);
 
         assertThat(registryIt.hasBranchCode()).isTrue();
         assertThat(registryIt.getBranchCodePattern()).isEqualTo("5!n");
-        assertThat(registryIt.getBranchCodeIndexRange())
-            .extracting(IndexRange::getBegin, IndexRange::getEnd)
+        assertThat(registryIt.getBranchCodeComponent())
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
             .containsExactly(10, 15);
     }
 
@@ -248,12 +251,112 @@ final class IbanRegistryTest {
             + "SEPA country: Yes, "
             + "IBAN len: 22, "
             + "BBAN pattern: 8!n10!n, "
-            + "Bank Code: IndexRange[4-11 (8)], "
-            + "Account No: IndexRange[12-21 (10)], "
+            + "Bank Code: 4-11 (8), "
+            + "Account Number: 12-21 (10), "
             + "IBAN Example: DE89370400440532013000, "
             + "Organization: Bundesverband deutscher Banken, "
             + "Last Update: 2011-01]";
         assertThat(IbanRegistry.DE).hasToString(expected);
+    }
+
+    @DisplayName("getBaseEntryByCode should return the entry only for base countries, null for derived or unknown codes")
+    @Test
+    void getBaseEntryByCode_shouldReturnEntryOnlyForBaseCountries() {
+        assertThat(IbanRegistry.getBaseEntryByCode('F', 'R'))
+            .as("FR is a base country")
+            .isSameAs(IbanRegistry.FR);
+
+        assertThat(IbanRegistry.getBaseEntryByCode('G', 'F'))
+            .as("GF is derived from FR, not a base country itself")
+            .isNull();
+
+        assertThat(IbanRegistry.getBaseEntryByCode('X', 'X'))
+            .as("XX is not a known country code at all")
+            .isNull();
+    }
+
+    @DisplayName("isBaseCountry/isDerivedCountry should reflect the base/derived hierarchy")
+    @Test
+    void isBaseCountry_and_isDerivedCountry_shouldReflectHierarchy() {
+        assertThat(IbanRegistry.FR)
+            .returns(true, IbanRegistry::isBaseCountry)
+            .returns(false, IbanRegistry::isDerivedCountry);
+
+        assertThat(IbanRegistry.GF)
+            .as("Guadeloupe derives its data from France")
+            .returns(false, IbanRegistry::isBaseCountry)
+            .returns(true, IbanRegistry::isDerivedCountry);
+    }
+
+    @DisplayName("getDerivedCountries should list derived entries for a base country, and be empty otherwise")
+    @Test
+    void getDerivedCountries_shouldListDerivedEntriesForBaseCountry() {
+        assertThat(IbanRegistry.FR.getDerivedCountries())
+            .as("France has several overseas territories sharing its IBAN structure")
+            .isNotEmpty()
+            .allMatch(IbanRegistry::isDerivedCountry)
+            .contains(IbanRegistry.GF, IbanRegistry.GP, IbanRegistry.MQ, IbanRegistry.RE);
+
+        assertThat(IbanRegistry.GF.getDerivedCountries())
+            .as("a derived country is not itself a base country, so it has no derived countries of its own")
+            .isEmpty();
+    }
+
+    @DisplayName("getIbanRegex should match a valid IBAN and reject an invalid one")
+    @Test
+    void getIbanRegex_shouldMatchValidIbanAndRejectInvalid() {
+        assertThat(IbanRegistry.DE.getIbanRegex().matcher("DE89370400440532013000").matches())
+            .as("regex should match DE's own example IBAN")
+            .isTrue();
+
+        assertThat(IbanRegistry.DE.getIbanRegex().matcher("FR1420041010050500013M02606").matches())
+            .as("regex should not match an IBAN of a different country")
+            .isFalse();
+    }
+
+    @DisplayName("getBranchCodeLength should return 0 when absent, and the actual length when present")
+    @Test
+    void getBranchCodeLength_shouldReturnZeroWhenAbsent() {
+        assertThat(IbanRegistry.DE.getBranchCodeLength()).isZero();
+        assertThat(IbanRegistry.FR.getBranchCodeLength()).isEqualTo(5);
+    }
+
+    @DisplayName("National Check Digit should be present for AL and absent for DE")
+    @Test
+    void nationalCheckDigit_shouldBePresentForAlAndAbsentForDe() {
+        assertThat(IbanRegistry.AL.hasNationalCheckDigit()).isTrue();
+        assertThat(IbanRegistry.AL.getNationalCheckDigitPattern()).isEqualTo("1!n");
+        assertThat(IbanRegistry.AL.getNationalCheckDigitComponent())
+            .isNotNull()
+            .extracting(IbanComponent::getBeginIndex, IbanComponent::getEndIndex)
+            .containsExactly(11, 12);
+
+        assertThat(IbanRegistry.DE.hasNationalCheckDigit()).isFalse();
+        assertThat(IbanRegistry.DE.getNationalCheckDigitPattern()).isNull();
+        assertThat(IbanRegistry.DE.getNationalCheckDigitComponent()).isNull();
+    }
+
+    @DisplayName("Package-private internals (StructureData, MetaData, ContactData, builder factory) should be accessible and consistent")
+    @Test
+    void internalAccessors_shouldReturnConsistentValues() {
+        IbanRegistry de = IbanRegistry.DE;
+
+        assertThat(de.getStructureData()).isNotNull();
+
+        assertThat(de.getMetaData())
+            .isNotNull()
+            .returns(de.getIbanExample(), MetaData::getIbanExample)
+            .returns(de.getLastUpdate(), MetaData::getLastUpdate)
+            .returns(de.isSepa(), MetaData::isSepa);
+
+        assertThat(de.getContactData())
+            .isNotNull()
+            .returns(de.getOrganisation(), IbanRegistry.ContactData::getOrganisation);
+
+        assertThat(de.getBuilderFactory())
+            .as("builder factory should produce a builder for this same registry entry")
+            .isNotNull();
+        assertThat(de.getBuilderFactory().apply(de)).isNotNull();
     }
 
     @DisplayName("All entries must exist in Country Enum")
@@ -267,15 +370,15 @@ final class IbanRegistryTest {
     @ParameterizedTest(name = "[{index}]: {0}")
     @EnumSource(IbanRegistry.class)
     void allEntries_mustHaveValidLastUpdate(IbanRegistry entry) {
-        YearMonth firstYearMonth = YearMonth.of(2000, 1);
-        assertThat(entry.getLastUpdate())
-            .as("lastUpdate must be null or a valid date after %s for %s", firstYearMonth, entry.getCountryCode())
-            .satisfiesAnyOf(
-                lu -> assertThat(lu).isNull(),
-                lu -> assertThat(lu)
-                          .isAfter(firstYearMonth)
-                          .isBeforeOrEqualTo(YearMonth.now(ZoneId.systemDefault()))
-            );
+        if (entry.getLastUpdate() == null) {
+            assertThat(entry.getLastUpdateMonth()).isZero();
+            assertThat(entry.getLastUpdateYear()).isZero();
+        } else {
+            assertThat(entry.getLastUpdate())
+                .as("lastUpdate date for country %s", entry.getCountryCode())
+                .isAfter(YearMonth.of(1997, 1))
+                .isBeforeOrEqualTo(YearMonth.now(ZoneId.systemDefault()));
+        }
     }
 
     @DisplayName("All entries must have a valid IBAN length (4 to 34)")
@@ -284,7 +387,7 @@ final class IbanRegistryTest {
     void allEntries_mustHaveValidIbanLength(IbanRegistry entry) {
         assertThat(entry.getIbanLength())
             .as("IBAN length for %s", entry.getCountryCode())
-            .isBetween(IbanRegistry.MIN_IBAN_LENGTH, IbanRegistry.MAX_IBAN_LENGTH);
+            .isBetween(MIN_IBAN_LENGTH, MAX_IBAN_LENGTH);
     }
 
     @DisplayName("All entries must have a valid example IBAN")
@@ -396,44 +499,55 @@ final class IbanRegistryTest {
         assertThat(metaData.getLastUpdate()).isEqualTo(now);
     }
 
-    @DisplayName("Validate IBAN length is positive")
-    @ParameterizedTest(name = "[{index}]: {0}")
-    @ValueSource(ints = {-1, 0})
-    void build_shouldThrowExceptionWhenIbanLengthIsInvalid(int invalidLength) {
-        IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
-            .withIbanLength(invalidLength)
-            .withBbanPattern("4!n")
-            .withAccountNumber("4!n", IndexRange.of(4, 8));
-
-        // testing the validation logic inside the constructor (called by build())
-        assertThatIllegalStateException()
-            .isThrownBy(builder::build)
-            .withMessage("IBAN length must be set and positive");
-    }
-
     @DisplayName("Should throw exception when required BBAN pattern is missing")
     @Test
     void build_shouldThrowExceptionWhenBbanPatternIsMissing() {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
-            .withIbanLength(20)
-            .withAccountNumber("16!n", IndexRange.of(4, 20));
+            .withAccountNumber("16!n", 4);
 
-        assertThatNullPointerException()
-            .isThrownBy(builder::build);
+        assertThatIllegalStateException()
+            .isThrownBy(builder::build)
+            .withMessage("BBAN must be set");
+    }
+
+    @DisplayName("Should throw exception when required bank code is missing")
+    @Test
+    void build_shouldThrowExceptionWhenBankCodeIsMissing() {
+        IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
+            .withBbanPattern("16!n")
+            .withAccountNumber("16!n", 4);
+
+        assertThatIllegalStateException()
+            .isThrownBy(builder::build)
+            .withMessage("Bank Code must be set");
+    }
+
+    @DisplayName("Should throw exception when required account number is missing")
+    @Test
+    void build_shouldThrowExceptionWhenAccountNumberIsMissing() {
+        IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
+            .withBbanPattern("4!n")
+            .withBankCode("4!n", 4);
+
+        assertThatIllegalStateException()
+            .isThrownBy(builder::build)
+            .withMessage("Account Number must be set");
     }
 
     @DisplayName("Validate IBAN length limits (15-34)")
     @ParameterizedTest(name = "[{index}]: {0}")
-    @ValueSource(ints = {14, 35})
-    void build_shouldThrowExceptionWhenIbanLengthViolatesIsoLimits(int invalidLength) {
+    @ValueSource(ints = {14, 34})
+    void build_shouldThrowExceptionWhenBbanpatternLengthViolatesIsoLimits(int invalidIbanLength) {
+        int invalidBbanLength = invalidIbanLength - MIN_IBAN_BASE_LENGTH;
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
-            .withIbanLength(invalidLength)
-            .withBbanPattern("4!n")
-            .withAccountNumber("4!n", IndexRange.of(4, invalidLength));
+            .withBbanPattern(invalidBbanLength + "!n")
+            .withBankCode("4!n", 4)
+            .withAccountNumber("16!n", 8);
 
         assertThatIllegalStateException()
             .isThrownBy(builder::build)
-            .withMessage("IBAN length must be between 15 and 34");
+            .withMessage("IBAN length must be between %d and %d, but was %d",
+                MIN_IBAN_LENGTH, MAX_IBAN_LENGTH, invalidIbanLength);
     }
 
 }

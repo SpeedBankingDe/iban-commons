@@ -16,27 +16,31 @@
 package de.speedbanking.iban;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
+import de.speedbanking.iban.IbanComponent.IbanComponentType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
-import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.PatternCache;
 
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.IntSummaryStatistics;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * The definitive, immutable registry for all **ISO 13616-compliant national IBAN formats**.
@@ -77,11 +81,10 @@ public enum IbanRegistry {
      * </pre>
      */
     AD(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("4!n4!n12!c")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("12!c", IndexRange.of(12, 24))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("12!c", 12)
             .build(),
         MetaData.sepa("AD1200012030200359100100", YearMonth.of(2021, 3)),
         ContactData.of(
@@ -102,10 +105,9 @@ public enum IbanRegistry {
      * </pre>
      */
     AE(StructureData.builder()
-            .withIbanLength(23)
             .withBbanPattern("3!n16!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("16!n", IndexRange.of(7, 23))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("16!n", 7)
             .build(),
         MetaData.nonSepa("AE070331234567890123456", YearMonth.of(2025, 2)),
         ContactData.of(
@@ -126,12 +128,11 @@ public enum IbanRegistry {
      * </pre>
      */
     AL(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("8!n16!c")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("4!n", IndexRange.of(7, 11))
-            .withNationalCheckDigit(IndexRange.of(11, 12))
-            .withAccountNumber("16!c", IndexRange.of(12, 28))
+            .withBankCode("3!n", 4)
+            .withBranchCode("4!n", 7)
+            .withNationalCheckDigit("1!n", 11)
+            .withAccountNumber("16!c", 12)
             .build(),
         MetaData.nonSepa("AL47212110090000000235698741", YearMonth.of(2025, 6)),
         ContactData.of(
@@ -152,10 +153,9 @@ public enum IbanRegistry {
      * </pre>
      */
     AT(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("5!n11!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withAccountNumber("11!n", IndexRange.of(9, 20))
+            .withBankCode("5!n", 4)
+            .withAccountNumber("11!n", 9)
             .build(),
         MetaData.sepa("AT611904300234573201", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -176,10 +176,9 @@ public enum IbanRegistry {
      * </pre>
      */
     AZ(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!a20!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("20!c", IndexRange.of(8, 28))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("20!c", 8)
             .build(),
         MetaData.nonSepa("AZ21NABZ00000000137010001944", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -200,12 +199,11 @@ public enum IbanRegistry {
      * </pre>
      */
     BA(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("3!n3!n8!n2!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("3!n", IndexRange.of(7, 10))
-            .withAccountNumber("8!n", IndexRange.of(10, 18))
-            .withNationalCheckDigit(IndexRange.of(18, 20))
+            .withBankCode("3!n", 4)
+            .withBranchCode("3!n", 7)
+            .withAccountNumber("8!n", 10)
+            .withNationalCheckDigit("2!n", 18)
             .build(),
         MetaData.nonSepa("BA391290079401028494", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -226,11 +224,10 @@ public enum IbanRegistry {
      * </pre>
      */
     BE(StructureData.builder()
-            .withIbanLength(16)
             .withBbanPattern("3!n7!n2!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("7!n", IndexRange.of(7, 14))
-            .withNationalCheckDigit(IndexRange.of(14, 16))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("7!n", 7)
+            .withNationalCheckDigit("2!n", 14)
             .build(),
         MetaData.sepa("BE68539007547034", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -251,17 +248,17 @@ public enum IbanRegistry {
      * </pre>
      */
     BG(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("4!a4!n2!n8!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("8!c", IndexRange.of(14, 22))
+            .withBankCode("4!a", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountType("2!n", 12)
+            .withAccountNumber("8!c", 14)
             .build(),
         MetaData.sepa("BG80BNBG96611020345678", YearMonth.of(2016, 8)),
         ContactData.of(
             "Bulgarian National Bank", "Payment Systems and Minimum Reserves Directorate", "1, Knyaz Alexander I Sq.",
             "1000 Sofia, Bulgaria", "rtgs@bnbank.org", "+ 359 29145761"),
-        IbanBuilder.BgIbanBuilder::new
+        IbanBuilder.AccountTypeIbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -276,10 +273,9 @@ public enum IbanRegistry {
      * </pre>
      */
     BH(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("4!a14!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("14!c", IndexRange.of(8, 22))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("14!c", 8)
             .build(),
         MetaData.nonSepa("BH67BMAG00001299123456", YearMonth.of(2012, 1)),
         ContactData.of(
@@ -300,11 +296,10 @@ public enum IbanRegistry {
      * </pre>
      */
     BI(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("13!n", IndexRange.of(14, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("13!n", 14)
             .build(),
         MetaData.nonSepa("BI4210000100010000332045181", YearMonth.of(2021, 10)),
         ContactData.of(
@@ -325,17 +320,17 @@ public enum IbanRegistry {
      * </pre>
      */
     BR(StructureData.builder()
-            .withIbanLength(29)
             .withBbanPattern("8!n5!n10!n1!a1!c")
-            .withBankCode("8!n", IndexRange.of(4, 12))
-            .withBranchCode("5!n", IndexRange.of(12, 17))
-            .withAccountNumber("10!n", IndexRange.of(17, 27))
+            .withBankCode("8!n", 4)
+            .withBranchCode("5!n", 12)
+            .withAccountNumber("10!n", 17)
+            .withAccountTypeAndControl("1!a1!c", 27)
             .build(),
         MetaData.nonSepa("BR1800360305000010009795493C1", YearMonth.of(2016, 8)),
         ContactData.of(
             "Banco Central do Brasil", "DEBAN - Departamento de Operações Bancárias e de Sistema de Pagamentos", "SBS Quadra 3 Bloco B",
             "71.070-900 Brasília", "iban@bcb.gov.br", "+ 55 (61)34142666 / + 55 (51)32157339"),
-        IbanBuilder.BrIbanBuilder::new
+        IbanBuilder.AccountTypeAndControlIbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -350,11 +345,10 @@ public enum IbanRegistry {
      * </pre>
      */
     BY(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!c4!n16!c")
-            .withBankCode("4!c", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("16!c", IndexRange.of(12, 28))
+            .withBankCode("4!c", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("16!c", 12)
             .build(),
         MetaData.nonSepa("BY13NBRB3600900000002Z00AB00", YearMonth.of(2024, 2)),
         ContactData.of(
@@ -375,10 +369,9 @@ public enum IbanRegistry {
      * </pre>
      */
     CH(StructureData.builder()
-            .withIbanLength(21)
             .withBbanPattern("5!n12!c")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withAccountNumber("12!c", IndexRange.of(9, 21))
+            .withBankCode("5!n", 4)
+            .withAccountNumber("12!c", 9)
             .build(),
         MetaData.sepa("CH9300762011623852957", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -399,10 +392,9 @@ public enum IbanRegistry {
      * </pre>
      */
     CR(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("4!n14!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("14!n", IndexRange.of(8, 22))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("14!n", 8)
             .build(),
         MetaData.nonSepa("CR05015202001026284066", YearMonth.of(2019, 1)),
         ContactData.of(
@@ -423,11 +415,10 @@ public enum IbanRegistry {
      * </pre>
      */
     CY(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("3!n5!n16!c")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("5!n", IndexRange.of(7, 12))
-            .withAccountNumber("16!c", IndexRange.of(12, 28))
+            .withBankCode("3!n", 4)
+            .withBranchCode("5!n", 7)
+            .withAccountNumber("16!c", 12)
             .build(),
         MetaData.sepa("CY17002001280000001200527600", YearMonth.of(2009, 8)),
         ContactData.of(
@@ -448,10 +439,9 @@ public enum IbanRegistry {
      * </pre>
      */
     CZ(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("4!n6!n10!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("16!n", 8)
             .build(),
         MetaData.sepa("CZ6508000000192000145399", YearMonth.of(2025, 6)),
         ContactData.of(
@@ -472,10 +462,9 @@ public enum IbanRegistry {
      * </pre>
      */
     DE(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("8!n10!n")
-            .withBankCode("8!n", IndexRange.of(4, 12))
-            .withAccountNumber("10!n", IndexRange.of(12, 22))
+            .withBankCode("8!n", 4)
+            .withAccountNumber("10!n", 12)
             .build(),
         MetaData.sepa("DE89370400440532013000", YearMonth.of(2011, 1)),
         ContactData.of(
@@ -496,12 +485,11 @@ public enum IbanRegistry {
      * </pre>
      */
     DJ(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.nonSepa("DJ2100010000000154000100186", YearMonth.of(2022, 5)),
         ContactData.of(
@@ -522,10 +510,9 @@ public enum IbanRegistry {
      * </pre>
      */
     DK(StructureData.builder()
-            .withIbanLength(18)
             .withBbanPattern("4!n9!n1!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("10!n", IndexRange.of(8, 18))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("10!n", 8)
             .build(),
         MetaData.sepa("DK5000400440116243", YearMonth.of(2018, 11)),
         ContactData.of(
@@ -546,10 +533,9 @@ public enum IbanRegistry {
      * </pre>
      */
     DO(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!c20!n")
-            .withBankCode("4!c", IndexRange.of(4, 8))
-            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .withBankCode("4!c", 4)
+            .withAccountNumber("20!n", 8)
             .build(),
         MetaData.nonSepa("DO28BAGR00000001212453611324", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -570,12 +556,11 @@ public enum IbanRegistry {
      * </pre>
      */
     EE(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("2!n14!n")
-            .withBankCode("2!n", IndexRange.of(4, 6))
-            .withBranchCode("2!n", IndexRange.of(6, 8))
-            .withAccountNumber("11!n", IndexRange.of(8, 19))
-            .withNationalCheckDigit(IndexRange.of(19, 20))
+            .withBankCode("2!n", 4)
+            .withBranchCode("2!n", 6)
+            .withAccountNumber("11!n", 8)
+            .withNationalCheckDigit("1!n", 19)
             .build(),
         MetaData.sepa("EE382200221020145685", YearMonth.of(2024, 12)),
         ContactData.of(
@@ -596,11 +581,10 @@ public enum IbanRegistry {
      * </pre>
      */
     EG(StructureData.builder()
-            .withIbanLength(29)
             .withBbanPattern("4!n4!n17!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("17!n", IndexRange.of(12, 29))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("17!n", 12)
             .build(),
         MetaData.nonSepa("EG380019000500000000263180002", YearMonth.of(2020, 1)),
         ContactData.of(
@@ -621,12 +605,11 @@ public enum IbanRegistry {
      * </pre>
      */
     ES(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("4!n4!n1!n1!n10!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withNationalCheckDigit(IndexRange.of(12, 14))
-            .withAccountNumber("10!n", IndexRange.of(14, 24))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withNationalCheckDigit("2!n", 12)
+            .withAccountNumber("10!n", 14)
             .build(),
         MetaData.sepa("ES9121000418450200051332", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -647,11 +630,10 @@ public enum IbanRegistry {
      * </pre>
      */
     FI(StructureData.builder()
-            .withIbanLength(18)
             .withBbanPattern("3!n11!n")
-            .withBankCode("6!n", IndexRange.of(4, 10))
-            .withAccountNumber("7!n", IndexRange.of(10, 17))
-            .withNationalCheckDigit(IndexRange.of(17, 18))
+            .withBankCode("6!n", 4)
+            .withAccountNumber("7!n", 10)
+            .withNationalCheckDigit("1!n", 17)
             .build(),
         MetaData.sepa("FI2112345600000785", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -679,10 +661,9 @@ public enum IbanRegistry {
      * </pre>
      */
     FK(StructureData.builder()
-            .withIbanLength(18)
             .withBbanPattern("2!a12!n")
-            .withBankCode("2!a", IndexRange.of(4, 6))
-            .withAccountNumber("12!n", IndexRange.of(6, 18))
+            .withBankCode("2!a", 4)
+            .withAccountNumber("12!n", 6)
             .build(),
         MetaData.nonSepa("FK88SC123456789012", YearMonth.of(2023, 7)),
         ContactData.of(
@@ -703,11 +684,10 @@ public enum IbanRegistry {
      * </pre>
      */
     FO(StructureData.builder()
-            .withIbanLength(18)
             .withBbanPattern("4!n9!n1!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("9!n", IndexRange.of(8, 17))
-            .withNationalCheckDigit(IndexRange.of(17, 18))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("9!n", 8)
+            .withNationalCheckDigit("1!n", 17)
             .build(),
         MetaData.nonSepa("FO6264600001631634", YearMonth.of(2017, 2)),
         DK.contactData,
@@ -726,12 +706,11 @@ public enum IbanRegistry {
      * </pre>
      */
     FR(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!c2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!c", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!c", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.sepa("FR1420041010050500013M02606", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -836,11 +815,10 @@ public enum IbanRegistry {
      * </pre>
      */
     GB(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("4!a6!n8!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withBranchCode("6!n", IndexRange.of(8, 14))
-            .withAccountNumber("8!n", IndexRange.of(14, 22))
+            .withBankCode("4!a", 4)
+            .withBranchCode("6!n", 8)
+            .withAccountNumber("8!n", 14)
             .build(),
         MetaData.sepa("GB29NWBK60161331926819", YearMonth.of(2017, 5)),
         ContactData.of(
@@ -882,10 +860,9 @@ public enum IbanRegistry {
      * </pre>
      */
     GE(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("2!a16!n")
-            .withBankCode("2!a", IndexRange.of(4, 6))
-            .withAccountNumber("16!n", IndexRange.of(6, 22))
+            .withBankCode("2!a", 4)
+            .withAccountNumber("16!n", 6)
             .build(),
         MetaData.nonSepa("GE29NB0000000101904917", YearMonth.of(2023, 4)),
         ContactData.of(
@@ -906,10 +883,9 @@ public enum IbanRegistry {
      * </pre>
      */
     GI(StructureData.builder()
-            .withIbanLength(23)
             .withBbanPattern("4!a15!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("15!c", IndexRange.of(8, 23))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("15!c", 8)
             .build(),
         MetaData.sepa("GI75NWBK000000007099453", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -930,10 +906,9 @@ public enum IbanRegistry {
      * </pre>
      */
     GL(StructureData.builder()
-            .withIbanLength(18)
             .withBbanPattern("4!n9!n1!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("10!n", IndexRange.of(8, 18))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("10!n", 8)
             .build(),
         MetaData.nonSepa("GL8964710001000206", YearMonth.of(2017, 2)),
         DK.contactData,
@@ -952,11 +927,10 @@ public enum IbanRegistry {
      * </pre>
      */
     GR(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("3!n4!n16!c")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("4!n", IndexRange.of(7, 11))
-            .withAccountNumber("16!c", IndexRange.of(11, 27))
+            .withBankCode("3!n", 4)
+            .withBranchCode("4!n", 7)
+            .withAccountNumber("16!c", 11)
             .build(),
         MetaData.sepa("GR1601101250000000012300695", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -977,10 +951,9 @@ public enum IbanRegistry {
      * </pre>
      */
     GT(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!c20!c")
-            .withBankCode("4!c", IndexRange.of(4, 8))
-            .withAccountNumber("20!c", IndexRange.of(8, 28))
+            .withBankCode("4!c", 4)
+            .withAccountNumber("20!c", 8)
             .build(),
         MetaData.nonSepa("GT82TRAJ01020000001210029690", YearMonth.of(2016, 10)),
         ContactData.of(
@@ -1001,10 +974,9 @@ public enum IbanRegistry {
      * </pre>
      */
     HN(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!a20!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("20!n", 8)
             .build(),
         MetaData.nonSepa("HN88CABF00000000000250005469", YearMonth.of(2024, 12)),
         ContactData.of(
@@ -1025,10 +997,9 @@ public enum IbanRegistry {
      * </pre>
      */
     HR(StructureData.builder()
-            .withIbanLength(21)
             .withBbanPattern("7!n10!n")
-            .withBankCode("7!n", IndexRange.of(4, 11))
-            .withAccountNumber("10!n", IndexRange.of(11, 21))
+            .withBankCode("7!n", 4)
+            .withAccountNumber("10!n", 11)
             .build(),
         MetaData.sepa("HR1210010051863000160", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -1049,12 +1020,11 @@ public enum IbanRegistry {
      * </pre>
      */
     HU(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("3!n4!n1!n15!n1!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("4!n", IndexRange.of(7, 11))
-            .withAccountNumber("16!n", IndexRange.of(11, 27))
-            .withNationalCheckDigit(IndexRange.of(27, 28))
+            .withBankCode("3!n", 4)
+            .withBranchCode("4!n", 7)
+            .withAccountNumber("16!n", 11)
+            .withNationalCheckDigit("1!n", 27)
             .build(),
         MetaData.sepa("HU42117730161111101800000000", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -1075,11 +1045,10 @@ public enum IbanRegistry {
      * </pre>
      */
     IE(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("4!a6!n8!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withBranchCode("6!n", IndexRange.of(8, 14))
-            .withAccountNumber("8!n", IndexRange.of(14, 22))
+            .withBankCode("4!a", 4)
+            .withBranchCode("6!n", 8)
+            .withAccountNumber("8!n", 14)
             .build(),
         MetaData.sepa("IE29AIBK93115212345678", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -1100,11 +1069,10 @@ public enum IbanRegistry {
      * </pre>
      */
     IL(StructureData.builder()
-            .withIbanLength(23)
             .withBbanPattern("3!n3!n13!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("3!n", IndexRange.of(7, 10))
-            .withAccountNumber("13!n", IndexRange.of(10, 23))
+            .withBankCode("3!n", 4)
+            .withBranchCode("3!n", 7)
+            .withAccountNumber("13!n", 10)
             .build(),
         MetaData.nonSepa("IL620108000000099999999", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -1125,11 +1093,10 @@ public enum IbanRegistry {
      * </pre>
      */
     IQ(StructureData.builder()
-            .withIbanLength(23)
             .withBbanPattern("4!a3!n12!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withBranchCode("3!n", IndexRange.of(8, 11))
-            .withAccountNumber("12!n", IndexRange.of(11, 23))
+            .withBankCode("4!a", 4)
+            .withBranchCode("3!n", 8)
+            .withAccountNumber("12!n", 11)
             .build(),
         MetaData.nonSepa("IQ98NBIQ850123456789012", YearMonth.of(2016, 11)),
         ContactData.of(
@@ -1150,16 +1117,17 @@ public enum IbanRegistry {
      * </pre>
      */
     IS(StructureData.builder()
-            .withIbanLength(26)
             .withBbanPattern("4!n2!n6!n10!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("6!n", IndexRange.of(10, 16))
+            .withBankCode("4!n", 4)
+            .withBranchCode("2!n", 8)
+            .withAccountNumber("6!n", 10)
+            .withIdentificationNumber("10!n", 16)
             .build(),
         MetaData.sepa("IS140159260076545510730339", YearMonth.of(2016, 8)),
         ContactData.of(
             "Icelandic Banks Data Centre", null, "Katrinartun 2",
             "105 Reykjavik", "hjalp@rb.is", "+ 354 5698877"),
-        IbanBuilder.IsIbanBuilder::new
+        IbanBuilder.IdentificationNumberIbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1174,12 +1142,11 @@ public enum IbanRegistry {
      * </pre>
      */
     IT(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("1!a5!n5!n12!c")
-            .withNationalCheckDigit(IndexRange.of(4, 5))
-            .withBankCode("5!n", IndexRange.of(5, 10))
-            .withBranchCode("5!n", IndexRange.of(10, 15))
-            .withAccountNumber("12!c", IndexRange.of(15, 27))
+            .withNationalCheckDigit("1!a", 4)
+            .withBankCode("5!n", 5)
+            .withBranchCode("5!n", 10)
+            .withAccountNumber("12!c", 15)
             .build(),
         MetaData.sepa("IT60X0542811101000000123456", YearMonth.of(2013, 3)),
         ContactData.of(
@@ -1200,11 +1167,10 @@ public enum IbanRegistry {
      * </pre>
      */
     JO(StructureData.builder()
-            .withIbanLength(30)
             .withBbanPattern("4!a4!n18!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("18!c", IndexRange.of(12, 30))
+            .withBankCode("4!a", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("18!c", 12)
             .build(),
         MetaData.nonSepa("JO94CBJO0010000000000131000302", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1225,10 +1191,9 @@ public enum IbanRegistry {
      * </pre>
      */
     KW(StructureData.builder()
-            .withIbanLength(30)
             .withBbanPattern("4!a22!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("22!c", IndexRange.of(8, 30))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("22!c", 8)
             .build(),
         MetaData.nonSepa("KW81CBKU0000000000001234560101", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1249,10 +1214,9 @@ public enum IbanRegistry {
      * </pre>
      */
     KZ(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("3!n13!c")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("13!c", IndexRange.of(7, 20))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("13!c", 7)
             .build(),
         MetaData.nonSepa("KZ86125KZT5004100100", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1273,10 +1237,9 @@ public enum IbanRegistry {
      * </pre>
      */
     LB(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!n20!c")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("20!c", IndexRange.of(8, 28))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("20!c", 8)
             .build(),
         MetaData.nonSepa("LB62099900000001001901229114", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -1297,10 +1260,9 @@ public enum IbanRegistry {
      * </pre>
      */
     LC(StructureData.builder()
-            .withIbanLength(32)
             .withBbanPattern("4!a24!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("24!c", IndexRange.of(8, 32))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("24!c", 8)
             .build(),
         MetaData.nonSepa("LC55HEMM000100010012001200023015", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -1321,10 +1283,9 @@ public enum IbanRegistry {
      * </pre>
      */
     LI(StructureData.builder()
-            .withIbanLength(21)
             .withBbanPattern("5!n12!c")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withAccountNumber("12!c", IndexRange.of(9, 21))
+            .withBankCode("5!n", 4)
+            .withAccountNumber("12!c", 9)
             .build(),
         MetaData.sepa("LI21088100002324013AA", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1345,10 +1306,9 @@ public enum IbanRegistry {
      * </pre>
      */
     LT(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("5!n11!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withAccountNumber("11!n", IndexRange.of(9, 20))
+            .withBankCode("5!n", 4)
+            .withAccountNumber("11!n", 9)
             .build(),
         MetaData.sepa("LT121000011101001000", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1369,10 +1329,9 @@ public enum IbanRegistry {
      * </pre>
      */
     LU(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("3!n13!c")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("13!c", IndexRange.of(7, 20))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("13!c", 7)
             .build(),
         MetaData.sepa("LU280019400644750000", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1393,10 +1352,9 @@ public enum IbanRegistry {
      * </pre>
      */
     LV(StructureData.builder()
-            .withIbanLength(21)
             .withBbanPattern("4!a13!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("13!c", IndexRange.of(8, 21))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("13!c", 8)
             .build(),
         MetaData.sepa("LV80BANK0000435195001", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1417,11 +1375,10 @@ public enum IbanRegistry {
      * </pre>
      */
     LY(StructureData.builder()
-            .withIbanLength(25)
             .withBbanPattern("3!n3!n15!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("3!n", IndexRange.of(7, 10))
-            .withAccountNumber("15!n", IndexRange.of(10, 25))
+            .withBankCode("3!n", 4)
+            .withBranchCode("3!n", 7)
+            .withAccountNumber("15!n", 10)
             .build(),
         MetaData.nonSepa("LY83002048000020100120361", YearMonth.of(2020, 9)),
         ContactData.of(
@@ -1442,12 +1399,11 @@ public enum IbanRegistry {
      * </pre>
      */
     MC(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!c2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!c", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!c", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.sepa("MC5811222000010123456789030", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1468,10 +1424,9 @@ public enum IbanRegistry {
      * </pre>
      */
     MD(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("2!c18!c")
-            .withBankCode("2!c", IndexRange.of(4, 6))
-            .withAccountNumber("18!c", IndexRange.of(6, 24))
+            .withBankCode("2!c", 4)
+            .withAccountNumber("18!c", 6)
             .build(),
         MetaData.nonSepa("MD24AG000225100013104168", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1492,11 +1447,10 @@ public enum IbanRegistry {
      * </pre>
      */
     ME(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("3!n13!n2!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("13!n", IndexRange.of(7, 20))
-            .withNationalCheckDigit(IndexRange.of(20, 22))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("13!n", 7)
+            .withNationalCheckDigit("2!n", 20)
             .build(),
         MetaData.nonSepa("ME25505000012345678951", YearMonth.of(2010, 5)),
         ContactData.of(
@@ -1517,11 +1471,10 @@ public enum IbanRegistry {
      * </pre>
      */
     MK(StructureData.builder()
-            .withIbanLength(19)
             .withBbanPattern("3!n10!c2!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("10!c", IndexRange.of(7, 17))
-            .withNationalCheckDigit(IndexRange.of(17, 19))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("10!c", 7)
+            .withNationalCheckDigit("2!n", 17)
             .build(),
         MetaData.nonSepa("MK07250120000058984", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1542,10 +1495,9 @@ public enum IbanRegistry {
      * </pre>
      */
     MN(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("4!n12!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("12!n", IndexRange.of(8, 20))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("12!n", 8)
             .build(),
         MetaData.nonSepa("MN121234123456789123", YearMonth.of(2023, 4)),
         ContactData.of(
@@ -1566,12 +1518,11 @@ public enum IbanRegistry {
      * </pre>
      */
     MR(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.nonSepa("MR1300020001010000123456753", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -1592,11 +1543,10 @@ public enum IbanRegistry {
      * </pre>
      */
     MT(StructureData.builder()
-            .withIbanLength(31)
             .withBbanPattern("4!a5!n18!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withBranchCode("5!n", IndexRange.of(8, 13))
-            .withAccountNumber("18!c", IndexRange.of(13, 31))
+            .withBankCode("4!a", 4)
+            .withBranchCode("5!n", 8)
+            .withAccountNumber("18!c", 13)
             .build(),
         MetaData.sepa("MT84MALT011000012345MTLCAST001S", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1617,17 +1567,17 @@ public enum IbanRegistry {
      * </pre>
      */
     MU(StructureData.builder()
-            .withIbanLength(30)
             .withBbanPattern("4!a2!n2!n12!n3!n3!a")
-            .withBankCode("4!a2!n", IndexRange.of(4, 10))
-            .withBranchCode("2!n", IndexRange.of(10, 12))
-            .withAccountNumber("15!n", IndexRange.of(12, 27))
+            .withBankCode("4!a2!n", 4)
+            .withBranchCode("2!n", 10)
+            .withAccountNumber("15!n", 12)
+            .withNationalCode("3!a", 27)
             .build(),
         MetaData.nonSepa("MU17BOMM0101101030300200000MUR", YearMonth.of(2025, 10)),
         ContactData.of(
             "The Central Bank of Mauritius", null, "Sir William Newton Street",
             "Port Louis", null, null),
-        IbanBuilder.MuIbanBuilder::new
+        IbanBuilder.NationalCodeIbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1642,10 +1592,9 @@ public enum IbanRegistry {
      * </pre>
      */
     NI(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!a20!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("20!n", 8)
             .build(),
         MetaData.nonSepa("NI45BAPR00000013000003558124", YearMonth.of(2024, 12)),
         ContactData.of(
@@ -1666,10 +1615,9 @@ public enum IbanRegistry {
      * </pre>
      */
     NL(StructureData.builder()
-            .withIbanLength(18)
             .withBbanPattern("4!a10!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("10!n", IndexRange.of(8, 18))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("10!n", 8)
             .build(),
         MetaData.sepa("NL91ABNA0417164300", YearMonth.of(2020, 9)),
         ContactData.of(
@@ -1690,11 +1638,10 @@ public enum IbanRegistry {
      * </pre>
      */
     NO(StructureData.builder()
-            .withIbanLength(15)
             .withBbanPattern("4!n6!n1!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("6!n", IndexRange.of(8, 14))
-            .withNationalCheckDigit(IndexRange.of(14, 15))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("6!n", 8)
+            .withNationalCheckDigit("1!n", 14)
             .build(),
         MetaData.sepa("NO9386011117947", YearMonth.of(2009, 8)),
         ContactData.of(
@@ -1715,10 +1662,9 @@ public enum IbanRegistry {
      * </pre>
      */
     OM(StructureData.builder()
-            .withIbanLength(23)
             .withBbanPattern("3!n16!c")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("16!c", IndexRange.of(7, 23))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("16!c", 7)
             .build(),
         MetaData.nonSepa("OM810180000001299123456", YearMonth.of(2024, 3)),
         ContactData.of(
@@ -1739,10 +1685,9 @@ public enum IbanRegistry {
      * </pre>
      */
     PK(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("4!a16!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("16!n", 8)
             .build(),
         MetaData.nonSepa("PK36SCBL0000001123456702", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1763,17 +1708,17 @@ public enum IbanRegistry {
      * </pre>
      */
     PL(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("8!n16!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("4!n", IndexRange.of(7, 11))
-            .withAccountNumber("16!n", IndexRange.of(12, 28))
+            .withBankCode("3!n", 4)
+            .withBranchCode("4!n", 7)
+            .withNationalCode("1!n", 11)
+            .withAccountNumber("16!n", 12)
             .build(),
         MetaData.sepa("PL61109010140000071219812874", YearMonth.of(2025, 10)),
         ContactData.of(
             "Narodowy Bank Polski", "Payment Systems Deparment", "Świętokrzyska 11/21",
             "00 – 919 Warsaw", "sekretariat.dsp@nbp.pl", "48 22 185 27 25"),
-        IbanBuilder.PlIbanBuilder::new
+        IbanBuilder.NationalCodeIbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1788,10 +1733,9 @@ public enum IbanRegistry {
      * </pre>
      */
     PS(StructureData.builder()
-            .withIbanLength(29)
             .withBbanPattern("4!a21!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("21!c", IndexRange.of(8, 29))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("21!c", 8)
             .build(),
         MetaData.nonSepa("PS92PALS000000000400123456702", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1812,12 +1756,11 @@ public enum IbanRegistry {
      * </pre>
      */
     PT(StructureData.builder()
-            .withIbanLength(25)
             .withBbanPattern("4!n4!n11!n2!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("11!n", IndexRange.of(12, 23))
-            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("11!n", 12)
+            .withNationalCheckDigit("2!n", 23)
             .build(),
         MetaData.sepa("PT50000201231234567890154", YearMonth.of(2025, 12)),
         ContactData.of(
@@ -1838,10 +1781,9 @@ public enum IbanRegistry {
      * </pre>
      */
     QA(StructureData.builder()
-            .withIbanLength(29)
             .withBbanPattern("4!a21!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("21!c", IndexRange.of(8, 29))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("21!c", 8)
             .build(),
         MetaData.nonSepa("QA58DOHB00001234567890ABCDEFG", YearMonth.of(2014, 1)),
         ContactData.of(
@@ -1862,10 +1804,9 @@ public enum IbanRegistry {
      * </pre>
      */
     RO(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("4!a16!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("16!c", IndexRange.of(8, 24))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("16!c", 8)
             .build(),
         MetaData.sepa("RO49AAAA1B31007593840000", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1886,11 +1827,10 @@ public enum IbanRegistry {
      * </pre>
      */
     RS(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("3!n13!n2!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("13!n", IndexRange.of(7, 20))
-            .withNationalCheckDigit(IndexRange.of(20, 22))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("13!n", 7)
+            .withNationalCheckDigit("2!n", 20)
             .build(),
         MetaData.nonSepa("RS35260005601001611379", YearMonth.of(2017, 3)),
         ContactData.of(
@@ -1911,11 +1851,10 @@ public enum IbanRegistry {
      * </pre>
      */
     RU(StructureData.builder()
-            .withIbanLength(33)
             .withBbanPattern("9!n5!n15!c")
-            .withBankCode("9!n", IndexRange.of(4, 13))
-            .withBranchCode("5!n", IndexRange.of(13, 18))
-            .withAccountNumber("15!c", IndexRange.of(18, 33))
+            .withBankCode("9!n", 4)
+            .withBranchCode("5!n", 13)
+            .withAccountNumber("15!c", 18)
             .build(),
         MetaData.nonSepa("RU0304452522540817810538091310419", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -1936,10 +1875,9 @@ public enum IbanRegistry {
      * </pre>
      */
     SA(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("2!n18!c")
-            .withBankCode("2!n", IndexRange.of(4, 6))
-            .withAccountNumber("18!c", IndexRange.of(6, 24))
+            .withBankCode("2!n", 4)
+            .withAccountNumber("18!c", 6)
             .build(),
         MetaData.nonSepa("SA0380000000608010167519", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -1960,17 +1898,17 @@ public enum IbanRegistry {
      * </pre>
      */
     SC(StructureData.builder()
-            .withIbanLength(31)
             .withBbanPattern("4!a2!n2!n16!n3!a")
-            .withBankCode("4!a2!n", IndexRange.of(4, 10))
-            .withBranchCode("2!n", IndexRange.of(10, 12))
-            .withAccountNumber("16!n", IndexRange.of(12, 28))
+            .withBankCode("4!a2!n", 4)
+            .withBranchCode("2!n", 10)
+            .withAccountNumber("16!n", 12)
+            .withNationalCode("3!a", 28)
             .build(),
         MetaData.nonSepa("SC18SSCB11010000000000001497USD", YearMonth.of(2019, 10)),
         ContactData.of(
             "Central Bank of Seychelles", null, "Independence Avenue",
             "Victoria - Mahe", "Psd@cbs.sc; BankingServices@cbs.sc", null),
-        IbanBuilder.ScIbanBuilder::new
+        IbanBuilder.NationalCodeIbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -1985,10 +1923,9 @@ public enum IbanRegistry {
      * </pre>
      */
     SD(StructureData.builder()
-            .withIbanLength(18)
             .withBbanPattern("2!n12!n")
-            .withBankCode("2!n", IndexRange.of(4, 6))
-            .withAccountNumber("12!n", IndexRange.of(6, 18))
+            .withBankCode("2!n", 4)
+            .withAccountNumber("12!n", 6)
             .build(),
         MetaData.nonSepa("SD2129010501234001", YearMonth.of(2021, 10)),
         ContactData.of(
@@ -2009,11 +1946,10 @@ public enum IbanRegistry {
      * </pre>
      */
     SE(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("3!n16!n1!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("16!n", IndexRange.of(7, 23))
-            .withNationalCheckDigit(IndexRange.of(23, 24))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("16!n", 7)
+            .withNationalCheckDigit("1!n", 23)
             .build(),
         MetaData.sepa("SE4550000000058398257466", YearMonth.of(2009, 8)),
         ContactData.of(
@@ -2034,12 +1970,11 @@ public enum IbanRegistry {
      * </pre>
      */
     SI(StructureData.builder()
-            .withIbanLength(19)
             .withBbanPattern("2!n3!n8!n2!n")
-            .withBankCode("2!n", IndexRange.of(4, 6))
-            .withBranchCode("3!n", IndexRange.of(6, 9))
-            .withAccountNumber("8!n", IndexRange.of(9, 17))
-            .withNationalCheckDigit(IndexRange.of(17, 19))
+            .withBankCode("2!n", 4)
+            .withBranchCode("3!n", 6)
+            .withAccountNumber("8!n", 9)
+            .withNationalCheckDigit("2!n", 17)
             .build(),
         MetaData.sepa("SI56263300012039086", YearMonth.of(2016, 10)),
         ContactData.of(
@@ -2060,10 +1995,9 @@ public enum IbanRegistry {
      * </pre>
      */
     SK(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("4!n6!n10!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .withBankCode("4!n", 4)
+            .withAccountNumber("16!n", 8)
             .build(),
         MetaData.sepa("SK3112000000198742637541", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -2084,12 +2018,11 @@ public enum IbanRegistry {
      * </pre>
      */
     SM(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("1!a5!n5!n12!c")
-            .withNationalCheckDigit(IndexRange.of(4, 5))
-            .withBankCode("5!n", IndexRange.of(5, 10))
-            .withBranchCode("5!n", IndexRange.of(10, 15))
-            .withAccountNumber("12!c", IndexRange.of(15, 27))
+            .withNationalCheckDigit("1!a", 4)
+            .withBankCode("5!n", 5)
+            .withBranchCode("5!n", 10)
+            .withAccountNumber("12!c", 15)
             .build(),
         MetaData.sepa("SM86U0322509800000000270100", YearMonth.of(2016, 8)),
         ContactData.of(
@@ -2110,11 +2043,10 @@ public enum IbanRegistry {
      * </pre>
      */
     SO(StructureData.builder()
-            .withIbanLength(23)
             .withBbanPattern("4!n3!n12!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("3!n", IndexRange.of(8, 11))
-            .withAccountNumber("12!n", IndexRange.of(11, 23))
+            .withBankCode("4!n", 4)
+            .withBranchCode("3!n", 8)
+            .withAccountNumber("12!n", 11)
             .build(),
         MetaData.nonSepa("SO211000001001000100141", YearMonth.of(2025, 2)),
         ContactData.of(
@@ -2135,11 +2067,10 @@ public enum IbanRegistry {
      * </pre>
      */
     ST(StructureData.builder()
-            .withIbanLength(25)
             .withBbanPattern("4!n4!n11!n2!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("13!n", IndexRange.of(12, 25))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("13!n", 12)
             .build(),
         MetaData.nonSepa("ST23000100010051845310146", YearMonth.of(2020, 5)),
         ContactData.of(
@@ -2160,10 +2091,9 @@ public enum IbanRegistry {
      * </pre>
      */
     SV(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("4!a20!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("20!n", IndexRange.of(8, 28))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("20!n", 8)
             .build(),
         MetaData.nonSepa("SV62CENR00000000000000700025", YearMonth.of(2021, 3)),
         ContactData.of(
@@ -2184,11 +2114,10 @@ public enum IbanRegistry {
      * </pre>
      */
     TL(StructureData.builder()
-            .withIbanLength(23)
             .withBbanPattern("3!n14!n2!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("14!n", IndexRange.of(7, 21))
-            .withNationalCheckDigit(IndexRange.of(21, 23))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("14!n", 7)
+            .withNationalCheckDigit("2!n", 21)
             .build(),
         MetaData.nonSepa("TL380080012345678910157", YearMonth.of(2014, 11)),
         ContactData.of(
@@ -2209,12 +2138,11 @@ public enum IbanRegistry {
      * </pre>
      */
     TN(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("2!n3!n13!n2!n")
-            .withBankCode("2!n", IndexRange.of(4, 6))
-            .withBranchCode("3!n", IndexRange.of(6, 9))
-            .withAccountNumber("13!n", IndexRange.of(9, 22))
-            .withNationalCheckDigit(IndexRange.of(22, 24))
+            .withBankCode("2!n", 4)
+            .withBranchCode("3!n", 6)
+            .withAccountNumber("13!n", 9)
+            .withNationalCheckDigit("2!n", 22)
             .build(),
         MetaData.nonSepa("TN5910006035183598478831", YearMonth.of(2016, 5)),
         ContactData.of(
@@ -2235,11 +2163,10 @@ public enum IbanRegistry {
      * </pre>
      */
     TR(StructureData.builder()
-            .withIbanLength(26)
             .withBbanPattern("5!n1!n16!c")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withNationalCheckDigit(IndexRange.of(9, 10))
-            .withAccountNumber("16!c", IndexRange.of(10, 26))
+            .withBankCode("5!n", 4)
+            .withNationalCheckDigit("1!n", 9)
+            .withAccountNumber("16!c", 10)
             .build(),
         MetaData.nonSepa("TR330006100519786457841326", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -2260,10 +2187,9 @@ public enum IbanRegistry {
      * </pre>
      */
     UA(StructureData.builder()
-            .withIbanLength(29)
             .withBbanPattern("6!n19!c")
-            .withBankCode("6!n", IndexRange.of(4, 10))
-            .withAccountNumber("19!n", IndexRange.of(10, 29))
+            .withBankCode("6!n", 4)
+            .withAccountNumber("19!n", 10)
             .build(),
         MetaData.nonSepa("UA213223130000026007233566001", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -2284,10 +2210,9 @@ public enum IbanRegistry {
      * </pre>
      */
     VA(StructureData.builder()
-            .withIbanLength(22)
             .withBbanPattern("3!n15!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("15!n", IndexRange.of(7, 22))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("15!n", 7)
             .build(),
         MetaData.sepa("VA59001123000012345678", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -2308,10 +2233,9 @@ public enum IbanRegistry {
      * </pre>
      */
     VG(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("4!a16!n")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withAccountNumber("16!n", IndexRange.of(8, 24))
+            .withBankCode("4!a", 4)
+            .withAccountNumber("16!n", 8)
             .build(),
         MetaData.nonSepa("VG96VPVG0000012345678901", YearMonth.of(2025, 10)),
         ContactData.of(
@@ -2332,12 +2256,11 @@ public enum IbanRegistry {
      * </pre>
      */
     XK(StructureData.builder()
-            .withIbanLength(20)
             .withBbanPattern("4!n10!n2!n")
-            .withBankCode("2!n", IndexRange.of(4, 6))
-            .withBranchCode("2!n", IndexRange.of(6, 8))
-            .withAccountNumber("10!n", IndexRange.of(8, 18))
-            .withNationalCheckDigit(IndexRange.of(18, 20))
+            .withBankCode("2!n", 4)
+            .withBranchCode("2!n", 6)
+            .withAccountNumber("10!n", 8)
+            .withNationalCheckDigit("2!n", 18)
             .build(),
         MetaData.nonSepa("XK051212012345678906", YearMonth.of(2016, 9)),
         ContactData.of(
@@ -2358,11 +2281,10 @@ public enum IbanRegistry {
      * </pre>
      */
     YE(StructureData.builder()
-            .withIbanLength(30)
             .withBbanPattern("4!a4!n18!c")
-            .withBankCode("4!a", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("18!c", IndexRange.of(12, 30))
+            .withBankCode("4!a", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("18!c", 12)
             .build(),
         MetaData.nonSepa("YE15CBYE0001018861234567891234", YearMonth.of(2024, 7)),
         ContactData.of(
@@ -2385,12 +2307,11 @@ public enum IbanRegistry {
      * </pre>
      */
     AO(StructureData.builder()
-            .withIbanLength(25)
             .withBbanPattern("4!n4!n11!n2!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("11!n", IndexRange.of(12, 23))
-            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("11!n", 12)
+            .withNationalCheckDigit("2!n", 23)
             .build(),
         MetaData.nonSepa("AO06000600000100037131174", null),
         ContactData.of(
@@ -2411,12 +2332,11 @@ public enum IbanRegistry {
      * </pre>
      */
     BF(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!c5!n11!n2!n")
-            .withBankCode("5!c", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!c", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.nonSepa("BF21BF084010130046357400039", null),
         ContactData.of(
@@ -2437,12 +2357,11 @@ public enum IbanRegistry {
      * </pre>
      */
     BJ(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("5!c5!n12!n2!n")
-            .withBankCode("5!c", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("12!n", IndexRange.of(14, 26))
-            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .withBankCode("5!c", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("12!n", 14)
+            .withNationalCheckDigit("2!n", 26)
             .build(),
         MetaData.nonSepa("BJ66BJ0610100100144390000769", null),
         BF.contactData,
@@ -2461,12 +2380,11 @@ public enum IbanRegistry {
      * </pre>
      */
     CF(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.nonSepa("CF4220001000010120069700160", null),
         ContactData.of(
@@ -2487,15 +2405,13 @@ public enum IbanRegistry {
      * </pre>
      */
     CG(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
-        MetaData.of(
-            false, "CG3930011000101013451300019", null),
+        MetaData.nonSepa("CG3930011000101013451300019", null),
         ContactData.of(
             "BEAC", null, "Av. Sergent Malamine, B.P. 126",
             "Brazzaville", "beacbzv@beac.int", "+242 22 281 10 73"),
@@ -2514,15 +2430,13 @@ public enum IbanRegistry {
      * </pre>
      */
     CI(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("5!c5!n12!n2!n")
-            .withBankCode("5!c", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("12!n", IndexRange.of(14, 26))
-            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .withBankCode("5!c", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("12!n", 14)
+            .withNationalCheckDigit("2!n", 26)
             .build(),
-        MetaData.of(
-            false, "CI93CI0080111301134291200589", null),
+        MetaData.nonSepa("CI93CI0080111301134291200589", null),
         BF.contactData,
         IbanBuilder.IbanBuilderWithBranchCode::new
     ),
@@ -2539,12 +2453,11 @@ public enum IbanRegistry {
      * </pre>
      */
     CM(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.nonSepa("CM2110003024000224016952238", null),
         ContactData.of(
@@ -2565,11 +2478,10 @@ public enum IbanRegistry {
      * </pre>
      */
     CV(StructureData.builder()
-            .withIbanLength(25)
             .withBbanPattern("4!n4!n13!c")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("13!c", IndexRange.of(12, 25))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("13!c", 12)
             .build(),
         MetaData.nonSepa("CV05123412341234123412341", null),
         ContactData.of(
@@ -2590,17 +2502,17 @@ public enum IbanRegistry {
      * </pre>
      */
     DZ(StructureData.builder()
-            .withIbanLength(24)
             .withBbanPattern("3!n5!n10!n2!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("5!n", IndexRange.of(7, 12))
-            .withAccountNumber("10!n", IndexRange.of(12, 22))
+            .withBankCode("3!n", 4)
+            .withBranchCode("5!n", 7)
+            .withAccountNumber("10!n", 12)
+            .withNationalCode("2!n", 22)
             .build(),
         MetaData.nonSepa("DZ1700021000011130000005", null),
         ContactData.of(
             "Bank of Algeria", null, "38, Avenue Franklin Roosevelt, Sidi M'Hamed",
             "Algiers", "communication@bank-of-algeria.dz", "+213 23 487 131"),
-        IbanBuilder.DzIbanBuilder::new
+        IbanBuilder.NationalCodeIbanBuilderWithBranchCode::new
     ),
 
     /**
@@ -2615,11 +2527,10 @@ public enum IbanRegistry {
      * </pre>
      */
     GA(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n13!c")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("13!c", IndexRange.of(14, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("13!c", 14)
             .build(),
         MetaData.nonSepa("GA2140021010032001890020126", null),
         ContactData.of(
@@ -2640,12 +2551,11 @@ public enum IbanRegistry {
      * </pre>
      */
     GQ(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.nonSepa("GQ7050002001003715228190196", null),
         ContactData.of(
@@ -2666,15 +2576,13 @@ public enum IbanRegistry {
      * </pre>
      */
     GW(StructureData.builder()
-            .withIbanLength(25)
             .withBbanPattern("4!c4!n11!n2!n")
-            .withBankCode("4!c", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("11!n", IndexRange.of(12, 23))
-            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .withBankCode("4!c", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("11!n", 12)
+            .withNationalCheckDigit("2!n", 23)
             .build(),
-        MetaData.of(
-            false, "GW04GW1430010181800637601", null),
+        MetaData.nonSepa("GW04GW1430010181800637601", null),
         BF.contactData,
         IbanBuilder.IbanBuilderWithBranchCode::new
     ),
@@ -2691,10 +2599,9 @@ public enum IbanRegistry {
      * </pre>
      */
     IR(StructureData.builder()
-            .withIbanLength(26)
             .withBbanPattern("3!n19!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withAccountNumber("19!n", IndexRange.of(7, 26))
+            .withBankCode("3!n", 4)
+            .withAccountNumber("19!n", 7)
             .build(),
         MetaData.nonSepa("IR062960000000100324200001", null),
         ContactData.of(
@@ -2715,12 +2622,11 @@ public enum IbanRegistry {
      * </pre>
      */
     KM(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
         MetaData.nonSepa("KM4600005000010010904400137", null),
         ContactData.of(
@@ -2741,11 +2647,10 @@ public enum IbanRegistry {
      * </pre>
      */
     MA(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("3!n5!n16!n")
-            .withBankCode("3!n", IndexRange.of(4, 7))
-            .withBranchCode("5!n", IndexRange.of(7, 12))
-            .withAccountNumber("16!n", IndexRange.of(12, 28))
+            .withBankCode("3!n", 4)
+            .withBranchCode("5!n", 7)
+            .withAccountNumber("16!n", 12)
             .build(),
         MetaData.nonSepa("MA64360815000001793222001617", null),
         ContactData.of(
@@ -2766,15 +2671,13 @@ public enum IbanRegistry {
      * </pre>
      */
     MG(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
-        MetaData.of(
-            false, "MG4600005030071289421016045", null),
+        MetaData.nonSepa("MG4600005030071289421016045", null),
         ContactData.of(
             "Banky Foiben'i Madagasikara (Banque Centrale de Madagascar)", null, "B.P. 550, Lalana Revolisiona Sosialista Antaninarenina",
             "101 Antananarivo", "banky-foibe@bfm.mg", "+261 20 22 217 51"),
@@ -2793,15 +2696,13 @@ public enum IbanRegistry {
      * </pre>
      */
     ML(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("5!c5!n12!n2!n")
-            .withBankCode("5!c", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("12!n", IndexRange.of(14, 26))
-            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .withBankCode("5!c", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("12!n", 14)
+            .withNationalCheckDigit("2!n", 26)
             .build(),
-        MetaData.of(
-            false, "ML13ML0160120102600100668497", null),
+        MetaData.nonSepa("ML13ML0160120102600100668497", null),
         BF.contactData,
         IbanBuilder.IbanBuilderWithBranchCode::new
     ),
@@ -2818,12 +2719,11 @@ public enum IbanRegistry {
      * </pre>
      */
     MZ(StructureData.builder()
-            .withIbanLength(25)
             .withBbanPattern("4!n4!n11!n2!n")
-            .withBankCode("4!n", IndexRange.of(4, 8))
-            .withBranchCode("4!n", IndexRange.of(8, 12))
-            .withAccountNumber("11!n", IndexRange.of(12, 23))
-            .withNationalCheckDigit(IndexRange.of(23, 25))
+            .withBankCode("4!n", 4)
+            .withBranchCode("4!n", 8)
+            .withAccountNumber("11!n", 12)
+            .withNationalCheckDigit("2!n", 23)
             .build(),
         MetaData.nonSepa("MZ59000800005138555713187", null),
         ContactData.of(
@@ -2844,15 +2744,13 @@ public enum IbanRegistry {
      * </pre>
      */
     NE(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("5!c5!n12!n2!n")
-            .withBankCode("5!c", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("12!n", IndexRange.of(14, 26))
-            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .withBankCode("5!c", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("12!n", 14)
+            .withNationalCheckDigit("2!n", 26)
             .build(),
-        MetaData.of(
-            false, "NE58NE0380100100130305000268", null),
+        MetaData.nonSepa("NE58NE0380100100130305000268", null),
         BF.contactData,
         IbanBuilder.IbanBuilderWithBranchCode::new
     ),
@@ -2869,12 +2767,11 @@ public enum IbanRegistry {
      * </pre>
      */
     SN(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("5!c5!n12!n2!n")
-            .withBankCode("5!c", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("12!n", IndexRange.of(14, 26))
-            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .withBankCode("5!c", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("12!n", 14)
+            .withNationalCheckDigit("2!n", 26)
             .build(),
         MetaData.nonSepa("SN08SN1910100101260047607163", YearMonth.of(2015, 5)),
         BF.contactData,
@@ -2893,15 +2790,13 @@ public enum IbanRegistry {
      * </pre>
      */
     TD(StructureData.builder()
-            .withIbanLength(27)
             .withBbanPattern("5!n5!n11!n2!n")
-            .withBankCode("5!n", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("11!n", IndexRange.of(14, 25))
-            .withNationalCheckDigit(IndexRange.of(25, 27))
+            .withBankCode("5!n", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("11!n", 14)
+            .withNationalCheckDigit("2!n", 25)
             .build(),
-        MetaData.of(
-            false, "TD8960002000010271091600153", null),
+        MetaData.nonSepa("TD8960002000010271091600153", null),
         ContactData.of(
             "BEAC", null, "B.P. 50",
             "N'Djamena", "beacndj@beac.int", "+235 22 52 41 76"),
@@ -2920,16 +2815,15 @@ public enum IbanRegistry {
      * </pre>
      */
     TG(StructureData.builder()
-            .withIbanLength(28)
             .withBbanPattern("5!c5!n12!n2!n")
-            .withBankCode("5!c", IndexRange.of(4, 9))
-            .withBranchCode("5!n", IndexRange.of(9, 14))
-            .withAccountNumber("12!n", IndexRange.of(14, 26))
-            .withNationalCheckDigit(IndexRange.of(26, 28))
+            .withBankCode("5!c", 4)
+            .withBranchCode("5!n", 9)
+            .withAccountNumber("12!n", 14)
+            .withNationalCode("2!n", 26)
             .build(),
         MetaData.nonSepa("TG87TG0090100110232500400512", null),
         BF.contactData,
-        IbanBuilder.TgIbanBuilder::new
+        IbanBuilder.NationalCodeIbanBuilderWithBranchCode::new
     );
     // --- END: Enum Constants (manually maintained) ---
 
@@ -2947,29 +2841,37 @@ public enum IbanRegistry {
     /**
      * Cached read-only list of all {@link IbanRegistry} entries, sorted alphabetically by their ISO country code.
      */
-    static final List<IbanRegistry>     ALL_COUNTRIES        = Arrays.stream(values())
-        .sorted(comparing(IbanRegistry::getCountryCode))
-        .collect(collectingAndThen(
-            toList(),
-            Collections::unmodifiableList
-        ));
+    static final List<IbanRegistry> ALL_COUNTRIES = unmodifiableList(
+        Stream.of(values())
+            .sorted(comparing(IbanRegistry::getCountryCode))
+            .collect(toList())
+    );
 
     /** The minimum required length: Country Code (2) + Check Digits (2). */
-    static final int                    MIN_IBAN_BASE_LENGTH = 4;
+    static final int        MIN_IBAN_BASE_LENGTH = 4;
 
     /** ISO 13616 standard minimum. */
-    static final int                    MIN_IBAN_LENGTH;
+    public static final int MIN_IBAN_LENGTH;
 
     /** ISO 13616 standard maximum. */
-    public static final int             MAX_IBAN_LENGTH;
+    public static final int MAX_IBAN_LENGTH;
 
     static {
-        IntSummaryStatistics stats = ALL_COUNTRIES.stream()
-            .mapToInt(IbanRegistry::getIbanLength)
-            .summaryStatistics();
+        int min = Integer.MAX_VALUE;
+        int max = MIN_IBAN_BASE_LENGTH;
 
-        MIN_IBAN_LENGTH = stats.getCount() > 0 ? stats.getMin() : MIN_IBAN_BASE_LENGTH;
-        MAX_IBAN_LENGTH = stats.getCount() > 0 ? stats.getMax() : 34;
+        for (IbanRegistry entry : ALL_COUNTRIES) {
+            int len = entry.getIbanLength();
+            if (len < min) {
+                min = len;
+            }
+            if (len > max) {
+                max = len;
+            }
+        }
+
+        MIN_IBAN_LENGTH = min;
+        MAX_IBAN_LENGTH = max;
     }
 
     /** Index of first IBAN check digit within the full IBAN string (position 3, 0-based index 2). */
@@ -3025,7 +2927,7 @@ public enum IbanRegistry {
         this.contactData = Optional.ofNullable(contactData).orElse(ContactData.EMPTY);
         this.baseCountry = baseCountry == null ? this : baseCountry;
         this.builderFactory = requireNonNull(builderFactory, "builderFactory required");
-        String ibanPatternNoCountry = "2!n" + structureData.bbanPatternStr;
+        String ibanPatternNoCountry = "2!n" + structureData.getComponent(IbanComponentType.BBAN).getPattern();
         this.ibanRegex = PatternCache.getDefault().getPattern('^' + getCountryCode() + IbanPatternConverter.convertToRegex(ibanPatternNoCountry) + '$');
     }
 
@@ -3222,7 +3124,7 @@ public enum IbanRegistry {
      * @return the BBAN pattern string
      */
     public String getBbanPattern() {
-        return structureData.bbanPatternStr;
+        return structureData.getComponent(IbanComponentType.BBAN).getPattern();
     }
 
     /**
@@ -3235,25 +3137,46 @@ public enum IbanRegistry {
     }
 
     /**
+     * Returns the internal {@link IbanComponent} for the given component type, or {@code null}
+     * if this country's structure does not define that component.
+     * <p>
+     * Generic counterpart to the named accessors (e.g. {@link #getBankCodeComponent()}) for the
+     * rarer, country-specific component types (e.g. {@link IbanComponentType#ACCOUNT_TYPE},
+     * {@link IbanComponentType#NATIONAL_CODE}) that are only ever consulted by a single
+     * {@link IbanBuilder} subclass and therefore don't warrant their own named getter.
+     *
+     * @param type the component type, must not be null
+     * @return the component, or {@code null} if not defined for this country
+     */
+    IbanComponent getComponent(IbanComponentType type) {
+        return structureData.getComponent(type);
+    }
+
+    /**
+     * Returns the internal {@link IbanComponent} for the Bank Identifier Code.
+     *
+     * @return the bank code component
+     */
+    IbanComponent getBankCodeComponent() {
+        return structureData.getComponent(IbanComponentType.BANK_CODE);
+    }
+
+    /**
      * Returns the character pattern string for the Bank Identifier Code.
      *
      * @return the bank code pattern string
      */
     public String getBankCodePattern() {
-        return structureData.bankCodePatternStr;
+        return getBankCodeComponent().getPattern();
     }
 
     /**
-     * Returns the index range defining the position of the Bank Code within the IBAN.
+     * Returns the internal {@link IbanComponent} for the Branch Identifier Code.
      *
-     * @return the {@code IndexRange} for the bank code
+     * @return the branch code component, or {@code null} if this country has none
      */
-    IndexRange getBankCodeIndexRange() {
-        return structureData.bankCodeIndexRange;
-    }
-
-    public int getBankCodeLength() {
-        return getBankCodeIndexRange().length();
+    IbanComponent getBranchCodeComponent() {
+        return structureData.getComponent(IbanComponentType.BRANCH_CODE);
     }
 
     /**
@@ -3262,20 +3185,13 @@ public enum IbanRegistry {
      * @return the branch code pattern string
      */
     public String getBranchCodePattern() {
-        return structureData.branchCodePatternStr;
-    }
-
-    /**
-     * Returns the index range defining the position of the Branch Code within the IBAN.
-     *
-     * @return the {@code IndexRange} for the branch code, or {@code null}
-     */
-    IndexRange getBranchCodeIndexRange() {
-        return structureData.branchCodeIndexRange;
+        IbanComponent component = getBranchCodeComponent();
+        return component == null ? null : component.getPattern();
     }
 
     public int getBranchCodeLength() {
-        return getBranchCodeIndexRange() == null ? 0 : getBranchCodeIndexRange().length();
+        IbanComponent component = getBranchCodeComponent();
+        return component == null ? 0 : component.getLength();
     }
 
     /**
@@ -3284,7 +3200,16 @@ public enum IbanRegistry {
      * @return {@code true} if a branch code exists, {@code false} otherwise
      */
     public boolean hasBranchCode() {
-        return getBranchCodeIndexRange() != null;
+        return getBranchCodeComponent() != null;
+    }
+
+    /**
+     * Returns the internal {@link IbanComponent} for the Account Number.
+     *
+     * @return the account number component
+     */
+    IbanComponent getAccountNumberComponent() {
+        return structureData.getComponent(IbanComponentType.ACCOUNT_NUMBER);
     }
 
     /**
@@ -3293,16 +3218,7 @@ public enum IbanRegistry {
      * @return the branch code pattern string
      */
     public String getAccountNumberPattern() {
-        return structureData.accountNumberPatternStr;
-    }
-
-    /**
-     * Returns the index range defining the position of the Account Number within the IBAN.
-     *
-     * @return the {@code IndexRange} for the account number
-     */
-    IndexRange getAccountNumberIndexRange() {
-        return structureData.accountNumberIndexRange;
+        return getAccountNumberComponent().getPattern();
     }
 
     /**
@@ -3313,16 +3229,26 @@ public enum IbanRegistry {
      * @since 1.8.8
      */
     public int getAccountNumberLength() {
-        return structureData.accountNumberIndexRange.length();
+        return getAccountNumberComponent().getLength();
     }
 
     /**
-     * Returns the index range defining the position of the optional National Check Digit (NCD) within the IBAN.
+     * Returns the internal {@link IbanComponent} for the optional National Check Digit (NCD).
      *
-     * @return the {@code IndexRange} for the national check digit
+     * @return the national check digit component, or {@code null} if this country has none
      */
-    IndexRange getNationalCheckDigitIndexRange() {
-        return structureData.nationalCheckDigitIndexRange;
+    IbanComponent getNationalCheckDigitComponent() {
+        return structureData.getComponent(IbanComponentType.NATIONAL_CHECK_DIGIT);
+    }
+
+    /**
+     * Returns the character pattern string for the optional National Check Digit (NCD).
+     *
+     * @return the national check digit pattern string, or {@code null} if not applicable
+     */
+    public String getNationalCheckDigitPattern() {
+        IbanComponent component = getNationalCheckDigitComponent();
+        return component == null ? null : component.getPattern();
     }
 
     /**
@@ -3331,7 +3257,7 @@ public enum IbanRegistry {
      * @return {@code true} if a National Check Digit (NCD) exists, {@code false} otherwise
      */
     public boolean hasNationalCheckDigit() {
-        return structureData.nationalCheckDigitIndexRange != null;
+        return getNationalCheckDigitComponent() != null;
     }
 
     /**
@@ -3491,17 +3417,29 @@ public enum IbanRegistry {
             .add(getCountryCode() + " (" + getCountryName() + ")")
             .add("SEPA country: " + (isSepa() ? "Yes" : "No"))
             .add("IBAN len: " + getIbanLength())
-            .add("BBAN pattern: " + getBbanPattern())
-            .add("Bank Code: " + getBankCodeIndexRange());
-        if (getBranchCodeIndexRange() != null) {
-            joiner.add("Branch Code: " + getBranchCodeIndexRange());
-        }
+            .add("BBAN pattern: " + getBbanPattern());
+
+        structureData.streamComponentsByPosition()
+            .filter(c -> c.getType() != IbanComponentType.BBAN)
+            .forEach(
+            c -> joiner.add(c.getType().getLabel() + ": " + formatComponentPosition(c)));
+
         return joiner
-            .add("Account No: " + getAccountNumberIndexRange())
             .add("IBAN Example: " + getIbanExample())
             .add("Organization: " + getOrganisation())
             .add("Last Update: " + getLastUpdate())
             .toString();
+    }
+
+    /**
+     * Formats a component's position as {@code beginIndex-inclusiveEndIndex (length)},
+     * e.g. {@code "4-11 (8)"} for a component spanning IBAN positions 4 up to, but excluding, 12.
+     *
+     * @param component the component to format, must not be null
+     * @return the formatted position string
+     */
+    private static String formatComponentPosition(IbanComponent component) {
+        return component.getBeginIndex() + "-" + (component.getEndIndex() - 1) + " (" + component.getLength() + ")";
     }
 
     /**
@@ -3607,34 +3545,33 @@ public enum IbanRegistry {
      * The builder pattern is used to handle optional index ranges and improve legibility.
      */
     static final class StructureData {
-        private final int        ibanLength;
-        private final String     bbanPatternStr;
 
-        private final String     bankCodePatternStr;
-        private final IndexRange bankCodeIndexRange;
-
-        private final String     branchCodePatternStr;
-        private final IndexRange branchCodeIndexRange;
-
-        private final String     accountNumberPatternStr;
-        private final IndexRange accountNumberIndexRange;
-
-        private final IndexRange nationalCheckDigitIndexRange;
+        private final Map<IbanComponentType, IbanComponent> components;
+        private final int                                   ibanLength;
 
         StructureData(Builder builder) {
-            this.ibanLength = builder.ibanLength;
-            this.bbanPatternStr = requireNonNull(builder.bbanPatternStr, "bbanPatternStr required");
+            this.components = new EnumMap<>(builder.components);
+            this.ibanLength = MIN_IBAN_BASE_LENGTH + components.get(IbanComponentType.BBAN).getLength();
+        }
 
-            this.bankCodePatternStr = builder.bankCodePatternStr;
-            this.bankCodeIndexRange = builder.bankCodeIndexRange;
+        /**
+         * Returns the {@link IbanComponent} for the given structural component.
+         *
+         * @param type the component type, must not be null
+         * @return the component, or {@code null} if this country's structure does not define that component
+         */
+        IbanComponent getComponent(IbanComponentType type) {
+            return components.get(type);
+        }
 
-            this.branchCodePatternStr = builder.branchCodePatternStr;
-            this.branchCodeIndexRange = builder.branchCodeIndexRange;
-
-            this.accountNumberPatternStr = builder.accountNumberPatternStr;
-            this.accountNumberIndexRange = requireNonNull(builder.accountNumberIndexRange, "accountNumberIndexRange required");
-
-            this.nationalCheckDigitIndexRange = builder.nationalCheckDigitIndexRange;
+        /**
+         * Returns all structural components defined for this country, sorted by their position within the IBAN.
+         *
+         * @return a stream of components (never null, never empty)
+         */
+        Stream<IbanComponent> streamComponentsByPosition() {
+            return components.values().stream()
+                .sorted(comparingInt(IbanComponent::getBeginIndex));
         }
 
         static Builder builder() {
@@ -3642,65 +3579,74 @@ public enum IbanRegistry {
         }
 
         static final class Builder {
-            private int        ibanLength;
-            private String     bbanPatternStr;
+            private static final int MIN_IBAN_LEN = 15;
+            private static final int MAX_IBAN_LEN = 33;
 
-            private String     bankCodePatternStr;
-            private IndexRange bankCodeIndexRange;
-
-            private String     branchCodePatternStr;
-            private IndexRange branchCodeIndexRange;
-
-            private String     accountNumberPatternStr;
-            private IndexRange accountNumberIndexRange;
-
-            private IndexRange nationalCheckDigitIndexRange;
+            private final Map<IbanComponentType, IbanComponent> components = new EnumMap<>(IbanComponentType.class);
 
             private Builder() {
             }
 
-            Builder withIbanLength(int ibanLength) {
-                this.ibanLength = ibanLength;
-                return this;
+            Builder withBbanPattern(String bbanPattern) {
+                return withComponent(IbanComponentType.BBAN, bbanPattern, INDEX_BBAN);
             }
 
-            Builder withBbanPattern(String bbanPatternStr) {
-                this.bbanPatternStr = bbanPatternStr;
-                return this;
+            Builder withBankCode(String bankCodePattern, int beginIndex) {
+                return withComponent(IbanComponentType.BANK_CODE, bankCodePattern, beginIndex);
             }
 
-            Builder withBankCode(String bankCodePatternStr, IndexRange bankCodeIndexRange) {
-                this.bankCodePatternStr = bankCodePatternStr;
-                this.bankCodeIndexRange = bankCodeIndexRange;
-                return this;
+            Builder withBranchCode(String branchCodePattern, int beginIndex) {
+                return withComponent(IbanComponentType.BRANCH_CODE, branchCodePattern, beginIndex);
             }
 
-            Builder withBranchCode(String branchCodePatternStr, IndexRange branchCodeIndexRange) {
-                this.branchCodePatternStr = branchCodePatternStr;
-                this.branchCodeIndexRange = branchCodeIndexRange;
-                return this;
+            Builder withAccountNumber(String accountNumberPattern, int beginIndex) {
+                return withComponent(IbanComponentType.ACCOUNT_NUMBER, accountNumberPattern, beginIndex);
             }
 
-            Builder withAccountNumber(String accountNumberPatternStr, IndexRange accountNumberIndexRange) {
-                this.accountNumberPatternStr = accountNumberPatternStr;
-                this.accountNumberIndexRange = accountNumberIndexRange;
-                return this;
+            Builder withNationalCheckDigit(String nationalCheckDigitPattern, int beginIndex) {
+                return withComponent(IbanComponentType.NATIONAL_CHECK_DIGIT, nationalCheckDigitPattern, beginIndex);
             }
 
-            Builder withNationalCheckDigit(IndexRange nationalCheckDigitIndexRange) {
-                this.nationalCheckDigitIndexRange = nationalCheckDigitIndexRange;
+            Builder withAccountType(String accountTypePattern, int beginIndex) {
+                return withComponent(IbanComponentType.ACCOUNT_TYPE, accountTypePattern, beginIndex);
+            }
+
+            Builder withNationalCode(String nationalCodePattern, int beginIndex) {
+                return withComponent(IbanComponentType.NATIONAL_CODE, nationalCodePattern, beginIndex);
+            }
+
+            Builder withIdentificationNumber(String identificationNumberPattern, int beginIndex) {
+                return withComponent(IbanComponentType.IDENTIFICATION_NUMBER, identificationNumberPattern, beginIndex);
+            }
+
+            Builder withAccountTypeAndControl(String accountTypeAndControlPattern, int beginIndex) {
+                return withComponent(IbanComponentType.ACCOUNT_TYPE_AND_CONTROL, accountTypeAndControlPattern, beginIndex);
+            }
+
+            /**
+             * Stores a structural component, deriving its end index from {@code beginIndex} plus the
+             * length encoded in {@code pattern} (e.g. {@code ("4!n", 4)} becomes the same
+             * {@code IndexRange.of(4, 8)} that used to be passed in explicitly).
+             */
+            private Builder withComponent(IbanComponentType type, String pattern, int beginIndex) {
+                requireNonNull(pattern, "pattern must not be null");
+                int length = IbanPatternConverter.calculateTotalLength(pattern);
+                components.put(type, new IbanComponent(type, pattern, beginIndex, length));
                 return this;
             }
 
             StructureData build() {
-                if (ibanLength <= 0) {
-                    throw new IllegalStateException("IBAN length must be set and positive");
-                } else if (ibanLength < 15 || ibanLength > 34) { // ISO 13616 limits
-                    throw new IllegalStateException("IBAN length must be between 15 and 34");
+                for (IbanComponentType component : Arrays.asList(IbanComponentType.BBAN, IbanComponentType.BANK_CODE, IbanComponentType.ACCOUNT_NUMBER)) {
+                    if (!components.containsKey(component)) {
+                        throw new IllegalStateException(component.getLabel() + " must be set");
+                    }
                 }
-                requireNonNull(bbanPatternStr, "BBAN pattern must be set");
-                requireNonNull(bankCodeIndexRange, "Bank code index range must be set");
-                requireNonNull(accountNumberIndexRange, "Account number index range must be set");
+
+                int derivedIbanLength = MIN_IBAN_BASE_LENGTH + IbanPatternConverter.calculateTotalLength(components.get(IbanComponentType.BBAN).getPattern());
+                if (derivedIbanLength < MIN_IBAN_LEN || derivedIbanLength > MAX_IBAN_LEN) { // ISO 13616 limits
+                    throw new IllegalStateException(
+                        "IBAN length must be between " + MIN_IBAN_LEN + " and " + MAX_IBAN_LEN + ", but was " + derivedIbanLength);
+                }
 
                 return new StructureData(this);
             }

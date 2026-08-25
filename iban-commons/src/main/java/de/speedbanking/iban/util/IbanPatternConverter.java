@@ -262,6 +262,70 @@ public final class IbanPatternConverter {
     }
 
     /**
+     * Checks whether all segments in the given {@link Iterable} consist strictly of numeric characters.
+     *
+     * @param segments the iterable of pattern segments to inspect
+     * @return true if all segments are numeric, false otherwise
+     */
+    public static boolean isAllNumeric(Iterable<Segment> segments) {
+        return allMatch(segments, Segment::isNumeric);
+    }
+
+    /**
+     * Checks whether all segments in the given {@link Iterable} satisfy the provided predicate.
+     * <p>
+     * Returns {@code true} if the iterable is empty.
+     *
+     * @param segments the iterable of pattern segments to inspect, must not be null
+     * @param predicate the condition to evaluate for each segment, must not be null
+     * @return true if all segments match the predicate, false otherwise
+     * @throws NullPointerException if {@code segments} or {@code predicate} is null
+     */
+    public static boolean allMatch(Iterable<Segment> segments, Predicate<Segment> predicate) {
+        requireNonNull(segments, "segments must not be null");
+        requireNonNull(predicate, "predicate must not be null");
+
+        for (Segment segment : segments) {
+            if (!predicate.test(segment)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Calculates the total length of all segments in the given {@link Iterable}.
+     * <p>
+     * Returns 0 if the provided iterable is {@code null} or empty.
+     *
+     * @param segments the iterable of pattern segments to inspect, may be null
+     * @return the combined total length of all segments
+     */
+    public static int calculateTotalLength(Iterable<Segment> segments) {
+        if (segments == null) {
+            return 0;
+        }
+        int totalLen = 0;
+        for (Segment segment : segments) {
+            if (segment != null) {
+                totalLen += segment.getLength();
+            }
+        }
+        return totalLen;
+    }
+
+    /**
+     * Computes the total length (in characters) by summing the lengths of all segments in the given
+     * pattern string (e.g. {@code "4!n4!n12!c"} yields {@code 4 + 4 + 12 = 20}).
+     *
+     * @param pattern the pattern string, must not be null
+     * @return the total length
+     */
+    public static int calculateTotalLength(String pattern) {
+        return calculateTotalLength(parseSegments(pattern));
+    }
+
+    /**
      * Internal, immutable data class representing a single structural segment
      * of the Basic Bank Account Number (BBAN) pattern.
      * <p>
@@ -354,59 +418,6 @@ public final class IbanPatternConverter {
          */
         public String toPatternNotation() {
             return length + "!" + charType.getIbanCode();
-        }
-
-        /**
-         * Checks whether all segments in the given {@link Iterable} consist strictly of numeric characters.
-         *
-         * @param segments the iterable of pattern segments to inspect
-         * @return true if all segments are numeric, false otherwise
-         */
-        public static boolean isAllNumeric(Iterable<Segment> segments) {
-            return allMatch(segments, Segment::isNumeric);
-        }
-
-        /**
-         * Checks whether all segments in the given {@link Iterable} satisfy the provided predicate.
-         * <p>
-         * Returns {@code true} if the iterable is empty.
-         *
-         * @param segments the iterable of pattern segments to inspect, must not be null
-         * @param predicate the condition to evaluate for each segment, must not be null
-         * @return true if all segments match the predicate, false otherwise
-         * @throws NullPointerException if {@code segments} or {@code predicate} is null
-         */
-        public static boolean allMatch(Iterable<Segment> segments, Predicate<Segment> predicate) {
-            requireNonNull(segments, "segments must not be null");
-            requireNonNull(predicate, "predicate must not be null");
-
-            for (Segment segment : segments) {
-                if (!predicate.test(segment)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /**
-         * Calculates the total length of all segments in the given {@link Iterable}.
-         * <p>
-         * Returns 0 if the provided iterable is {@code null} or empty.
-         *
-         * @param segments the iterable of pattern segments to inspect, may be null
-         * @return the combined total length of all segments
-         */
-        public static int calculateTotalLength(Iterable<Segment> segments) {
-            if (segments == null) {
-                return 0;
-            }
-            int totalLen = 0;
-            for (Segment segment : segments) {
-                if (segment != null) {
-                    totalLen += segment.getLength();
-                }
-            }
-            return totalLen;
         }
 
         /**

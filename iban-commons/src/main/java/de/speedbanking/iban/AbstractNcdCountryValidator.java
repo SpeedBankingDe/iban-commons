@@ -110,7 +110,7 @@ abstract class AbstractNcdCountryValidator
     public final char[] calculateNationalCheckDigit(final char[] iban) {
         return ncdCalculator == null
             || !IbanConfig.isCalculateNcd()
-            ? getCountryData().getNationalCheckDigitIndexRange().applyTo(iban)
+            ? getCountryData().getNationalCheckDigitComponent().extractFrom(iban)
             : ncdCalculator.calculateNationalCheckDigit(iban);
     }
 

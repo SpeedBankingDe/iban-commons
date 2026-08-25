@@ -9,9 +9,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * JUnit tests for {@link Currency}.
@@ -259,7 +259,7 @@ final class CurrencyTest {
     @DisplayName("Exactly one Country constant (AQ) has a null currency")
     @Test
     void invariant_exactlyOneCountryEntry_hasNullCurrency() {
-        long nullCount = Arrays.stream(Country.values())
+        long nullCount = Stream.of(Country.values())
             .filter(c -> c.getCurrency() == null)
             .count();
         assertThat(nullCount)

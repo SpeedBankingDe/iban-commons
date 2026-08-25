@@ -15,22 +15,27 @@
  */
 package de.speedbanking.iban;
 
-import static de.speedbanking.iban.IbanComponent.ACCOUNT_NUMBER;
-import static de.speedbanking.iban.IbanComponent.BANK_CODE;
-import static de.speedbanking.iban.IbanComponent.BBAN;
-import static de.speedbanking.iban.IbanComponent.BRANCH_CODE;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.ACCOUNT_NUMBER;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.ACCOUNT_TYPE;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.ACCOUNT_TYPE_AND_CONTROL;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.BANK_CODE;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.BBAN;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.BRANCH_CODE;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.IDENTIFICATION_NUMBER;
+import static de.speedbanking.iban.IbanComponent.IbanComponentType.NATIONAL_CODE;
 
 import static java.util.Objects.requireNonNull;
 
+import de.speedbanking.iban.IbanComponent.IbanComponentType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
 import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Mod97;
 import de.speedbanking.util.PatternCache;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Standard IBAN builder for account structures consisting of bank code and account number (e.g., DE, AT).
@@ -44,11 +49,15 @@ import java.util.Random;
  */
 public class IbanBuilder<B extends IbanBuilder<B>> {
 
+    /** The registry entry defining this builder's country structure, never {@code null}. */
     private final IbanRegistry countryData;
 
+    /** Lazily initialized or explicitly injected random instance. */
     private Random             random;
 
+    /** The bank code set via {@link #bankCode(String)}, or {@code null} for random generation. */
     private String             bankCode;
+    /** The account number set via {@link #accountNumber(String)}, or {@code null} for random generation. */
     private String             accountNumber;
 
     /**
@@ -70,6 +79,11 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         return (B) this;
     }
 
+    /**
+     * Returns the registry entry defining this builder's country structure.
+     *
+     * @return the country data, never {@code null}
+     */
     protected final IbanRegistry getCountryData() {
         return countryData;
     }
@@ -77,10 +91,15 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     /**
      * Validates that {@code actual} is either the {@code expectedBase} country entry or a derived country based on it.
      * <p>
-     * Used by country-specific builder subclasses whose custom BBAN component (pattern and {@link IndexRange})
-     * is hardcoded for a single base country. Since such a subclass cannot honor an arbitrary {@link IbanRegistry}
-     * argument, this guard turns an accidental mis-wiring into an immediate, clear failure instead of silently
-     * producing an invalid IBAN.
+     * Intended as a guard for builder subclasses whose custom BBAN component (pattern and {@link IndexRange})
+     * is hardcoded for a single base country and therefore cannot honor an arbitrary {@link IbanRegistry}
+     * argument; such a guard turns an accidental mis-wiring into an immediate, clear failure instead of
+     * silently producing an invalid IBAN.
+     * <p>
+     * Currently unused within this class: none of the builders defined here are hardcoded to a single
+     * country anymore (see {@link NationalCodeIbanBuilderWithBranchCode} and its siblings, which accept
+     * any {@link IbanRegistry} whose structure defines the relevant component). Kept as package-private
+     * infrastructure for a future builder that does need this guard; remove if no other caller exists.
      *
      * @param actual   the country data passed to the builder constructor, must not be null
      * @param expected the single base country this builder subclass supports, must not be null
@@ -97,15 +116,13 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     }
 
     /**
-     * Returns the configured {@link Random} instance, creating a default one if not set.
+     * Returns the configured {@link Random} instance, falling back to {@link ThreadLocalRandom#current()}
+     * to avoid unnecessary synchronization overhead and allocation costs.
      *
      * @return the random instance, never {@code null}
      */
     protected final Random getRandom() {
-        if (random == null) {
-            random = new Random();
-        }
-        return random;
+        return random != null ? random : ThreadLocalRandom.current();
     }
 
     /**
@@ -149,8 +166,6 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     public final Iban build() {
         String countryCode = getCountryData().getBaseCountry().getCountryCode();
         int expectedLength = getCountryData().getIbanLength();
-        IndexRange bankCodeIndexRange = getCountryData().getBankCodeIndexRange();
-        IndexRange accountNumberIndexRange = getCountryData().getAccountNumberIndexRange();
 
         // Seed with country code, "00" check-digit placeholder (fixed up below) and a random,
         // but pattern-valid, BBAN. The bank code and account number ranges are overwritten right
@@ -160,14 +175,11 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         // produce a structurally valid IBAN.
         StringBuilder ibanBuilder = new StringBuilder(expectedLength)
             .append(countryCode)
-            .append("00")
-            .append(resolveComponent(BBAN, null))
-            .replace(bankCodeIndexRange.getBegin(),
-                     bankCodeIndexRange.getEnd(),
-                     resolveComponent(BANK_CODE, bankCode))
-            .replace(accountNumberIndexRange.getBegin(),
-                     accountNumberIndexRange.getEnd(),
-                     resolveComponent(ACCOUNT_NUMBER, accountNumber));
+            .append("00");
+
+        resolveComponent(ibanBuilder, getCountryData().getStructureData().getComponent(BBAN), null);
+        resolveComponent(ibanBuilder, getCountryData().getBankCodeComponent(), bankCode);
+        resolveComponent(ibanBuilder, getCountryData().getAccountNumberComponent(), accountNumber);
 
         appendSubclassComponents(ibanBuilder);
 
@@ -201,56 +213,137 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     }
 
     /**
-     * Resolves an IBAN component by validating and formatting input or generating random values.
-     * <p>
-     * If the input is null, random values matching the component pattern are generated.
+     * Helper overload primarily for testing. Resolves a component into a new StringBuilder
+     * pre-filled with spaces up to the country's IBAN length.
      *
-     * @param component the IBAN component specification, must not be null
-     * @param input     the input string, may be null
-     * @return the resolved or generated component string
-     * @throws InvalidIbanException if input length or pattern is invalid
+     * @param ibanComponent the IBAN component specification, must not be null
+     * @param input         the input character sequence, may be null
+     * @return a new StringBuilder instance containing the resolved component at its target position
      */
-    String resolveComponent(IbanComponent component, String input) {
-        requireNonNull(component, "component must not be null");
-        return resolveComponent(component.getPattern(getCountryData()), component.getValidationError(), input);
+    StringBuilder resolveComponent(IbanComponent ibanComponent, CharSequence input) {
+        int length = countryData.getIbanLength();
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            sb.append(' ');
+        }
+
+        return resolveComponent(sb, ibanComponent, input);
     }
 
     /**
-     * Resolves an IBAN component pattern by validating and formatting input or generating random values.
-     * <p>
-     * Useful for custom attributes that do not map to standard IbanComponent enum values.
+     * Resolves an IBAN component directly into the provided {@link StringBuilder} target,
+     * avoiding intermediate String allocations when generating random values or padding inputs.
      *
-     * @param pattern         the IBAN component pattern string, must not be null
-     * @param validationError the error to throw on validation failure, must not be null
-     * @param input           the input string, may be null
-     * @return the resolved or generated component string
-     * @throws InvalidIbanException if input length or pattern is invalid
+     * @param target        the IBAN string builder to mutate, must not be null
+     * @param ibanComponent the IBAN component specification, must not be null
+     * @param input         the input character sequence, may be null
+     * @return the mutated target StringBuilder instance
      */
-    String resolveComponent(String pattern, IbanValidationError validationError, String input) {
-        List<Segment> segments = IbanPatternConverter.parseSegments(pattern);
-        int requiredLength = Segment.calculateTotalLength(segments);
+    StringBuilder resolveComponent(StringBuilder target, IbanComponent ibanComponent, CharSequence input) {
+        requireNonNull(target, "target must not be null");
+        requireNonNull(ibanComponent, "component must not be null");
+
+        List<Segment> segments = IbanPatternConverter.parseSegments(ibanComponent.getPattern());
+        int requiredLength = IbanPatternConverter.calculateTotalLength(segments);
+        int beginIndex = ibanComponent.getBeginIndex();
+
         if (input == null) {
-            StringBuilder sb = new StringBuilder(requiredLength);
+            // write random characters directly into the existing StringBuilder buffer
+            Random rng = getRandom();
+            int currentPos = beginIndex;
             for (int i = 0; i < segments.size(); i++) {
-                sb.append(generateRandom(segments.get(i)));
+                Segment segment = segments.get(i);
+
+                SourceChars sourceChars;
+                if (segment.isNumeric()) {
+                    sourceChars = SourceChars.NUMERIC;
+                } else if (segment.isAlphabetic()) {
+                    sourceChars = SourceChars.ALPHABETIC;
+                } else {
+                    sourceChars = SourceChars.ALPHANUMERIC;
+                }
+
+                int segmentLen = segment.getLength();
+
+                for (int j = 0; j < segmentLen; j++) {
+                    char ch = sourceChars.nextChar(rng);
+                    if (currentPos < target.length()) {
+                        target.setCharAt(currentPos, ch);
+                    } else {
+                        target.append(ch);
+                    }
+                    currentPos++;
+                }
             }
-            return sb.toString();
         } else {
-            if (input.length() > requiredLength) {
-                throw InvalidIbanException.of(validationError, input, getCountryData().getCountryCode());
+            int inputLen = input.length();
+            if (inputLen > requiredLength) {
+                throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
             }
-            String resolvedValue;
-            if (input.length() < requiredLength && Segment.allMatch(segments, Segment::isNumericOrAlphanumeric)) {
-                // numeric padding with leading zeros if shorter than expected length
-                resolvedValue = padLeft(input, requiredLength, '0');
-            } else {
-                resolvedValue = input;
-            }
+
+            int paddingLen = requiredLength - inputLen;
+            boolean canPad = paddingLen > 0 && IbanPatternConverter.allMatch(segments, Segment::isNumericOrAlphanumeric);
+
+            // validate pattern against the input (or padded representation if padding will be applied)
             String regex = IbanPatternConverter.buildRegex(segments);
-            if (!PatternCache.getDefault().getPattern(regex).matcher(resolvedValue).matches()) {
-                throw InvalidIbanException.of(validationError, input, getCountryData().getCountryCode());
+            CharSequence checkTarget = canPad ? padLeft(input.toString(), requiredLength, '0') : input;
+            if (!PatternCache.getDefault().getPattern(regex).matcher(checkTarget).matches()) {
+                throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
             }
-            return resolvedValue;
+
+            // in-place mutation of target buffer to avoid intermediate String allocation for padded result
+            int currentPos = beginIndex;
+
+            // 1. Write leading zero-padding directly into buffer if required
+            if (canPad) {
+                for (int i = 0; i < paddingLen; i++) {
+                    if (currentPos < target.length()) {
+                        target.setCharAt(currentPos, '0');
+                    } else {
+                        target.append('0');
+                    }
+                    currentPos++;
+                }
+            }
+
+            // 2. Write input characters directly into buffer
+            for (int i = 0; i < inputLen; i++) {
+                char ch = input.charAt(i);
+                if (currentPos < target.length()) {
+                    target.setCharAt(currentPos, ch);
+                } else {
+                    target.append(ch);
+                }
+                currentPos++;
+            }
+        }
+        return target;
+    }
+
+    /**
+     * Maps a structural {@link IbanComponentType} to the {@link IbanValidationError} to report
+     * when its resolved value fails pattern validation.
+     * <p>
+     * Only {@code BBAN}, {@code BANK_CODE}, {@code BRANCH_CODE} and {@code ACCOUNT_NUMBER} have a
+     * dedicated error; every other component type (national check digit, and the various
+     * country-specific custom components such as account type or identification number) shares
+     * the generic {@link IbanValidationError#INVALID_STRUCTURE}, since none of them warrants its
+     * own error code.
+     *
+     * @param type the component type to look up, must not be null
+     * @return the validation error to use for this component type
+     */
+    static IbanValidationError errorFor(IbanComponentType type) {
+        switch (type) {
+            case BANK_CODE:
+                return IbanValidationError.INVALID_BANK_CODE;
+            case BRANCH_CODE:
+                return IbanValidationError.INVALID_BRANCH_CODE;
+            case ACCOUNT_NUMBER:
+                return IbanValidationError.INVALID_ACCOUNT_NUMBER;
+            default:
+                return IbanValidationError.INVALID_STRUCTURE;
         }
     }
 
@@ -273,43 +366,11 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         if (paddingLen <= 0) {
             return str;
         }
-        char[] padding = new char[paddingLen];
-        Arrays.fill(padding, padChar);
-        return new String(padding) + str;
-    }
-
-    /**
-     * Generates a random string for a single IBAN notation {@link Segment}.
-     * <p>
-     * The character set is chosen by the segment's {@code CharType}:
-     * <ul>
-     *   <li>{@code NUMERIC}      → digits {@code 0–9}</li>
-     *   <li>{@code ALPHABETIC}   → upper-case letters {@code A–Z}</li>
-     *   <li>{@code ALPHANUMERIC} → the combination of the above</li>
-     * </ul>
-     *
-     * @param segment the pattern segment specifying the character type and length
-     * @return a randomly generated string of {@link Segment#getLength()} characters
-     * @throws IllegalStateException if an unrecognised {@code CharType} is encountered
-     */
-    String generateRandom(Segment segment) {
-        requireNonNull(segment, "segment");
-
-        SourceChars sourceChars;
-        if (segment.isNumeric()) {
-            sourceChars = SourceChars.NUMERIC;
-        } else if (segment.isAlphabetic()) {
-            sourceChars = SourceChars.ALPHABETIC;
-        } else {
-            sourceChars = SourceChars.ALPHANUMERIC;
+        StringBuilder sb = new StringBuilder(targetLength);
+        for (int i = 0; i < paddingLen; i++) {
+            sb.append(padChar);
         }
-
-        int segmentLen = segment.getLength();
-        StringBuilder sb = new StringBuilder(segmentLen);
-        for (int i = 0; i < segmentLen; i++) {
-            sb.append(sourceChars.nextChar(getRandom()));
-        }
-        return sb.toString();
+        return sb.append(str).toString();
     }
 
     /**
@@ -362,7 +423,7 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * This method is a no-op when:
      * <ul>
      *   <li>the country has no NCD field
-     *       ({@link IbanRegistry#getNationalCheckDigitIndexRange()} returns {@code null}), or</li>
+     *       ({@link IbanRegistry#getNationalCheckDigitComponent()} returns {@code null}), or</li>
      *   <li>the country's {@link CountryValidator} does not implement
      *       {@link NationalCheckDigitCalculator}.</li>
      * </ul>
@@ -384,8 +445,8 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         }
 
         // only countries with a registered NCD field are relevant
-        IndexRange ncdRange = countryData.getNationalCheckDigitIndexRange();
-        if (ncdRange == null) {
+        IbanComponent ncdCompo = countryData.getNationalCheckDigitComponent();
+        if (ncdCompo == null) {
             return ibanBuilder;
         }
 
@@ -393,11 +454,8 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         CountryValidator validator = IbanValidator.getCountryValidator(countryData);
         if (validator instanceof NationalCheckDigitCalculator) {
             char[] ncd = ((NationalCheckDigitCalculator) validator).calculateNationalCheckDigit(ibanBuilder);
-
             // write the computed NCD into the StringBuilder
-            for (int idxIban = ncdRange.getBegin(), idxNcd = 0; idxIban < ncdRange.getEnd(); idxIban++, idxNcd++) {
-                ibanBuilder.setCharAt(idxIban, ncd[idxNcd]);
-            }
+            ibanBuilder.replace(ncdCompo.getBeginIndex(), ncdCompo.getEndIndex(), new String(ncd));
         }
 
         return ibanBuilder;
@@ -405,15 +463,15 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
     @Override
     public final String toString() {
-        StringBuilder sb = new StringBuilder(getClass().getSimpleName())
+        StringBuilder sb = new StringBuilder(128)
+            .append(getClass().getSimpleName())
             .append('[')
             .append("country=").append(getCountryData().getCountryCode())
-            .append(", bankCode=").append(bankCode)
-            .append(", accountNumber=").append(accountNumber);
+            .append(", ").append(BANK_CODE.getLabel()).append('=').append(bankCode)
+            .append(", ").append(ACCOUNT_NUMBER.getLabel()).append('=').append(accountNumber);
         appendToString(sb);
         return sb.append(']').toString();
     }
-
     /**
      * Appends state attributes of this builder to the provided {@link StringBuilder}.
      * <p>
@@ -430,8 +488,11 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * Internal character pools used for generating random IBAN segment values.
      */
     private enum SourceChars {
+        /** Digits {@code 0-9}. */
         NUMERIC("0123456789"),
+        /** Upper-case letters {@code A-Z}. */
         ALPHABETIC("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+        /** Digits and upper-case letters combined. */
         ALPHANUMERIC("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 
         private final String chars;
@@ -462,8 +523,6 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * Capability interface for IBAN builders that support setting a branch code component.
      *
      * @param <B> self-type of the concrete builder
-     *
-     * @since 1.9.0
      */
     @FunctionalInterface
     public interface HasBranchCode<B extends HasBranchCode<B>> {
@@ -475,6 +534,82 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
          * @return this builder instance
          */
         B branchCode(String branchCode);
+
+    }
+
+    /**
+     * Capability interface for IBAN builders that support setting an account type component
+     * (e.g. Bulgaria's BG single-character account type).
+     *
+     * @param <B> self-type of the concrete builder
+     */
+    @FunctionalInterface
+    public interface HasAccountType<B extends HasAccountType<B>> {
+
+        /**
+         * Sets the account type for the IBAN.
+         *
+         * @param accountType the account type, may be null
+         * @return this builder instance
+         */
+        B accountType(String accountType);
+
+    }
+
+    /**
+     * Capability interface for IBAN builders that support setting a combined account type and
+     * control component (e.g. Brazil's BR two-character account type/control field).
+     *
+     * @param <B> self-type of the concrete builder
+     */
+    @FunctionalInterface
+    public interface HasAccountTypeAndControl<B extends HasAccountTypeAndControl<B>> {
+
+        /**
+         * Sets the combined account type and control characters for the IBAN.
+         *
+         * @param accountTypeAndControl the account type and control value, may be null
+         * @return this builder instance
+         */
+        B accountTypeAndControl(String accountTypeAndControl);
+
+    }
+
+    /**
+     * Capability interface for IBAN builders that support setting a national code component
+     * (e.g. Algeria's DZ, Mauritius' MU, Poland's PL, Seychelles' SC or Togo's TG national code).
+     *
+     * @param <B> self-type of the concrete builder
+     */
+    @FunctionalInterface
+    public interface HasNationalCode<B extends HasNationalCode<B>> {
+
+        /**
+         * Sets the national code for the IBAN.
+         *
+         * @param nationalCode the national code, may be null
+         * @return this builder instance
+         */
+        B nationalCode(String nationalCode);
+
+    }
+
+    /**
+     * Capability interface for IBAN builders that support setting an identification number
+     * component (e.g. Iceland's IS identification number).
+     *
+     * @param <B> self-type of the concrete builder
+     */
+    @FunctionalInterface
+    public interface HasIdentificationNumber<B extends HasIdentificationNumber<B>> {
+
+        /**
+         * Sets the identification number for the IBAN.
+         *
+         * @param identificationNumber the identification number, may be null
+         * @return this builder instance
+         */
+        B identificationNumber(String identificationNumber);
 
     }
 
@@ -509,6 +644,9 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
         private String branchCode;
 
+        /**
+         * @param countryData the registry entry defining the country structure, must not be null
+         */
         AbstractIbanBuilderWithBranchCode(IbanRegistry countryData) {
             super(countryData);
         }
@@ -527,15 +665,16 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
         @Override
         protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
-            return ibanBuilder.replace(getCountryData().getBranchCodeIndexRange().getBegin(),
-                                       getCountryData().getBranchCodeIndexRange().getEnd(),
-                                       resolveComponent(BRANCH_CODE, branchCode));
+            return resolveComponent(ibanBuilder, getCountryData().getStructureData().getComponent(BRANCH_CODE), branchCode);
         }
 
         @Override
         protected StringBuilder appendToString(StringBuilder sb) {
             return super.appendToString(sb)
-                        .append(", branchCode=").append(branchCode);
+                        .append(", ")
+                        .append(BRANCH_CODE.getLabel())
+                        .append('=')
+                        .append(branchCode);
         }
     }
 
@@ -561,17 +700,19 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     protected abstract static class AbstractCustomIbanBuilder<B extends AbstractCustomIbanBuilder<B>>
             extends IbanBuilder<B> {
 
-        private final String     componentName;
-        private final String     pattern;
-        private final IndexRange indexRange;
+        private final IbanComponent ibanComponent;
+        private String              customValue;
 
-        private String           customValue;
-
-        protected AbstractCustomIbanBuilder(IbanRegistry countryData, String componentName, String pattern, IndexRange indexRange) {
+        /**
+         * @param countryData   the registry entry defining the country structure, must not be null
+         * @param componentType the custom component type this builder subclass supports; must be defined
+         *                      in {@code countryData}'s structure (see {@link IbanRegistry#getComponent(IbanComponentType)})
+         */
+        protected AbstractCustomIbanBuilder(IbanRegistry countryData, IbanComponentType componentType) {
             super(countryData);
-            this.componentName = requireNonNull(componentName, "componentName");
-            this.pattern = requireNonNull(pattern, "pattern");
-            this.indexRange = requireNonNull(indexRange, "indexRange");
+            requireNonNull(componentType, "componentType");
+            this.ibanComponent = requireNonNull(countryData.getComponent(componentType),
+                () -> "No " + componentType + " component defined for " + countryData.getCountryCode());
         }
 
         /**
@@ -587,15 +728,14 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
         @Override
         protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
-            return super.appendSubclassComponents(ibanBuilder)
-                        .replace(indexRange.getBegin(), indexRange.getEnd(),
-                            resolveComponent(pattern, IbanValidationError.INVALID_STRUCTURE, customValue));
+            super.appendSubclassComponents(ibanBuilder);
+            return resolveComponent(ibanBuilder, ibanComponent, customValue);
         }
 
         @Override
         protected StringBuilder appendToString(StringBuilder sb) {
             return super.appendToString(sb)
-                        .append(", ").append(componentName).append('=').append(customValue);
+                        .append(", ").append(ibanComponent.getType().getLabel()).append('=').append(customValue);
         }
     }
 
@@ -610,8 +750,13 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
         private String branchCode;
 
-        protected AbstractCustomIbanBuilderWithBranchCode(IbanRegistry countryData, String componentName, String pattern, IndexRange indexRange) {
-            super(countryData, componentName, pattern, indexRange);
+        /**
+         * @param countryData   the registry entry defining the country structure, must not be null
+         * @param componentType the custom component type this builder subclass supports; must be defined
+         *                      in {@code countryData}'s structure (see {@link IbanRegistry#getComponent(IbanComponentType)})
+         */
+        protected AbstractCustomIbanBuilderWithBranchCode(IbanRegistry countryData, IbanComponentType componentType) {
+            super(countryData, componentType);
         }
 
         /**
@@ -628,158 +773,111 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
         @Override
         protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
-            ibanBuilder.replace(getCountryData().getBranchCodeIndexRange().getBegin(),
-                                getCountryData().getBranchCodeIndexRange().getEnd(),
-                                resolveComponent(BRANCH_CODE, branchCode));
+            resolveComponent(ibanBuilder, getCountryData().getStructureData().getComponent(BRANCH_CODE), branchCode);
             return super.appendSubclassComponents(ibanBuilder);
         }
 
         @Override
         protected StringBuilder appendToString(StringBuilder sb) {
-            sb.append(", branchCode=").append(branchCode);
-            return super.appendToString(sb);
+            super.appendToString(sb);
+            return sb.append(", ")
+                     .append(BRANCH_CODE.getLabel())
+                     .append('=')
+                     .append(branchCode);
         }
     }
 
     /**
-     * Specialized builder for Bulgarian (BG) IBAN structures.
+     * Concrete builder for IBAN structures consisting of bank code, account number, branch code
+     * and an account type as the only country-specific custom BBAN component (e.g. BG).
      */
-    public static class BgIbanBuilder extends AbstractCustomIbanBuilderWithBranchCode<BgIbanBuilder> {
-        BgIbanBuilder() {
-            this(IbanRegistry.BG);
+    public static class AccountTypeIbanBuilderWithBranchCode
+            extends AbstractCustomIbanBuilderWithBranchCode<AccountTypeIbanBuilderWithBranchCode>
+            implements HasAccountType<AccountTypeIbanBuilderWithBranchCode> {
+
+        /**
+         * Package-private constructor for account-type-with-branch-code country builder instances.
+         *
+         * @param countryData the registry entry defining the country structure, must not be null
+         */
+        AccountTypeIbanBuilderWithBranchCode(IbanRegistry countryData) {
+            super(countryData, ACCOUNT_TYPE);
         }
 
-        BgIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.BG), "accountType", "2!n", IndexRange.of(12, 14));
-        }
-
-        public BgIbanBuilder accountType(String accountType) {
+        @Override
+        public AccountTypeIbanBuilderWithBranchCode accountType(String accountType) {
             return customValue(accountType);
         }
     }
 
     /**
-     * Specialized builder for Algerian (DZ) IBAN structures.
+     * Concrete builder for IBAN structures consisting of bank code, account number, branch code
+     * and a combined account type/control field as the only country-specific custom BBAN
+     * component (e.g. BR).
      */
-    public static class DzIbanBuilder extends AbstractCustomIbanBuilderWithBranchCode<DzIbanBuilder> {
-        DzIbanBuilder() {
-            this(IbanRegistry.DZ);
-        }
-
-        DzIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.DZ), "nationalCode", "2!n", IndexRange.of(22, 24));
-        }
-
-        public DzIbanBuilder nationalCode(String nationalCode) {
-            return customValue(nationalCode);
-        }
-    }
-
-    /**
-     * Specialized builder for Icelandic (IS) IBAN structures.
-     */
-    public static class IsIbanBuilder extends AbstractCustomIbanBuilder<IsIbanBuilder> {
-        IsIbanBuilder() {
-            this(IbanRegistry.IS);
-        }
-
-        IsIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.IS), "identificationNumber", "10!n", IndexRange.of(16, 26));
-        }
-
-        public IsIbanBuilder identificationNumber(String identificationNumber) {
-            return customValue(identificationNumber);
-        }
-    }
-
-    /**
-     * Specialized builder for Mauritian (MU) IBAN structures.
-     */
-    public static class MuIbanBuilder extends AbstractCustomIbanBuilderWithBranchCode<MuIbanBuilder> {
-        MuIbanBuilder() {
-            this(IbanRegistry.MU);
-        }
-
-        MuIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.MU), "nationalCode", "3!a", IndexRange.of(27, 30));
-        }
-
-        public MuIbanBuilder nationalCode(String nationalCode) {
-            return customValue(nationalCode);
-        }
-    }
-
-    /**
-     * Specialized builder for Polish (PL) IBAN structures.
-     */
-    public static class PlIbanBuilder extends AbstractCustomIbanBuilderWithBranchCode<PlIbanBuilder> {
-        PlIbanBuilder() {
-            this(IbanRegistry.PL);
-        }
-
-        PlIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.PL), "nationalCode", "1!n", IndexRange.of(11, 12));
-        }
-
-        public PlIbanBuilder nationalCode(String nationalCode) {
-            return customValue(nationalCode);
-        }
-    }
-
-    /**
-     * Specialized builder for Seychellois (SC) IBAN structures.
-     */
-    public static class ScIbanBuilder extends AbstractCustomIbanBuilderWithBranchCode<ScIbanBuilder> {
-        ScIbanBuilder() {
-            this(IbanRegistry.SC);
-        }
-
-        ScIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.SC), "nationalCode", "3!a", IndexRange.of(28, 31));
-        }
-
-        public ScIbanBuilder nationalCode(String nationalCode) {
-            return customValue(nationalCode);
-        }
-    }
-
-    /**
-     * Specialized builder for Togolese (TG) IBAN structures.
-     */
-    public static class TgIbanBuilder extends AbstractCustomIbanBuilderWithBranchCode<TgIbanBuilder> {
-        TgIbanBuilder() {
-            this(IbanRegistry.TG);
-        }
-
-        TgIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.TG), "nationalCode", "2!n", IndexRange.of(26, 28));
-        }
-
-        public TgIbanBuilder nationalCode(String nationalCode) {
-            return customValue(nationalCode);
-        }
-    }
-
-    /**
-     * Specialized builder for Brazilian (BR) IBAN structures.
-     */
-    public static class BrIbanBuilder extends AbstractCustomIbanBuilderWithBranchCode<BrIbanBuilder> {
-        BrIbanBuilder() {
-            this(IbanRegistry.BR);
-        }
-
-        BrIbanBuilder(IbanRegistry countryData) {
-            super(requireCountry(countryData, IbanRegistry.BR), "accountTypeAndControl", "1!a1!c", IndexRange.of(27, 29));
-        }
+    public static class AccountTypeAndControlIbanBuilderWithBranchCode
+            extends AbstractCustomIbanBuilderWithBranchCode<AccountTypeAndControlIbanBuilderWithBranchCode>
+            implements HasAccountTypeAndControl<AccountTypeAndControlIbanBuilderWithBranchCode> {
 
         /**
-         * Sets the combined account type and control characters for the Brazilian IBAN.
+         * Package-private constructor for account-type-and-control-with-branch-code country builder instances.
          *
-         * @param accountTypeAndControl the 2-character account type and control value (e.g. "C1", "P1")
-         * @return this builder instance
+         * @param countryData the registry entry defining the country structure, must not be null
          */
-        public BrIbanBuilder accountTypeAndControl(String accountTypeAndControl) {
+        AccountTypeAndControlIbanBuilderWithBranchCode(IbanRegistry countryData) {
+            super(countryData, ACCOUNT_TYPE_AND_CONTROL);
+        }
+
+        @Override
+        public AccountTypeAndControlIbanBuilderWithBranchCode accountTypeAndControl(String accountTypeAndControl) {
             return customValue(accountTypeAndControl);
+        }
+    }
+
+    /**
+     * Concrete builder for IBAN structures consisting of bank code, account number, branch code
+     * and a national code as the only country-specific custom BBAN component
+     * (e.g. DZ, MU, PL, SC, TG).
+     */
+    public static class NationalCodeIbanBuilderWithBranchCode
+            extends AbstractCustomIbanBuilderWithBranchCode<NationalCodeIbanBuilderWithBranchCode>
+            implements HasNationalCode<NationalCodeIbanBuilderWithBranchCode> {
+
+        /**
+         * Package-private constructor for national-code-with-branch-code country builder instances.
+         *
+         * @param countryData the registry entry defining the country structure, must not be null
+         */
+        NationalCodeIbanBuilderWithBranchCode(IbanRegistry countryData) {
+            super(countryData, NATIONAL_CODE);
+        }
+
+        @Override
+        public NationalCodeIbanBuilderWithBranchCode nationalCode(String nationalCode) {
+            return customValue(nationalCode);
+        }
+    }
+
+    /**
+     * Concrete builder for IBAN structures consisting of bank code, branch code, account number and an
+     * identification number (e.g. IS).
+     */
+    public static class IdentificationNumberIbanBuilderWithBranchCode
+            extends AbstractCustomIbanBuilderWithBranchCode<IdentificationNumberIbanBuilderWithBranchCode>
+            implements HasIdentificationNumber<IdentificationNumberIbanBuilderWithBranchCode> {
+
+        /**
+         * Package-private constructor for identification-number country builder instances.
+         *
+         * @param countryData the registry entry defining the country structure, must not be null
+         */
+        IdentificationNumberIbanBuilderWithBranchCode(IbanRegistry countryData) {
+            super(countryData, IDENTIFICATION_NUMBER);
+        }
+
+        @Override
+        public IdentificationNumberIbanBuilderWithBranchCode identificationNumber(String identificationNumber) {
+            return customValue(identificationNumber);
         }
     }
 

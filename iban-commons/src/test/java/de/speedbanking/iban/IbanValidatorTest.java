@@ -40,6 +40,21 @@ final class IbanValidatorTest {
     // An invalid IBAN with a wrong checksum (Mod 97)
     private static final String INVALID_CHECKSUM_DE = "DE90100000000123456789"; // DE91 -> DE90
 
+    /**
+     * Builds a syntactically plain (digits-only), always-too-long input string for length-boundary tests.
+     * Java 8 does not have {@code String.repeat(int)}.
+     *
+     * @param count number of {@code '1'} characters to append after the {@code "DE"} prefix
+     * @return a string of length {@code count + 2}
+     */
+    private static String tooLongInput(int count) {
+        StringBuilder sb = new StringBuilder(count + 2).append("DE");
+        for (int i = 0; i < count; i++) {
+            sb.append('1');
+        }
+        return sb.toString();
+    }
+
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
     void privateConstructor_shouldThrowException_whenInstantiated() {
@@ -217,6 +232,83 @@ final class IbanValidatorTest {
 
         assertThat(result.isValid()).isFalse();
         assertThat(result.error).isEqualTo(INVALID_CHECKSUM);
+    }
+
+    @DisplayName("isValid should return false for an IBAN with an invalid Mod97 checksum")
+    @Test
+    void isValid_shouldReturnFalse_whenChecksumIsInvalid() {
+        assertThat(IbanValidator.isValid(INVALID_CHECKSUM_DE)).isFalse();
+        assertThat(IbanValidator.isValid((CharSequence) INVALID_CHECKSUM_DE)).isFalse();
+    }
+
+    @DisplayName("validate should return INCORRECT_LENGTH (not just a generic short-length failure) "
+        + "when raw input exceeds MAX_IBAN_LENGTH, for both the String and CharSequence overloads")
+    @Test
+    @ResourceLock(IbanConfigTest.RESOURCE_NAME)
+    void validate_shouldReturnIncorrectLength_whenRawInputExceedsMaxLength() {
+        IbanConfig previous = IbanConfig.get();
+        try {
+            // pin allowLower=false so normalize() takes its fast (no-transformation) path,
+            // where the over-length check is a distinct branch from the transformation path
+            IbanConfig.reset(IbanConfig.builder().allowSpace(false).allowLowercase(false).build());
+
+            String tooLong = tooLongInput(40); // 42 chars, well beyond MAX_IBAN_LENGTH (33)
+
+            IbanValidationResult resultString = IbanValidator.validate(tooLong, false);
+            assertThat(resultString.isValid()).isFalse();
+            assertThat(resultString.error).isEqualTo(INCORRECT_LENGTH);
+
+            IbanValidationResult resultCharSeq = IbanValidator.validate((CharSequence) tooLong, false);
+            assertThat(resultCharSeq.isValid()).isFalse();
+            assertThat(resultCharSeq.error).isEqualTo(INCORRECT_LENGTH);
+
+        } finally {
+            IbanConfig.reset(previous);
+        }
+    }
+
+    @DisplayName("isValid should return false when raw input exceeds MAX_IBAN_LENGTH (fast normalization path)")
+    @Test
+    @ResourceLock(IbanConfigTest.RESOURCE_NAME)
+    void isValid_shouldReturnFalse_whenRawInputExceedsMaxLength() {
+        IbanConfig previous = IbanConfig.get();
+        try {
+            IbanConfig.reset(IbanConfig.builder().allowSpace(false).allowLowercase(false).build());
+
+            String tooLong = tooLongInput(40);
+
+            assertThat(IbanValidator.isValid(tooLong)).isFalse();
+            assertThat(IbanValidator.isValid((CharSequence) tooLong)).isFalse();
+
+        } finally {
+            IbanConfig.reset(previous);
+        }
+    }
+
+    @DisplayName("validate should reject lowercase letters when lowercase is not allowed, "
+        + "even though spaces are allowed (transformation path, not the fast path)")
+    @Test
+    @ResourceLock(IbanConfigTest.RESOURCE_NAME)
+    void validate_shouldReturnIllegalCharacters_whenLowercasePresentButNotAllowed() {
+        IbanConfig previous = IbanConfig.get();
+        try {
+            IbanConfig.reset(IbanConfig.builder().allowSpace(true).allowLowercase(false).build());
+
+            IbanValidationResult result = IbanValidator.validate("de91 1000 0000 0123 4567 89", true);
+            assertThat(result.isValid()).isFalse();
+            assertThat(result.error).isEqualTo(ILLEGAL_CHARACTERS);
+
+        } finally {
+            IbanConfig.reset(previous);
+        }
+    }
+
+    @DisplayName("calculateMod97 should return INVALID_MOD97 when input exceeds MAX_IBAN_LENGTH")
+    @Test
+    void calculateMod97_shouldReturnInvalid_whenInputExceedsMaxLength() {
+        String tooLong = tooLongInput(40);
+
+        assertThat(IbanValidator.calculateMod97(tooLong)).isEqualTo(IbanValidator.INVALID_MOD97);
     }
 
     /**

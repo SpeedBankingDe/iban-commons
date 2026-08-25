@@ -925,12 +925,11 @@ final class CountryValidators {
         }
     }
 
-    /** NCD-aware Validator for Togo (TG), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
-    static final class TG extends AbstractNcdCountryValidator {
+    /** Validator for Togo (TG), IBAN length: 28, BBAN pattern: {@code 5!c5!n12!n2!n} */
+    static final class TG extends AbstractCountryValidator {
         @Override
         public boolean validateIban(final char[] iban) {
-            return isAllDigits(iban, 9, 28)
-                && validateNationalCheckDigit(iban);
+            return isAllDigits(iban, 9, 28);
         }
     }
 

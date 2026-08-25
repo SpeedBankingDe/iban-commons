@@ -6,8 +6,8 @@ import static java.util.stream.Collectors.toList;
 import de.speedbanking.iban.IbanRegistry;
 import de.speedbanking.iban.util.IbanPatternConverter;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Utility for generating IBAN registry format mappings for Datafaker.
@@ -36,7 +36,7 @@ public final class DatafakerFinanceIbanGenerator {
     }
 
     static List<String> formatEntries() {
-        return Arrays.stream(IbanRegistry.values())
+        return Stream.of(IbanRegistry.values())
             .filter(IbanRegistry::isBaseCountry)
             .sorted(comparing(IbanRegistry::getCountryCode))
             .map(DatafakerFinanceIbanGenerator::formatEntry)

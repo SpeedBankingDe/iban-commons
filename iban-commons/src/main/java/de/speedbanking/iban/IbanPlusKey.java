@@ -18,8 +18,6 @@ package de.speedbanking.iban;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.stream.Collectors.toMap;
 
-import de.speedbanking.util.IndexRange;
-
 import java.util.Map;
 
 /**
@@ -101,20 +99,20 @@ public final class IbanPlusKey {
         private final boolean useNcd;
 
         private Strategy(final IbanRegistry registry) {
-            IndexRange bankRange = registry.getBankCodeIndexRange();
-            IndexRange branchRange = registry.getBranchCodeIndexRange();
-            IndexRange ncdRange = registry.getNationalCheckDigitIndexRange();
+            IbanComponent bankComponent = registry.getBankCodeComponent();
+            IbanComponent branchComponent = registry.getBranchCodeComponent();
+            IbanComponent ncdComponent = registry.getNationalCheckDigitComponent();
 
-            this.useBranchCode = branchRange != null;
-            this.useNcd = isNcdRoutingRelevant(bankRange, branchRange, ncdRange);
+            this.useBranchCode = branchComponent != null;
+            this.useNcd = isNcdRoutingRelevant(bankComponent, branchComponent, ncdComponent);
         }
 
-        private static boolean isNcdRoutingRelevant(IndexRange bankRange, IndexRange branchRange, IndexRange ncdRange) {
-            if (ncdRange == null) {
+        private static boolean isNcdRoutingRelevant(IbanComponent bankComponent, IbanComponent branchComponent, IbanComponent ncdComponent) {
+            if (ncdComponent == null) {
                 return false;
             }
-            return ncdRange.getBegin() == bankRange.getEnd()
-                || (branchRange != null && ncdRange.getBegin() == branchRange.getEnd());
+            return ncdComponent.getBeginIndex() == bankComponent.getEndIndex()
+                || (branchComponent != null && ncdComponent.getBeginIndex() == branchComponent.getEndIndex());
         }
     }
 

@@ -1,6 +1,5 @@
 package de.speedbanking.iban;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -29,7 +28,7 @@ public final class CreateSampleIbans {
      */
     public static void main(String[] args) {
         Stream<IbanRegistry> registries = (args != null && args.length > 0)
-            ? Arrays.stream(args).map(IbanRegistry::getByCode).filter(Objects::nonNull)
+            ? Stream.of(args).map(IbanRegistry::getByCode).filter(Objects::nonNull)
             : getRandomCountries(10);
 
         registries

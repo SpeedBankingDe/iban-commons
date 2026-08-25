@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
@@ -36,7 +35,7 @@ final class NationalCheckDigitCalculatorsTest {
         String expectedToString = String.format("%s$%s[NCD %s]",
             NationalCheckDigitCalculators.class.getSimpleName(),
             clazz.getSimpleName(),
-            calculator.ncdIndexRange);
+            calculator.ncdComponent);
 
         assertThat(toString)
             .as("Check toString() format for class %s", clazz.getSimpleName())
@@ -46,7 +45,7 @@ final class NationalCheckDigitCalculatorsTest {
 
     @SuppressWarnings("unchecked")
     private static Stream<Class<? extends NcdCalculatorBase>> provideNcdCalculatorClasses() {
-        return Arrays.stream(NationalCheckDigitCalculators.class.getDeclaredClasses())
+        return Stream.of(NationalCheckDigitCalculators.class.getDeclaredClasses())
             .filter(NcdCalculatorBase.class::isAssignableFrom)
             .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
             .map(clazz -> (Class<? extends NcdCalculatorBase>) clazz);

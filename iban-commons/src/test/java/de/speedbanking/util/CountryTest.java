@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * JUnit tests for {@link Country} and its relation to {@link Continent}.
@@ -594,7 +595,7 @@ final class CountryTest {
     @DisplayName("AQ is the only constant with a null currency code")
     @Test
     void invariant_onlyAQ_hasNullCurrencyCode() {
-        long nullCount = Arrays.stream(Country.values())
+        long nullCount = Stream.of(Country.values())
             .filter(c -> c.getCurrency() == null)
             .count();
         assertThat(nullCount)

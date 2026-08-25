@@ -17,63 +17,139 @@ package de.speedbanking.iban;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.function.Function;
+import de.speedbanking.iban.IbanRegistry.StructureData;
 
 /**
- * Encapsulates structural components of an IBAN, their validation error mapping,
- * and the extraction logic for their expected pattern.
+ * Immutable pairing of a component's type, character pattern and position within the IBAN.
+ * <p>
+ * Package-private: used internally by {@link StructureData} / {@link StructureData.Builder} and by other
+ * classes in this package (e.g. {@link IbanBuilder}) that need a component's pattern and position together.
  *
  * @since 1.8.9
  */
-@SuppressWarnings("ImmutableEnumChecker")
-enum IbanComponent {
+final class IbanComponent {
+    private final IbanComponentType type;
+    private final String            patternStr;
+    private final int               beginIndex;
+    private final int               length;
 
-    /** BBAN (Basic Bank Account Number) component. */
-    BBAN(
-        IbanValidationError.INVALID_BBAN,
-        IbanRegistry::getBbanPattern),
-
-    /** Bank code component. */
-    BANK_CODE(
-        IbanValidationError.INVALID_BANK_CODE,
-        IbanRegistry::getBankCodePattern),
-
-    /** Branch code component. */
-    BRANCH_CODE(
-        IbanValidationError.INVALID_BRANCH_CODE,
-        IbanRegistry::getBranchCodePattern),
-
-    /** Account number component. */
-    ACCOUNT_NUMBER(
-        IbanValidationError.INVALID_ACCOUNT_NUMBER,
-        IbanRegistry::getAccountNumberPattern);
-
-    private final IbanValidationError            validationError;
-    private final Function<IbanRegistry, String> patternExtractor;
-
-    IbanComponent(IbanValidationError validationError, Function<IbanRegistry, String> patternExtractor) {
-        this.validationError = requireNonNull(validationError, "validationError must not be null");
-        this.patternExtractor = requireNonNull(patternExtractor, "patternExtractor must not be null");
+    IbanComponent(IbanComponentType type, String patternStr, int beginIndex, int length) {
+        this.type = requireNonNull(type, "type required");
+        this.patternStr = requireNonNull(patternStr, "patternStr required");
+        if (beginIndex < 0) {
+            throw new IllegalArgumentException("beginIndex must be >= 0, was " + beginIndex);
+        }
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be > 0, was " + length);
+        }
+        this.beginIndex = beginIndex;
+        this.length = length;
     }
 
     /**
-     * Returns the validation error associated with this component.
+     * Creates a component for the country-specific "Account Type" BBAN part
+     * (e.g. Brazil's account type character).
      *
-     * @return the validation error, never null
+     * @param patternStr the character pattern string for this component
+     * @param beginIndex the zero-based begin index within the full IBAN
+     * @param length     the length of this component in characters
+     * @return a new {@code IbanComponent} of type {@link IbanComponentType#ACCOUNT_TYPE}
      */
-    IbanValidationError getValidationError() {
-        return validationError;
+    static IbanComponent accountType(String patternStr, int beginIndex, int length) {
+        return new IbanComponent(IbanComponentType.ACCOUNT_TYPE, patternStr, beginIndex, length);
     }
 
     /**
-     * Extracts the required pattern string for this component from the given country registry.
+     * Creates a component for the country-specific "National Code" BBAN part.
      *
-     * @param registry the country registry entry, must not be null
-     * @return the pattern string, or null if not defined
+     * @param patternStr the character pattern string for this component
+     * @param beginIndex the zero-based begin index within the full IBAN
+     * @param length     the length of this component in characters
+     * @return a new {@code IbanComponent} of type {@link IbanComponentType#NATIONAL_CODE}
      */
-    String getPattern(IbanRegistry registry) {
-        requireNonNull(registry, "registry must not be null");
-        return patternExtractor.apply(registry);
+    static IbanComponent nationalCode(String patternStr, int beginIndex, int length) {
+        return new IbanComponent(IbanComponentType.NATIONAL_CODE, patternStr, beginIndex, length);
+    }
+
+    IbanComponentType getType() {
+        return type;
+    }
+
+    String getPattern() {
+        return patternStr;
+    }
+
+    int getBeginIndex() {
+        return beginIndex;
+    }
+
+    int getEndIndex() {
+        return beginIndex + length;
+    }
+
+    int getLength() {
+        return length;
+    }
+
+    /**
+     * Extracts this component's substring directly from the given full IBAN string.
+     *
+     * @param ibanStr the full, normalized IBAN string
+     * @return the substring occupied by this component
+     */
+    String extractFrom(String ibanStr) {
+        return ibanStr.substring(beginIndex, getEndIndex());
+    }
+
+    /**
+     * Extracts this component's characters directly from the given full IBAN character sequence.
+     *
+     * @param sequence the full, normalized IBAN character sequence
+     * @return a new array containing the characters occupied by this component
+     */
+    char[] extractFrom(final char[] sequence) {
+        char[] result = new char[length];
+        System.arraycopy(sequence, beginIndex, result, 0, length);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()
+            + "[type=" + type
+            + ", pattern=" + patternStr
+            + ", beginIndex=" + beginIndex
+            + ", length=" + length + "]";
+    }
+
+    /**
+     * Identifies a structural BBAN component that carries its own pattern and position within the IBAN.
+     */
+    enum IbanComponentType {
+        BBAN("BBAN"),
+        BANK_CODE("Bank Code"),
+        BRANCH_CODE("Branch Code"),
+        ACCOUNT_NUMBER("Account Number"),
+        NATIONAL_CHECK_DIGIT("NCD"),
+        ACCOUNT_TYPE("Account Type"),
+        NATIONAL_CODE("National Code"),
+        IDENTIFICATION_NUMBER("Identification Number"),
+        ACCOUNT_TYPE_AND_CONTROL("Account Type/Control");
+
+        private final String label;
+
+        IbanComponentType(String label) {
+            this.label = label;
+        }
+
+        /**
+         * Returns the short, human-readable label used for this component type, e.g. in {@link IbanRegistry#toString()}.
+         *
+         * @return the display label
+         */
+        String getLabel() {
+            return label;
+        }
     }
 
 }

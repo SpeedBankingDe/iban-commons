@@ -17,7 +17,6 @@ package de.speedbanking.iban;
 
 import static java.util.Objects.requireNonNull;
 
-import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Mod97;
 
 import java.util.stream.IntStream;
@@ -104,7 +103,7 @@ final class NationalCheckDigitCalculators {
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
-            final int prefixLen = ncdIndexRange.getBegin() - BBAN_START;
+            final int prefixLen = ncdComponent.getBeginIndex() - BBAN_START;
             final int maskedLen = countryData.getIbanLength() - BBAN_START;
 
             // virtual CharSequence view: forwards the BBAN prefix as-is, and substitutes
@@ -158,7 +157,7 @@ final class NationalCheckDigitCalculators {
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START; // 10 digits for BE
+            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START; // 10 digits for BE
 
             int remainder = mod97(iban, BBAN_START, lengthToProcess);
 
@@ -185,7 +184,7 @@ final class NationalCheckDigitCalculators {
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
             int s = 0;
-            for (int i = BBAN_START; i < ncdIndexRange.getBegin(); i++) {
+            for (int i = BBAN_START; i < ncdComponent.getBeginIndex(); i++) {
                 s += (iban[i] - '0') * WEIGHTS[(i - BBAN_START) % WEIGHTS.length];
             }
             return oneDigit((10 - s % 10) % 10);
@@ -221,7 +220,7 @@ final class NationalCheckDigitCalculators {
             int firstDigit   = calculateMod11Spanish(iban, BBAN_START, 8, 2);
 
             // DC[1]: account number (10 digits) after the NCD field
-            int accountStart = ncdIndexRange.getEnd();
+            int accountStart = ncdComponent.getEndIndex();
             int secondDigit  = calculateMod11Spanish(iban, accountStart, 10, 0);
 
             // the combination of both digits (0-9) results in a value from 00 to 99
@@ -282,11 +281,11 @@ final class NationalCheckDigitCalculators {
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START;
+            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
 
             int sum = 0;
             for (int i = 0; i < lengthToProcess; i++) {
-                int digit   = iban[ncdIndexRange.getBegin() - 1 - i] - '0';
+                int digit   = iban[ncdComponent.getBeginIndex() - 1 - i] - '0';
                 int product = digit * WEIGHTS[i % WEIGHTS.length];
                 if (product >= 10) {
                     product = (product / 10) + (product % 10);
@@ -357,7 +356,7 @@ final class NationalCheckDigitCalculators {
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START;
+            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
 
             int remainder = mod97French(iban, BBAN_START, lengthToProcess);
 
@@ -488,7 +487,7 @@ final class NationalCheckDigitCalculators {
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
             // CIN is at BBAN_START (index 4); algorithm covers indices 5 to end of BBAN
-            int cinIndex = ncdIndexRange.getBegin();
+            int cinIndex = ncdComponent.getBeginIndex();
             int bbanEnd  = countryData.getIbanLength();
 
             int sum = 0;
@@ -570,7 +569,7 @@ final class NationalCheckDigitCalculators {
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdIndexRange.getBegin() - BBAN_START;
+            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
 
             int sum = 0;
             for (int i = 0; i < lengthToProcess; i++) {
@@ -582,7 +581,7 @@ final class NationalCheckDigitCalculators {
 
             // result == 10: account number not issuable — return existing NCD as-is
             return result == 10
-                ? ncdIndexRange.applyTo(iban)
+                ? ncdComponent.extractFrom(iban)
                 : oneDigit(result);
         }
     }
@@ -686,15 +685,6 @@ final class NationalCheckDigitCalculators {
 
     /** Senegal (SN) — uses France (FR) algorithm. */
     static final class SN extends FR {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Togo (TG)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for TG.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class TG extends NoOpNcdCalculatorBase {
     }
 
     /**
@@ -814,16 +804,16 @@ final class NationalCheckDigitCalculators {
                 .toArray(char[][]::new);
 
         /** Cache for single uppercase letters 'A' through 'Z' as arrays. */
-        private static final char[][]       LETTER_CACHE =
+        private static final char[][] LETTER_CACHE =
             IntStream.range(0, 26)
                 .mapToObj(i -> new char[] {(char) ('A' + i)})
                 .toArray(char[][]::new);
 
         /** Country-specific registry data, i.e. the enum entry in {@link IbanRegistry}, resolved at construction time. */
-        final IbanRegistry countryData;
+        final IbanRegistry            countryData;
 
-        /** Index range defining the position of the optional National Check Digit (NCD) within the IBAN. */
-        final IndexRange   ncdIndexRange;
+        /** The optional National Check Digit (NCD) component within the IBAN. */
+        final IbanComponent           ncdComponent;
 
         /**
          * Resolves {@link #countryData} from the concrete subclass's simple name.
@@ -834,7 +824,7 @@ final class NationalCheckDigitCalculators {
             final String clazzName = getClass().getSimpleName();
             countryData = requireNonNull(IbanRegistry.getByCode(clazzName),
                 clazzName + " is not a supported IBAN country code");
-            ncdIndexRange = countryData.getNationalCheckDigitIndexRange();
+            ncdComponent = countryData.getNationalCheckDigitComponent();
         }
 
         /**
@@ -850,8 +840,8 @@ final class NationalCheckDigitCalculators {
         @Override
         public boolean validateNationalCheckDigit(final char[] iban) {
             // use coordinates instead of allocating a new array via existingNcd.applyTo(iban)
-            final int start = ncdIndexRange.getBegin();
-            final int length = ncdIndexRange.length();
+            final int start = ncdComponent.getBeginIndex();
+            final int length = ncdComponent.getLength();
 
             // the computed NCD should ideally return a primitive or use a small cached buffer
             final char[] computedNcd = calculateNationalCheckDigit(iban);
@@ -925,7 +915,7 @@ final class NationalCheckDigitCalculators {
         @Override
         public final String toString() {
             final String className = getClass().getName();
-            return className.substring(className.lastIndexOf('.') + 1) + "[NCD " + ncdIndexRange + ']';
+            return className.substring(className.lastIndexOf('.') + 1) + "[NCD " + ncdComponent + ']';
         }
     }
 
@@ -948,7 +938,7 @@ final class NationalCheckDigitCalculators {
          */
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
-            return ncdIndexRange.applyTo(iban);
+            return ncdComponent.extractFrom(iban);
         }
     }
 
@@ -978,7 +968,7 @@ final class NationalCheckDigitCalculators {
          */
         @Override
         public final char[] calculateNationalCheckDigit(final char[] iban) {
-            int remainder = mod97(iban, BBAN_START, ncdIndexRange.getBegin() - BBAN_START);
+            int remainder = mod97(iban, BBAN_START, ncdComponent.getBeginIndex() - BBAN_START);
             remainder = (remainder * 100) % MODULO_BASE;
 
             return twoDigits(CHECK_DIGIT_MAGIC_NUMBER - remainder);

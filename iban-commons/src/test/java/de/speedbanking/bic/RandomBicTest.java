@@ -15,7 +15,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -218,7 +217,7 @@ final class RandomBicTest {
     }
 
     static Stream<Country> provideAllIsoCountries() {
-        return Arrays.stream(Country.values());
+        return Stream.of(Country.values());
     }
 
     @DisplayName("of(String) should generate a valid BIC-8 for every ISO 3166-1 Alpha-2 country")

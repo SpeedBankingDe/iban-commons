@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
-import de.speedbanking.util.IndexRange;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -409,8 +408,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String getBankCode() {
-        if (bankCode == null && countryData.getBankCodeIndexRange() != null) {
-            bankCode = countryData.getBankCodeIndexRange().applyTo(ibanStr);
+        if (bankCode == null) {
+            bankCode = countryData.getBankCodeComponent().extractFrom(ibanStr);
         }
         return bankCode;
     }
@@ -423,8 +422,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String getBranchCode() {
-        if (branchCode == null && countryData.getBranchCodeIndexRange() != null) {
-            branchCode = countryData.getBranchCodeIndexRange().applyTo(ibanStr);
+        if (branchCode == null) {
+            IbanComponent component = countryData.getBranchCodeComponent();
+            if (component != null) {
+                branchCode = component.extractFrom(ibanStr);
+            }
         }
         return branchCode;
     }
@@ -456,7 +458,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      */
     public String getAccountNumber() {
         if (accountNumber == null) {
-            accountNumber = countryData.getAccountNumberIndexRange().applyTo(ibanStr);
+            accountNumber = countryData.getAccountNumberComponent().extractFrom(ibanStr);
         }
         return accountNumber;
     }
@@ -469,8 +471,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.1
      */
     public String getNationalCheckDigit() {
-        if (nationalCheckDigit == null && countryData.hasNationalCheckDigit()) {
-            nationalCheckDigit = countryData.getNationalCheckDigitIndexRange().applyTo(ibanStr);
+        if (nationalCheckDigit == null) {
+            IbanComponent component = countryData.getNationalCheckDigitComponent();
+            if (component != null) {
+                nationalCheckDigit = component.extractFrom(ibanStr);
+            }
         }
         return nationalCheckDigit;
     }
@@ -538,10 +543,10 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.5
      */
     public String toComponentString() {
-        IndexRange bankRange = countryData.getBankCodeIndexRange();
-        IndexRange branchRange = countryData.getBranchCodeIndexRange();
-        IndexRange accountRange = countryData.getAccountNumberIndexRange();
-        IndexRange ncdRange = countryData.getNationalCheckDigitIndexRange();
+        IbanComponent bankCompo = countryData.getBankCodeComponent();
+        IbanComponent branchCompo = countryData.getBranchCodeComponent();
+        IbanComponent accountCompo = countryData.getAccountNumberComponent();
+        IbanComponent ncdCompo = countryData.getNationalCheckDigitComponent();
 
         // fixed-size stack array (max 12 entries)
         int[] idx = new int[12];
@@ -550,20 +555,20 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         idx[count++] = IbanRegistry.INDEX_CHECK_DIGIT1;
         idx[count++] = IbanRegistry.INDEX_BBAN;
 
-        idx[count++] = bankRange.getBegin();
-        idx[count++] = bankRange.getEnd();
+        idx[count++] = bankCompo.getBeginIndex();
+        idx[count++] = bankCompo.getEndIndex();
 
-        if (branchRange != null) {
-            idx[count++] = branchRange.getBegin();
-            idx[count++] = branchRange.getEnd();
+        if (branchCompo != null) {
+            idx[count++] = branchCompo.getBeginIndex();
+            idx[count++] = branchCompo.getEndIndex();
         }
 
-        idx[count++] = accountRange.getBegin();
-        idx[count++] = accountRange.getEnd();
+        idx[count++] = accountCompo.getBeginIndex();
+        idx[count++] = accountCompo.getEndIndex();
 
-        if (ncdRange != null) {
-            idx[count++] = ncdRange.getBegin();
-            idx[count++] = ncdRange.getEnd();
+        if (ncdCompo != null) {
+            idx[count++] = ncdCompo.getBeginIndex();
+            idx[count++] = ncdCompo.getEndIndex();
         }
 
         // insertion sort - optimal for small fixed arrays, avoids Arrays.sort overhead
