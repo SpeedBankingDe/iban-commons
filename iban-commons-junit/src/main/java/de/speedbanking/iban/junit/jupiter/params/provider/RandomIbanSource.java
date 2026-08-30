@@ -208,7 +208,7 @@ public @interface RandomIbanSource {
 
             // value() and includeCountries() must not both be specified
             if (!valueCountries.isEmpty() && !includeCountries.isEmpty()) {
-                throwIllegalArgument(": value and includeCountries must not be used simultaneously");
+                throwIllegalArgument("value and includeCountries must not be used simultaneously");
             }
 
             // resolve effective include list

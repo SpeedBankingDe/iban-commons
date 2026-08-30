@@ -289,7 +289,7 @@ public final class Mod97 {
      * @param data   the source character array; must not be {@code null}
      * @param offset start index within {@code data} (inclusive)
      * @param length number of characters to process
-     * @return the remainder in the range {@code [0, 96]};\
+     * @return the remainder in the range {@code [0, 96]};
      *         or {@link #INVALID_REMAINDER} if an illegal character is encountered
      * @throws NullPointerException      if {@code data} is {@code null}
      * @throws IndexOutOfBoundsException if {@code offset} or {@code offset + length}

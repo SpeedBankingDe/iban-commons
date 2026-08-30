@@ -50,10 +50,20 @@ public enum Continent {
         this.continentName = continentName;
     }
 
+    /**
+     * Returns the two-letter code of this continent (e.g., {@code "EU"}).
+     *
+     * @return the continent code
+     */
     public String getCode() {
         return code;
     }
 
+    /**
+     * Returns the English name of this continent (e.g., {@code "Europe"}).
+     *
+     * @return the continent name
+     */
     public String getContinentName() {
         return continentName;
     }

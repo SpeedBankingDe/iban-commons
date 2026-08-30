@@ -17,7 +17,7 @@
 **[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [📚 Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
 
 `iban-commons` is a Java IBAN validation library and BIC validator for Java 8+, providing fast and reliable parsing, validation, and formatting of International Bank Account Numbers (IBAN) and Business Identifier Codes (BIC/SWIFT codes).
-Designed for high-performance enterprise applications, it covers 120 countries, is Android-compatible (API 21+), and has zero compile or runtime dependencies outside the Java Standard Library.
+Designed for high-performance enterprise applications, it covers 127 countries, is Android-compatible (API 21+), and has zero compile or runtime dependencies outside the Java Standard Library.
 
 ## Why IBAN Commons?
 
@@ -28,7 +28,7 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 | **Dependencies**           |        0       |     0     |       5        |     0     |     0     |
 | **Java Version**           |       8+       |    8+     |       8+       |    11+    |    8+     |
 | **Android (API 21+)**      |        ✅       |     ?     |       ?        |     ?     |     ✅     |
-| **Countries**              |       120      |    82     |      n/a       |    111    |    111    |
+| **Countries**              |       127      |    82     |      n/a       |    111    |    111    |
 
 > Throughput: rejection path (invalid IBANs) — JMH · OpenJDK 21.0.7 · Linux · single core · ParallelGC · `-XX:-StackTraceInThrowable` · 2026-04-19
 
@@ -43,13 +43,13 @@ Designed for high-performance enterprise applications, it covers 120 countries, 
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.8</version>
+    <version>1.8.9</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.8'
+implementation 'de.speedbanking:iban-commons:1.8.9'
 ```
 
 ### 2. Validate & Parse
@@ -359,6 +359,22 @@ Each invalid IBAN is derived from a valid one by applying one of six sabotage st
 ### Benchmark Suite Repository
 
 All performance tests are fully open and available in the [SpeedBankingDe/iban-commons-benchmarks](https://github.com/SpeedBankingDe/iban-commons-benchmarks) repository.
+
+-----
+
+## 🆕 What's New in 1.8.9
+
+### IbanBuilder
+New `IbanBuilder` API (obtained via `IbanRegistry#builder()`) generates structurally valid, correctly checksummed IBANs from explicit or randomly filled components — useful for tests and fixtures.
+
+### 7 New Countries
+Added CG (Congo-Brazzaville), CI (Côte d'Ivoire), GW (Guinea-Bissau), MG (Madagascar), ML (Mali), NE (Niger), and TD (Chad) to `IbanRegistry`, bringing total country coverage to 127.
+
+### Regex & Component Utilities
+Added `PatternCache` (thread-safe compiled-`Pattern` cache) and `RegexSimplifier` (consolidates consecutive same-class regex blocks), plus new `IndexRange` offset methods and gap-range support in component string formatting.
+
+### Internal Consolidation
+`CountryUtil` was merged into `Country` (including `createFlagEmoji`), and several country data entries were corrected (Bolivia name, Tonga continent, ZWL→ZWG rename, KGS typo).
 
 -----
 

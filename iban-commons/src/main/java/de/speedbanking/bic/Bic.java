@@ -103,7 +103,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * Package-private constructor.
      * <p>
      * Construction is restricted to {@link BicValidator} which guarantees
-     * the input character sequence {@code csBic} is valid, normalized,
+     * the input character sequence {@code bicInput} is valid, normalized,
      * and correctly sized (8 or 11 characters long).
      * <p>
      * For BIC-11 input the branch code is stored eagerly so that {@link #toBic11()}
@@ -336,7 +336,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * <ul>
      *   <li>For BIC {@code BHLSDEMMXXX}: Branch Code is {@code XXX} (Head Office of Bankhaus Ludwig Sperrer KG)</li>
      *   <li>For BIC {@code DEUTDEFFXXX}: Branch Code is {@code XXX} (Head Office of Deutsche Bank AG)</li>
-     *   <li>For BIC {@code DEUTDEFF444}: Branch Code is {@code 500} (Specific Branch of Deutsche Bank AG Frankfurt am Main)</li>
+     *   <li>For BIC {@code DEUTDEFF444}: Branch Code is {@code 444} (Specific Branch of Deutsche Bank AG Frankfurt am Main)</li>
      * </ul>
      *
      * @return the Branch Code (e.g., {@code "XXX"}), or {@code null} if the BIC is a BIC-8 (8 characters long)

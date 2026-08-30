@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
  * Represents an immutable range defined by a begin index (inclusive)
  * and an ending index (exclusive).
  * <p>
- * This class models a **half-open interval** {@code [begin, end)}, which is consistent with
+ * This class models a <strong>half-open interval</strong> {@code [begin, end)}, which is consistent with
  * indexing conventions used in Java (e.g., {@link String#substring(int, int)}) and
  * is ideally suited for defining segments within a string (such as BBAN parts in an IBAN).<br>
  * It implements {@link Comparable} to allow sorting by start position, then end position.

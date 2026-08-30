@@ -29,17 +29,17 @@ import java.io.Serializable;
 import java.util.Optional;
 
 /**
- * Represents a valid, immutable **International Bank Account Number (IBAN)**,
- * structured according to the **ISO 13616** standard.
+ * Represents a valid, immutable <strong>International Bank Account Number (IBAN)</strong>,
+ * structured according to the <strong>ISO 13616</strong> standard.
  * <p>
  * The validity is guaranteed by successful checks on length, country-specific
- * structure (BBAN), and the **ISO 7064 Mod 97-10** checksum.
+ * structure (BBAN), and the <strong>ISO 7064 Mod 97-10</strong> checksum.
  * <p>
  * The IBAN format consists of:
  * <ul>
- *   <li>**Country Code** (2 letters, ISO 3166-1 alpha-2)</li>
- *   <li>**Check Digits** (2 numbers, calculated using ISO 7064 Mod 97-10)</li>
- *   <li>**Basic Bank Account Number (BBAN)** (country-specific length and structure)</li>
+ *   <li><strong>Country Code</strong> (2 letters, ISO 3166-1 alpha-2)</li>
+ *   <li><strong>Check Digits</strong> (2 numbers, calculated using ISO 7064 Mod 97-10)</li>
+ *   <li><strong>Basic Bank Account Number (BBAN)</strong> (country-specific length and structure)</li>
  * </ul>
  * Creation is done exclusively via static factory methods after successful validation.
  *
@@ -99,7 +99,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Package-private constructor.
      * <p>
      * Construction is restricted to static factory methods after validation and guarantees
-     * the input {@code ibanArr} is valid, normalized, and correctly sized.
+     * the input {@code normIban} is valid, normalized, and correctly sized.
      *
      * @param normIban    the normalized, validated IBAN characters
      * @param countryData the metadata for the country code (format, structure)
@@ -250,7 +250,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     /**
      * Returns the two-letter ISO country code (positions 1 and 2).
      * <p>
-     * This is the {@code <strong>ISO 3166-1 Alpha-2</strong>} country code, which identifies the country of the bank.
+     * This is the <strong>ISO 3166-1 Alpha-2</strong> country code, which identifies the country of the bank.
      * This code forms the initial part of every IBAN.
      * <p>
      * Examples:

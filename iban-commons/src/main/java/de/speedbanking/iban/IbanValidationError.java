@@ -29,7 +29,7 @@ public enum IbanValidationError implements ValidationError {
     /** The IBAN input string is null or empty. */
     EMPTY("IBAN is null or empty"),
 
-    /** The overall length of the IBAN string is incorrect (not between 15 and 34 characters). */
+    /** The overall length of the IBAN string is incorrect (not between 15 and 33 characters). */
     INCORRECT_LENGTH("IBAN has incorrect length"),
 
     /** The IBAN contains characters that are not digits (0-9) or uppercase letters (A-Z). */

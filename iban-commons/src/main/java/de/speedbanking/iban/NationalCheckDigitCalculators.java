@@ -65,10 +65,10 @@ final class NationalCheckDigitCalculators {
     /**
      * National Check Digit calculator for <strong>Albania (AL)</strong>.
      * <p>
-     * <strong>BBAN structure:</strong> 8n bank/branch + 1n NCD + 16n account = 28 digits (IBAN length 28).
+     * <strong>BBAN structure:</strong> 7n bank/branch + 1n NCD + 16n account = 24 digits (IBAN length 28).
      * <p>
      * <strong>Algorithm:</strong>
-     * Weighted MOD 10 applied to the 8-digit bank/branch prefix.
+     * Weighted MOD 10 applied to the 7-digit bank/branch prefix.
      * Weights: {@code {9, 7, 3, 1, 9, 7, 3}} (cyclic). Result: {@code (10 − sum % 10) % 10}.
      */
     static final class AL extends NcdCalculatorBase {
@@ -171,7 +171,7 @@ final class NationalCheckDigitCalculators {
     /**
      * National Check Digit calculator for <strong>Estonia (EE)</strong>.
      * <p>
-     * <strong>BBAN structure:</strong> 2n bank + 2n branch + 11n account + 1n NCD + 3n reserved
+     * <strong>BBAN structure:</strong> 2n bank + 2n branch + 11n account + 1n NCD
      *  = 16 digits (IBAN length 20). Only the 15 digits before the NCD are used.
      * <p>
      * <strong>Algorithm:</strong>

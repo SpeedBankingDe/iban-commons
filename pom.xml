@@ -142,8 +142,8 @@
         <dep.plugin.jacoco.version>0.8.15</dep.plugin.jacoco.version>
         <dep.plugin.jar.version>3.5.1</dep.plugin.jar.version>
         <dep.plugin.javadoc.version>3.12.0</dep.plugin.javadoc.version>
-        <dep.plugin.license.version>5.1.1</dep.plugin.license.version>
-        <dep.plugin.pitest.version>1.25.8</dep.plugin.pitest.version>
+        <dep.plugin.license.version>5.1.2</dep.plugin.license.version>
+        <dep.plugin.pitest.version>1.30.0</dep.plugin.pitest.version>
         <dep.plugin.pmd.version>3.28.0</dep.plugin.pmd.version>
         <dep.plugin.release.version>3.3.1</dep.plugin.release.version>
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version> <!-- see https://github.com/Ekryd/sortpom/releases -->

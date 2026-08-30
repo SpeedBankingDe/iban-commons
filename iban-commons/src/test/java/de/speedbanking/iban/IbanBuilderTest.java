@@ -291,7 +291,7 @@ final class IbanBuilderTest {
         IbanBuilder<?> builder = IbanRegistry.GL.builder();
 
         assertThatInvalidIbanException()
-            .isThrownBy(() -> builder.resolveComponent(new IbanComponent(IbanComponentType.BANK_CODE, "4!n", 4, 4), "999X"))
+            .isThrownBy(() -> builder.resolveComponent(new IbanComponent(BANK_CODE, "4!n", 4, 4), "999X"))
             .hasFieldOrPropertyWithValue("reason", IbanValidationError.INVALID_BANK_CODE);
 
         assertThatInvalidIbanException()

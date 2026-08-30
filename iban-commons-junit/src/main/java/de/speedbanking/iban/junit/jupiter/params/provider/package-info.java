@@ -23,8 +23,8 @@
  *
  * <ul>
  *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.IbanCountrySource} –
- *       supplies {@link de.speedbanking.iban.IbanRegistry} entries filtered by SEPA
- *       membership or an explicit country list.</li>
+ *       supplies {@link de.speedbanking.iban.IbanRegistry} entries filtered by an
+ *       explicit include/exclude country list.</li>
  *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.IbanRegistrySource} –
  *       supplies all (or a filtered subset of) {@link de.speedbanking.iban.IbanRegistry}
  *       enum constants.</li>

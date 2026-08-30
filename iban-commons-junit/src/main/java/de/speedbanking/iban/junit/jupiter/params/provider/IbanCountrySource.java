@@ -15,6 +15,7 @@
  */
 package de.speedbanking.iban.junit.jupiter.params.provider;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 import de.speedbanking.iban.IbanRegistry;
@@ -32,6 +33,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -45,6 +47,8 @@ import java.util.stream.Stream;
  *   <li>The country name (e.g., "Germany")</li>
  * </ul>
  * The list of provided IBAN registries can be filtered using the {@link #includeCountries()} and {@link #excludeCountries()} parameters.
+ *
+ * @since 1.8.6
  */
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -57,8 +61,8 @@ public @interface IbanCountrySource {
      * If specified, only the constants listed here will be considered. If not specified (default),
      * all enum constants are initially taken into consideration before applying {@link #excludeCountries()}.
      * <p>
-     * **Note:** The names must match existing enum constants, otherwise an {@link IllegalArgumentException} is thrown
-     * by the calling code.
+     * <strong>Note:</strong> entries are type-safe {@link IbanRegistry} enum constants, so an invalid
+     * name is already rejected at compile time, not at runtime.
      */
     IbanRegistry[] includeCountries() default {};
 
@@ -67,13 +71,25 @@ public @interface IbanCountrySource {
      * <p>
      * Constants listed here will be filtered out from the final list of arguments.
      * <p>
-     * **Note:** The names must match existing enum constants, otherwise an {@link IllegalArgumentException} is thrown
-     * by the calling code.
+     * <strong>Note:</strong> entries are type-safe {@link IbanRegistry} enum constants, so an invalid
+     * name is already rejected at compile time, not at runtime.
      */
     IbanRegistry[] excludeCountries() default {};
 
+    /**
+     * Implementation of {@link ArgumentsProvider} for {@link IbanCountrySource}.
+     */
     class IbanCountryArgumentsProvider implements ArgumentsProvider {
 
+        /**
+         * Provides the filtered stream of {@link IbanRegistry} entries as test arguments.
+         *
+         * @param parameters parameter declarations of the test method (unused)
+         * @param context    the current extension context
+         * @return a non-empty stream of {@link Arguments}, each wrapping a country code and country name
+         * @throws IllegalStateException if the {@code @IbanCountrySource} annotation is not present on the
+         *                                test element, or if the configured filters match no entries
+         */
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
             // find the annotation on the element (usually a method) or throw if not present
@@ -90,10 +106,18 @@ public @interface IbanCountrySource {
             Set<IbanRegistry> excludedCountries = Arrays.stream(src.excludeCountries())
                 .collect(toSet());
 
-            // filter the included stream by the excluded set and map to Arguments
-            return includeCountries
+            // filter the included stream by the excluded set
+            List<IbanRegistry> result = includeCountries
                 .filter(registry -> !excludedCountries.contains(registry))
-                .map(registry -> Arguments.of(registry.getCountryCode(), registry.getCountryName()));
+                .collect(toList());
+
+            if (result.isEmpty()) {
+                throw new IllegalStateException(
+                    "No " + IbanRegistry.class.getSimpleName() + " entries matched the configured "
+                    + "includeCountries/excludeCountries filter of @" + IbanCountrySource.class.getSimpleName() + ".");
+            }
+
+            return result.stream().map(registry -> Arguments.of(registry.getCountryCode(), registry.getCountryName()));
         }
 
     }

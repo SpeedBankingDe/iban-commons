@@ -17,6 +17,7 @@ package de.speedbanking.validation;
 
 import de.speedbanking.iban.Iban;
 import de.speedbanking.iban.IbanConfig;
+import de.speedbanking.iban.IbanValidationError;
 import de.speedbanking.iban.InvalidIbanException;
 
 import jakarta.validation.ConstraintValidator;
@@ -61,8 +62,18 @@ public class IbanConstraintValidator implements ConstraintValidator<ValidIban, C
             return true;
         }
 
-        // If the annotation permits spaces but the global IbanConfig does not,
-        // strip spaces before delegating so that Iban.validate() does not reject them.
+        // Iban.validate() only ever honors the global IbanConfig.isAllowSpace() flag, so the
+        // per-field allowSpace() attribute has to be enforced here on both sides:
+        if (!allowSpace && IbanConfig.isAllowSpace() && containsSpace(value)) {
+            // annotation forbids spaces even though the global config would otherwise accept them
+            ctx.disableDefaultConstraintViolation();
+            ctx.buildConstraintViolationWithTemplate(IbanValidationError.ILLEGAL_CHARACTERS.getText())
+               .addConstraintViolation();
+            return false;
+        }
+
+        // annotation permits spaces but the global IbanConfig does not: strip them before
+        // delegating so that Iban.validate() does not reject them.
         CharSequence input = allowSpace && !IbanConfig.isAllowSpace() ? stripSpaces(value) : value;
 
         try {
@@ -76,6 +87,15 @@ public class IbanConstraintValidator implements ConstraintValidator<ValidIban, C
                .addConstraintViolation();
             return false;
         }
+    }
+
+    private static boolean containsSpace(CharSequence value) {
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) == ' ') {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static String stripSpaces(CharSequence value) {

@@ -66,6 +66,16 @@ public final class IbanPatternConverter {
     private static final ConcurrentMap<String, List<Segment>> SEGMENT_CACHE = new ConcurrentHashMap<>();
 
     /**
+     * Cache of already-built regex strings, keyed by the exact pattern notation string.
+     * <p>
+     * Mirrors {@link #SEGMENT_CACHE}: {@link #buildRegex(String, List)} is called once per
+     * component with an explicit (non-random) value on every {@code IbanBuilder#build()} call,
+     * always with the same small, fixed set of pattern strings. Caching avoids rebuilding the
+     * same regex string (and the {@code StringBuilder} it takes to build it) on every call.
+     */
+    private static final ConcurrentMap<String, String> REGEX_CACHE = new ConcurrentHashMap<>();
+
+    /**
      * Private constructor to prevent instantiation of this utility class.
      */
     private IbanPatternConverter() {
@@ -215,7 +225,7 @@ public final class IbanPatternConverter {
         // parsing and validation
         List<Segment> segments = aggregateSegments(parseSegments(patternNotation));
 
-        return buildRegex(segments);
+        return buildRegex(patternNotation, segments);
     }
 
     /**
@@ -243,6 +253,23 @@ public final class IbanPatternConverter {
         }
 
         return regexBuilder.toString();
+    }
+
+    /**
+     * Cached variant of {@link #buildRegex(List)}, keyed by the pattern notation the segments
+     * were parsed from.
+     * <p>
+     * Results are cached by exact {@code patternNotation} string (see {@link #REGEX_CACHE});
+     * for a given input, the returned regex string is always the same shared instance.
+     *
+     * @param patternNotation the IBAN structure pattern string the segments were parsed from
+     *                        (used only as the cache key), must not be null
+     * @param segments        the list of validated segments (intermediate format) to build the
+     *                        regex from on a cache miss
+     * @return the resulting Java regular expression string (e.g., "[A-Z]{4}[A-Z0-9]{16}")
+     */
+    public static String buildRegex(String patternNotation, List<Segment> segments) {
+        return REGEX_CACHE.computeIfAbsent(patternNotation, p -> buildRegex(segments));
     }
 
     /**
@@ -339,7 +366,7 @@ public final class IbanPatternConverter {
         private final int          length;
 
         /**
-         * Private constructor for the immutable segment.
+         * Constructs an immutable segment.
          *
          * @param charType the character type
          * @param length   the fixed length
@@ -372,18 +399,39 @@ public final class IbanPatternConverter {
             return charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#NUMERIC}.
+         *
+         * @return {@code true} if the segment is numeric
+         */
         public boolean isNumeric() {
             return IbanCharType.NUMERIC == charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#ALPHABETIC}.
+         *
+         * @return {@code true} if the segment is alphabetic
+         */
         public boolean isAlphabetic() {
             return IbanCharType.ALPHABETIC == charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#ALPHANUMERIC}.
+         *
+         * @return {@code true} if the segment is alphanumeric
+         */
         public boolean isAlphanumeric() {
             return IbanCharType.ALPHANUMERIC == charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#NUMERIC}
+         * or {@link IbanCharType#ALPHANUMERIC}.
+         *
+         * @return {@code true} if the segment is numeric or alphanumeric
+         */
         public boolean isNumericOrAlphanumeric() {
             return IbanCharType.NUMERIC == charType || IbanCharType.ALPHANUMERIC == charType;
         }

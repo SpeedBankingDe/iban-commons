@@ -26,7 +26,7 @@ import de.speedbanking.util.Mod97;
 import java.util.stream.Stream;
 
 /**
- * The core engine for **International Bank Account Number (IBAN)** validation.
+ * The core engine for <strong>International Bank Account Number (IBAN)</strong> validation.
  *
  * <h2>Validation pipeline</h2>
  * Every validation call follows a strict fail-fast sequence that aborts at the

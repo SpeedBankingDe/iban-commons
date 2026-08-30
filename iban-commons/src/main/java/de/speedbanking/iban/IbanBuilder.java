@@ -162,6 +162,8 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * Builds and returns a fully formatted and valid IBAN instance.
      *
      * @return the constructed IBAN
+     * @throws IllegalStateException if a subclass hook alters the IBAN length to an invalid value
+     * @throws InvalidIbanException  if the assembled IBAN string unexpectedly fails validation
      */
     public final Iban build() {
         String countryCode = getCountryData().getBaseCountry().getCountryCode();
@@ -190,12 +192,17 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
                 + " (expected: " + expectedLength + ")");
         }
 
-        // always calculdate NCD regardless of IbanConfig#isCalculateNcd
+        // always calculate NCD regardless of IbanConfig#isCalculateNcd
         fixNationalCheckDigit(getCountryData(), ibanBuilder);
 
         fixCheckDigits(ibanBuilder);
 
-        return Iban.of(ibanBuilder.toString());
+        // fixCheckDigits() already ran a full structural validation (with placeholder check
+        // digits, whose value does not influence structure validation) and just installed the
+        // correct checksum, so the result is provably valid at this point. Re-parsing it via
+        // Iban.of() would repeat that same structural + checksum validation for no benefit;
+        // constructing directly (this class shares Iban's package) skips that redundant pass.
+        return new Iban(ibanBuilder, getCountryData());
     }
 
     /**
@@ -286,7 +293,7 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
             boolean canPad = paddingLen > 0 && IbanPatternConverter.allMatch(segments, Segment::isNumericOrAlphanumeric);
 
             // validate pattern against the input (or padded representation if padding will be applied)
-            String regex = IbanPatternConverter.buildRegex(segments);
+            String regex = IbanPatternConverter.buildRegex(ibanComponent.getPattern(), segments);
             CharSequence checkTarget = canPad ? padLeft(input.toString(), requiredLength, '0') : input;
             if (!PatternCache.getDefault().getPattern(regex).matcher(checkTarget).matches()) {
                 throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
