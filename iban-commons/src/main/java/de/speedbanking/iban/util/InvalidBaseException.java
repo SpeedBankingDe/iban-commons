@@ -29,7 +29,7 @@ import java.util.Objects;
  * Concrete subclasses store a specific {@link ValidationError} enum constant as
  * the failure reason and override {@link #getReason()} with a covariant return
  * type to expose the concrete enum type to callers without casting.
- * All shared logic — input normalisation, country code handling, {@code equals},
+ * All shared logic — input normalization, country code handling, {@code equals},
  * {@code hashCode}, and {@code toString} — is implemented here exactly once.
  *
  * @since 1.8.5
@@ -45,7 +45,7 @@ public abstract class InvalidBaseException extends RuntimeException {
     /** The specific reason why validation failed. */
     private final ValidationError reason;
 
-    /** The optional input found to be erroneous, trimmed to {@code null} if blank. */
+    /** The optional input found to be erroneous, stored verbatim (untrimmed); {@code null} only if the input itself was {@code null}. */
     private final String          input;
 
     /** The optional ISO country code associated with the validation failure, trimmed and upper-cased to {@code null} if blank. */
@@ -112,9 +112,10 @@ public abstract class InvalidBaseException extends RuntimeException {
 
     /**
      * Returns the erroneous input that triggered this exception, if available.
-     * The value is trimmed; blank input is normalized to {@code null}.
+     * The value is stored verbatim (not trimmed); it is {@code null} only if the original
+     * input itself was {@code null}.
      *
-     * @return the invalid input, or {@code null} if not set or blank
+     * @return the invalid input, or {@code null} if not set
      */
     public final CharSequence getInput() {
         return input;
@@ -132,8 +133,8 @@ public abstract class InvalidBaseException extends RuntimeException {
 
     /**
      * Indicates whether some other object is equal to this exception.
-     * Two instances are considered equal if they are of the same concrete class
-     * and have the same {@code reason}, {@code input}, and {@code countryCode}.
+     * Two instances are considered equal if they are both {@code InvalidBaseException}
+     * (or a subclass thereof) and have the same {@code reason}, {@code input}, and {@code countryCode}.
      *
      * @param obj the reference object with which to compare
      * @return {@code true} if this object is the same as {@code obj}

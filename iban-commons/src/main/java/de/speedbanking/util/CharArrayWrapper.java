@@ -85,6 +85,18 @@ public final class CharArrayWrapper implements CharSequence {
         return new CharArrayWrapper(data, offset + start, end - start);
     }
 
+    /**
+     * Compares this wrapper to another object for content equality.
+     * <p>
+     * Returns {@code true} for any {@link CharSequence} (not just {@code CharArrayWrapper}) with the
+     * same character content, mirroring {@link #hashCode()}'s {@code String}-compatible contract.
+     * <strong>Note:</strong> this intentionally breaks strict {@link Object#equals} symmetry —
+     * {@code wrapper.equals(str)} may be {@code true} while {@code str.equals(wrapper)} is
+     * always {@code false}, since {@link String#equals} only accepts other {@code String} instances.
+     *
+     * @param o the object to compare against
+     * @return {@code true} if {@code o} is a {@link CharSequence} with identical character content
+     */
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

@@ -339,7 +339,7 @@ public final class IbanPatternConverter {
         private final int          length;
 
         /**
-         * Private constructor for the immutable segment.
+         * Constructs an immutable segment.
          *
          * @param charType the character type
          * @param length   the fixed length
@@ -372,18 +372,39 @@ public final class IbanPatternConverter {
             return charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#NUMERIC}.
+         *
+         * @return {@code true} if the segment is numeric
+         */
         public boolean isNumeric() {
             return IbanCharType.NUMERIC == charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#ALPHABETIC}.
+         *
+         * @return {@code true} if the segment is alphabetic
+         */
         public boolean isAlphabetic() {
             return IbanCharType.ALPHABETIC == charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#ALPHANUMERIC}.
+         *
+         * @return {@code true} if the segment is alphanumeric
+         */
         public boolean isAlphanumeric() {
             return IbanCharType.ALPHANUMERIC == charType;
         }
 
+        /**
+         * Returns whether this segment's character type is {@link IbanCharType#NUMERIC}
+         * or {@link IbanCharType#ALPHANUMERIC}.
+         *
+         * @return {@code true} if the segment is numeric or alphanumeric
+         */
         public boolean isNumericOrAlphanumeric() {
             return IbanCharType.NUMERIC == charType || IbanCharType.ALPHANUMERIC == charType;
         }

@@ -723,6 +723,7 @@ public enum Country {
     /**
      * Returns the continent of this country or territory.
      *
+     * @return the continent
      * @since 1.8.8
      */
     public Continent getContinent() {
@@ -755,6 +756,11 @@ public enum Country {
      * High-performance check using primitive chars.
      * <p>
      * Zero-allocation, no String or Integer creation.
+     *
+     * @param c1 the first letter of the two-letter code (case-sensitive)
+     * @param c2 the second letter of the two-letter code (case-sensitive)
+     * @return {@code true} if the code is an officially assigned ISO 3166-1 Alpha-2 code;
+     *         {@code false} otherwise
      */
     public static boolean isAssigned(char c1, char c2) {
         return LOOKUP.isAssigned(c1, c2);
@@ -797,9 +803,10 @@ public enum Country {
      * This conversion relies on the Unicode Regional Indicator Symbol Letters (RIS)
      * which are calculated by adding an offset to the uppercase ASCII value of the letters.
      *
-     * @param countryCode the two-letter Alpha-2 country code (case-insensitive)
-     * @return the flag emoji string, or an empty string if the input code is invalid or null
-     * @throws IllegalArgumentException if the provided {@code countryCode} is not a valid two-letter uppercase code
+     * @param countryCode the two-letter uppercase Alpha-2 country code, must not be null
+     * @return the flag emoji string
+     * @throws IllegalArgumentException if the provided {@code countryCode} is null or not a valid
+     *                                   two-letter uppercase code
      *
      * @since 1.8.9
      */

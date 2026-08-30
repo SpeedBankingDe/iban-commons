@@ -279,7 +279,7 @@ public @interface IbanRegistrySource {
             // the filter combination is too restrictive.
             if (result.isEmpty()) {
                 throw new IllegalStateException(
-                    "No " + IbanRegistry.class.getSimpleName() + " entries matched " + describe(config) + "."
+                    "No " + IbanRegistry.class.getSimpleName() + " entries matched " + describe(config) + ". "
                     + "Check that the filter combination is not contradictory "
                     + "(e.g. sepa=YES with a non-SEPA currency) or overly restrictive.");
             }

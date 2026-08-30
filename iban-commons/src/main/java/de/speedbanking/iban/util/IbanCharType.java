@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * Defines the character types used in the **ISO 13616 IBAN structure notation**
+ * Defines the character types used in the <strong>ISO 13616 IBAN structure notation</strong>
  * for defining the Basic Bank Account Number (BBAN) pattern.
  * <p>
  * Each constant maps a single-character ISO code (e.g., 'n', 'a', 'c') to its corresponding

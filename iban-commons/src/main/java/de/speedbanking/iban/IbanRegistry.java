@@ -43,16 +43,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
- * The definitive, immutable registry for all **ISO 13616-compliant national IBAN formats**.
+ * The definitive, immutable registry for all <strong>ISO 13616-compliant national IBAN formats</strong>.
  * <p>
  * This enumeration holds the official structural rules (total length, BBAN pattern, component index ranges)
- * for each country, as published in the **SWIFT IBAN Registry (Release 100 - Oct 2025)**.<br>
+ * for each country, as published in the <strong>SWIFT IBAN Registry (Release 100 - Oct 2025)</strong>.<br>
  * Additional countries participating in the IBAN scheme are manually maintained in this class.
  * <p>
- * The **International Organization for Standardization (ISO)** designated **SWIFT** as the
+ * The <strong>International Organization for Standardization (ISO)</strong> designated <strong>SWIFT</strong> as the
  * Registration Authority for ISO 13616.
  * <p>
- * **BBAN Pattern Notation** (defined in ISO 13616):
+ * <strong>BBAN Pattern Notation</strong> (defined in ISO 13616):
  * <ul>
  *   <li>{@code n}: Digits (numeric characters 0-9)</li>
  *   <li>{@code a}: Upper-case letters (alphabetic characters A-Z)</li>
@@ -3189,6 +3189,11 @@ public enum IbanRegistry {
         return component == null ? null : component.getPattern();
     }
 
+    /**
+     * Returns the fixed length of the branch code for this country.
+     *
+     * @return the branch code length, or {@code 0} if the country has no separate branch code
+     */
     public int getBranchCodeLength() {
         IbanComponent component = getBranchCodeComponent();
         return component == null ? 0 : component.getLength();
@@ -3215,7 +3220,7 @@ public enum IbanRegistry {
     /**
      * Returns the character pattern string for the account number.
      *
-     * @return the branch code pattern string
+     * @return the account number pattern string
      */
     public String getAccountNumberPattern() {
         return getAccountNumberComponent().getPattern();
@@ -3359,7 +3364,7 @@ public enum IbanRegistry {
 
     /**
      * Returns the base country {@code IbanRegistry} entry if this country entry
-     * is a derived from another country (e.g., {@code AX} points to {@code FI})
+     * is derived from another country (e.g., {@code AX} points to {@code FI})
      * or {@code this} if this is a base country.
      *
      * @return the base country {@code IbanRegistry} entry, or {@code this} if this is a base country
@@ -3397,7 +3402,7 @@ public enum IbanRegistry {
     }
 
     /**
-     * Returns {@code true} if this country entry is a derived
+     * Returns {@code true} if this country entry is derived
      * from another country (e.g., {@code AX} inherits from {@code FI}).
      *
      * @return {@code true} if this is a derived country
@@ -3763,8 +3768,8 @@ public enum IbanRegistry {
                 cityPostcode, departmentGenericEmail, departmentTel);
         }
 
-        static boolean isEmpty(ContactData contactata) {
-            return contactata == null || EMPTY.equals(contactata);
+        static boolean isEmpty(ContactData contactData) {
+            return contactData == null || EMPTY.equals(contactData);
         }
     }
 

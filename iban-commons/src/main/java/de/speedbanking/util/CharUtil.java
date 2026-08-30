@@ -109,6 +109,17 @@ public final class CharUtil {
         return true;
     }
 
+    /**
+     * Checks whether the entire {@link CharSequence} consists exclusively of digit characters (0-9).
+     * <p>
+     * Effectively a shorthand for {@code isAllDigits(chars, 0, chars.length())}.
+     *
+     * @param chars the character sequence to check
+     * @return {@code true} if all characters are digits, {@code false} otherwise
+     * @throws NullPointerException if {@code chars} is {@code null}
+     *
+     * @since 1.8.5
+     */
     public static boolean isAllDigits(final CharSequence chars) {
         requireInput(chars);
         return isAllDigits(chars, 0, chars.length());
@@ -211,6 +222,17 @@ public final class CharUtil {
         return true;
     }
 
+    /**
+     * Checks whether the entire {@link CharSequence} consists exclusively of uppercase letters (A-Z).
+     * <p>
+     * Effectively a shorthand for {@code isAllUpperCase(chars, 0, chars.length())}.
+     *
+     * @param chars the character sequence to check
+     * @return {@code true} if all characters are uppercase letters, {@code false} otherwise
+     * @throws NullPointerException if {@code chars} is {@code null}
+     *
+     * @since 1.8.5
+     */
     public static boolean isAllUpperCase(final CharSequence chars) {
         requireInput(chars);
         return isAllUpperCase(chars, 0, chars.length());
@@ -304,7 +326,7 @@ public final class CharUtil {
      * @param chars the character sequence to convert, must not be null
      * @param charsLen the number of characters to copy, or -1 to copy the entire sequence
      * @return a new character array containing the characters
-     * @throws IllegalArgumentException if {@code chars} is null
+     * @throws NullPointerException if {@code chars} is null
      */
     public static char[] toCharArray(final CharSequence chars, final int charsLen) {
         requireInput(chars);
@@ -323,7 +345,7 @@ public final class CharUtil {
      *
      * @param chars the character sequence to convert, must not be null
      * @return a new character array containing all characters
-     * @throws IllegalArgumentException if {@code chars} is null
+     * @throws NullPointerException if {@code chars} is null
      */
     public static char[] toCharArray(final CharSequence chars) {
         return toCharArray(chars, -1);

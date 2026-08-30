@@ -162,6 +162,8 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * Builds and returns a fully formatted and valid IBAN instance.
      *
      * @return the constructed IBAN
+     * @throws IllegalStateException if a subclass hook alters the IBAN length to an invalid value
+     * @throws InvalidIbanException  if the assembled IBAN string unexpectedly fails validation
      */
     public final Iban build() {
         String countryCode = getCountryData().getBaseCountry().getCountryCode();
@@ -190,7 +192,7 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
                 + " (expected: " + expectedLength + ")");
         }
 
-        // always calculdate NCD regardless of IbanConfig#isCalculateNcd
+        // always calculate NCD regardless of IbanConfig#isCalculateNcd
         fixNationalCheckDigit(getCountryData(), ibanBuilder);
 
         fixCheckDigits(ibanBuilder);

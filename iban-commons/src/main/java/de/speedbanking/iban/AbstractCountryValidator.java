@@ -21,7 +21,7 @@ package de.speedbanking.iban;
  * <h3>Design</h3>
  * Every country-specific {@code CountryValidator} implementation (declared in {@link CountryValidators})
  * extends this base instead of implementing {@link CountryValidator} directly.
- * Centralising shared behaviour here keeps the generated subclasses minimal:
+ * Centralizing shared behavior here keeps the generated subclasses minimal:
  * they only contain a {@code validateIban} implementation and nothing else.
  *
  * <h3>toString</h3>
