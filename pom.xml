@@ -21,7 +21,7 @@
 
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons-parent</artifactId>
-    <version>1.8.9-SNAPSHOT</version>
+    <version>1.8.9</version>
     <packaging>pom</packaging>
 
     <name>${project.organization.name} IBAN Commons Parent</name>
@@ -68,7 +68,7 @@
         <connection>scm:git:ssh://git@github.com/${project.organization.name}/${project.dist.name}.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/${project.organization.name}/${project.dist.name}.git</developerConnection>
         <url>https://github.com/${project.organization.name}/${project.dist.name}</url>
-        <tag>HEAD</tag>
+        <tag>iban-commons-1.8.9</tag>
     </scm>
 
     <issueManagement>
