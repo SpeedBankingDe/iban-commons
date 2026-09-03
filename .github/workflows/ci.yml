@@ -1,0 +1,68 @@
+name: Build & Deploy
+
+on:
+    push:
+        branches:
+        - master
+    pull_request:
+        branches:
+        - master
+    workflow_dispatch: {}
+
+# cancel superseded runs on the same branch/PR to save CI minutes.
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions:
+    contents: read
+
+jobs:
+
+    build:
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-latest, windows-latest]
+                java: ['17', '21']
+        runs-on: ${{ matrix.os }}
+        steps:
+        -   uses: actions/checkout@v7
+
+        -   name: Set up JDK ${{ matrix.java }}
+            uses: actions/setup-java@v6
+            with:
+                java-version: ${{ matrix.java }}
+                distribution: temurin
+                cache: maven
+
+        -   name: Build with Maven/JDK ${{ matrix.java }} on ${{ matrix.os }}
+            run: mvn --batch-mode --file pom.xml clean verify
+
+    deploy:
+        needs: build
+        # skip the deploy job for contributors/forks who lack the required secrets
+        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+        -   uses: actions/checkout@v7
+        -   name: Set up Java for deployment to Sonatype snapshot repo
+            uses: actions/setup-java@v6
+            with:
+                java-version: '17'
+                distribution: 'temurin'
+                cache: maven
+                # Sonatype Central Snapshots
+                # must match distributionManagement/snapshotRepository/id in pom:
+                server-id: central
+                server-username: SONATYPE_CENTRAL_USERNAME
+                server-password: SONATYPE_CENTRAL_PASSWORD
+
+        -   name: Deploy to Sonatype Central snapshot repo
+            run: mvn --batch-mode --file pom.xml deploy
+            env:
+                SONATYPE_CENTRAL_USERNAME: ${{ secrets.SONATYPE_CENTRAL_USERNAME }}
+                SONATYPE_CENTRAL_PASSWORD: ${{ secrets.SONATYPE_CENTRAL_PASSWORD }}
