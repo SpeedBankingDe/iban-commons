@@ -134,6 +134,7 @@
         <dep.plugin.compiler.version>3.15.0</dep.plugin.compiler.version>
         <dep.plugin.cyclonedx.version>2.9.3</dep.plugin.cyclonedx.version>
         <dep.plugin.enforcer.version>3.6.3</dep.plugin.enforcer.version>
+        <dep.plugin.figlet.version>1.0.0</dep.plugin.figlet.version>
         <!-- last error-prone version compatible with Java 17; 2.43.0+ requires Java 21 -->
         <dep.plugin.error-prone.version>2.42.0</dep.plugin.error-prone.version>
         <dep.plugin.error-prone-support.version>0.26.0</dep.plugin.error-prone-support.version>
@@ -150,8 +151,6 @@
         <dep.plugin.source.version>3.4.0</dep.plugin.source.version>
         <dep.plugin.surefire.version>3.5.6</dep.plugin.surefire.version>
         <dep.plugin.versions.version>2.21.0</dep.plugin.versions.version>
-
-        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
         <surefireArgLine /> <!-- placeholder; overridden by jacoco-prepare-agent -->
     </properties>
@@ -247,6 +246,19 @@
         <pluginManagement>
 
             <plugins>
+
+                <plugin>
+                    <groupId>io.github.spannm</groupId>
+                    <artifactId>figlet-maven-plugin</artifactId>
+                    <version>${dep.plugin.figlet.version}</version>
+                    <configuration>
+                         <content><![CDATA[
+                             <lineBreak/><lineBreak/>
+                             <figletFont name="chunky">${project.dist.name}</figletFont>
+                             <preserveWhitespace>    v${project.version}</preserveWhitespace><lineBreak/>
+                         ]]></content>
+                    </configuration>
+                </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -656,6 +668,18 @@
             only in the respective sub-module POM.
         -->
         <plugins>
+
+            <plugin>
+                <groupId>io.github.spannm</groupId>
+                <artifactId>figlet-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>render</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
