@@ -44,5 +44,7 @@
  *   <dd>Common interface implemented by validation error enumerations such as
  *     {@link de.speedbanking.iban.IbanValidationError} and {@link de.speedbanking.bic.BicValidationError}.</dd>
  * </dl>
+ *
+ * @since 1.8.0
  */
 package de.speedbanking.util;
