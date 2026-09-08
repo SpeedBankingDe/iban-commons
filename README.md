@@ -19,6 +19,8 @@
 `iban-commons` is a Java IBAN validation library and BIC validator for Java 8+, providing fast and reliable parsing, validation, and formatting of International Bank Account Numbers (IBAN) and Business Identifier Codes (BIC/SWIFT codes).
 Designed for high-performance enterprise applications, it covers 127 countries, is Android-compatible (API 21+), and has zero compile or runtime dependencies outside the Java Standard Library.
 
+An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module is available for verifying German domestic account number ("Kontonummer") check digits against a Bankleitzahl (BLZ) — standalone and independent of `iban-commons`.
+
 ## Why IBAN Commons?
 
 | Feature                    | iban-commons   | jbanking  | Apache Commons |  iban4j   | garvelink |
@@ -270,6 +272,23 @@ Bic.tryParse("INVALIDBIC").ifPresentOrElse(
     ()  -> System.err.println("Invalid BIC")
 );
 ```
+
+-----
+
+### German Account Check Digit (`iban-commons-de-checkdigit`)
+
+An optional, standalone module implementing the Deutsche Bundesbank's
+[*"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"*](https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320) —
+122 of the 127 assignable check digit methods (`00`–`99`, `A0`–`D9`) used to verify a German domestic
+account number ("Kontonummer") against a Bankleitzahl (BLZ).
+
+It operates purely on BLZ + Kontonummer + method code and has **zero dependency on `iban-commons`**
+(or any other library), so it can be used on its own by callers who only have those three values —
+typically from legacy domestic payment processing — and have obtained the applicable method code from
+elsewhere, e.g. the Bundesbank's BLZ master-data file. This module does not select a method, only executes one.
+
+See the module's own **[README](iban-commons-de-checkdigit/README.md)** for installation, usage
+examples, and full method coverage details.
 
 -----
 

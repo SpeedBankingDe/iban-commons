@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright © 2025-2026 Markus Spann, SpeedBankingDe
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.speedbanking</groupId>
+        <artifactId>iban-commons-parent</artifactId>
+        <version>1.8.10-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>iban-commons-de-checkdigit</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.organization.name} IBAN Commons DE Check Digit</name>
+    <description>
+        Zero-dependency implementation of the German banking industry's account number
+        check digit methods ("Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"),
+        as catalogued by the Deutsche Bundesbank. Validates whether a Kontonummer is
+        structurally consistent for a given method, independently of any IBAN or BLZ
+        master-data lookup. Deliberately standalone: does not depend on iban-commons,
+        so it can be used on its own by callers that only have a BLZ and Kontonummer
+        (e.g. legacy domestic payment processing) and have obtained the applicable
+        method number from elsewhere (such as a BLZ master-data module).
+    </description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <!--
+                                JPMS automatic module name.
+                                Allows Java 9+ consumers to declare
+                                'requires de.speedbanking.checkdigit.de;'
+                                without this library being a named module itself.
+                                Must be stable and never change after first release.
+                            -->
+                            <Automatic-Module-Name>de.speedbanking.checkdigit.de</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>
