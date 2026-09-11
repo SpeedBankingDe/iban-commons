@@ -8,8 +8,7 @@
   <a href="https://github.com/SpeedBankingDe/iban-commons/stargazers"><img src="https://img.shields.io/github/stars/SpeedBankingDe/iban-commons?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars"></a>
   <br>
   <img src="https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat-square" alt="Test Coverage">
-  <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci_jdk17_ubuntu.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_ubuntu.yml?label=Build%20(JDK%2011%20Linux)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
-  <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci_jdk17_win.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci_jdk17_win.yml?label=Build%20(JDK%2011%20Win)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
+  <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci.yml?label=Build%20(Linux%2FWin%2C%20JDK%2017%2F21)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
   <a href="https://javadoc.io/doc/de.speedbanking/iban-commons"><img src="https://javadoc.io/badge2/de.speedbanking/iban-commons/javadoc.svg?style=flat-square" alt="Javadoc"></a>
   <a href="https://apidia.net/mvn/de.speedbanking/iban-commons"><img src="https://apidia.net/mvn/de.speedbanking/iban-commons/badge_flat_square.svg" alt="APIdia"></a>
 </div>
