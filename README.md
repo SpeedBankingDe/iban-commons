@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/maven-central/last-update/de.speedbanking/iban-commons?label=Updated&style=flat-square&color=blue" alt="Maven Central Last Update">
   <a href="https://github.com/SpeedBankingDe/iban-commons/stargazers"><img src="https://img.shields.io/github/stars/SpeedBankingDe/iban-commons?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars"></a>
   <br>
-  <img src="https://img.shields.io/badge/coverage-100%25-brightgreen?style=flat-square" alt="Test Coverage">
+  <img src="https://img.shields.io/badge/coverage-99%25-brightgreen?style=flat-square" alt="Test Coverage">
   <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci.yml?label=Build%20(Linux%2FWin%2C%20JDK%2017%2F21)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
   <a href="https://javadoc.io/doc/de.speedbanking/iban-commons"><img src="https://javadoc.io/badge2/de.speedbanking/iban-commons/javadoc.svg?style=flat-square" alt="Javadoc"></a>
   <a href="https://apidia.net/mvn/de.speedbanking/iban-commons"><img src="https://apidia.net/mvn/de.speedbanking/iban-commons/badge_flat_square.svg" alt="APIdia"></a>
@@ -44,13 +44,13 @@ An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-comm
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.9</version>
+    <version>1.8.10</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.9'
+implementation 'de.speedbanking:iban-commons:1.8.10'
 ```
 
 ### 2. Validate & Parse
@@ -110,7 +110,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 * **Comprehensive Coverage**
 
   Full support for IBAN and BIC validation per ISO 13616 and ISO 9362.
-  Covers **120 countries** including all from the SWIFT IBAN Registry — more than any comparable Java IBAN validation library.
+  Covers **127 countries** including all from the SWIFT IBAN Registry — more than any comparable Java IBAN validation library.
 
 * **Rich Metadata**
 
@@ -380,6 +380,13 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 
 -----
 
+## 🆕 What's New in 1.8.10
+
+### German Account Check Digit Module
+New standalone [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module implementing 122 of the Deutsche Bundesbank's "Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft" (methods `00`–`99`, `A0`–`D9`) for verifying a German domestic account number against a Bankleitzahl. Zero dependency on `iban-commons` itself.
+
+-----
+
 ## 🆕 What's New in 1.8.9
 
 ### IbanBuilder
@@ -469,7 +476,7 @@ The project now requires JDK 17+ to build. The compiled artifact remains fully b
 <details>
 <summary>Which countries are supported?</summary>
 
-120 countries including all from the SWIFT IBAN Registry Release 100 (October 2025):
+127 countries including all from the SWIFT IBAN Registry Release 100 (October 2025):
 - All SEPA countries including major economies: Germany, UK, Switzerland, Norway, etc.
 - All known non-SEPA countries that support IBAN
 - Full list available in the [source code](src/main/java/de/speedbanking/iban/IbanRegistry.java)
