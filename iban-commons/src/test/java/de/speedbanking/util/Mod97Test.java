@@ -44,6 +44,16 @@ final class Mod97Test {
     }
 
     @Test
+    void constants_minCheckDigitValue() {
+        assertThat(Mod97.MIN_CHECK_DIGIT_VALUE).isEqualTo(2);
+    }
+
+    @Test
+    void constants_maxCheckDigitValue() {
+        assertThat(Mod97.MAX_CHECK_DIGIT_VALUE).isEqualTo(98);
+    }
+
+    @Test
     void privateConstructor_shouldThrowException() {
         TestUtil.assertConstructorIsPrivate(Mod97.class);
     }
@@ -352,6 +362,68 @@ final class Mod97Test {
     void isValid_charArrayWithLen_tampered() {
         char[] data = TAMPERED_DE_IBAN.toCharArray();
         assertThat(Mod97.isValid(data, data.length)).isFalse();
+    }
+
+    // -------------------------------------------------------------------------
+    // isValid — impossible check digit range (00, 01, 99)
+    //
+    // checkDigit = 98 - (N mod 97), and N mod 97 is in [0, 96], so a genuinely
+    // generated IBAN check digit always lies in [2, 98]. The BBANs below were
+    // picked so the remainder still comes out to VALID_REMAINDER (1) for the
+    // impossible check digit — i.e. calculate() alone would wrongly call them
+    // valid, which is exactly the bug isValid() must guard against.
+    // -------------------------------------------------------------------------
+
+    @Test
+    void isValid_charSequence_checkDigit00_returnsFalseDespiteValidRemainder() {
+        String iban = "GB00HLFX11016111455365";
+        assertThat(Mod97.calculate(iban)).isEqualTo(Mod97.VALID_REMAINDER);
+        assertThat(Mod97.isValid(iban)).isFalse();
+    }
+
+    @Test
+    void isValid_charSequence_checkDigit01_returnsFalseDespiteValidRemainder() {
+        String iban = "GB01HLFX11016111455347";
+        assertThat(Mod97.calculate(iban)).isEqualTo(Mod97.VALID_REMAINDER);
+        assertThat(Mod97.isValid(iban)).isFalse();
+    }
+
+    @Test
+    void isValid_charSequence_checkDigit99_returnsFalseDespiteValidRemainder() {
+        String iban = "GB99HLFX11016111455329";
+        assertThat(Mod97.calculate(iban)).isEqualTo(Mod97.VALID_REMAINDER);
+        assertThat(Mod97.isValid(iban)).isFalse();
+    }
+
+    @Test
+    void isValid_charArray_checkDigit00_returnsFalseDespiteValidRemainder() {
+        char[] iban = "GB00HLFX11016111455365".toCharArray();
+        assertThat(Mod97.calculate(iban)).isEqualTo(Mod97.VALID_REMAINDER);
+        assertThat(Mod97.isValid(iban)).isFalse();
+        assertThat(Mod97.isValid(iban, iban.length)).isFalse();
+    }
+
+    @Test
+    void isValid_charSequence_nonDigitCheckDigit_returnsFalse() {
+        // check digits must be decimal digits — letters must not sneak past the range check
+        assertThat(Mod97.isValid("GBAAHLFX11016111455365")).isFalse();
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ValueSource(strings = {
+        "GBA0HLFX11016111455365", // c1 above '9'
+        "GB/0HLFX11016111455365", // c1 below '0'
+        "GB0AHLFX11016111455365", // c1 valid, c2 above '9'
+        "GB0/HLFX11016111455365"  // c1 valid, c2 below '0'
+    })
+    void isValid_charSequence_partiallyNonDigitCheckDigit_returnsFalse(String iban) {
+        // exercises every short-circuit branch of hasValidCheckDigitRange
+        assertThat(Mod97.isValid(iban)).isFalse();
+    }
+
+    @Test
+    void isValid_charArrayWithLen_null_returnsFalse() {
+        assertThat(Mod97.isValid((char[]) null, 5)).isFalse();
     }
 
 }

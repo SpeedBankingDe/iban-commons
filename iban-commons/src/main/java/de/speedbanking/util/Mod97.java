@@ -94,6 +94,35 @@ public final class Mod97 {
     private static final int HEADER_LENGTH     = 4;
 
     /**
+     * Zero-based index of the header's first check digit character ({@value}).
+     */
+    private static final int CHECK_DIGIT_INDEX_1 = 2;
+
+    /**
+     * Zero-based index of the header's second check digit character ({@value}).
+     */
+    private static final int CHECK_DIGIT_INDEX_2 = 3;
+
+    /**
+     * Minimum value a genuine IBAN check digit can take ({@value}).
+     * <p>
+     * By construction, {@code checkDigit = 98 - (N mod 97)} where {@code N mod 97}
+     * lies in {@code [0, 96]}, so a correctly generated check digit always lies in
+     * {@code [MIN_CHECK_DIGIT_VALUE, MAX_CHECK_DIGIT_VALUE]}. The values {@code 00}
+     * and {@code 01} can therefore never occur in a legitimately generated IBAN —
+     * a string carrying one of them can coincidentally still satisfy
+     * {@link #VALID_REMAINDER} for its BBAN, which is why this range is checked
+     * separately rather than relying on the remainder alone.
+     */
+    public static final int  MIN_CHECK_DIGIT_VALUE = 2;
+
+    /**
+     * Maximum value a genuine IBAN check digit can take ({@value}).
+     * @see #MIN_CHECK_DIGIT_VALUE
+     */
+    public static final int  MAX_CHECK_DIGIT_VALUE = 98;
+
+    /**
      * Private constructor — utility class, not instantiable.
      * @throws UnsupportedOperationException always
      */
@@ -126,6 +155,24 @@ public final class Mod97 {
         } else {
             return INVALID_REMAINDER;
         }
+    }
+
+    /**
+     * Returns {@code true} if the two given characters form a check digit value
+     * that a genuine IBAN can actually carry, i.e. two decimal digits in
+     * {@code [MIN_CHECK_DIGIT_VALUE, MAX_CHECK_DIGIT_VALUE]}.
+     *
+     * @param c1 the first check digit character (tens place)
+     * @param c2 the second check digit character (ones place)
+     * @return {@code true} if both characters are digits and their combined value
+     *         lies in the valid range
+     */
+    private static boolean hasValidCheckDigitRange(final char c1, final char c2) {
+        if (c1 < '0' || c1 > '9' || c2 < '0' || c2 > '9') {
+            return false;
+        }
+        int value = (c1 - '0') * 10 + (c2 - '0');
+        return value >= MIN_CHECK_DIGIT_VALUE && value <= MAX_CHECK_DIGIT_VALUE;
     }
 
     // -------------------------------------------------------------------------
@@ -374,7 +421,9 @@ public final class Mod97 {
      * @since 1.8.5
      */
     public static boolean isValid(final char[] iban) {
-        return calculate(iban) == VALID_REMAINDER;
+        return iban != null && iban.length >= HEADER_LENGTH
+            && hasValidCheckDigitRange(iban[CHECK_DIGIT_INDEX_1], iban[CHECK_DIGIT_INDEX_2])
+            && calculate(iban) == VALID_REMAINDER;
     }
 
     /**
@@ -391,7 +440,9 @@ public final class Mod97 {
      * @since 1.8.5
      */
     public static boolean isValid(final char[] iban, final int length) {
-        return calculate(iban, length) == VALID_REMAINDER;
+        return iban != null && length >= HEADER_LENGTH
+            && hasValidCheckDigitRange(iban[CHECK_DIGIT_INDEX_1], iban[CHECK_DIGIT_INDEX_2])
+            && calculate(iban, length) == VALID_REMAINDER;
     }
 
     /**
@@ -406,7 +457,9 @@ public final class Mod97 {
      * @since 1.8.5
      */
     public static boolean isValid(final CharSequence iban) {
-        return calculate(iban) == VALID_REMAINDER;
+        return iban != null && iban.length() >= HEADER_LENGTH
+            && hasValidCheckDigitRange(iban.charAt(CHECK_DIGIT_INDEX_1), iban.charAt(CHECK_DIGIT_INDEX_2))
+            && calculate(iban) == VALID_REMAINDER;
     }
 
 }
