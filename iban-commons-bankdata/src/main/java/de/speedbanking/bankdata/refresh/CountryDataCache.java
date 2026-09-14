@@ -1,0 +1,391 @@
+/*
+ * Copyright © 2025-2026 Markus Spann, SpeedBankingDe
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package de.speedbanking.bankdata.refresh;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.unmodifiableMap;
+
+import de.speedbanking.bankdata.BankData;
+import de.speedbanking.bankdata.BankDataConfig;
+import de.speedbanking.bankdata.io.BankDataFormat;
+import de.speedbanking.bankdata.io.Downloader;
+import de.speedbanking.bankdata.io.HttpDownloadException;
+import de.speedbanking.bankdata.log.BankDataLog;
+import de.speedbanking.bankdata.spi.BankDataParseException;
+import de.speedbanking.bankdata.spi.CountryBankDataLoader;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/**
+ * Per-country lazily loaded, asynchronously refreshed bank data cache.
+ * <p>
+ * One instance exists per supported country, created lazily on first lookup. The first call to
+ * {@link #getOrLoadSync()} synchronously establishes an initial in-memory index by trying, in
+ * order: (1) a previously persisted local cache file, (2) the bundled classpath fallback resource
+ * shipped with this module ("Urladung"), (3) an empty result if neither is available.
+ * <p>
+ * After the synchronous result has been returned to the caller, {@link #triggerAsyncRefreshIfStale()}
+ * may kick off a non-blocking background refresh if the currently loaded data is older than the
+ * applicable staleness threshold. At most one refresh runs at a time per country. Staleness is
+ * always based on the actual age of the data, whether that data came from the local cache file's
+ * last-modified timestamp or from the bundled classpath resource's last-modified timestamp: a
+ * freshly rebuilt bundled resource (e.g. right after a release) is therefore not immediately
+ * flagged stale, only once the normal staleness threshold has genuinely elapsed.
+ * <p>
+ * A background refresh that completes with fewer than half the records of the bundled classpath
+ * fallback is treated as suspect (e.g. a truncated response, an upstream page that changed shape
+ * but still returned {@code 200 OK}) and is discarded: a warning is logged and the last known good
+ * data is kept rather than replacing a good in-memory index with a plausibly broken one.
+ *
+ * @since 1.8.11
+ */
+public final class CountryDataCache {
+
+    private static final BankDataLog LOGGER = BankDataLog.of(CountryDataCache.class);
+
+    private static final String      CLASSPATH_RESOURCE_PREFIX = "/bankdata/";
+    private static final String      CSV_SUFFIX = ".csv";
+    private static final String      BUNDLED_SOURCE_VERSION = "bundled";
+
+    private final CountryBankDataLoader             loader;
+    private final Downloader                        downloader;
+    private final Object                            loadLock = new Object();
+    private volatile State                          state;
+    private final AtomicBoolean                     refreshInFlight = new AtomicBoolean(false);
+    private volatile long                           bundledRecordCount = -1;
+
+    /**
+     * Creates a new cache for the given country loader.
+     *
+     * @param loader     the loader responsible for this country
+     * @param downloader the downloader used for background refreshes
+     */
+    public CountryDataCache(CountryBankDataLoader loader, Downloader downloader) {
+        this.loader = loader;
+        this.downloader = downloader;
+    }
+
+    /**
+     * Returns the in-memory bank code index, loading it synchronously on first call.
+     *
+     * @return an immutable map of bank code to {@link BankData}; never {@code null}, may be empty
+     */
+    public Map<String, BankData> getOrLoadSync() {
+        State current = state;
+        if (current != null) {
+            return current.data;
+        }
+        synchronized (loadLock) {
+            current = state;
+            if (current != null) {
+                return current.data;
+            }
+            loadInitial();
+            return state.data;
+        }
+    }
+
+    private void loadInitial() {
+        String countryCode = loader.getCountryCode();
+        Path cacheFile = cacheFilePath(countryCode);
+
+        if (Files.isReadable(cacheFile)) {
+            try {
+                if (!looksLikeValidBankDataFile(cacheFile)) {
+                    LOGGER.warn("Local bank data cache file for country {0} does not look like a valid bank data file "
+                        + "(empty, or missing/unexpected CSV header), falling back to bundled data", countryCode);
+                } else {
+                    Instant fetchedAt = Files.getLastModifiedTime(cacheFile).toInstant();
+                    String sourceVersion = fetchedAt.toString();
+                    Map<String, BankData> data = readDataFile(cacheFile, countryCode, sourceVersion);
+                    state = new State(data, sourceVersion, fetchedAt, false);
+                    LOGGER.info("Loaded local bank data cache for country {0}: {1} records (source version {2})",
+                        countryCode, data.size(), sourceVersion);
+                    return;
+                }
+            } catch (IOException ex) {
+                LOGGER.warn("Failed to read local bank data cache for country {0}, falling back to bundled data", ex, countryCode);
+            }
+        }
+
+        loadBundledFallback(countryCode);
+    }
+
+    /**
+     * Cheap sanity check performed before parsing a local cache file: the file must be non-empty
+     * and start with the exact expected CSV header line.
+     * <p>
+     * Deliberately not a minimum byte-size threshold, a legitimately tiny country (e.g. a
+     * micro-state with a single bank) would otherwise be rejected as "suspiciously small" even
+     * though its file is complete and valid. Since {@link #persistToCache(List)} already writes
+     * via a temp-file-then-atomic-rename, a partially written file can never land at the final
+     * path in the first place; the remaining corruption cases (external tampering, filesystem
+     * errors) are already caught by {@link BankDataFormat#read} throwing an {@link IOException},
+     * which the caller falls back on regardless.
+     *
+     * @param cacheFile the local cache file to check
+     * @return {@code true} if the file is non-empty and starts with {@link BankDataFormat#HEADER_LINE}
+     * @throws IOException if the file cannot be read
+     */
+    private static boolean looksLikeValidBankDataFile(Path cacheFile) throws IOException {
+        if (Files.size(cacheFile) == 0) {
+            return false;
+        }
+        try (BufferedReader reader = Files.newBufferedReader(cacheFile, UTF_8)) {
+            String firstLine = reader.readLine();
+            return BankDataFormat.HEADER_LINE.equals(firstLine);
+        }
+    }
+
+    private void loadBundledFallback(String countryCode) {
+        String resourceName = CLASSPATH_RESOURCE_PREFIX + countryCode + CSV_SUFFIX;
+        URL resourceUrl = CountryDataCache.class.getResource(resourceName);
+        if (resourceUrl == null) {
+            LOGGER.warn("No bundled bank data resource found for country {0}", countryCode);
+            state = new State(emptyMap(), BUNDLED_SOURCE_VERSION, Instant.EPOCH, true);
+            return;
+        }
+
+        try {
+            URLConnection connection = resourceUrl.openConnection();
+            Map<String, BankData> data;
+            try (InputStream in = connection.getInputStream()) {
+                data = toMap(BankDataFormat.read(in, UTF_8, countryCode, BUNDLED_SOURCE_VERSION));
+            }
+            // getLastModified() returns 0 when it cannot be determined; treat that as "unknown",
+            // maximally stale, so a refresh is still attempted soon (the only remaining
+            // always-stale case, not the normal path anymore)
+            long lastModifiedMillis = connection.getLastModified();
+            Instant fetchedAt = lastModifiedMillis > 0 ? Instant.ofEpochMilli(lastModifiedMillis) : Instant.EPOCH;
+
+            state = new State(data, BUNDLED_SOURCE_VERSION, fetchedAt, true);
+            LOGGER.info("Loaded bundled fallback bank data for country {0}: {1} records (resource last modified {2})",
+                countryCode, data.size(), fetchedAt);
+        } catch (IOException ex) {
+            LOGGER.warn("Failed to read bundled bank data resource for country {0}", ex, countryCode);
+            state = new State(emptyMap(), BUNDLED_SOURCE_VERSION, Instant.EPOCH, true);
+        }
+    }
+
+    /**
+     * Checks whether the currently loaded data is stale and, if so, triggers a non-blocking
+     * background refresh. Never throws, never blocks. A no-op if network access is disabled (see
+     * {@link BankDataConfig#isNetworkDisabled()}) or a refresh for this country is already in
+     * flight.
+     */
+    @SuppressWarnings("TimeZoneUsage") // Instant.now() here is a plain elapsed-time/staleness comparison, not a display timestamp
+    public void triggerAsyncRefreshIfStale() {
+        if (BankDataConfig.get().isNetworkDisabled()) {
+            return;
+        }
+        State current = state;
+        Duration threshold = loader.getRecommendedRefreshThreshold();
+        boolean stale = current == null || Duration.between(current.fetchedAt, Instant.now()).compareTo(threshold) > 0;
+        if (!stale) {
+            return;
+        }
+        if (refreshInFlight.compareAndSet(false, true)) {
+            if (current == null) {
+                LOGGER.info("Bank data for country {0} has not been loaded yet, scheduling a background refresh", loader.getCountryCode());
+            } else {
+                LOGGER.info("Bank data for country {0} is stale (currently loaded from {1}, source version {2}), scheduling a background refresh",
+                    loader.getCountryCode(), current.fromBundledFallback ? "bundled fallback" : "local cache", current.sourceVersion);
+            }
+            RefreshExecutors.get().execute(this::refreshNow);
+        }
+    }
+
+    @SuppressWarnings("TimeZoneUsage") // sourceVersion is a UTC-based, machine-readable vintage stamp, not a display timestamp
+    private void refreshNow() {
+        try {
+            BankDataConfig config = BankDataConfig.get();
+            byte[] rawBytes = downloader.download(loader.getRemoteSourceUri(), config.getConnectTimeout(), config.getReadTimeout());
+            Instant fetchedAt = Instant.now();
+            String sourceVersion = fetchedAt.toString();
+            List<BankData> records = loader.parse(new ByteArrayInputStream(rawBytes), sourceVersion);
+
+            long bundledCount = getBundledRecordCount();
+            if (bundledCount > 0 && records.size() * 2L < bundledCount) {
+                LOGGER.warn("Refreshed bank data for country {0} has only {1} record(s), less than half of the {2} record(s) "
+                    + "in the bundled fallback; discarding this refresh as likely truncated/corrupted upstream data and "
+                    + "keeping last known good data", loader.getCountryCode(), records.size(), bundledCount);
+                return;
+            }
+
+            Map<String, BankData> newData = toMap(records);
+
+            state = new State(newData, sourceVersion, fetchedAt, false);
+
+            persistToCache(records);
+            LOGGER.info("Refreshed bank data for country {0}: {1} records (source version {2})",
+                loader.getCountryCode(), newData.size(), sourceVersion);
+        } catch (IOException | BankDataParseException | RuntimeException ex) {
+            LOGGER.warn("Background bank data refresh failed for country {0}, keeping last known good data ({1})",
+                ex, loader.getCountryCode(), describeFailure(ex));
+        } finally {
+            refreshInFlight.set(false);
+        }
+    }
+
+    /**
+     * Returns a short, actionable diagnosis for a failed download, to make common network
+     * misconfigurations (proxy, DNS, firewall, timeout) easier to spot in the log than a bare
+     * exception class name.
+     *
+     * @param ex the throwable to describe
+     * @return a short diagnostic phrase
+     */
+    private static String describeFailure(Throwable ex) {
+        if (ex instanceof HttpDownloadException) {
+            int statusCode = ((HttpDownloadException) ex).getStatusCode();
+            if (statusCode == 407) {
+                return "HTTP 407: proxy authentication required, check proxy credentials/configuration";
+            }
+            return "HTTP status " + statusCode;
+        } else if (ex instanceof UnknownHostException) {
+            return "unknown host, check DNS resolution and network connectivity";
+        } else if (ex instanceof ConnectException) {
+            return "connection refused, a firewall or proxy may be blocking the connection";
+        } else if (ex instanceof SocketTimeoutException) {
+            return "timed out, possibly a slow network or an unresponsive proxy";
+        }
+        return ex.getClass().getSimpleName();
+    }
+
+    /**
+     * Returns the number of data records in the bundled classpath fallback resource for this
+     * cache's country, used by {@link #refreshNow()} as a sanity baseline for freshly downloaded
+     * data. Counted once per {@link CountryDataCache} instance and cached, since the bundled
+     * resource on the classpath never changes at runtime.
+     *
+     * @return the record count of the bundled resource, or {@code 0} if it does not exist or
+     *         cannot be read (in which case the sanity check in {@link #refreshNow()} is skipped)
+     */
+    private long getBundledRecordCount() {
+        long count = bundledRecordCount;
+        if (count >= 0) {
+            return count;
+        }
+        count = countBundledRecords(loader.getCountryCode());
+        bundledRecordCount = count;
+        return count;
+    }
+
+    private static long countBundledRecords(String countryCode) {
+        String resourceName = CLASSPATH_RESOURCE_PREFIX + countryCode + CSV_SUFFIX;
+        URL resourceUrl = CountryDataCache.class.getResource(resourceName);
+        if (resourceUrl == null) {
+            return 0;
+        }
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(resourceUrl.openStream(), UTF_8))) {
+            return reader.lines().skip(1).count(); // skip the CSV header line
+        } catch (IOException ex) {
+            LOGGER.warn("Failed to count records in bundled bank data resource for country {0} for refresh sanity check", ex, countryCode);
+            return 0;
+        }
+    }
+
+    private void persistToCache(List<BankData> records) {
+        String countryCode = loader.getCountryCode();
+        Path cacheFile = cacheFilePath(countryCode);
+        Path tempFile = null;
+        try {
+            Files.createDirectories(BankDataConfig.get().getCacheDirectory());
+
+            tempFile = Files.createTempFile(BankDataConfig.get().getCacheDirectory(), countryCode, CSV_SUFFIX + ".tmp");
+            try (OutputStream out = Files.newOutputStream(tempFile)) {
+                BankDataFormat.write(out, records);
+            }
+
+            // a single atomic rename: with one file per country (instead of the former .dat + .meta
+            // sidecar pair) there is no longer a second rename that could leave the pair inconsistent
+            Files.move(tempFile, cacheFile, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            tempFile = null;
+        } catch (IOException ex) {
+            LOGGER.warn("Failed to persist refreshed bank data cache for country {0}", ex, countryCode);
+        } finally {
+            deleteQuietly(tempFile);
+        }
+    }
+
+    private static void deleteQuietly(Path path) {
+        if (path == null) {
+            return;
+        }
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ex) {
+            LOGGER.warn("Failed to clean up temporary bank data cache file {0}", ex, path);
+        }
+    }
+
+    private Map<String, BankData> readDataFile(Path cacheFile, String countryCode, String sourceVersion) throws IOException {
+        try (InputStream in = Files.newInputStream(cacheFile)) {
+            return toMap(BankDataFormat.read(in, UTF_8, countryCode, sourceVersion));
+        }
+    }
+
+    private static Map<String, BankData> toMap(List<BankData> records) {
+        Map<String, BankData> map = new HashMap<>(Math.max(16, records.size() * 2));
+        for (BankData record : records) {
+            map.put(record.getBankCode(), record);
+        }
+        return unmodifiableMap(map);
+    }
+
+    private static Path cacheFilePath(String countryCode) {
+        return BankDataConfig.get().getCacheDirectory().resolve(countryCode + CSV_SUFFIX);
+    }
+
+    /**
+     * Immutable snapshot of the currently loaded index and its provenance, always replaced
+     * together so a concurrent reader never observes data and metadata from two different loads.
+     */
+    private static final class State {
+        private final Map<String, BankData> data;
+        private final String                sourceVersion;
+        private final Instant               fetchedAt;
+        private final boolean               fromBundledFallback;
+
+        private State(Map<String, BankData> data, String sourceVersion, Instant fetchedAt, boolean fromBundledFallback) {
+            this.data = data;
+            this.sourceVersion = sourceVersion;
+            this.fetchedAt = fetchedAt;
+            this.fromBundledFallback = fromBundledFallback;
+        }
+    }
+
+}
