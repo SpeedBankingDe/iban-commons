@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright © 2025-2026 Markus Spann, SpeedBankingDe
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>de.speedbanking</groupId>
+        <artifactId>iban-commons-parent</artifactId>
+        <version>1.8.11-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>iban-commons-bankdata</artifactId>
+    <packaging>jar</packaging>
+
+    <name>${project.organization.name} IBAN Commons Bank Data</name>
+    <description>
+        Zero-dependency lookup of BIC and bank name master data (BLZ/Bankleitzahl/BC/kod
+        banky/bank code directories) for a given IBAN or country-specific bank code. Ships a small
+        bundled offline fallback dataset per country ("Urladung") and can refresh its data lazily
+        and asynchronously from the respective national registry at runtime, persisting the result
+        to a local cache directory. Initial country coverage: Germany (DE), Austria (AT),
+        Switzerland (CH), Czech Republic (CZ), Belgium (BE).
+    </description>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>de.speedbanking</groupId>
+            <artifactId>iban-commons</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <!--
+                                JPMS automatic module name.
+                                Allows Java 9+ consumers to declare
+                                'requires de.speedbanking.bankdata;'
+                                without this library being a named module itself.
+                                Must be stable and never change after first release.
+                            -->
+                            <Automatic-Module-Name>de.speedbanking.bankdata</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!--
+                    Points the default bank data cache directory at a build-local, disposable
+                    directory for the whole test run, instead of the real ${user.home}. Keeps
+                    tests hermetic (no writes outside target/) and deterministic (a fixed,
+                    known location CountryDataCacheTest can assert against).
+                -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <de.speedbanking.bankdata.cacheDir>${project.build.directory}/test-bankdata-cache</de.speedbanking.bankdata.cacheDir>
+                        <!-- single-line, ISO-8601 UTC log output instead of java.util.logging's
+                             default two-line, locale-dependent SimpleFormatter; see CompactLogFormatter -->
+                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!--
+                    Maintainer-only tool to regenerate the bundled "Urladung" CSV files under
+                    src/main/resources/bankdata from the live upstream sources, typically run
+                    manually before a release. See BundledDataRefreshTool's Javadoc and this
+                    module's README ("Regenerating bundled data") for the invocation command.
+                    https://www.mojohaus.org/exec-maven-plugin/
+                -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>refresh-bundled-bankdata</id>
+                        <phase>none</phase> <!-- only manual execution -->
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                            <mainClass>de.speedbanking.bankdata.tool.BundledDataRefreshTool</mainClass>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bank-data-lookup-sample</id>
+                        <phase>none</phase> <!-- only manual execution -->
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                            <mainClass>de.speedbanking.bankdata.tool.BankDataLookupSample</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+</project>

@@ -101,8 +101,11 @@ public final class Alpha2EnumLookup<E extends Enum<E>> {
             return null;
         }
         char c1 = code.charAt(0);
+        if (isNotUpperCase(c1)) {
+            return null;
+        }
         char c2 = code.charAt(1);
-        if (isNotUpperCase(c1) || isNotUpperCase(c2)) {
+        if (isNotUpperCase(c2)) {
             return null;
         }
         return lookupTable[packToIndex(c1, c2)];

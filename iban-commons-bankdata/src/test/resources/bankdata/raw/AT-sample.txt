@@ -1,0 +1,9 @@
+Es wird darauf hingewiesen, dass die Daten der oesterreichischen Kreditinstitute von der Oesterreichischen Nationalbank taeglich aktualisiert und im Internet zur Verfuegung gestellt werden.
+Diese Daten werden ausschliesslich unter den Bedingungen des Haftungsausschlusses und der Copyrightbestimmungen der Oesterreichischen Nationalbank zur Verfuegung gestellt.
+Weitere Informationen zu diesem Thema finden Sie unter http://www.oenb.at/Service/Impressum-und-Haftung.html.
+
+SEPA-Verzeichnis-Abfrage vom 15.09.2026
+Kennzeichen;Identnummer;Bankleitzahl;Institutsart;Sektor;Firmenbuchnummer;Bankenname;Strasse;PLZ;Ort;Postadresse / Strasse;Postadresse / PLZ;Postadresse / Ort;Postfach;Bundesland;Telefon;Fax;E-Mail;SWIFT-Code;Homepage;Gruendungsdatum;LEI
+Hauptanstalt;3404218;12000;KI;Aktienbanken;150714p;UniCredit Bank Austria AG;Rothschildplatz 1;1020;Wien;;1011;Wien;35;Wien;050505;;info@unicreditgroup.at;BKAUATWWXXX;www.bankaustria.at;18.09.1996;D1HEB8VEU6D9M8ZUXG17
+Hauptanstalt;189448;18170;;;128283b;KA Finanz AG i.A.;Am Tabor 19;1020;Wien;;;;;Wien;;;;;;03.10.1958;6I8315LJQXS02XDL2V84
+;30937;34923;;Raiffeisen;247579m;Raiffeisenlandesbank Oberoesterreich Aktiengesellschaft;Europaplatz 1a;4020;Linz;;;;;Oberoesterreich;0732/6596;;internet@rlbooe.at;RZOOAT2LXXX;www.rlbooe.at;31.03.2004;I6SS27Q1Q3385V753S50

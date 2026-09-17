@@ -1,0 +1,4 @@
+Kod platebniho styku;Poskytovatel platebnich sluzeb;BIC kod (SWIFT);System CERTIS
+0100;Musterbanka Praha a.s.;KOMBCZPPXXX;1
+0300;Musterna sporitelna a.s.;CEKOCZPPXXX;1
+2700;Musterbanka bez BIC;;1

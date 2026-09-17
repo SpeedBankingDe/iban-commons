@@ -15,11 +15,6 @@
  */
 package de.speedbanking.iban;
 
-import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.toMap;
-
-import java.util.Map;
-
 /**
  * Utility class to derive a lookup key compatible with the <strong>SWIFT IBAN Plus</strong> service.
  * <p>
@@ -27,25 +22,11 @@ import java.util.Map;
  * the routing-relevant parts of the BBAN.<br>
  * This key typically consists of the bank code, an optional branch code, and in
  * specific countries, a national check digit (NCD).
- * <p>
- * This implementation uses a pre-calculated strategy cache to determine the
- * construction rules for each country at class-loading time, ensuring maximum
- * performance during runtime by avoiding redundant metadata lookups.
  *
  * @author Markus Spann
  * @since 1.8.1
  */
 public final class IbanPlusKey {
-
-    /** Cache for pre-calculated extraction strategies per country code. */
-    private static final Map<String, Strategy> STRATEGY_CACHE = unmodifiableMap(
-        IbanRegistry.ALL_COUNTRIES.stream()
-              .filter(IbanRegistry::isBaseCountry)
-              .collect(toMap(
-                  IbanRegistry::getCountryCode,
-                  Strategy::new
-              ))
-    );
 
     private IbanPlusKey() {
         throw new UnsupportedOperationException(
@@ -65,15 +46,15 @@ public final class IbanPlusKey {
             return null;
         }
 
-        Strategy strategy = STRATEGY_CACHE.get(iban.getCountryCode());
+        IbanRegistry countryData = IbanRegistry.valueOf(iban.getCountryCode());
 
-        StringBuilder sb = new StringBuilder(15)
+        StringBuilder sb = new StringBuilder(14)
             .append(iban.getBankCode());
 
-        if (strategy.useBranchCode) {
+        if (countryData.hasBranchCode()) {
             sb.append(iban.getBranchCode());
         }
-        if (strategy.useNcd) {
+        if (isNcdRoutingRelevant(countryData)) {
             sb.append(iban.getNationalCheckDigit());
         }
 
@@ -91,29 +72,22 @@ public final class IbanPlusKey {
     }
 
     /**
-     * Internal representation of a country-specific extraction rule.<br>
-     * Decisions are made based on the connectivity of BBAN segments.
+     * Checks whether the national check digit (NCD) belongs to the IBAN Plus key for the given country.
+     * <p>
+     * This is the case only if the NCD sits directly next to the bank code or branch code in the BBAN,
+     * i.e. no other component (such as the account number) lies between them.
+     *
+     * @param countryData the country's IBAN registry entry
+     * @return {@code true} if the country has an NCD and it directly follows the bank code or branch code
      */
-    private static final class Strategy {
-        private final boolean useBranchCode;
-        private final boolean useNcd;
-
-        private Strategy(final IbanRegistry registry) {
-            IbanComponent bankComponent = registry.getBankCodeComponent();
-            IbanComponent branchComponent = registry.getBranchCodeComponent();
-            IbanComponent ncdComponent = registry.getNationalCheckDigitComponent();
-
-            this.useBranchCode = branchComponent != null;
-            this.useNcd = isNcdRoutingRelevant(bankComponent, branchComponent, ncdComponent);
+    private static boolean isNcdRoutingRelevant(IbanRegistry countryData) {
+        IbanComponent ncdComponent = countryData.getNationalCheckDigitComponent();
+        if (ncdComponent == null) {
+            return false;
         }
-
-        private static boolean isNcdRoutingRelevant(IbanComponent bankComponent, IbanComponent branchComponent, IbanComponent ncdComponent) {
-            if (ncdComponent == null) {
-                return false;
-            }
-            return ncdComponent.getBeginIndex() == bankComponent.getEndIndex()
-                || (branchComponent != null && ncdComponent.getBeginIndex() == branchComponent.getEndIndex());
-        }
+        IbanComponent branchComponent = countryData.getBranchCodeComponent();
+        return ncdComponent.getBeginIndex() == countryData.getBankCodeComponent().getEndIndex()
+            || (countryData.hasBranchCode() && ncdComponent.getBeginIndex() == branchComponent.getEndIndex());
     }
 
 }
