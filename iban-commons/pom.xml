@@ -68,6 +68,9 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <mainClass>de.speedbanking.about.ThisLib</mainClass>
+                        </manifest>
                         <manifestEntries>
                             <!--
                                 JPMS automatic module name.
@@ -77,6 +80,8 @@
                                 Must be stable and never change after first release.
                             -->
                             <Automatic-Module-Name>de.speedbanking.iban</Automatic-Module-Name>
+                            <Issue-Management-Url>${project.issueManagement.url}</Issue-Management-Url>
+                            <Scm-Url>${project.scm.url}</Scm-Url>
                         </manifestEntries>
                     </archive>
                 </configuration>
