@@ -20,6 +20,8 @@ Designed for high-performance enterprise applications, it covers 127 countries, 
 
 An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module is available for verifying German domestic account number ("Kontonummer") check digits against a Bankleitzahl (BLZ) — standalone and independent of `iban-commons`.
 
+An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolves the BIC and bank name behind an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL), with a bundled offline fallback dataset and lazy background refresh.
+
 ## Why IBAN Commons?
 
 | Feature                    | iban-commons   | jbanking  | Apache Commons |  iban4j   | garvelink |
@@ -291,6 +293,25 @@ examples, and full method coverage details.
 
 -----
 
+### Bank Data Lookup (`iban-commons-bankdata`)
+
+An optional module resolving the BIC and bank name of the institution behind an IBAN or a raw
+country-specific bank code (German BLZ, Austrian Bankleitzahl, Swiss BC-Nummer, Czech kod banky,
+Belgian bank code, Polish numer rozliczeniowy), self-hosted and open-source. Initial country
+coverage: **DE, AT, CH, CZ, BE, PL**.
+
+Ships a small bundled offline fallback dataset per country so lookups work immediately without
+network access, then lazily refreshes itself in the background against each country's official
+bank directory, persisting the result to a local cache directory that survives JVM restarts.
+Depends on `iban-commons` (reuses `Iban` and `Bic`).
+
+See the module's own **[README](iban-commons-bankdata/README.md)** for installation, usage
+examples, configuration, and a data-accuracy disclaimer: this module is provided on a
+**best-effort basis** with no guarantee of correctness, completeness, or timeliness of the bank
+data it returns.
+
+-----
+
 ## 🔄 Migrating from Other Libraries
 
 ### From iban4j
@@ -377,6 +398,13 @@ Each invalid IBAN is derived from a valid one by applying one of six sabotage st
 ### Benchmark Suite Repository
 
 All performance tests are fully open and available in the [SpeedBankingDe/iban-commons-benchmarks](https://github.com/SpeedBankingDe/iban-commons-benchmarks) repository.
+
+-----
+
+## 🆕 What's New in 1.8.11
+
+### Bank Data Lookup Module
+New optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolving BIC and bank name from an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL), with a bundled offline fallback dataset and a lazy, non-blocking background refresh against each country's official bank directory. Depends on `iban-commons`.
 
 -----
 
