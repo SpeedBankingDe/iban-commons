@@ -431,16 +431,20 @@ public final class Mod97 {
      * character array segment equals {@link #VALID_REMAINDER} ({@value #VALID_REMAINDER}).
      * <p>
      * This variant is optimized for use with shared or pooled buffers where only
-     * a specific portion of the array contains the IBAN to be validated.
+     * a specific portion of the array contains the IBAN to be validated; {@code length}
+     * may therefore be less than {@code iban.length}, but never more — a {@code length}
+     * exceeding the array's actual size is treated as invalid input rather than read
+     * out of bounds.
      *
      * @param iban   the normalized IBAN character array
-     * @param length the number of characters to process from the array
+     * @param length the number of characters to process from the array; if it exceeds
+     *               {@code iban.length}, this method returns {@code false}
      * @return {@code true} if the checksum is valid, {@code false} otherwise
      *
      * @since 1.8.5
      */
     public static boolean isValid(final char[] iban, final int length) {
-        return iban != null && length >= HEADER_LENGTH
+        return iban != null && length >= HEADER_LENGTH && length <= iban.length
             && hasValidCheckDigitRange(iban[CHECK_DIGIT_INDEX_1], iban[CHECK_DIGIT_INDEX_2])
             && calculate(iban, length) == VALID_REMAINDER;
     }

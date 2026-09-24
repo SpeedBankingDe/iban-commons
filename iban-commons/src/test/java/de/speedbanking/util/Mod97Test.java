@@ -426,4 +426,12 @@ final class Mod97Test {
         assertThat(Mod97.isValid((char[]) null, 5)).isFalse();
     }
 
+    @Test
+    void isValid_charArrayWithLen_lengthExceedsArraySize_returnsFalse() {
+        // length is meant to let callers use only a portion of a shared/pooled buffer, i.e.
+        // length <= iban.length; a length that instead exceeds the array's actual size must be
+        // rejected as invalid input rather than read out of bounds
+        assertThat(Mod97.isValid(new char[2], 4)).isFalse();
+    }
+
 }
