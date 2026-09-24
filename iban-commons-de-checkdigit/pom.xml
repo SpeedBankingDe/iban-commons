@@ -52,6 +52,11 @@
             <artifactId>assertj-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.code-intelligence</groupId>
+            <artifactId>jazzer-junit</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

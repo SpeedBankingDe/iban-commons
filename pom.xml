@@ -105,6 +105,8 @@
         <dep.junit.version>5.14.4</dep.junit.version>
         <dep.assertj.version>3.27.7</dep.assertj.version>
         <dep.mockito.version>4.11.0</dep.mockito.version>
+        <dep.jazzer.version>0.30.0</dep.jazzer.version>
+        <dep.junit-platform.version>1.14.4</dep.junit-platform.version>
         <dep.pitest-junit5-plugin.version>1.2.3</dep.pitest-junit5-plugin.version>
 
         <developer1Id>spannm</developer1Id>
@@ -237,6 +239,44 @@
                 <scope>test</scope>
             </dependency>
 
+            <!--
+                Coverage-guided fuzz testing via JUnit 5 (@FuzzTest). Native-library based
+                (libFuzzer), so only supported on Linux/macOS; excluded from the default
+                'clean verify' run everywhere, see the "run-fuzz-tests" profile below.
+
+                jazzer-junit 0.30.0 transitively pulls junit-platform-launcher/-commons
+                1.9.0, which is older than the junit-platform-engine version that
+                junit-jupiter ${dep.junit.version} brings in; the two must be aligned or
+                test discovery fails ("OutputDirectoryCreator not available"), so the
+                platform artifacts below are pinned explicitly.
+            -->
+            <dependency>
+                <groupId>com.code-intelligence</groupId>
+                <artifactId>jazzer-junit</artifactId>
+                <version>${dep.jazzer.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-launcher</artifactId>
+                <version>${dep.junit-platform.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!--
+                No explicit scope: iban-commons-junit needs this at compile scope (its
+                main code uses org.junit.platform.commons.support.AnnotationSupport), while
+                jazzer-junit only needs it at test scope. A dependencyManagement scope here
+                would override every module's effective scope, including that compile-scope
+                use - so scope is left to whichever dependency graph pulls this in.
+            -->
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-commons</artifactId>
+                <version>${dep.junit-platform.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -291,6 +331,13 @@
                         <forkedProcessTimeoutInSeconds>180</forkedProcessTimeoutInSeconds>
 
                         <argLine>@{surefireArgLine} -XX:+EnableDynamicAgentLoading -Xmx2048m</argLine>
+
+                        <!-- fuzz tests add build time for no default-run value (they only
+                             replay a fixed seed corpus without -Drun-fuzz-tests); see the
+                             "run-fuzz-tests" profile below -->
+                        <excludes>
+                            <exclude>**/*FuzzTest.java</exclude>
+                        </excludes>
                     </configuration>
                 </plugin>
 
@@ -890,6 +937,40 @@
                     </plugin>
 
                 </plugins>
+            </build>
+        </profile>
+
+        <!--
+            Fuzz test classes (**/*FuzzTest.java) are excluded from the default surefire run
+            (see the exclude above) - they add build time for no default-run value, since
+            without -Djazzer.fuzz they only replay a fixed seed corpus. Activate explicitly
+            with -Drun-fuzz-tests, e.g.:
+              mvn test -Drun-fuzz-tests -Dtest=Mod97FuzzTest
+            jazzer-junit's @FuzzTest loads a native libFuzzer driver that only ships for Linux
+            and macOS, so this profile never activates on Windows even if requested there.
+        -->
+        <profile>
+            <id>run-fuzz-tests</id>
+            <activation>
+                <property>
+                    <name>run-fuzz-tests</name>
+                </property>
+                <os>
+                    <family>!windows</family>
+                </os>
+            </activation>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-surefire-plugin</artifactId>
+                            <configuration>
+                                <excludes combine.self="override" />
+                            </configuration>
+                        </plugin>
+                    </plugins>
+                </pluginManagement>
             </build>
         </profile>
 
