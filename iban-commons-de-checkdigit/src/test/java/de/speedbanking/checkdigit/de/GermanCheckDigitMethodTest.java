@@ -612,4 +612,98 @@ final class GermanCheckDigitMethodTest {
             .isInstanceOf(NullPointerException.class);
     }
 
+    // Methods 37, 39, 47, 62, 82, A2, A3, A5, A7, A9, B1, B2, B3, B5, C1, C2, C3, C4, C8, C9,
+    // D2, D3, D6, D9: previously had no test vectors at all (round-tripped via fromCode()/
+    // getCode() only, never through calculate() itself) - found via a pitest mutation-coverage
+    // gap that contradicted this class's own "all 122 implemented methods are exercised" claim.
+    // For the delegating/fallback methods, at least one vector per branch is included so the
+    // branch selection itself (not just the arithmetic) is verified.
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "37, 1234567891, true",
+        "37, 1234567892, false",
+        "39, 1234567890, true",
+        "39, 1234567891, false",
+        "47, 1234567800, true",
+        "47, 1234567810, false",
+        "62, 1234567890, true",
+        "62, 1234567990, false",
+        "82, 1299567894, true",  // digit3-4=99 -> M10 branch
+        "82, 1299567895, false", // same branch, wrong check digit
+        "82, 1200567892, true",  // digit3-4!=99 -> M33 branch
+        "82, 1200567893, false", // same branch, wrong check digit
+        "A2, 0234567808, true",  // valid via M00
+        "A2, 0234567802, true",  // M00 invalid, valid via M04
+        "A2, 0234567800, false", // both invalid
+        "A3, 0234567808, true",  // valid via M00
+        "A3, 0234567805, true",  // M00 invalid, valid via M10
+        "A3, 0234567800, false", // both invalid
+        "A5, 0234567808, true",  // valid via M00
+        "A5, 0234567805, true",  // M00 invalid, digit1 != 9, valid via M10
+        "A5, 9234567800, false", // M00 invalid, digit1 == 9 -> rejected outright
+        "A7, 0234567808, true",  // valid via M00
+        "A7, 0234567800, true",  // M00 invalid, valid via M03
+        "A7, 0234567801, false", // both invalid
+        "A9, 0234567807, true",  // valid via M01
+        "A9, 0234567802, true",  // M01 invalid, valid via M06
+        "A9, 0234567800, false", // both invalid
+        "B1, 0234567801, true",  // valid via M05
+        "B1, 0234567807, true",  // M05 invalid, valid via M01
+        "B1, 0234567808, true",  // M05/M01 invalid, valid via M00
+        "B1, 0234567800, false", // all three invalid
+        "B2, 3234567893, true",  // digit1 <= 7 -> M02 branch
+        "B2, 3234567894, false", // same branch, wrong check digit
+        "B2, 9234567890, true",  // digit1 == 9 -> M00 branch
+        "B2, 9234567891, false", // same branch, wrong check digit
+        "B3, 3234567897, true",  // digit1 != 9 -> M32 branch
+        "B3, 3234567898, false", // same branch, wrong check digit
+        "B3, 9234567893, true",  // digit1 == 9 -> M06 branch
+        "B3, 9234567894, false", // same branch, wrong check digit
+        "B5, 0234567801, true",  // valid via M05
+        "B5, 0234567808, true",  // M05 invalid, digit1 not 8/9, valid via M00
+        "B5, 8234567800, false", // M05 invalid, digit1 == 8 -> rejected outright
+        "C1, 3234567990, true",  // digit1 != 5 -> M17 branch
+        "C1, 3234567090, false", // same branch, wrong check digit
+        "C1, 5234567894, true",  // digit1 == 5 -> C1's own asymmetric mod-10/11 formula
+        "C1, 5234567895, false", // same branch, wrong check digit
+        "C2, 0234567805, true",  // valid via M22
+        "C2, 0234567808, true",  // M22 invalid, valid via M00
+        "C2, 0234567802, true",  // M22/M00 invalid, valid via M04
+        "C2, 0234567800, false", // all three invalid
+        "C3, 3234567893, true",  // digit1 != 9 -> M00 branch
+        "C3, 3234567894, false", // same branch, wrong check digit
+        "C3, 9234567892, true",  // digit1 == 9 -> M58 branch
+        "C3, 9234567893, false", // same branch, wrong check digit
+        "C4, 3234567890, true",  // digit1 != 9 -> M15 branch
+        "C4, 3234567891, false", // same branch, wrong check digit
+        "C4, 9234567892, true",  // digit1 == 9 -> M58 branch
+        "C4, 9234567893, false", // same branch, wrong check digit
+        "C8, 0234567808, true",  // valid via M00
+        "C8, 0234567802, true",  // M00 invalid, valid via M04
+        "C8, 0234567805, true",  // M00/M04 invalid, valid via M07
+        "C8, 0234567800, false", // all three invalid
+        "C9, 0234567808, true",  // valid via M00
+        "C9, 0234567805, true",  // M00 invalid, valid via M07
+        "C9, 0234567800, false", // both invalid
+        "D2, 0230567808, true",  // valid via M95
+        "D2, 0230567802, true",  // M95 invalid, valid via M00
+        "D2, 0231567808, true",  // M95/M00 invalid, valid via M68
+        "D2, 0230567800, false", // all three invalid
+        "D3, 0234567808, true",  // valid via M00
+        "D3, 1234567801, true",  // M00 invalid, valid via M27
+        "D3, 0234567800, false", // both invalid
+        "D6, 0234567805, true",  // valid via M07
+        "D6, 0234567800, true",  // M07 invalid, valid via M03
+        "D6, 0234567808, true",  // M07/M03 invalid, valid via M00
+        "D6, 0234567801, false", // all three invalid
+        "D9, 0234567808, true",  // valid via M00
+        "D9, 0234567805, true",  // M00 invalid, valid via M10
+        "D9, 0234567809, true",  // M00/M10 invalid, valid via M18
+        "D9, 0234567800, false", // all three invalid
+    })
+    void calculate_knownVectors_remainingCodes(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
 }
