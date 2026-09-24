@@ -58,6 +58,12 @@
             <!-- scope: test (inherited from dependencyManagement) -->
         </dependency>
 
+        <dependency>
+            <groupId>com.code-intelligence</groupId>
+            <artifactId>jazzer-junit</artifactId>
+            <!-- scope: test (inherited from dependencyManagement) -->
+        </dependency>
+
     </dependencies>
 
     <build>
