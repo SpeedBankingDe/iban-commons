@@ -163,6 +163,14 @@ final class ValidIbanTest {
         assertThat(validator.validate(new WithIbanAllowSpace("DE89370400440532013000"))).isEmpty();
     }
 
+    @DisplayName("IBAN with a leading space is still stripped (covers the indexOf == 0 boundary)")
+    @Test
+    void ibanWithLeadingSpace_isStripped() {
+        // stripSpaces() uses indexOf(' ') < 0 to decide "no space present"; a space at
+        // index 0 must still take the replace branch, not be mistaken for "no space".
+        assertThat(validator.validate(new WithIbanAllowSpace(" DE89370400440532013000"))).isEmpty();
+    }
+
     @DisplayName("Grouped IBAN fails when allowSpace = false (default)")
     @Test
     void groupedIban_failsWithoutAllowSpace() {
