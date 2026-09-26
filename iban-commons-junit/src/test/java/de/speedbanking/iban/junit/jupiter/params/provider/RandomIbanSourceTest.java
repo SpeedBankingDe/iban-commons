@@ -100,6 +100,27 @@ final class RandomIbanSourceTest {
     }
 
     @Test
+    void validateAndBuild_shouldExcludeConfiguredCountries_fromGeneratedIbans() {
+        // excludeCountries actually removing entries from the pool - not just the
+        // include/exclude-overlap error path exercised elsewhere in this class. A large
+        // count against the ~127-entry full registry makes the odds of never drawing DE
+        // by chance alone (were the exclude filter a no-op) astronomically small.
+        RandomIbanSource mockAnnotation = createAnnotation(
+            null, 5000, 0,
+            null, new IbanRegistry[] {IbanRegistry.DE},
+            RandomIbanSource.Sepa.ANY);
+        provider.accept(mockAnnotation);
+
+        Stream<? extends Arguments> args = provider.provideArguments(null, null);
+        assertThat(args)
+            .hasSize(5000)
+            .allSatisfy(arg -> {
+                String iban = (String) arg.get()[0];
+                assertThat(iban).doesNotStartWith("DE");
+            });
+    }
+
+    @Test
     void validateAndBuild_shouldFilterBySepa_whenSepaIsYes() {
         // LC (Saint Lucia) is non-SEPA, DE is SEPA
         RandomIbanSource mockAnnotation = createAnnotation(

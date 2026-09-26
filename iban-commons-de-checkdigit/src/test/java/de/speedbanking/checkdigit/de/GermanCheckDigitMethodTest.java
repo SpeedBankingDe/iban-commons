@@ -612,4 +612,259 @@ final class GermanCheckDigitMethodTest {
             .isInstanceOf(NullPointerException.class);
     }
 
+    // Methods 37, 39, 47, 62, 82, A2, A3, A5, A7, A9, B1, B2, B3, B5, C1, C2, C3, C4, C8, C9,
+    // D2, D3, D6, D9: previously had no test vectors at all (round-tripped via fromCode()/
+    // getCode() only, never through calculate() itself) - found via a pitest mutation-coverage
+    // gap that contradicted this class's own "all 122 implemented methods are exercised" claim.
+    // For the delegating/fallback methods, at least one vector per branch is included so the
+    // branch selection itself (not just the arithmetic) is verified.
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "37, 1234567891, true",
+        "37, 1234567892, false",
+        "39, 1234567890, true",
+        "39, 1234567891, false",
+        "47, 1234567800, true",
+        "47, 1234567810, false",
+        "62, 1234567890, true",
+        "62, 1234567990, false",
+        "82, 1299567894, true",  // digit3-4=99 -> M10 branch
+        "82, 1299567895, false", // same branch, wrong check digit
+        "82, 1200567892, true",  // digit3-4!=99 -> M33 branch
+        "82, 1200567893, false", // same branch, wrong check digit
+        "A2, 0234567808, true",  // valid via M00
+        "A2, 0234567802, true",  // M00 invalid, valid via M04
+        "A2, 0234567800, false", // both invalid
+        "A3, 0234567808, true",  // valid via M00
+        "A3, 0234567805, true",  // M00 invalid, valid via M10
+        "A3, 0234567800, false", // both invalid
+        "A5, 0234567808, true",  // valid via M00
+        "A5, 0234567805, true",  // M00 invalid, digit1 != 9, valid via M10
+        "A5, 9234567800, false", // M00 invalid, digit1 == 9 -> rejected outright
+        "A7, 0234567808, true",  // valid via M00
+        "A7, 0234567800, true",  // M00 invalid, valid via M03
+        "A7, 0234567801, false", // both invalid
+        "A9, 0234567807, true",  // valid via M01
+        "A9, 0234567802, true",  // M01 invalid, valid via M06
+        "A9, 0234567800, false", // both invalid
+        "B1, 0234567801, true",  // valid via M05
+        "B1, 0234567807, true",  // M05 invalid, valid via M01
+        "B1, 0234567808, true",  // M05/M01 invalid, valid via M00
+        "B1, 0234567800, false", // all three invalid
+        "B2, 3234567893, true",  // digit1 <= 7 -> M02 branch
+        "B2, 3234567894, false", // same branch, wrong check digit
+        "B2, 9234567890, true",  // digit1 == 9 -> M00 branch
+        "B2, 9234567891, false", // same branch, wrong check digit
+        "B3, 3234567897, true",  // digit1 != 9 -> M32 branch
+        "B3, 3234567898, false", // same branch, wrong check digit
+        "B3, 9234567893, true",  // digit1 == 9 -> M06 branch
+        "B3, 9234567894, false", // same branch, wrong check digit
+        "B5, 0234567801, true",  // valid via M05
+        "B5, 0234567808, true",  // M05 invalid, digit1 not 8/9, valid via M00
+        "B5, 8234567800, false", // M05 invalid, digit1 == 8 -> rejected outright
+        "C1, 3234567990, true",  // digit1 != 5 -> M17 branch
+        "C1, 3234567090, false", // same branch, wrong check digit
+        "C1, 5234567894, true",  // digit1 == 5 -> C1's own asymmetric mod-10/11 formula
+        "C1, 5234567895, false", // same branch, wrong check digit
+        "C2, 0234567805, true",  // valid via M22
+        "C2, 0234567808, true",  // M22 invalid, valid via M00
+        "C2, 0234567802, true",  // M22/M00 invalid, valid via M04
+        "C2, 0234567800, false", // all three invalid
+        "C3, 3234567893, true",  // digit1 != 9 -> M00 branch
+        "C3, 3234567894, false", // same branch, wrong check digit
+        "C3, 9234567892, true",  // digit1 == 9 -> M58 branch
+        "C3, 9234567893, false", // same branch, wrong check digit
+        "C4, 3234567890, true",  // digit1 != 9 -> M15 branch
+        "C4, 3234567891, false", // same branch, wrong check digit
+        "C4, 9234567892, true",  // digit1 == 9 -> M58 branch
+        "C4, 9234567893, false", // same branch, wrong check digit
+        "C8, 0234567808, true",  // valid via M00
+        "C8, 0234567802, true",  // M00 invalid, valid via M04
+        "C8, 0234567805, true",  // M00/M04 invalid, valid via M07
+        "C8, 0234567800, false", // all three invalid
+        "C9, 0234567808, true",  // valid via M00
+        "C9, 0234567805, true",  // M00 invalid, valid via M07
+        "C9, 0234567800, false", // both invalid
+        "D2, 0230567808, true",  // valid via M95
+        "D2, 0230567802, true",  // M95 invalid, valid via M00
+        "D2, 0231567808, true",  // M95/M00 invalid, valid via M68
+        "D2, 0230567800, false", // all three invalid
+        "D3, 0234567808, true",  // valid via M00
+        "D3, 1234567801, true",  // M00 invalid, valid via M27
+        "D3, 0234567800, false", // both invalid
+        "D6, 0234567805, true",  // valid via M07
+        "D6, 0234567800, true",  // M07 invalid, valid via M03
+        "D6, 0234567808, true",  // M07/M03 invalid, valid via M00
+        "D6, 0234567801, false", // all three invalid
+        "D9, 0234567808, true",  // valid via M00
+        "D9, 0234567805, true",  // M00 invalid, valid via M10
+        "D9, 0234567809, true",  // M00/M10 invalid, valid via M18
+        "D9, 0234567800, false", // all three invalid
+    })
+    void calculate_knownVectors_remainingCodes(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
+        // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
+        // m76Branch, calculateM93) that the vectors above never reached.
+        "08, 0000060000, false",
+        "23, 0000000000, true",
+        "24, 3000000000, false",
+        "24, 9000000000, false",
+        "24, 0001000003, true",
+        "24, 0000000056, true",
+        "25, 0000000060, false",
+        "25, 0800000030, true",
+        "26, 0100000000, false",
+        "27, 1000000009, true",
+        "41, 0009000001, true",
+        "41, 0000000000, true",
+        "45, 4700000000, false",
+        "51, 0090000005, true",
+        "51, 0090000006, false",
+        "51, 1111111117, false",
+        "51, 1111111110, false",
+        "56, 9000000048, true",
+        "56, 1000000040, false",
+        "57, 7123456000, true",
+        "57, 6400000006, true",
+        "57, 6600000001, true",
+        "57, 7500000002, true",
+        "57, 8200000008, true",
+        "57, 3230000000, true",
+        "57, 3980000000, true",
+        "57, 4140000000, true",
+        "57, 4970000000, true",
+        "57, 5210000000, true",
+        "57, 5470000000, true",
+        "57, 5620000000, true",
+        "57, 6040000000, true",
+        "57, 6790000000, true",
+        "57, 6950000000, true",
+        "57, 8360000000, true",
+        "57, 8770000000, true",
+        "57, 9680000000, true",
+        "57, 9840000000, true",
+        "57, 0101004000, true",
+        "57, 0112004000, true",
+        "57, 0113004000, false",
+        "57, 0101005000, false",
+        "57, 3101004000, true",
+        "63, 0001234400, true",
+        "63, 0123456700, false",
+        "63, 0009999509, true",
+        "68, 0000000000, false",
+        "68, 0000100008, true",
+        "69, 0123456185, true",
+        "70, 0006900003, true",
+        "70, 0006000002, true",
+        "73, 0001000000, true",
+        "73, 0090000020, true",
+        "73, 0190000007, true",
+        "73, 0190000009, false",
+        "74, 0000500004, true",
+        "76, 0001234800, true",
+        "76, 0501234800, true",
+        "76, 0561234200, true",
+        "76, 0000034952, true",
+        "85, 0099000008, true",
+        "85, 0001000000, true",
+        "86, 0001000000, true",
+        "88, 0090000005, true",
+        "88, 0000000000, true",
+        "90, 0090000000, false",
+        "90, 0090000005, true",
+        "90, 0001000000, true",
+        "90, 0000000015, true",
+        "90, 0000000017, true",
+        "95, 0000000000, true",
+        "95, 0002000000, false",
+        "95, 0008999999, false",
+        "95, 0026000000, false",
+        "95, 0395999999, false",
+        "95, 0500000000, false",
+        "95, 0699999999, false",
+        "95, 0800000000, false",
+        "95, 0909999999, false",
+        "95, 0990000000, true",
+        "96, 0001299998, false",
+        "96, 0001300000, true",
+        "96, 0099399999, true",
+        "96, 0099400000, false",
+        "98, 0000000000, true",
+        "98, 0010000000, true",
+        "99, 0395999999, false",
+        "99, 0500000000, false",
+        "A0, 0000001003, true",
+        "A4, 0099000000, true",
+        "A4, 0090000000, true",
+        "A6, 0800000002, true",
+        "A8, 0090000005, true",
+        "A8, 0000000000, true",
+        "B2, 7000000008, true",
+        "B2, 8000000003, true",
+        "B8, 5000000008, false",
+        "B8, 6000000005, false",
+        "B8, 9000000007, false",
+        "B8, 9110000001, false",
+        "B9, 0010000004, true",
+        "B9, 0000000000, true",
+        "B9, 0010000009, true",
+        "B9, 0020000000, true",
+        "C5, 0000000000, false",
+        "C5, 0000100008, true",
+        "C5, 0000800003, true",
+        "C5, 0000900000, false",
+        "C5, 0100008000, true",
+        "C5, 0800003000, true",
+        "C5, 0900000000, false",
+        "C5, 0020000000, false",
+        "C5, 0060000000, false",
+        "D0, 5600000008, true",
+        "93, 0000123455, true",
+        "93, 1000214560, true",
+        "21, 0000001899, true",
+    })
+    void calculate_mutationCoverageGaps(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1} not checked")
+    @CsvSource({
+        // Boundary vectors for range-gated "no check performed" branches (M45, M95, M99, A0, B8, C5, D0).
+        "45, 4800000000",
+        "95, 0000000001",
+        "95, 0001999999",
+        "95, 0009000000",
+        "95, 0025999999",
+        "95, 0396000000",
+        "95, 0499999999",
+        "95, 0700000000",
+        "95, 0799999999",
+        "95, 0910000000",
+        "95, 0989999999",
+        "99, 0396000000",
+        "99, 0499999999",
+        "A0, 0000000000",
+        "B8, 5100000000",
+        "B8, 5900000012",
+        "B8, 9010000000",
+        "B8, 9100000009",
+        "C5, 0030000000",
+        "C5, 0050000000",
+        "D0, 5700000000",
+    })
+    void calculate_mutationCoverageGaps_notChecked(String code, String account) {
+        GermanCheckDigitMethod method = GermanCheckDigitMethod.fromCode(code);
+
+        CheckDigitResult result = method.calculate(BLZ, account.toCharArray());
+
+        assertThat(result.isChecked()).as("method %s, account %s", code, account).isFalse();
+        assertThat(result.isValid()).as("method %s, account %s", code, account).isTrue();
+    }
+
 }
