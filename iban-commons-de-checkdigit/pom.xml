@@ -22,7 +22,7 @@
     <parent>
         <groupId>de.speedbanking</groupId>
         <artifactId>iban-commons-parent</artifactId>
-        <version>1.8.11-SNAPSHOT</version>
+        <version>1.8.11</version>
     </parent>
 
     <artifactId>iban-commons-de-checkdigit</artifactId>
