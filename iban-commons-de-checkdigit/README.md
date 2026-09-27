@@ -27,13 +27,13 @@ payment processing. It does not select a method; it only executes one you alread
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons-de-checkdigit</artifactId>
-    <version>1.8.10-SNAPSHOT</version>
+    <version>1.8.11</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons-de-checkdigit:1.8.10-SNAPSHOT'
+implementation 'de.speedbanking:iban-commons-de-checkdigit:1.8.11'
 ```
 
 ```java

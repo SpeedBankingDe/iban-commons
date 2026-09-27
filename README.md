@@ -44,13 +44,13 @@ An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-comm
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.10</version>
+    <version>1.8.11</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.10'
+implementation 'de.speedbanking:iban-commons:1.8.11'
 ```
 
 ### 2. Validate & Parse
@@ -380,6 +380,22 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 
 -----
 
+## 🆕 What's New in 1.8.11
+
+### IBAN Registry Release 103
+`IbanRegistry` is now cross-checked against SWIFT IBAN Registry Release 103 (Sep 2026), up from Release 100. The only structural change: Brazil's bank identifier and account-type/control digits are now alphanumeric instead of numeric/alpha-only (`8!c...1!c1!c` instead of `8!n...1!a1!c`).
+
+### Check Digit Range Enforcement
+A genuinely generated IBAN check digit is always in `[02, 98]` — `00`, `01`, and `99` can't occur. `Mod97.isValid()`, and everything built on it (`IbanValidator`, `IbanBuilder`), now rejects those three values outright instead of trusting the raw mod-97 remainder alone, which some BBANs could coincidentally still satisfy.
+
+### Library Metadata on Direct JAR Execution
+Running the JAR directly (`java -jar iban-commons.jar`) now prints its title, version, vendor, and build info from the manifest, with a note that it's a library and not meant for CLI use, instead of exiting silently.
+
+### Test Suite Hardening
+Line and mutation coverage (via pitest) were pushed further across `iban-commons-de-checkdigit`, `iban-commons-junit`, and `iban-commons-validation`, closing gaps mutation testing had exposed.
+
+-----
+
 ## 🆕 What's New in 1.8.10
 
 ### German Account Check Digit Module
@@ -476,7 +492,7 @@ The project now requires JDK 17+ to build. The compiled artifact remains fully b
 <details>
 <summary>Which countries are supported?</summary>
 
-127 countries including all from the SWIFT IBAN Registry Release 100 (October 2025):
+127 countries including all from the SWIFT IBAN Registry Release 103 (September 2026):
 - All SEPA countries including major economies: Germany, UK, Switzerland, Norway, etc.
 - All known non-SEPA countries that support IBAN
 - Full list available in the [source code](src/main/java/de/speedbanking/iban/IbanRegistry.java)
