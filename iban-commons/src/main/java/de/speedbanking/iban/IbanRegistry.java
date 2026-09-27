@@ -46,7 +46,7 @@ import java.util.stream.Stream;
  * The definitive, immutable registry for all <strong>ISO 13616-compliant national IBAN formats</strong>.
  * <p>
  * This enumeration holds the official structural rules (total length, BBAN pattern, component index ranges)
- * for each country, as published in the <strong>SWIFT IBAN Registry (Release 100 - Oct 2025)</strong>.<br>
+ * for each country, as published in the <strong>SWIFT IBAN Registry (Release 103 - Sep 2026)</strong>.<br>
  * Additional countries participating in the IBAN scheme are manually maintained in this class.
  * <p>
  * The <strong>International Organization for Standardization (ISO)</strong> designated <strong>SWIFT</strong> as the
@@ -312,21 +312,21 @@ public enum IbanRegistry {
      * <strong>Brazil ({@code BR})</strong><p>
      * IBAN Length: 29<br>
      * SEPA: No<br>
-     * BBAN Structure: {@code 8!n5!n10!n1!a1!c}<br>
+     * BBAN Structure: {@code 8!c5!n10!n1!c1!c}<br>
      * Examples:<pre>
-     *   unformatted: {@code BR1800360305000010009795493C1}
-     *   formatted:   {@code BR18 0036 0305 0000 1000 9795 493C 1}
-     *   components:  {@code BR 18 00360305 00001 0009795493 C1}
+     *   unformatted: {@code BR6699999A03000010009795493C1}
+     *   formatted:   {@code BR66 9999 9A03 0000 1000 9795 493C 1}
+     *   components:  {@code BR 66 99999A03 00001 0009795493 C1}
      * </pre>
      */
     BR(StructureData.builder()
-            .withBbanPattern("8!n5!n10!n1!a1!c")
-            .withBankCode("8!n", 4)
+            .withBbanPattern("8!c5!n10!n1!c1!c")
+            .withBankCode("8!c", 4)
             .withBranchCode("5!n", 12)
             .withAccountNumber("10!n", 17)
-            .withAccountTypeAndControl("1!a1!c", 27)
+            .withAccountTypeAndControl("1!c1!c", 27)
             .build(),
-        MetaData.nonSepa("BR1800360305000010009795493C1", YearMonth.of(2016, 8)),
+        MetaData.nonSepa("BR6699999A03000010009795493C1", YearMonth.of(2026, 8)),
         ContactData.of(
             "Banco Central do Brasil", "DEBAN - Departamento de Operações Bancárias e de Sistema de Pagamentos", "SBS Quadra 3 Bloco B",
             "71.070-900 Brasília", "iban@bcb.gov.br", "+ 55 (61)34142666 / + 55 (51)32157339"),

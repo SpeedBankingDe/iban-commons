@@ -161,12 +161,11 @@ final class CountryValidators {
         }
     }
 
-    /** Validator for Brazil (BR), IBAN length: 29, BBAN pattern: {@code 8!n5!n10!n1!a1!c} */
+    /** Validator for Brazil (BR), IBAN length: 29, BBAN pattern: {@code 8!c5!n10!n1!c1!c} */
     static final class BR extends AbstractCountryValidator {
         @Override
         public boolean validateIban(final char[] iban) {
-            return isAllDigits(iban, 4, 27)
-                && isAllUpperCase(iban, 27, 28);
+            return isAllDigits(iban, 12, 27);
         }
     }
 
