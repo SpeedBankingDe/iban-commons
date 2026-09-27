@@ -414,7 +414,7 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, '0');
 
         // calculate the required check digits value (98 - modulo result)
-        int checkDigitsValue = 98 - Mod97.calculate(sb);
+        int checkDigitsValue = Mod97.MAX_CHECK_DIGIT_VALUE - Mod97.calculate(sb);
 
         // manual zero-padding: faster than String.format
         sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, (char) ('0' + (checkDigitsValue / 10)));
