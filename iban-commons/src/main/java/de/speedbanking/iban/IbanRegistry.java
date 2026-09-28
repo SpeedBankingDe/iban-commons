@@ -3019,7 +3019,8 @@ public enum IbanRegistry {
      * @return the country name
      */
     public String getCountryName() {
-        return Country.fromCode(getCountryCode()).getCountryName();
+        return requireNonNull(Country.fromCode(getCountryCode()), "unknown country code: " + getCountryCode())
+            .getCountryName();
     }
 
     /**
@@ -3044,7 +3045,8 @@ public enum IbanRegistry {
      * @see Country#getCurrency()
      */
     public Currency getCurrency() {
-        return Country.fromCode(getCountryCode()).getCurrency();
+        return requireNonNull(Country.fromCode(getCountryCode()), "unknown country code: " + getCountryCode())
+            .getCurrency();
     }
 
     /**

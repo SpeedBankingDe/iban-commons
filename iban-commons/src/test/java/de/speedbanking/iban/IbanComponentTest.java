@@ -184,8 +184,8 @@ final class IbanComponentTest {
     void toString_containsAllFields() {
         IbanComponent component = new IbanComponent(IbanComponentType.IDENTIFICATION_NUMBER, "[0-9]{4}", 6, 4);
 
-        assertThat(component.toString())
-            .isEqualTo("IbanComponent[type=IDENTIFICATION_NUMBER, pattern=[0-9]{4}, beginIndex=6, length=4]");
+        assertThat(component)
+            .hasToString("IbanComponent[type=IDENTIFICATION_NUMBER, pattern=[0-9]{4}, beginIndex=6, length=4]");
     }
 
 }

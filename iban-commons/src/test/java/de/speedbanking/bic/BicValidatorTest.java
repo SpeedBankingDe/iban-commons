@@ -58,9 +58,11 @@ final class BicValidatorTest {
     @DisplayName("validate: should return INCORRECT_LENGTH for lengths other than 8 or 11")
     @ParameterizedTest
     @ValueSource(strings = {
-        "YAMAJP",      // too short (6 chars)
-        "YAMAJPJTXX",  // invalid 10-char length
-        "YAMAJPJTXXXX" // too long (12 chars)
+        "YAMAJP",       // too short (6 chars)
+        "YAMAJPJTXX",   // invalid 10-char length
+        "YAMAJPJTXXXX", // too long (12 chars)
+        "BCCIL",        // too short
+        "BCCILULLXXXX"  // too long
     })
     void validate_shouldReturnIncorrectLength_whenLengthIsInvalid(String invalidLengthBic) {
         BicValidationResult result = BicValidator.validate(invalidLengthBic);
@@ -106,19 +108,6 @@ final class BicValidatorTest {
         char[] result = BicValidator.copyToBuffer(genericSeq, sourceStr.length(), target);
 
         assertThat(new String(result, 0, sourceStr.length())).isEqualTo(sourceStr);
-    }
-
-    @DisplayName("validate: should return INCORRECT_LENGTH for boundary violations")
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "BCCIL",       // too short
-        "BCCILULLXXXX" // too long
-    })
-    void validate_shouldReturnIncorrectLength_whenLengthIsOutsideBounds(String invalidLengthBic) {
-        BicValidationResult result = BicValidator.validate(invalidLengthBic);
-
-        assertThat(result.isValid()).isFalse();
-        assertThat(result.error).isEqualTo(INCORRECT_LENGTH);
     }
 
     @DisplayName("validate: should catch invalid lengths that are neither 8 nor 11")

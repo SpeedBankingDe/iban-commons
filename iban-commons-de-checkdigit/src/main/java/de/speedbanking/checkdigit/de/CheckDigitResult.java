@@ -43,11 +43,11 @@ public final class CheckDigitResult {
      */
     public static final CheckDigitResult NOT_CHECKED = new CheckDigitResult(true, false);
 
-    private final boolean                 valid;
+    private final boolean                 validFlag;
     private final boolean                 checked;
 
     private CheckDigitResult(boolean valid, boolean checked) {
-        this.valid = valid;
+        this.validFlag = valid;
         this.checked = checked;
     }
 
@@ -69,7 +69,7 @@ public final class CheckDigitResult {
      * @return {@code true} if the account number should be treated as acceptable
      */
     public boolean isValid() {
-        return valid;
+        return validFlag;
     }
 
     /**
@@ -90,17 +90,17 @@ public final class CheckDigitResult {
             return false;
         }
         CheckDigitResult other = (CheckDigitResult) obj;
-        return valid == other.valid && checked == other.checked;
+        return validFlag == other.validFlag && checked == other.checked;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(valid, checked);
+        return Objects.hash(validFlag, checked);
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "[valid=" + valid + ", checked=" + checked + ']';
+        return getClass().getSimpleName() + "[valid=" + validFlag + ", checked=" + checked + ']';
     }
 
 }

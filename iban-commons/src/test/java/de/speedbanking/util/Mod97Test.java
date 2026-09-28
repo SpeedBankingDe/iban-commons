@@ -282,7 +282,7 @@ final class Mod97Test {
 
     @Test
     void calculateRange_charSequence_emptyRange_returnsZero() {
-        assertThat(Mod97.calculateRange("ABC123", 0, 0)).isEqualTo(0);
+        assertThat(Mod97.calculateRange("ABC123", 0, 0)).isZero();
     }
 
     @Test
@@ -306,7 +306,7 @@ final class Mod97Test {
     @Test
     void calculateRange_charSequence_exactUpperBoundary_doesNotThrow() {
         // offset == length, len == 0: valid but vacuous
-        assertThat(Mod97.calculateRange("123", 3, 0)).isEqualTo(0);
+        assertThat(Mod97.calculateRange("123", 3, 0)).isZero();
     }
 
     @Test
@@ -374,23 +374,13 @@ final class Mod97Test {
     // valid, which is exactly the bug isValid() must guard against.
     // -------------------------------------------------------------------------
 
-    @Test
-    void isValid_charSequence_checkDigit00_returnsFalseDespiteValidRemainder() {
-        String iban = "GB00HLFX11016111455365";
-        assertThat(Mod97.calculate(iban)).isEqualTo(Mod97.VALID_REMAINDER);
-        assertThat(Mod97.isValid(iban)).isFalse();
-    }
-
-    @Test
-    void isValid_charSequence_checkDigit01_returnsFalseDespiteValidRemainder() {
-        String iban = "GB01HLFX11016111455347";
-        assertThat(Mod97.calculate(iban)).isEqualTo(Mod97.VALID_REMAINDER);
-        assertThat(Mod97.isValid(iban)).isFalse();
-    }
-
-    @Test
-    void isValid_charSequence_checkDigit99_returnsFalseDespiteValidRemainder() {
-        String iban = "GB99HLFX11016111455329";
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "GB00HLFX11016111455365", // impossible check digit 00
+        "GB01HLFX11016111455347", // impossible check digit 01
+        "GB99HLFX11016111455329"  // impossible check digit 99
+    })
+    void isValid_charSequence_impossibleCheckDigit_returnsFalseDespiteValidRemainder(String iban) {
         assertThat(Mod97.calculate(iban)).isEqualTo(Mod97.VALID_REMAINDER);
         assertThat(Mod97.isValid(iban)).isFalse();
     }

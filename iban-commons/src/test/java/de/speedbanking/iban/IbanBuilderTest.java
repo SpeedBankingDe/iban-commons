@@ -429,9 +429,7 @@ final class IbanBuilderTest {
 
         assertThat(resultBuffer)
             .as("The returned StringBuilder must be identical to the input instance")
-            .isSameAs(inputBuffer);
-
-        assertThat(resultBuffer)
+            .isSameAs(inputBuffer)
             .as("The check digits must be correctly computed and mutated inside the buffer")
             .hasToString(inputBuffer.toString());
     }
@@ -445,7 +443,6 @@ final class IbanBuilderTest {
 
         assertThat(resultBuffer)
             .as("A new StringBuilder instance must be allocated with computed check digits")
-            .isNotSameAs(input)
             .hasToString(input);
     }
 

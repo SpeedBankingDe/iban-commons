@@ -213,12 +213,10 @@ final class BicTest {
         }
 
         assertThat(exFromOf).as("of() must throw for input '%s'", bic).isNotNull();
-        assertThat(exFromValidate).as("validate() must throw for input '%s'", bic).isNotNull();
 
         assertThat(exFromValidate)
-            .as("validate() and of() must produce the same exception message")
-            .hasMessage(exFromOf.getMessage());
-        assertThat(exFromValidate)
+            .as("validate() must throw for input '%s'", bic).isNotNull()
+            .as("validate() and of() must produce the same exception message").hasMessage(exFromOf.getMessage())
             .as("validate() and of() must carry the same validation error")
             .hasFieldOrPropertyWithValue("reason", exFromOf.getReason());
     }
@@ -380,7 +378,7 @@ final class BicTest {
         assertThat(bicA.compareTo(bicC)).isPositive();
 
         // third chain: greater than (positive) because 'F' (Finland) comes alphabetically after 'A' (Åland)
-        assertThat(bicA.compareTo(bicD)).isPositive();
+        assertThat(bicA).isGreaterThan(bicD);
     }
 
     @DisplayName("charAt() should return correct character and check bounds")

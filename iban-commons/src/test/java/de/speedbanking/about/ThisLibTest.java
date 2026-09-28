@@ -3,11 +3,12 @@ package de.speedbanking.about;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.jar.Manifest;
 
 @SuppressWarnings("checkstyle:MethodName")
@@ -92,7 +93,7 @@ final class ThisLibTest {
             + System.lineSeparator()
             + "Name: de/speedbanking/about/" + System.lineSeparator()
             + "Implementation-Vendor: SectionVendor" + System.lineSeparator();
-        Manifest manifest = new Manifest(new ByteArrayInputStream(raw.getBytes(StandardCharsets.UTF_8)));
+        Manifest manifest = new Manifest(new ByteArrayInputStream(raw.getBytes(UTF_8)));
 
         String info = ThisLib.buildInfo(manifest);
 
@@ -123,7 +124,7 @@ final class ThisLibTest {
         for (String line : lines) {
             sb.append(line).append(System.lineSeparator());
         }
-        return new Manifest(new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8)));
+        return new Manifest(new ByteArrayInputStream(sb.toString().getBytes(UTF_8)));
     }
 
 }

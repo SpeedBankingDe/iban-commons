@@ -72,7 +72,6 @@ public final class RegexSimplifier {
                 } else {
                     // flush previously accumulated block due to gap or type change
                     simplified.append(currentBlockType).append('{').append(currentLength).append('}');
-                    currentBlockType = null;
                 }
             }
 

@@ -321,8 +321,8 @@ final class PatternCacheTest extends Assertions {
 
         // then: equals reflexive and null / class checks
         assertEquals(key1, key1);
-        assertNotEquals(key1, null);
-        assertNotEquals(key1, "some string");
+        assertNotEquals(null, key1);
+        assertNotEquals("some string", key1);
 
         // then: equals equality / inequality checks
         assertEquals(key1, key1Duplicate);

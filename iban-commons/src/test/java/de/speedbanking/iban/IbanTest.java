@@ -504,7 +504,6 @@ final class IbanTest {
             .hasBankCode(expectedBankCode)
             .hasBranchCode(expectedBranchCode)
             .hasAccountNumber(expectedAccountNumber);
-            //.hasToString(iban.toString());
     }
 
     /**
@@ -634,12 +633,10 @@ final class IbanTest {
         }
 
         assertThat(fromOf).as("of() must throw for input '%s'", ibanInput).isNotNull();
-        assertThat(fromValidate).as("validate() must throw for input '%s'", ibanInput).isNotNull();
 
         assertThat(fromValidate)
-            .as("validate() and of() must produce the same exception message")
-            .hasMessage(fromOf.getMessage());
-        assertThat(fromValidate)
+            .as("validate() must throw for input '%s'", ibanInput).isNotNull()
+            .as("validate() and of() must produce the same exception message").hasMessage(fromOf.getMessage())
             .as("validate() and of() must carry the same validation error")
             .hasFieldOrPropertyWithValue("reason", fromOf.getReason());
     }

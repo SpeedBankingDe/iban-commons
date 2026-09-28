@@ -252,80 +252,91 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         requireNonNull(ibanComponent, "component must not be null");
 
         List<Segment> segments = IbanPatternConverter.parseSegments(ibanComponent.getPattern());
-        int requiredLength = IbanPatternConverter.calculateTotalLength(segments);
         int beginIndex = ibanComponent.getBeginIndex();
 
         if (input == null) {
-            // write random characters directly into the existing StringBuilder buffer
-            Random rng = getRandom();
-            int currentPos = beginIndex;
-            for (int i = 0; i < segments.size(); i++) {
-                Segment segment = segments.get(i);
-
-                SourceChars sourceChars;
-                if (segment.isNumeric()) {
-                    sourceChars = SourceChars.NUMERIC;
-                } else if (segment.isAlphabetic()) {
-                    sourceChars = SourceChars.ALPHABETIC;
-                } else {
-                    sourceChars = SourceChars.ALPHANUMERIC;
-                }
-
-                int segmentLen = segment.getLength();
-
-                for (int j = 0; j < segmentLen; j++) {
-                    char ch = sourceChars.nextChar(rng);
-                    if (currentPos < target.length()) {
-                        target.setCharAt(currentPos, ch);
-                    } else {
-                        target.append(ch);
-                    }
-                    currentPos++;
-                }
-            }
+            writeRandomSegments(target, segments, beginIndex);
         } else {
-            int inputLen = input.length();
-            if (inputLen > requiredLength) {
-                throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
-            }
-
-            int paddingLen = requiredLength - inputLen;
-            boolean canPad = paddingLen > 0 && IbanPatternConverter.allMatch(segments, Segment::isNumericOrAlphanumeric);
-
-            // validate pattern against the input (or padded representation if padding will be applied)
-            String regex = IbanPatternConverter.buildRegex(ibanComponent.getPattern(), segments);
-            CharSequence checkTarget = canPad ? padLeft(input.toString(), requiredLength, '0') : input;
-            if (!PatternCache.getDefault().getPattern(regex).matcher(checkTarget).matches()) {
-                throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
-            }
-
-            // in-place mutation of target buffer to avoid intermediate String allocation for padded result
-            int currentPos = beginIndex;
-
-            // 1. Write leading zero-padding directly into buffer if required
-            if (canPad) {
-                for (int i = 0; i < paddingLen; i++) {
-                    if (currentPos < target.length()) {
-                        target.setCharAt(currentPos, '0');
-                    } else {
-                        target.append('0');
-                    }
-                    currentPos++;
-                }
-            }
-
-            // 2. Write input characters directly into buffer
-            for (int i = 0; i < inputLen; i++) {
-                char ch = input.charAt(i);
-                if (currentPos < target.length()) {
-                    target.setCharAt(currentPos, ch);
-                } else {
-                    target.append(ch);
-                }
-                currentPos++;
-            }
+            writeInputComponent(target, ibanComponent, segments, beginIndex, input);
         }
         return target;
+    }
+
+    /**
+     * Writes random characters for every segment directly into the target buffer, used when
+     * generating a component with no explicit input.
+     */
+    private void writeRandomSegments(StringBuilder target, List<Segment> segments, int beginIndex) {
+        Random rng = getRandom();
+        int currentPos = beginIndex;
+        for (Segment segment : segments) {
+            SourceChars sourceChars = sourceCharsFor(segment);
+            for (int j = 0; j < segment.getLength(); j++) {
+                writeChar(target, currentPos++, sourceChars.nextChar(rng));
+            }
+        }
+    }
+
+    /**
+     * Returns the character source matching a segment's character class.
+     */
+    private static SourceChars sourceCharsFor(Segment segment) {
+        if (segment.isNumeric()) {
+            return SourceChars.NUMERIC;
+        } else if (segment.isAlphabetic()) {
+            return SourceChars.ALPHABETIC;
+        }
+        return SourceChars.ALPHANUMERIC;
+    }
+
+    /**
+     * Validates the given input against the component's pattern (padding it first if applicable),
+     * then writes the zero-padding (if any) and the input characters directly into the target
+     * buffer, avoiding an intermediate String allocation for the padded result.
+     */
+    private void writeInputComponent(StringBuilder target, IbanComponent ibanComponent, List<Segment> segments, int beginIndex, CharSequence input) {
+        int requiredLength = IbanPatternConverter.calculateTotalLength(segments);
+        int inputLen = input.length();
+        if (inputLen > requiredLength) {
+            throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
+        }
+
+        int paddingLen = requiredLength - inputLen;
+        boolean canPad = paddingLen > 0 && IbanPatternConverter.allMatch(segments, Segment::isNumericOrAlphanumeric);
+
+        validateAgainstPattern(ibanComponent, segments, input, requiredLength, canPad);
+
+        int currentPos = beginIndex;
+        for (int i = 0; canPad && i < paddingLen; i++) {
+            writeChar(target, currentPos++, '0');
+        }
+        for (int i = 0; i < inputLen; i++) {
+            writeChar(target, currentPos++, input.charAt(i));
+        }
+    }
+
+    /**
+     * Validates the input (or its zero-padded representation, if padding will be applied) against
+     * the component's regex pattern, throwing if it does not match.
+     */
+    private void validateAgainstPattern(IbanComponent ibanComponent, List<Segment> segments, CharSequence input, int requiredLength, boolean canPad) {
+        String regex = IbanPatternConverter.buildRegex(ibanComponent.getPattern(), segments);
+        CharSequence checkTarget = canPad ? padLeft(input.toString(), requiredLength, '0') : input;
+        if (!PatternCache.getDefault().getPattern(regex).matcher(checkTarget).matches()) {
+            throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
+        }
+    }
+
+    /**
+     * Writes a single character into the target buffer at {@code pos}: overwrites the existing
+     * placeholder character if {@code pos} already lies within the buffer, or appends it otherwise.
+     */
+    private static void writeChar(StringBuilder target, int pos, char ch) {
+        if (pos < target.length()) {
+            target.setCharAt(pos, ch);
+        } else {
+            target.append(ch);
+        }
     }
 
     /**

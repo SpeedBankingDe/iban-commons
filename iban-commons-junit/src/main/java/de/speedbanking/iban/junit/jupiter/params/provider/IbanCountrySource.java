@@ -98,9 +98,8 @@ public @interface IbanCountrySource {
                 .orElseThrow(() -> new IllegalStateException("@IbanCountrySource annotation not found on the test element"));
 
             // determine the initial stream of included IbanRegistry entries
-            Stream<IbanRegistry> includeCountries = src.includeCountries().length == 0
-                ? Arrays.stream(IbanRegistry.values())
-                : Arrays.stream(src.includeCountries());
+            Stream<IbanRegistry> includeCountries = Arrays.stream(
+                src.includeCountries().length == 0 ? IbanRegistry.values() : src.includeCountries());
 
             // convert excluded list to a Set for efficient filtering (O(1) lookup)
             Set<IbanRegistry> excludedCountries = Arrays.stream(src.excludeCountries())

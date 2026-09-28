@@ -40,11 +40,11 @@ import java.util.regex.PatternSyntaxException;
  */
 public final class PatternCache {
 
-    private static final int          NO_FLAG          = 0x0;
+    private static final int                       NO_FLAG          = 0x0;
 
-    private static final PatternCache DEFAULT_INSTANCE = new PatternCache();
+    private static final PatternCache              DEFAULT_INSTANCE = new PatternCache();
 
-    private final ConcurrentMap<CacheKey, Pattern> patternCache;
+    private final ConcurrentMap<CacheKey, Pattern> cache;
 
     /**
      * Internal immutable composite key to prevent string concatenation overhead and key collisions.
@@ -94,7 +94,7 @@ public final class PatternCache {
      * Creates a new PatternCache with an empty cache.
      */
     PatternCache() {
-        this.patternCache = new ConcurrentHashMap<>();
+        this.cache = new ConcurrentHashMap<>();
     }
 
     /**
@@ -128,7 +128,7 @@ public final class PatternCache {
      * @throws PatternSyntaxException if the regex syntax is invalid
      */
     public Pattern getPattern(String regex, int flags) {
-        return patternCache.computeIfAbsent(new CacheKey(regex, flags), key -> Pattern.compile(key.getRegex(), key.getFlags()));
+        return cache.computeIfAbsent(new CacheKey(regex, flags), key -> Pattern.compile(key.getRegex(), key.getFlags()));
     }
 
     /**
@@ -137,7 +137,7 @@ public final class PatternCache {
      * @return the size of the pattern cache
      */
     public int size() {
-        return patternCache.size();
+        return cache.size();
     }
 
     /**
@@ -158,7 +158,7 @@ public final class PatternCache {
      * @return true if cached, false otherwise
      */
     public boolean contains(String regex, int flags) {
-        return regex != null && patternCache.containsKey(new CacheKey(regex, flags));
+        return regex != null && cache.containsKey(new CacheKey(regex, flags));
     }
 
     /**
@@ -169,7 +169,7 @@ public final class PatternCache {
      */
     public boolean containsAnyFlags(String regex) {
         return regex != null
-            && patternCache.keySet().stream().anyMatch(key -> key.getRegex().equals(regex));
+            && cache.keySet().stream().anyMatch(key -> key.getRegex().equals(regex));
     }
 
 }

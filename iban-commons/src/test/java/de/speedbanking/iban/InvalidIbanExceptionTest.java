@@ -89,10 +89,9 @@ final class InvalidIbanExceptionTest {
             .isEqualTo(expectedCountryCode);
 
         assertThat(exception)
-            .hasMessage("%s (%s), country %s: '%s'", reason.getText(), reason, expectedCountryCode, input);
-
-        assertThat(exception).hasToString("%s[reason=%s, country=%s, input='%s']",
-            InvalidIbanException.class.getSimpleName(), reason, expectedCountryCode, input);
+            .hasMessage("%s (%s), country %s: '%s'", reason.getText(), reason, expectedCountryCode, input)
+            .hasToString("%s[reason=%s, country=%s, input='%s']",
+                InvalidIbanException.class.getSimpleName(), reason, expectedCountryCode, input);
     }
 
     @DisplayName("of(reason, input, countryCode) should normalize null or blank countryCode to null")

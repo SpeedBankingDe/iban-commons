@@ -442,9 +442,8 @@ public final class IbanValidator {
         }
 
         if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
-            return normLen == 0
-                ? IbanValidationResult.invalid(IbanValidationError.EMPTY)
-                : IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
+            return IbanValidationResult.invalid(
+                normLen == 0 ? IbanValidationError.EMPTY : IbanValidationError.INCORRECT_LENGTH);
         }
 
         // country code: lookup ensures it consists of 2 uppercase letters
@@ -536,9 +535,8 @@ public final class IbanValidator {
         }
 
         if (normLen < MIN_IBAN_LENGTH || normLen > MAX_IBAN_LENGTH) {
-            return normLen == 0
-                ? IbanValidationResult.invalid(IbanValidationError.EMPTY)
-                : IbanValidationResult.invalid(IbanValidationError.INCORRECT_LENGTH);
+            return IbanValidationResult.invalid(
+                normLen == 0 ? IbanValidationError.EMPTY : IbanValidationError.INCORRECT_LENGTH);
         }
 
         IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(normIban[0], normIban[1]);

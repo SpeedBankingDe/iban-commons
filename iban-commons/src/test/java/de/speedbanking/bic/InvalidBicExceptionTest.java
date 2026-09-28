@@ -41,9 +41,7 @@ final class InvalidBicExceptionTest {
 
         assertThat(exception)
             .as("Exception message must match the reason's failure text")
-            .hasMessage("%s (%s)", reason.getText(), reason);
-
-        assertThat(exception)
+            .hasMessage("%s (%s)", reason.getText(), reason)
             .hasToString("InvalidBicException[reason=" + reason + ", input='null']");
     }
 
@@ -93,9 +91,7 @@ final class InvalidBicExceptionTest {
             .isEqualTo("DE");
 
         assertThat(exception)
-            .hasMessage("%s (%s), country DE: '%s'", reason.getText(), reason, input);
-
-        assertThat(exception)
+            .hasMessage("%s (%s), country DE: '%s'", reason.getText(), reason, input)
             .hasToString("%s[reason=%s, country=DE, input='%s']", InvalidBicException.class.getSimpleName(), reason, input);
     }
 

@@ -283,7 +283,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.5
      */
     public String getCountryName() {
-        return Country.fromCode(getCountryCode()).getCountryName();
+        return requireNonNull(Country.fromCode(getCountryCode()), "unknown country code: " + getCountryCode())
+            .getCountryName();
     }
 
     /**
@@ -358,7 +359,8 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * @since 1.8.5
      */
     public Currency getCurrency() {
-        return Country.fromCode(getCountryCode()).getCurrency();
+        return requireNonNull(Country.fromCode(getCountryCode()), "unknown country code: " + getCountryCode())
+            .getCurrency();
     }
 
     /**

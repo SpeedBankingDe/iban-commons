@@ -585,17 +585,13 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         StringBuilder sb = new StringBuilder(ibanStr.length() + count);
         int last = 0;
         int prev = -1;
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count && idx[i] <= ibanStr.length(); i++) {
             int cut = idx[i];
-            if (cut <= last || cut == prev) {
-                continue;
+            if (cut > last && cut != prev) {
+                sb.append(ibanStr, last, cut).append(' ');
+                last = cut;
+                prev = cut;
             }
-            if (cut > ibanStr.length()) {
-                break;
-            }
-            sb.append(ibanStr, last, cut).append(' ');
-            last = cut;
-            prev = cut;
         }
 
         if (last < ibanStr.length()) {

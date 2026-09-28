@@ -117,8 +117,9 @@ final class IbanPatternConverterTest {
         List<Segment> a = IbanPatternConverter.parseSegments("4!a16!c");
         List<Segment> b = IbanPatternConverter.parseSegments("30!n");
 
-        assertThat(a).isNotSameAs(b);
-        assertThat(a).containsExactly(Segment.of(ALPHABETIC, 4), Segment.of(ALPHANUMERIC, 16));
+        assertThat(a)
+            .isNotSameAs(b)
+            .containsExactly(Segment.of(ALPHABETIC, 4), Segment.of(ALPHANUMERIC, 16));
         assertThat(b).containsExactly(Segment.of(NUMERIC, 30));
     }
 
@@ -126,9 +127,10 @@ final class IbanPatternConverterTest {
     @Test
     void parseSegments_returnedList_isUnmodifiable() {
         List<Segment> segments = IbanPatternConverter.parseSegments("4!a16!c");
+        Segment extraSegment = Segment.of(NUMERIC, 1);
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
-            .isThrownBy(() -> segments.add(Segment.of(NUMERIC, 1)));
+            .isThrownBy(() -> segments.add(extraSegment));
     }
 
     @DisplayName("Should merge consecutive segments of the same type")
@@ -273,8 +275,8 @@ final class IbanPatternConverterTest {
     @DisplayName("IbanPatternConverter.calculateTotalLength should sum lengths or handle nulls")
     @Test
     void calculateTotalLength_shouldSumLengthsCorrectly() {
-        assertThat(IbanPatternConverter.calculateTotalLength((Iterable<Segment>) null)).isEqualTo(0);
-        assertThat(IbanPatternConverter.calculateTotalLength(emptyList())).isEqualTo(0);
+        assertThat(IbanPatternConverter.calculateTotalLength((Iterable<Segment>) null)).isZero();
+        assertThat(IbanPatternConverter.calculateTotalLength(emptyList())).isZero();
 
         List<Segment> listWithNull = Arrays.asList(Segment.of(NUMERIC, 4), null, Segment.of(ALPHABETIC, 6));
         assertThat(IbanPatternConverter.calculateTotalLength(listWithNull)).isEqualTo(10);

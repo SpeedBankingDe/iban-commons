@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import de.speedbanking.iban.Iban;
 import de.speedbanking.iban.IbanValidationError;
 import de.speedbanking.iban.InvalidIbanException;
+import de.speedbanking.iban.junit.jupiter.api.IbanAssertions.IbanAssert;
+import de.speedbanking.iban.junit.jupiter.api.IbanAssertions.IbanStringAssert;
 import de.speedbanking.util.Currency;
 
 import org.assertj.core.api.SoftAssertions;
@@ -150,7 +152,8 @@ final class IbanAssertionsTest {
     void failureMessage_countryCode_mismatch() {
         Iban iban = Iban.of(VALID_CY);
         String expectedCountryCode = "GL";
-        assertThatThrownBy(() -> assertThatIban(iban).hasCountryCode(expectedCountryCode))
+        IbanAssert ibanAssert = assertThatIban(iban);
+        assertThatThrownBy(() -> ibanAssert.hasCountryCode(expectedCountryCode))
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected country code to be '%s' but was '%s' for IBAN '%s'", expectedCountryCode, iban.getCountryCode(), iban);
     }
@@ -160,7 +163,8 @@ final class IbanAssertionsTest {
     void failureMessage_length_mismatch() {
         Iban iban = Iban.of(VALID_CY);
         int expectedLength = 10;
-        assertThatThrownBy(() -> assertThatIban(iban).hasLength(expectedLength))
+        IbanAssert ibanAssert = assertThatIban(iban);
+        assertThatThrownBy(() -> ibanAssert.hasLength(expectedLength))
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected IBAN length to be %d but was %d for IBAN '%s'",
                 expectedLength, iban.length(), iban);
@@ -171,9 +175,8 @@ final class IbanAssertionsTest {
     void failureMessage_sepa_mismatch() {
         Iban iban = Iban.of(VALID_CY);
         boolean expectedSepa = false;
-        assertThatThrownBy(() -> {
-            assertThatIban(iban).isSepa(expectedSepa);
-        })
+        IbanAssert ibanAssert = assertThatIban(iban);
+        assertThatThrownBy(() -> ibanAssert.isSepa(expectedSepa))
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected SEPA participation to be '%s' but was '%s' for IBAN '%s'",
                 expectedSepa, !expectedSepa, iban);
@@ -184,7 +187,8 @@ final class IbanAssertionsTest {
     void failureMessage_currency_mismatch() {
         Iban iban = Iban.of(VALID_CY);
         Currency expectedCcy = Currency.USD;
-        assertThatThrownBy(() -> assertThatIban(iban).hasCurrency(expectedCcy))
+        IbanAssert ibanAssert = assertThatIban(iban);
+        assertThatThrownBy(() -> ibanAssert.hasCurrency(expectedCcy))
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected currency to be '%s' but was '%s' for IBAN '%s'",
                 expectedCcy.getAlphaCode(), iban.getCurrencyCode(), iban);
@@ -482,7 +486,8 @@ final class IbanAssertionsTest {
     @Test
     void isSepa_noArg_fail() {
         Iban iban = Iban.of("PK36SCBL0000001123456702");
-        assertThatThrownBy(() -> assertThatIban(iban).isSepa())
+        IbanAssert ibanAssert = assertThatIban(iban);
+        assertThatThrownBy(ibanAssert::isSepa)
             .isInstanceOf(AssertionError.class)
             .hasMessageContaining("Expected SEPA participation to be 'true'");
     }
@@ -491,7 +496,8 @@ final class IbanAssertionsTest {
     @Test
     void isNotSepa_fail() {
         Iban iban = Iban.of(VALID_CY);
-        assertThatThrownBy(() -> assertThatIban(iban).isNotSepa())
+        IbanAssert ibanAssert = assertThatIban(iban);
+        assertThatThrownBy(ibanAssert::isNotSepa)
             .isInstanceOf(AssertionError.class)
             .hasMessageContaining("Expected SEPA participation to be 'false'");
     }
@@ -517,14 +523,16 @@ final class IbanAssertionsTest {
     @DisplayName("assertThatIbanString(CharSequence).isValid() - null fails with isNotNull()")
     @Test
     void assertThatIbanString_isValid_null_fails() {
-        assertThatThrownBy(() -> assertThatIbanString(null).isValid())
+        IbanStringAssert ibanStringAssert = assertThatIbanString(null);
+        assertThatThrownBy(ibanStringAssert::isValid)
             .isInstanceOf(AssertionError.class);
     }
 
     @DisplayName("assertThatIbanString(CharSequence).isValid() - invalid IBAN fails with descriptive message")
     @Test
     void assertThatIbanString_isValid_invalid_fails() {
-        assertThatThrownBy(() -> assertThatIbanString("INVALID").isValid())
+        IbanStringAssert ibanStringAssert = assertThatIbanString("INVALID");
+        assertThatThrownBy(ibanStringAssert::isValid)
             .isInstanceOf(AssertionError.class)
             .hasMessageContaining("Expected 'INVALID' to be a valid IBAN but it was not");
     }
@@ -532,7 +540,8 @@ final class IbanAssertionsTest {
     @DisplayName("assertThatIbanString(CharSequence).isNotValid() - valid IBAN fails with descriptive message")
     @Test
     void assertThatIbanString_isNotValid_valid_fails() {
-        assertThatThrownBy(() -> assertThatIbanString(VALID_DE).isNotValid())
+        IbanStringAssert ibanStringAssert = assertThatIbanString(VALID_DE);
+        assertThatThrownBy(ibanStringAssert::isNotValid)
             .isInstanceOf(AssertionError.class)
             .hasMessageContaining("Expected '" + VALID_DE + "' to be an invalid IBAN but it was valid");
     }
