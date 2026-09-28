@@ -41,8 +41,9 @@ jobs:
 
     deploy:
         needs: build
-        # skip the deploy job for contributors/forks who lack the required secrets
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        # skip the deploy job on forks, which lack the Sonatype credentials and
+        # shouldn't deploy snapshots to the upstream repository/namespace
+        if: ${{ github.repository == 'SpeedBankingDe/iban-commons' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         runs-on: ubuntu-latest
         permissions:
             contents: read

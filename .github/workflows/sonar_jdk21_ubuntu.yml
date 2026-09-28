@@ -21,8 +21,9 @@ jobs:
 
     build:
         runs-on: ubuntu-latest
-        # skip the analysis job for contributors/forks who lack the required sonar token
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+        # skip the analysis job on forks, which lack the SONAR_TOKEN secret and access
+        # to the speedbankingde SonarCloud organization
+        if: ${{ github.repository == 'SpeedBankingDe/iban-commons' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
         steps:
         -   uses: actions/checkout@v7
             with:
