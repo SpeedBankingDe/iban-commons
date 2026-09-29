@@ -95,7 +95,9 @@ final class BankDataConfigTest {
     @Test
     void configFile_overridesCacheDirDisableNetworkAndTimeouts() throws IOException {
         writeConfigFile(
-            "cacheDir = " + tempDir.resolve("cache"),
+            // backslashes must be escaped for java.util.Properties, which the config file loader
+            // uses; otherwise a Windows path like "C:\Users\...\cache" loses its separators
+            "cacheDir = " + tempDir.resolve("cache").toString().replace("\\", "\\\\"),
             "disableNetwork = true",
             "staleThreshold = P30D",
             "connectTimeout = PT2S",

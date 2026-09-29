@@ -69,7 +69,9 @@ final class CountryDataCacheTest {
         if (System.getProperty(BankDataConfig.CONFIG_FILE_SYSTEM_PROPERTY) == null) {
             Path cacheDir = Files.createTempDirectory("iban-commons-bankdata-test-cache");
             Path configFile = Files.createTempFile("bankdata-test-config", ".properties");
-            Files.write(configFile, ("cacheDir=" + cacheDir).getBytes(UTF_8));
+            // backslashes must be escaped for java.util.Properties, which the config file loader
+            // uses; otherwise a Windows path like "C:\Users\...\cache" loses its separators
+            Files.write(configFile, ("cacheDir=" + cacheDir.toString().replace("\\", "\\\\")).getBytes(UTF_8));
             System.setProperty(BankDataConfig.CONFIG_FILE_SYSTEM_PROPERTY, configFile.toString());
         }
     }
