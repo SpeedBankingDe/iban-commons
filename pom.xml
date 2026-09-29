@@ -63,6 +63,7 @@
         <module>iban-commons-junit</module>
         <module>iban-commons-validation</module>
         <module>iban-commons-de-checkdigit</module>
+        <module>iban-commons-bankdata</module>
     </modules>
 
     <scm>
@@ -500,6 +501,7 @@
                             <exclude>src/test/resources/**</exclude>
                             <exclude>**/*.properties</exclude>
                             <exclude>**/*.txt</exclude>
+                            <exclude>**/bankdata/*.csv</exclude>
                         </excludes>
                         <mapping>
                             <java>SLASHSTAR_STYLE</java>
