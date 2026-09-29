@@ -1,2 +1,6 @@
 *.java eol=lf
 *.properties eol=lf
+
+# raw bank-data fixtures are byte-exact reproductions of real national source encodings/line
+# endings (e.g. ISO-8859-1 with CRLF for the German Bundesbank export) and must not be normalized
+iban-commons-bankdata/src/test/resources/bankdata/raw/*.txt -text

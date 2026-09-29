@@ -1,0 +1,4 @@
+NrInstytucji	Nazwa banku		KodBanku	NumerRozliczeniowy	NazwaOddzialu	Skrot	Miejscowosc	Adres	KodPocztowy	Miasto	NIP			Telefon		Fax		DataZmiany	BIC
+101	Musterbank Centrala		101	10100000	Centrala	C-la	Warszawa	ul. Przykladowa 1	00-001	Warszawa	1011			22 555 10 10		22 555 23 09		1945-01-15	MSTRPLPWXXX
+101	Musterbank Oddzial Krakow		101	10100026	Oddzial Krakow	O.	Krakow	ul. Przykladowa 2	30-001	Krakow
+144	Musterbank bez BIC		102	14400035	Oddzial	O.	Poznan		61-001	Poznan

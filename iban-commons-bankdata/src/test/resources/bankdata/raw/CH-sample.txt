@@ -1,0 +1,5 @@
+IID/QR-IID;Valid on;Concatenation;New IID/QR-IID;SIC IID;Headquarters;IID type;QR-IID allocation;Name of bank/institution;Street Name;Building Number;Post Code;Town Name;Country;BIC;SIC participation;RTGS customer payments, CHF;IP customer payments, CHF;euroSIC participation;LSV+/BDD, CHF;LSV+/BDD, EUR;202609141630000
+700;2026-09-15;N;;070008;700;1;;Musterbank Zuerich AG;Bahnhofstrasse;1;8001;Zuerich;CH;UBSWCHZHXXX;Y;Y;Y;Y;Y;N
+781;2026-09-15;N;;078108;781;1;;Musterbank ohne BIC;Rue du Rhone;2;1201;Geneve;CH;;Y;Y;Y;Y;Y;N
+750;2026-09-15;Y;700;075008;750;1;;Alte Bank AG;Alte Strasse;3;3000;Bern;CH;OLDACHBBXXX;Y;Y;Y;Y;Y;N
+760;2026-09-15;N;;076008;760;1;;Musterpostfinance;Postplatz;4;3030;Bern;CH;POFICHBEXXX;Y;Y;Y;Y;Y;N
