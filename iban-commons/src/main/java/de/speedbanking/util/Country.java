@@ -731,6 +731,16 @@ public enum Country {
     }
 
     /**
+     * Formats this country for log messages, e.g. {@code "Germany (DE)"}.
+     *
+     * @return the formatted string
+     * @since 1.8.12
+     */
+    public String getLongName() {
+        return getCountryName() + " (" + getCode() + ")";
+    }
+
+    /**
      * Looks up the enum constant for the given two-letter country code.
      * <p>
      * Accepts any {@link CharSequence} implementation ({@link String}, {@link StringBuilder},

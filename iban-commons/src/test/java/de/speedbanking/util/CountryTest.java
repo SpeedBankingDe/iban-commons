@@ -278,6 +278,33 @@ final class CountryTest {
             .isNotNull();
     }
 
+    @DisplayName("getLongName() combines country name and code as 'Name (XX)'")
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
+    @CsvSource(delimiter = '|', value = {
+        "PL | Poland (PL)",
+        "XK | Kosovo (XK)",
+        "TV | Tuvalu (TV)",
+        "NR | Nauru (NR)",
+        "KI | Kiribati (KI)",
+        "BT | Bhutan (BT)",
+        "VU | Vanuatu (VU)",
+        "FO | Faroe Islands (FO)",
+        "SM | San Marino (SM)",
+        "LI | Liechtenstein (LI)"
+    })
+    void getLongName_knownConstants_returnsFormattedString(Country country, String expected) {
+        assertThat(country.getLongName()).isEqualTo(expected);
+    }
+
+    @DisplayName("getLongName() follows 'countryName (code)' pattern for all constants")
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @EnumSource(Country.class)
+    void getLongName_allConstants_followsPattern(Country c) {
+        assertThat(c.getLongName())
+            .as("%s.getLongName()", c.name())
+            .isEqualTo("%s (%s)", c.getCountryName(), c.getCode());
+    }
+
     @DisplayName("Continent.fromCode() resolves the correct continent instance from its code")
     @ParameterizedTest(name = "[{index}] ''{0}'' -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
