@@ -46,13 +46,13 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.11</version>
+    <version>1.8.12</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.11'
+implementation 'de.speedbanking:iban-commons:1.8.12'
 ```
 
 ### 2. Validate & Parse
@@ -398,6 +398,13 @@ Each invalid IBAN is derived from a valid one by applying one of six sabotage st
 ### Benchmark Suite Repository
 
 All performance tests are fully open and available in the [SpeedBankingDe/iban-commons-benchmarks](https://github.com/SpeedBankingDe/iban-commons-benchmarks) repository.
+
+-----
+
+## 🆕 What's New in 1.8.12
+
+### Country Log Formatting
+New `Country.getLongName()` formats a country for log messages as `"Name (CODE)"`, e.g. `"Germany (DE)"`, sparing callers from writing the same concatenation themselves.
 
 -----
 
