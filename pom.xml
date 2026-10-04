@@ -137,6 +137,7 @@
         <dep.plugin.cyclonedx.version>2.9.3</dep.plugin.cyclonedx.version>
         <dep.plugin.enforcer.version>3.6.3</dep.plugin.enforcer.version>
         <dep.plugin.figlet.version>1.0.0</dep.plugin.figlet.version>
+        <dep.plugin.resources.version>3.5.0</dep.plugin.resources.version>
         <!-- last error-prone version compatible with Java 17; 2.43.0+ requires Java 21 -->
         <dep.plugin.error-prone.version>2.42.0</dep.plugin.error-prone.version>
         <dep.plugin.error-prone-support.version>0.26.0</dep.plugin.error-prone-support.version>
@@ -274,6 +275,15 @@
                         <showDeprecation>true</showDeprecation>
                         <compilerArgument>-Xlint:all,-options</compilerArgument>
                         <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${dep.plugin.resources.version}</version>
+                    <configuration>
+                        <propertiesEncoding>${project.build.sourceEncoding}</propertiesEncoding>
                     </configuration>
                 </plugin>
 
@@ -558,7 +568,6 @@
                                     org.apache.maven.plugins:maven-dependency-plugin,
                                     org.apache.maven.plugins:maven-deploy-plugin,
                                     org.apache.maven.plugins:maven-install-plugin,
-                                    org.apache.maven.plugins:maven-resources-plugin,
                                     org.apache.maven.plugins:maven-site-plugin
                                 </unCheckedPluginList>
                             </requirePluginVersions>
