@@ -22,6 +22,7 @@ import static de.speedbanking.util.CharUtil.isLowerCase;
 import static de.speedbanking.util.CharUtil.isNotDigit;
 
 import de.speedbanking.util.Mod97;
+import de.speedbanking.util.UtilityClasses;
 
 import java.util.stream.Stream;
 
@@ -123,8 +124,7 @@ public final class IbanValidator {
      * @throws UnsupportedOperationException always
      */
     private IbanValidator() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

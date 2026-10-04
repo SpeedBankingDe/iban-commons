@@ -19,6 +19,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
+import de.speedbanking.util.UtilityClasses;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -79,8 +81,7 @@ public final class IbanPatternConverter {
      * Private constructor to prevent instantiation of this utility class.
      */
     private IbanPatternConverter() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

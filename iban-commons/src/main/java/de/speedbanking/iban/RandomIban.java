@@ -18,6 +18,7 @@ package de.speedbanking.iban;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.Country;
+import de.speedbanking.util.UtilityClasses;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -120,8 +121,7 @@ public final class RandomIban {
      * @throws UnsupportedOperationException always
      */
     private RandomIban() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     // -------------------------------------------------------------------------

@@ -18,6 +18,7 @@ package de.speedbanking.iban;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.Mod97;
+import de.speedbanking.util.UtilityClasses;
 
 import java.util.stream.IntStream;
 
@@ -58,8 +59,7 @@ import java.util.stream.IntStream;
 final class NationalCheckDigitCalculators {
 
     private NationalCheckDigitCalculators() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

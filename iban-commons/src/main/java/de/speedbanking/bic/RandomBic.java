@@ -18,6 +18,7 @@ package de.speedbanking.bic;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.Country;
+import de.speedbanking.util.UtilityClasses;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -75,8 +76,7 @@ public final class RandomBic {
      * @throws UnsupportedOperationException always
      */
     private RandomBic() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     // -------------------------------------------------------------------------

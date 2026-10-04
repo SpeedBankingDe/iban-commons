@@ -32,8 +32,7 @@ public final class CharUtil {
      * @throws UnsupportedOperationException always
      */
     private CharUtil() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

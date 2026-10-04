@@ -15,6 +15,8 @@
  */
 package de.speedbanking.iban;
 
+import de.speedbanking.util.UtilityClasses;
+
 /**
  * Utility class to derive a lookup key compatible with the <strong>SWIFT IBAN Plus</strong> service.
  * <p>
@@ -29,8 +31,7 @@ package de.speedbanking.iban;
 public final class IbanPlusKey {
 
     private IbanPlusKey() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

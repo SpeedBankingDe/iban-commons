@@ -127,8 +127,7 @@ public final class Mod97 {
      * @throws UnsupportedOperationException always
      */
     private Mod97() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     // -------------------------------------------------------------------------

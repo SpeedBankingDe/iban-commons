@@ -20,6 +20,7 @@ import static java.util.Arrays.asList;
 
 import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bic.Bic;
+import de.speedbanking.util.UtilityClasses;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,8 +83,7 @@ public final class BankDataFormat {
     public static final String HEADER_LINE = String.join(Character.toString(FIELD_SEPARATOR), HEADER);
 
     private BankDataFormat() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

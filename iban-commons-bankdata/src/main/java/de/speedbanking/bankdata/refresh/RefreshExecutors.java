@@ -16,6 +16,7 @@
 package de.speedbanking.bankdata.refresh;
 
 import de.speedbanking.bankdata.BankDataRegistry;
+import de.speedbanking.util.UtilityClasses;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -49,8 +50,7 @@ public final class RefreshExecutors {
     }
 
     private RefreshExecutors() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

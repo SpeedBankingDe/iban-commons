@@ -43,6 +43,9 @@
  *   <dt>{@link de.speedbanking.util.ValidationError}</dt>
  *   <dd>Common interface implemented by validation error enumerations such as
  *     {@link de.speedbanking.iban.IbanValidationError} and {@link de.speedbanking.bic.BicValidationError}.</dd>
+ *   <dt>{@link de.speedbanking.util.UtilityClasses}</dt>
+ *   <dd>Builds the exception thrown by the private, no-instance constructor every utility
+ *     class in this library declares.</dd>
  * </dl>
  *
  * @since 1.8.0

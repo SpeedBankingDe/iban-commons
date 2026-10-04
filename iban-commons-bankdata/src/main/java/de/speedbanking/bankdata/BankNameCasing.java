@@ -18,6 +18,8 @@ package de.speedbanking.bankdata;
 import static java.util.Collections.unmodifiableMap;
 import static java.util.Collections.unmodifiableSet;
 
+import de.speedbanking.util.UtilityClasses;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,8 +116,7 @@ public final class BankNameCasing {
     }
 
     private BankNameCasing() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

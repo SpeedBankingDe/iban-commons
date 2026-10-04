@@ -19,6 +19,7 @@ import de.speedbanking.bankdata.refresh.CountryDataCache;
 import de.speedbanking.bic.Bic;
 import de.speedbanking.iban.Iban;
 import de.speedbanking.iban.IbanPlusKey;
+import de.speedbanking.util.UtilityClasses;
 
 import java.util.Map;
 import java.util.Optional;
@@ -48,8 +49,7 @@ import java.util.Set;
 public final class BankDataLookup {
 
     private BankDataLookup() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

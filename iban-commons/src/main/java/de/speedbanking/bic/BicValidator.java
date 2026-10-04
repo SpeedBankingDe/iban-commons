@@ -19,6 +19,7 @@ import static de.speedbanking.util.CharUtil.isDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isNotUpperCase;
 
 import de.speedbanking.util.Country;
+import de.speedbanking.util.UtilityClasses;
 
 import java.nio.CharBuffer;
 
@@ -49,8 +50,7 @@ public final class BicValidator {
      * @throws UnsupportedOperationException always
      */
     private BicValidator() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

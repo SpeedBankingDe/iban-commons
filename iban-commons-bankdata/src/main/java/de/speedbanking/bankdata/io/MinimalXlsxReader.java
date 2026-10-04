@@ -15,6 +15,8 @@
  */
 package de.speedbanking.bankdata.io;
 
+import de.speedbanking.util.UtilityClasses;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -63,8 +65,7 @@ public final class MinimalXlsxReader {
     private static final int    MAX_COLUMN_LETTERS   = 7;
 
     private MinimalXlsxReader() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

@@ -44,7 +44,7 @@ public final class GermanAccountCheckDigit {
 
     private GermanAccountCheckDigit() {
         throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
     }
 
     /**

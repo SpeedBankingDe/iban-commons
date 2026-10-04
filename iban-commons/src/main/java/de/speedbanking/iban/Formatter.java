@@ -15,6 +15,8 @@
  */
 package de.speedbanking.iban;
 
+import de.speedbanking.util.UtilityClasses;
+
 /**
  * Utility class for formatting a normalized IBAN sequence (no spaces)
  * into the standard display format (groups of characters separated by spaces).
@@ -31,8 +33,7 @@ public final class Formatter {
      * @throws UnsupportedOperationException always
      */
     private Formatter() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     /**

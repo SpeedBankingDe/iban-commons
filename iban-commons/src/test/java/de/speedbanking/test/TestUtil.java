@@ -1,4 +1,5 @@
 package de.speedbanking.test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -31,7 +32,7 @@ public final class TestUtil {
      */
     private TestUtil() {
         throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
     }
 
     /**

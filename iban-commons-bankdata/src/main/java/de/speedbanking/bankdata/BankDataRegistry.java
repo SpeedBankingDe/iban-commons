@@ -22,6 +22,7 @@ import de.speedbanking.bankdata.log.NaiveLogger;
 import de.speedbanking.bankdata.refresh.CountryDataCache;
 import de.speedbanking.bankdata.spi.CountryBankDataLoader;
 import de.speedbanking.iban.IbanRegistry;
+import de.speedbanking.util.UtilityClasses;
 
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashMap;
@@ -56,8 +57,7 @@ public final class BankDataRegistry {
     private static final AtomicReference<Supplier<Downloader>> DOWNLOADER_FACTORY = new AtomicReference<>(Downloader::createDefault);
 
     private BankDataRegistry() {
-        throw new UnsupportedOperationException(
-            String.format("Utility class %s cannot be instantiated", getClass().getSimpleName()));
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     private static Map<String, CountryBankDataLoader> discoverLoaders() {

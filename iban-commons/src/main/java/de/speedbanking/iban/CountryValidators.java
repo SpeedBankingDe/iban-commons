@@ -19,6 +19,8 @@ import static de.speedbanking.util.CharUtil.isAllDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isAllDigits;
 import static de.speedbanking.util.CharUtil.isAllUpperCase;
 
+import de.speedbanking.util.UtilityClasses;
+
 /**
  * Container class for all country-specific {@link CountryValidator} implementations.
  *
@@ -44,8 +46,7 @@ final class CountryValidators {
 
     /** Not instantiable. */
     private CountryValidators() {
-        throw new UnsupportedOperationException(
-            "Utility class " + getClass().getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(getClass());
     }
 
     // --- BGN: generated code ---

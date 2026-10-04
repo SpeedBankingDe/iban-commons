@@ -98,8 +98,7 @@ public final class RegexSimplifier {
      * Private constructor to prevent instantiation of this utility class.
      */
     private RegexSimplifier() {
-        throw new UnsupportedOperationException(
-            "Utility class " + RegexSimplifier.class.getSimpleName() + " cannot be instantiated");
+        throw UtilityClasses.cannotInstantiate(RegexSimplifier.class);
     }
 
 }
