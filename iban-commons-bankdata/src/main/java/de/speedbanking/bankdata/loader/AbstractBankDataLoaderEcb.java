@@ -15,6 +15,8 @@
  */
 package de.speedbanking.bankdata.loader;
 
+import static java.nio.charset.StandardCharsets.UTF_16;
+
 import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bankdata.io.BankDataFormat;
 import de.speedbanking.bankdata.spi.BankDataParseException;
@@ -104,7 +106,7 @@ abstract class AbstractBankDataLoaderEcb extends AbstractCountryBankDataLoader<A
 
     @Override
     public Charset getRemoteSourceCharset() {
-        return StandardCharsets.UTF_16;
+        return UTF_16;
     }
 
     @Override

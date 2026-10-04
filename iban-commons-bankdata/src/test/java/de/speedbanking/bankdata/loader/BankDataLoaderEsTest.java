@@ -3,6 +3,9 @@ package de.speedbanking.bankdata.loader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static java.nio.charset.StandardCharsets.UTF_16;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bankdata.spi.BankDataParseException;
 
@@ -11,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +40,7 @@ final class BankDataLoaderEsTest {
 
     @Test
     void remoteSourceCharset_returnsUtf16() {
-        assertThat(loader.getRemoteSourceCharset()).isEqualTo(StandardCharsets.UTF_16);
+        assertThat(loader.getRemoteSourceCharset()).isEqualTo(UTF_16);
     }
 
     @Test
@@ -50,7 +52,7 @@ final class BankDataLoaderEsTest {
         URI landingPage = URI.create("https://www.ecb.europa.eu/stats/financial_corporations/"
             + "list_of_financial_institutions/html/monthly_list-MID.en.html");
 
-        Optional<URI> resolved = loader.resolveActualSourceUri(landingPage, html.getBytes(StandardCharsets.UTF_8));
+        Optional<URI> resolved = loader.resolveActualSourceUri(landingPage, html.getBytes(UTF_8));
 
         assertThat(resolved).contains(URI.create(
             "https://www.ecb.europa.eu/stats/money/mfi/general/html/dla/mfi_mrr_MID/fi_mrr_csv_260831.csv"));
@@ -62,7 +64,7 @@ final class BankDataLoaderEsTest {
         URI landingPage = URI.create("https://www.ecb.europa.eu/stats/financial_corporations/"
             + "list_of_financial_institutions/html/monthly_list-MID.en.html");
 
-        Optional<URI> resolved = loader.resolveActualSourceUri(landingPage, html.getBytes(StandardCharsets.UTF_8));
+        Optional<URI> resolved = loader.resolveActualSourceUri(landingPage, html.getBytes(UTF_8));
 
         assertThat(resolved).isEmpty();
     }
@@ -70,7 +72,7 @@ final class BankDataLoaderEsTest {
     @Test
     void parse_rowWithTooFewColumns_throwsBankDataParseException() {
         String content = HEADER + "ES0049\tBSCHESMMXXX\tES\n"; // far fewer than the required columns
-        InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_16));
+        InputStream in = new ByteArrayInputStream(content.getBytes(UTF_16));
 
         assertThatThrownBy(() -> loader.parse(in, "test-version"))
             .isInstanceOf(BankDataParseException.class)
@@ -88,7 +90,7 @@ final class BankDataLoaderEsTest {
             + "Credit institution S122\t\t\t\tY\tN\r\n" // different country, must be filtered out
             + "DE00001\tDEUTDEFFXXX\tDE\tDeutsche Bank Aktiengesellschaft\t\tTaunusanlage 12\t60325\t"
             + "Frankfurt am Main\tCredit institution S122\t\t\t\tY\tN\r\n"; // different country, must be filtered out
-        InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_16));
+        InputStream in = new ByteArrayInputStream(content.getBytes(UTF_16));
 
         List<BankData> records = loader.parse(in, "test-version");
 
@@ -109,7 +111,7 @@ final class BankDataLoaderEsTest {
         String content = HEADER
             + "IE1234\tSOMEBIC1XXX\tES\tRelocated Institution\t\tCl Example 1\t28001\tMadrid\t"
             + "Credit institution S122\t\t\t\tY\tN\r\n";
-        InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_16));
+        InputStream in = new ByteArrayInputStream(content.getBytes(UTF_16));
 
         List<BankData> records = loader.parse(in, "test-version");
 
@@ -121,7 +123,7 @@ final class BankDataLoaderEsTest {
         String content = HEADER
             + "ES1492\t\tES\tBNP Paribas Lease Group S.A. Sucursal en España\t\tCl Example 1\t28001\tMadrid\t"
             + "Credit institution S122\t\t\t\tY\tN\r\n";
-        InputStream in = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_16));
+        InputStream in = new ByteArrayInputStream(content.getBytes(UTF_16));
 
         List<BankData> records = loader.parse(in, "test-version");
 

@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bankdata.spi.BankDataParseException;
 
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -93,7 +94,7 @@ final class AbstractCountryBankDataLoaderTest {
 
     @Test
     void remoteSourceCharset_defaultsToUtf8() {
-        assertThat(new LoaderPl().getRemoteSourceCharset()).isEqualTo(StandardCharsets.UTF_8);
+        assertThat(new LoaderPl().getRemoteSourceCharset()).isEqualTo(UTF_8);
     }
 
     @Test
