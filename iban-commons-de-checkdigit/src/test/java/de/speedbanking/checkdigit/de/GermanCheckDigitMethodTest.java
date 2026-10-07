@@ -778,6 +778,25 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "84, 0199100002, true",  // Ausnahme, method 51 Variante 1
+        "84, 0099100010, true",  // Ausnahme, method 51 Variante 1
+        "84, 2599100002, true",  // Ausnahme, method 51 Variante 1
+        "84, 0199100004, true",  // Ausnahme, method 51 Variante 2
+        "84, 2599100003, true",  // Ausnahme, method 51 Variante 2
+        "84, 3199204090, true",  // Ausnahme, method 51 Variante 2
+        "84, 0099345678, false", // Ausnahme, method 51 Variante 2
+        "84, 0099100110, false", // Ausnahme, method 51 Variante 2
+        "84, 0199100040, false", // Ausnahme, method 51 Variante 2
+        "84, 0099100061, true",  // hand-derived: Ausnahme, sum 153, remainder 10 gives check digit 1
+        "84, 0099100060, false", // hand-derived: same sum, check digit 0 is wrong
+        "84, 4591220536, false", // hand-derived: Ausnahme final, sums 122 and 207 expect 0 and 2
+    })
+    void calculate_m84_ausnahme51Vectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
