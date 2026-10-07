@@ -947,6 +947,22 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "E1, 0134211909, true",  // worked example
+        "E1, 0100041104, true",
+        "E1, 0100054106, true",
+        "E1, 0200025107, true",
+        "E1, 0150013107, false",
+        "E1, 0200035101, false",
+        "E1, 0081313890, false",
+        "E1, 4268550840, false",
+        "E1, 0987402008, false",
+    })
+    void calculate_e1_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
