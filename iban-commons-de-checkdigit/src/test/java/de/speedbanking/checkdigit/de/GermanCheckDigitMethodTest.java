@@ -833,6 +833,31 @@ final class GermanCheckDigitMethodTest {
         assertVector(code, account, expectedValid);
     }
 
+    // Bundesbank test account numbers ("Testkontonummern richtig/falsch"), left-padded to 10 digits
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "D7, 0500018205, true",
+        "D7, 0230103715, true",
+        "D7, 0301000434, true",
+        "D7, 0330035104, true",
+        "D7, 0420001202, true",
+        "D7, 0134637709, true",
+        "D7, 0201005939, true",
+        "D7, 0602006999, true",
+        "D7, 0501006102, false",
+        "D7, 0231307867, false",
+        "D7, 0301005331, false",
+        "D7, 0330034104, false",
+        "D7, 0420001302, false",
+        "D7, 0135638809, false",
+        "D7, 0202005939, false",
+        "D7, 0601006977, false",
+    })
+    void calculate_d7_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
         "73, 0003503398, true",  // Variante 1
