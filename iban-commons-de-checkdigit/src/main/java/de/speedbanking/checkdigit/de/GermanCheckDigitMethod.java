@@ -1695,8 +1695,9 @@ public enum GermanCheckDigitMethod {
      * digits 5-9, check digit {@code (7 - sum % 7) % 7}.
      * <p>
      * <strong>Implemented with reservation</strong>: the specification calls account
-     * numbers that fail every calculation "nicht pruefbar"; as for the methods with the
-     * same wording, such as {@link #M91}, they are reported as invalid, not as not checked.
+     * numbers that fail every calculation "nicht pruefbar". They are reported as invalid:
+     * for {@link #M91}, with the same wording, the specification lists accounts that fail
+     * every variant as "Testkontonummern (falsch)".
      */
     M83 {
         @Override
