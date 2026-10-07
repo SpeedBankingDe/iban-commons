@@ -1218,10 +1218,18 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Weights {@code {7,0,0,6,5,4,3,2}} over digits 2–9 (index 1–8), no complement — instead
      * a direct remainder mapping: {@code 0 → 1}, {@code 1 → 0}, anything else {@code → 11 − remainder}.
+     * Digit 1 must be {@code 0}; then digit 2 equal to {@code 9} is not checked ({@link #M09}).
      */
     M66 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
+            // digit 1 is not part of the 9-digit account number, so the exception applies only after this check
+            if (digitAt(account, 0) != 0) {
+                return CheckDigitResult.of(false);
+            }
+            if (digitAt(account, 1) == 9) {
+                return M09.calculate(blz, account);
+            }
             int sum = weightedSum(account, WEIGHTS_M66, 1, false);
             int remainder = sum % MODULUS_11;
             int crc;

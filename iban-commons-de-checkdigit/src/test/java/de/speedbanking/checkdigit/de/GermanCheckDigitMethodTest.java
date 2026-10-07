@@ -198,6 +198,12 @@ final class GermanCheckDigitMethodTest {
         "65, 1234567580, false",
         "66, 0123456784, true",
         "66, 0123456785, false",
+        "66, 0100154508, true",
+        "66, 0101154508, true",
+        "66, 0100154516, true",
+        "66, 0101154516, true",
+        "66, 1023843920, false",
+        "66, 5953334918, false",
         "67, 1234567400, true",
         "67, 1234567500, false",
         "68, 0123456782, true",
@@ -846,6 +852,8 @@ final class GermanCheckDigitMethodTest {
     @CsvSource({
         // Boundary vectors for range-gated "no check performed" branches (M45, M95, M99, A0, B8, C5, D0).
         "45, 4800000000",
+        "66, 0983393104",
+        "66, 0901468782",
         "95, 0000000001",
         "95, 0001999999",
         "95, 0009000000",
