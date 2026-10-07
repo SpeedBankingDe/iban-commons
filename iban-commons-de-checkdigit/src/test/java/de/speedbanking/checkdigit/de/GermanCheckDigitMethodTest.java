@@ -1160,6 +1160,19 @@ final class GermanCheckDigitMethodTest {
         assertThat(GermanCheckDigitMethod.M89.calculate(BLZ, "0000000001".toCharArray()).isChecked()).isFalse();
         assertThat(GermanCheckDigitMethod.M89.calculate(BLZ, "1234567890".toCharArray()).isChecked()).isFalse();
     }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "97, 0024010019, true",  // worked example: 2401001 - 2400992 = 9
+        "97, 0024010010, false", // hand-derived from the worked example
+        "97, 0000010000, true",  // hand-derived: 1000 % 11 = 10, check digit 0
+        "97, 1234567895, true",  // hand-derived: 123456789 % 11 = 5
+        "97, 1234567891, false", // hand-derived
+        "97, 0000001001, false", // hand-derived: 4 digits are not defined, 100 % 11 = 1 would match
+    })
+    void calculate_m97_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.

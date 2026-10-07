@@ -2088,6 +2088,27 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 97}.
+     * <p>
+     * Modulus 11 of the account number itself: the value of digits 1-9 (index 0-8), the
+     * check digit left out, is divided by 11. The remainder is the check digit, a
+     * remainder of {@code 10} gives check digit {@code 0}; compared at index 9.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification only defines
+     * account numbers with 5 to 10 digits, so shorter account numbers are rejected.
+     */
+    M97 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (significantDigits(account) < 5) {
+                return CheckDigitResult.of(false);
+            }
+            int remainder = (int) (toLong(account) / MODULUS_10 % MODULUS_11);
+            return compareToCheckDigit(account, remainder % MODULUS_10);
+        }
+    },
+
+    /**
      * Method {@code 98}.
      * <p>
      * Modulus 10, weights {@code {3,7,1,3,7,1,3}} over digits 3–9 (index 2–8), no cross sum.
