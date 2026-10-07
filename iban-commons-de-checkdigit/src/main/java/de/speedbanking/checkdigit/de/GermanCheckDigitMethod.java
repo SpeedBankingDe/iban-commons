@@ -1410,7 +1410,7 @@ public enum GermanCheckDigitMethod {
                 return b;
             }
 
-            int sumC = weightedSum(account, WEIGHTS_M73, 4, true);
+            int sumC = weightedSum(account, WEIGHTS_M73, 4, false);
             return compareToCheckDigit(account, mod7Complement(sumC));
         }
     },
@@ -1509,7 +1509,8 @@ public enum GermanCheckDigitMethod {
      * If that does not decide the outcome, tries three variants at index 9, weights
      * {@code {6,5,4,3,2}} over digits 5–9 throughout: (A) modulus 11, clamp-above-9;
      * (B) modulus 7, {@code (7 − sum % 7) % 7} (mapped >9 to 0, though the formula never
-     * exceeds 6); (C) modulus 10 with cross sum, weights {@code {2,1,2,1,2}}.
+     * exceeds 6); (C) modulus 10, weights {@code {2,1,2,1,2}}, products added without cross sum
+     * ("entsprechen dem Verfahren 06").
      */
     M84 {
         @Override
@@ -1531,7 +1532,7 @@ public enum GermanCheckDigitMethod {
                 return b;
             }
 
-            int sumC = weightedSum(account, WEIGHTS_M73, 4, true);
+            int sumC = weightedSum(account, WEIGHTS_M73, 4, false);
             return compareToCheckDigit(account, mod10Complement(sumC));
         }
     },

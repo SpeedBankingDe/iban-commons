@@ -274,7 +274,7 @@ final class GermanCheckDigitMethodTest {
         "B8 | 4273675928 | false", // both invalid, outside the 'not checked' exception ranges
         "84 | 2806520667 | true",  // no Ausnahme, sumA (Modulus 11) valid
         "84 | 3607756696 | true",  // no Ausnahme, sumA invalid, sumB (Modulus 7) valid
-        "84 | 9400189902 | true",  // no Ausnahme, sumA/sumB invalid, sumC (Modulus 10) valid
+        "84 | 0000240961 | true",  // no Ausnahme, sumA/sumB invalid, sumC (Modulus 10) valid
         "84 | 2100969422 | false", // no Ausnahme, all three formulas invalid
         "84 | 0898857649 | true",  // Ausnahme applies, first Modulus-11 variant matches
         "84 | 5791244665 | true",  // Ausnahme applies, first variant fails, second matches
@@ -867,4 +867,27 @@ final class GermanCheckDigitMethodTest {
         assertThat(result.isValid()).as("method %s, account %s", code, account).isTrue();
     }
 
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "84, 0000240699, true",  // Methode A
+        "84, 0000350982, true",  // Methode A
+        "84, 0000461059, true",  // Methode A
+        "84, 0000240692, true",  // Methode B
+        "84, 0000350985, true",  // Methode B
+        "84, 0000461052, true",  // Methode B
+        "84, 0000240961, true",  // Methode C: 4+4+0+9+12 = 29; with cross sum it would expect 0
+        "84, 0000350984, true",  // Methode C
+        "84, 0000461054, true",  // Methode C
+        "84, 0000240965, false", // Methode A, B and C
+        "84, 0000350980, false", // Methode A, B and C
+        "84, 0000461053, false", // Methode A, B and C
+        "84, 4076923062, true",  // hand-derived: sum 88 expects A 0, B 3; C sum 38 expects 2
+        "84, 2016316085, true",  // hand-derived: sum 63 expects A 3, B 0; C sum 35 expects 5
+        "84, 8588547083, false", // hand-derived: sum 94 expects A 5, B 4; C sum 44 expects 6
+        "84, 6778117499, false", // hand-derived: sum 69 expects A 8, B 1; C sum 39 expects 1
+        "84, 5928525469, false", // hand-derived: sum 84 expects A 4, B 0; C sum 38 expects 2
+    })
+    void calculate_m84_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
 }
