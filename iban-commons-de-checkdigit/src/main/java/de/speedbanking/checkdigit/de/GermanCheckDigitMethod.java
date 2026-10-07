@@ -2574,6 +2574,22 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code D7}.
+     * <p>
+     * Modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}} applied to digits 1-9 (index 0-8),
+     * products greater than 9 reduced to their cross sum (as in {@link #M00}). Unlike
+     * {@link #M00}, the check digit is the units digit of the sum itself
+     * ({@code sum % 10}), not its complement.
+     */
+    D7 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = weightedSum(account, WEIGHTS_2121, 0, true);
+            return compareToCheckDigit(account, sum % MODULUS_10);
+        }
+    },
+
     /** Method {@code D9}. Delegates to {@link #M00}, then {@link #M10}, then {@link #M18}. */
     D9 {
         @Override
