@@ -1003,6 +1003,27 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "E3, 0009290701, true",  // Variante 1
+        "E3, 0539290858, true",  // Variante 1
+        "E3, 0001501824, true",  // Variante 1
+        "E3, 0001501832, true",  // Variante 1
+        "E3, 0009290708, true",  // Variante 2
+        "E3, 0539290854, true",  // Variante 2
+        "E3, 0001501823, true",  // Variante 2
+        "E3, 0001501831, true",  // Variante 2
+        "E3, 2345678909, true",  // false in Variante 1, true in Variante 2
+        "E3, 5678901237, true",  // false in Variante 1, true in Variante 2
+        "E3, 0123456789, false", // false in both variants
+        "E3, 7414398260, false", // false in both variants
+        "E3, 2345678901, false", // Variante 2
+        "E3, 5678901234, false", // Variante 2
+    })
+    void calculate_e3_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
