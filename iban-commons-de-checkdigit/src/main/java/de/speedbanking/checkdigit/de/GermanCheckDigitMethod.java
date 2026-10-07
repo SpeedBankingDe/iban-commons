@@ -2590,6 +2590,28 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code D8}.
+     * <p>
+     * Selects the variant by account number range: {@code 1000000000} to
+     * {@code 9999999999} delegates to {@link #M00}; {@code 0010000000} to
+     * {@code 0099999999} delegates to {@link #M09} (not checked). Account numbers
+     * outside both ranges are invalid.
+     */
+    D8 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            long value = toLong(account);
+            if (value >= 1_000_000_000L) {
+                return M00.calculate(blz, account);
+            }
+            if (value >= 10_000_000L && value <= 99_999_999L) {
+                return M09.calculate(blz, account);
+            }
+            return CheckDigitResult.of(false);
+        }
+    },
+
     /** Method {@code D9}. Delegates to {@link #M00}, then {@link #M10}, then {@link #M18}. */
     D9 {
         @Override
