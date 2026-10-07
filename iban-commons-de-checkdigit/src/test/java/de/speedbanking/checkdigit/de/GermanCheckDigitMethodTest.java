@@ -1051,6 +1051,22 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+
+        "75, 0000123455, true",  // hand-derived: 6 digits, 2+2+6+4+1 = 15
+        "75, 0000123456, false", // hand-derived
+        "75, 0007123455, true",  // hand-derived: 7 digits, digit 4 is not weighted
+        "75, 0007123456, false", // hand-derived
+        "75, 0123455678, true",  // hand-derived: 9 digits, base number 12345, check digit at index 6
+        "75, 0123456678, false", // hand-derived
+        "75, 0923456767, true",  // hand-derived: 9 digits starting with 9, base number 23456, check digit at index 7
+        "75, 0923456867, false", // hand-derived
+        "75, 0000012344, false", // hand-derived: 5 digits are not defined, the 6-digit layout would accept it
+        "75, 0012345678, false", // hand-derived: 8 digits are not defined, the 6-digit layout would accept it
+        "75, 1000123455, false", // hand-derived: 10 digits are not defined, the 6-digit layout would accept it
+    })
+    void calculate_m75_handDerivedVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
