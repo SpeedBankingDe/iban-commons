@@ -1528,6 +1528,39 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 75}.
+     * <p>
+     * Modulus 10, weights {@code {2,1,2,1,2}} over a 5-digit base number, products
+     * greater than 9 reduced to their cross sum (as in {@link #M00}), check digit
+     * {@code (10 - sum % 10) % 10}. The position depends on the length of the account
+     * number: 6 or 7 digits use digits 5-9 (index 4-8) with the check digit at index 9;
+     * 9 digits use digits 2-6 (index 1-5) with the check digit at index 6, or, if the
+     * first of the 9 digits (index 1) is {@code 9}, digits 3-7 (index 2-6) with the check
+     * digit at index 7.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification only defines 6-,
+     * 7- and 9-digit account numbers, so all other lengths are rejected. Its layout table
+     * also has a row labelled "10stell." that shows a leading zero; it is read as the
+     * 9-digit layout.
+     */
+    M75 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int length = significantDigits(account);
+            if (length == 6 || length == 7) {
+                int sum = weightedSum(account, WEIGHTS_M73, 4, true);
+                return compareToCheckDigit(account, mod10Complement(sum));
+            }
+            if (length == 9) {
+                int offset = digitAt(account, 1) == 9 ? 2 : 1;
+                int sum    = weightedSum(account, WEIGHTS_M73, offset, true);
+                return compareAt(account, offset + 5, mod10Complement(sum));
+            }
+            return CheckDigitResult.of(false);
+        }
+    },
+
+    /**
      * Method {@code 76}.
      * <p>
      * Kontoart at digit 1, weights {@code {7,6,5,4,3,2}} over digits 2-7, {@code crc = sum % 11}
@@ -3064,6 +3097,15 @@ public enum GermanCheckDigitMethod {
             value = value * MODULUS_10 + (c - '0');
         }
         return value;
+    }
+
+    /** Number of digits of the account number without its leading zeros. */
+    private static int significantDigits(char[] account) {
+        int start = 0;
+        while (start < ACCOUNT_LENGTH && account[start] == '0') {
+            start++;
+        }
+        return ACCOUNT_LENGTH - start;
     }
 
     /** Non-recursive cross sum of a non-negative integer (sum of its decimal digits). */
