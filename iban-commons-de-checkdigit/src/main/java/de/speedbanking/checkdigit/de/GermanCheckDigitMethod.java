@@ -940,6 +940,37 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 52}.
+     * <p>
+     * Applies to 8-digit account numbers {@code XPXXXXXX} (digits 3-10, index 2-9, with a
+     * non-zero digit 3). The check runs on the account number of the ESER legacy system,
+     * built as BLZ digits 5-8, account digit 3, the check digit P (account digit 4), then
+     * account digits 5-10 with leading zeros removed. See {@link #eserCheck} for the
+     * modulus 11 factor search. 10-digit account numbers starting with {@code 9} are
+     * checked with {@link #M20} instead; all other account numbers are rejected.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification labels the BLZ
+     * group of the ESER pattern as the variable-length part, but its worked example
+     * removes the leading zeros of the trailing account digits ({@code 001500} becomes
+     * {@code 1500}); the example is followed. Account numbers with fewer than 8 digits
+     * are rejected, since the specification only defines the 8-digit layout. The BLZ
+     * pattern {@code XXX5XXXX} is not enforced.
+     */
+    M52 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 9) {
+                return M20.calculate(blz, account);
+            }
+            if (digitAt(account, 0) != 0 || digitAt(account, 1) != 0 || digitAt(account, 2) == 0) {
+                return CheckDigitResult.of(false);
+            }
+            char[] head = {blz[4], blz[5], blz[6], blz[7], account[2], account[3]};
+            return eserCheck(head, account);
+        }
+    },
+
+    /**
      * Method {@code 54}.
      * <p>
      * Modulus 11, weights {@code {2,7,6,5,4,3,2}} over digits 3–9 (index 2–8); digits 1 and
@@ -2530,6 +2561,15 @@ public enum GermanCheckDigitMethod {
     private static final int[] WEIGHTS_C5          = {2, 1, 2, 1, 2};
     private static final int[] WEIGHTS_C6          = {2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2};
 
+    /** Weights of the ESER methods {@link #M52}, from right to left. */
+    private static final int[] WEIGHTS_ESER        = {2, 4, 8, 5, 10, 9, 7, 3, 6, 1, 2, 4};
+
+    /** Number of leading ESER digits up to and including the check digit. */
+    private static final int ESER_HEAD_LENGTH = 6;
+
+    /** Remainder the ESER factor search must reach. */
+    private static final int ESER_TARGET_REMAINDER = 10;
+
     /**
      * {@link #C6} prepends one of these 7-digit constants — selected by digit 1 (index 0)
      * of the account number — to digits 2–9 before running the modulus-10 calculation.
@@ -2784,6 +2824,43 @@ public enum GermanCheckDigitMethod {
             sum          += contribution;
         }
         return sum;
+    }
+
+    /**
+     * Shared check of the ESER methods {@link #M52}.
+     * <p>
+     * The ESER account number is {@code head} (six digits, the check digit last) followed
+     * by account digits 5-10 (index 4-9) without leading zeros. Its digits are weighted
+     * from right to left with {@link #WEIGHTS_ESER}, the check digit counting as 0. The
+     * expected check digit is the factor 0-9 for which {@code sum % 11} plus the factor
+     * times the weight over the check digit leaves remainder 10 when divided by 11. If
+     * no factor reaches remainder 10, the account number cannot be used.
+     */
+    private static CheckDigitResult eserCheck(char[] head, char[] account) {
+        int start = 4;
+        while (start < ACCOUNT_LENGTH && account[start] == '0') {
+            start++;
+        }
+        int    length = ESER_HEAD_LENGTH + ACCOUNT_LENGTH - start;
+        char[] eser   = new char[length];
+        System.arraycopy(head, 0, eser, 0, ESER_HEAD_LENGTH);
+        System.arraycopy(account, start, eser, ESER_HEAD_LENGTH, ACCOUNT_LENGTH - start);
+
+        int checkIndex = ESER_HEAD_LENGTH - 1;
+        int sum        = 0;
+        for (int i = 0; i < length; i++) {
+            if (i != checkIndex) {
+                sum += digitAt(eser, i) * WEIGHTS_ESER[length - 1 - i];
+            }
+        }
+        int remainder   = sum % MODULUS_11;
+        int checkWeight = WEIGHTS_ESER[length - 1 - checkIndex];
+        for (int factor = 0; factor <= MAX_DIGIT; factor++) {
+            if ((remainder + factor * checkWeight) % MODULUS_11 == ESER_TARGET_REMAINDER) {
+                return CheckDigitResult.of(digitAt(eser, checkIndex) == factor);
+            }
+        }
+        return CheckDigitResult.of(false);
     }
 
     /** Adds 5 to a single-digit value, wrapping back into {@code [0, 9]}. Used by {@link #B9}. */
