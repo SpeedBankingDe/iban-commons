@@ -271,14 +271,17 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Two-stage: first tries modulus 10 with weights {@code {1,2,1,2,1,2}} and cross sum
      * over digits 2–7 (index 1–6), comparing at index 7. If that fails, retries the same
-     * formula shifted two positions right (digits 4–9, index 3–8), comparing at index 9.
+     * formula shifted two positions right (digits 4-9, index 3-8), comparing at index 9,
+     * but only when digits 1-2 are {@code 00} (sub-account {@code 00} omitted).
      */
     M13 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
             int sum1 = weightedSum(account, WEIGHTS_121212, 1, true);
-            if (compareAt(account, 7, mod10Complement(sum1)).isValid()) {
-                return CheckDigitResult.of(true);
+            CheckDigitResult first = compareAt(account, 7, mod10Complement(sum1));
+            // the shifted retry is for an omitted sub-account 00, so only for accounts starting with 00
+            if (first.isValid() || digitAt(account, 0) != 0 || digitAt(account, 1) != 0) {
+                return first;
             }
             int sum2 = weightedSum(account, WEIGHTS_121212, 3, true);
             return compareAt(account, 9, mod10Complement(sum2));
