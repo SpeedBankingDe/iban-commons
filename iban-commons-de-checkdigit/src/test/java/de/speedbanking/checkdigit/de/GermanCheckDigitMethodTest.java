@@ -1121,6 +1121,23 @@ final class GermanCheckDigitMethodTest {
     void calculate_m80_bundesbankVectors(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
     }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "83, 0001156071, true",  // Kundenkonten, Methode A
+        "83, 0001156136, true",  // Kundenkonten, Methode A
+        "83, 0000156078, true",  // Kundenkonten, Methode B (Methode A accepts it as well)
+        "83, 0000156071, true",  // Kundenkonten, Methode C
+        "83, 0000156072, false", // hand-derived: A and B expect 8, C expects 1
+        "83, 0000156077, false", // hand-derived: digit 10 is 7, rejected in Methode C
+        "83, 0099100002, true",  // Sachkonten
+        "83, 0099100003, false", // hand-derived: Sachkonten, sum 141 expects 2
+        "83, 0099100008, false", // hand-derived: Sachkonten, Kundenkonten Methode A would accept it
+        "83, 0099000300, true",  // hand-derived: Sachkonten, sum 144, result 10 becomes 0
+    })
+    void calculate_m83_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.

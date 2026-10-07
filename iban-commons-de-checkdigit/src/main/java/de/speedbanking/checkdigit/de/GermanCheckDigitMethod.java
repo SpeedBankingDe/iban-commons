@@ -1683,6 +1683,45 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 83}.
+     * <p>
+     * If digits 3 and 4 (index 2, 3) are both {@code 9} (Sachkonten): modulus 11, weights
+     * {@code {8,7,6,5,4,3,2}} over digits 3-9 (index 2-8), clamp-above-9 rule, compared at
+     * index 9; no other calculation follows.
+     * <p>
+     * Otherwise (Kundenkonten), tries three methods at index 9: (A) {@link #M32};
+     * (B) {@link #M33}; (C) if digit 10 (index 9) is {@code 7}, {@code 8} or {@code 9} the
+     * account is rejected outright, otherwise modulus 7, weights {@code {6,5,4,3,2}} over
+     * digits 5-9, check digit {@code (7 - sum % 7) % 7}.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification calls account
+     * numbers that fail every calculation "nicht pruefbar"; as for the methods with the
+     * same wording, such as {@link #M91}, they are reported as invalid, not as not checked.
+     */
+    M83 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9 && digitAt(account, 3) == 9) {
+                int sum = weightedSum(account, WEIGHTS_8765432, 2, false);
+                return compareToCheckDigit(account, mod11ClampAboveNine(sum));
+            }
+            CheckDigitResult a = M32.calculate(blz, account);
+            if (a.isValid()) {
+                return a;
+            }
+            CheckDigitResult b = M33.calculate(blz, account);
+            if (b.isValid()) {
+                return b;
+            }
+            if (digitAt(account, 9) >= 7) {
+                return CheckDigitResult.of(false);
+            }
+            int sumC = weightedSum(account, WEIGHTS_65432, 4, false);
+            return compareToCheckDigit(account, mod7Complement(sumC));
+        }
+    },
+
+    /**
      * Method {@code 84}.
      * <p>
      * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
