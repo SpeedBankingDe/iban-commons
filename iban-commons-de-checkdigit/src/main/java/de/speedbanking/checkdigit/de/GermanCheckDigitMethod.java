@@ -2146,6 +2146,27 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code B6}.
+     * <p>
+     * Variante 1: account numbers with digit 1 (index 0) in {@code 1}-{@code 9}, or with
+     * digits 1-5 in {@code 02691}-{@code 02699}, are checked with {@link #M20}. Variante 2:
+     * all other account numbers are checked with {@link #M53}, which reads BLZ digits.
+     * <p>
+     * <strong>Implemented with reservation</strong>: account numbers with two or more
+     * leading zeros reach {@link #M53}, which defines only 9-digit account numbers and
+     * therefore rejects them.
+     */
+    B6 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            boolean variante1 = digitAt(account, 0) != 0
+                || (digitAt(account, 1) == 2 && digitAt(account, 2) == 6 && digitAt(account, 3) == 9
+                    && digitAt(account, 4) != 0);
+            return variante1 ? M20.calculate(blz, account) : M53.calculate(blz, account);
+        }
+    },
+
+    /**
      * Method {@code B7}.
      * <p>
      * If the full account number falls within {@code [1000000, 5999999]} or
