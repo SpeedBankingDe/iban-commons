@@ -963,6 +963,46 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "E2, 3000260983, true",  // worked example
+        "E2, 0003831745, true",
+        "E2, 0051330335, true",
+        "E2, 1730773457, true",
+        "E2, 1987654327, true",
+        "E2, 2012345675, true",
+        "E2, 2220467998, true",
+        "E2, 3190519693, true",
+        "E2, 3011219713, true",
+        "E2, 4131220086, true",
+        "E2, 4110919419, true",
+        "E2, 5000083836, true",
+        "E2, 5069696965, true",
+        "E2, 0121314151, false",
+        "E2, 0036958466, false",
+        "E2, 1000174716, false",
+        "E2, 1975312468, false",
+        "E2, 2260519349, false",
+        "E2, 2004002175, false",
+        "E2, 3780024149, false",
+        "E2, 3015024274, false",
+        "E2, 4968745438, false",
+        "E2, 4005012150, false",
+        "E2, 5000137454, false",
+        "E2, 5221398871, false",
+        "E2, 6221398879, false",
+        "E2, 6742185327, false",
+        "E2, 7793867322, false",
+        "E2, 7900695413, false",
+        "E2, 8001256238, false",
+        "E2, 8303808900, false",
+        "E2, 9703805111, false",
+        "E2, 9006126433, false",
+    })
+    void calculate_e2_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.

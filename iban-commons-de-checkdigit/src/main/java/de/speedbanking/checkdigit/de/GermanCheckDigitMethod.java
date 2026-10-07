@@ -2661,6 +2661,24 @@ public enum GermanCheckDigitMethod {
             }
             return compareToCheckDigit(account, sum % MODULUS_11);
         }
+    },
+
+    /**
+     * Method {@code E2}.
+     * <p>
+     * Invalid if digit 1 (index 0) is {@code 6} to {@code 9}. Otherwise prepends the
+     * constant {@code 438320x} ({@code x} = digit 1) to digits 2-9 (index 1-8) and
+     * applies the {@link #M00} formula to those 15 digits, as {@link #C6} does; the
+     * check digit is at index 9.
+     */
+    E2 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) > 5) {
+                return CheckDigitResult.of(false);
+            }
+            return prefixedM00(account, "438320" + account[0]);
+        }
     };
 
     /** Number of digits in a normalized German domestic account number ("Kontonummer"). */
@@ -2910,7 +2928,14 @@ public enum GermanCheckDigitMethod {
      * {@link #M00} (weights {@code {2,1,...,2}}, cross sum) to those 15 digits.
      */
     private static CheckDigitResult calculateC6(char[] account) {
-        String  constant = C6_CONSTANTS[digitAt(account, 0)];
+        return prefixedM00(account, C6_CONSTANTS[digitAt(account, 0)]);
+    }
+
+    /**
+     * Prepends a 7-digit {@code constant} to digits 2-9 (index 1-8) and applies the
+     * {@link #M00} formula to the resulting 15 digits. Used by {@link #C6} and {@link #E2}.
+     */
+    private static CheckDigitResult prefixedM00(char[] account, String constant) {
         char[]  digits   = new char[15];
         constant.getChars(0, 7, digits, 0);
         System.arraycopy(account, 1, digits, 7, 8);
