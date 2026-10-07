@@ -1138,6 +1138,28 @@ final class GermanCheckDigitMethodTest {
     void calculate_m83_bundesbankVectors(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
     }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "89, 0001098506, true",  // 7 digits; without the cross sums the sum would be 99
+        "89, 0032028008, true",  // 8 digits, method 10
+        "89, 0218433000, true",  // 9 digits, method 10
+        "89, 0001098507, false", // hand-derived: sum 27 expects 6
+        "89, 0032028009, false", // hand-derived: method 10 expects 8
+        "89, 0218433001, false", // hand-derived: method 10 expects 0
+        "89, 0007000009, true",  // hand-derived: 7 digits, product 49 counts as 13
+    })
+    void calculate_m89_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @Test
+    void calculate_m89_noCheckDigit_notChecked() {
+        // hand-derived: 1 to 6 and 10 digits carry no check digit
+        assertThat(GermanCheckDigitMethod.M89.calculate(BLZ, "0000123456".toCharArray()).isChecked()).isFalse();
+        assertThat(GermanCheckDigitMethod.M89.calculate(BLZ, "0000000001".toCharArray()).isChecked()).isFalse();
+        assertThat(GermanCheckDigitMethod.M89.calculate(BLZ, "1234567890".toCharArray()).isChecked()).isFalse();
+    }
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.

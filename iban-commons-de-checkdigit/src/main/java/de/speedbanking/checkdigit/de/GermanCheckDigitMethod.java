@@ -1873,6 +1873,37 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 89}.
+     * <p>
+     * Depends on the length of the account number. 8 or 9 digits: delegates to
+     * {@link #M10}. 7 digits: modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4-9
+     * (index 3-8), each product replaced by its cross sum before adding (e.g. {@code 45}
+     * counts as {@code 9}), clamp-above-9 rule as in {@link #M06}, compared at index 9.
+     * Account numbers with 1 to 6 or 10 digits carry no check digit and are not checked
+     * ({@link CheckDigitResult#NOT_CHECKED}).
+     * <p>
+     * <strong>Implemented with reservation</strong>: the cross sum is taken once, so the
+     * product {@code 49} counts as {@code 13}; the specification does not say to repeat it.
+     */
+    M89 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int length = significantDigits(account);
+            if (length == 8 || length == 9) {
+                return M10.calculate(blz, account);
+            }
+            if (length != 7) {
+                return CheckDigitResult.NOT_CHECKED;
+            }
+            int sum = 0;
+            for (int i = 0; i < WEIGHTS_765432.length; i++) {
+                sum += crossSum(digitAt(account, 3 + i) * WEIGHTS_765432[i]);
+            }
+            return compareToCheckDigit(account, mod11ClampAboveNine(sum));
+        }
+    },
+
+    /**
      * Method {@code 90}.
      * <p>
      * "Sachkonten" (digit 3 / index 2 equals {@code 9}): modulus 11, weights
