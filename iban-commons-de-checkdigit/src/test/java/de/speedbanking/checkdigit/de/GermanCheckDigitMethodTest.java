@@ -1067,6 +1067,22 @@ final class GermanCheckDigitMethodTest {
     void calculate_m75_handDerivedVectors(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
     }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "77, 0000010338, true",
+        "77, 0000013844, true",
+        "77, 0000065354, true",
+        "77, 0000069258, true",
+        "77, 0000047678, true",  // worked example, first calculation: 88
+        "77, 0000047671, true",  // worked example, second calculation: 99
+        "77, 1234547678, true",  // hand-derived: digits 1-5 are not weighted
+        "77, 0000010339, false", // hand-derived: 29 and 71
+        "77, 0000047679, false", // hand-derived: 89 and 139
+    })
+    void calculate_m77_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
