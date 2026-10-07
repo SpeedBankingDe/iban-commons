@@ -1117,6 +1117,12 @@ final class GermanCheckDigitMethodTest {
         "80, 0099345678, false", // Ausnahme, method 51 Variante 2
         "80, 0099100110, false", // Ausnahme, method 51 Variante 2
         "80, 0199100040, false", // Ausnahme, method 51 Variante 2
+        "80, 6460121757, false", // hand-derived: sum 14, A expects 6, B expects 0 (no remainder), never 7
+        "80, 0638783017, false", // hand-derived: sum 21, A expects 9, B expects 0
+        "80, 7521713667, false", // hand-derived: sum 21, A expects 9, B expects 0
+        "80, 0350360857, false", // hand-derived: sum 21, A expects 9, B expects 0
+        "80, 2931826287, false", // hand-derived: sum 21, A expects 9, B expects 0
+        "80, 9667306267, false", // hand-derived: sum 14, A expects 6, B expects 0
     })
     void calculate_m80_bundesbankVectors(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
@@ -1222,6 +1228,12 @@ final class GermanCheckDigitMethodTest {
         "D5, 0000100088, true",  // Variante 4
         "D5, 0000100084, false", // Variante 4
         "D5, 0000100085, false", // Variante 4
+        "D5, 4080625762, false", // hand-derived: sum 99, Varianten 2 to 4 expect 0, 6, 1
+        "D5, 4038813076, false", // hand-derived: sum 135, Varianten 2 to 4 expect 8, 5, 5
+        "D5, 2886723857, false", // hand-derived: sum 140, Varianten 2 to 4 expect 3, 0, 0
+        "D5, 9434548078, true",  // hand-derived: sum 124, Variante 2 expects 8
+        "D5, 0198156182, true",  // hand-derived: digits 3-4 are 98, not 99; sum 130, Variante 2 expects 2
+        "D5, 9117353286, true",  // hand-derived: sum 126, Variante 2 expects 6
     })
     void calculate_d5_bundesbankVectors(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
