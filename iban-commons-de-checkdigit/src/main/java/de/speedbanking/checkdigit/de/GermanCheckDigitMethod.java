@@ -1640,6 +1640,28 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code 80}.
+     * <p>
+     * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
+     * applies its exception for exactly these account numbers. Otherwise: (A) modulus 10,
+     * weights {@code {2,1,2,1,2}} over digits 5-9 (index 4-8), products greater than 9
+     * reduced to their cross sum, check digit {@code (10 - sum % 10) % 10}; if that fails,
+     * (B) the same sum with check digit {@code (7 - sum % 7) % 7}. Both compared at
+     * index 9.
+     */
+    M80 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9) {
+                return M51.calculate(blz, account);
+            }
+            int sum = weightedSum(account, WEIGHTS_M73, 4, true);
+            CheckDigitResult a = compareToCheckDigit(account, mod10Complement(sum));
+            return a.isValid() ? a : compareToCheckDigit(account, mod7Complement(sum));
+        }
+    },
+
     /** Method {@code 81}. Delegates to {@link #M51} if digit 3 (index 2) is {@code 9}, else {@link #M32}. */
     M81 {
         @Override
