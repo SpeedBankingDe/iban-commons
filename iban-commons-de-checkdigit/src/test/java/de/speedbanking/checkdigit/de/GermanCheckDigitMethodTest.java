@@ -341,6 +341,34 @@ final class GermanCheckDigitMethodTest {
         assertVector(code, account, expectedValid);
     }
 
+    // Methods that read BLZ digits: test numbers and worked examples from the Bundesbank specification
+
+    @ParameterizedTest(name = "[{index}] method {0}: BLZ {1}, account {2}")
+    @CsvSource(delimiter = '|', value = {
+        "52 | 13051172 | 0043001500 | true",  // worked example, check digit 3
+        "52 | 13051172 | 0042001500 | false", // worked example with a wrong check digit (hand-derived)
+        "52 | 13051172 | 0048726458 | true",  // C0 Variante 1 test number (method 52)
+        "52 | 13051172 | 0082335729 | false", // C0 Variante 1 test number (method 52)
+        "52 | 13051172 | 0029837521 | false", // C0 Variante 1 test number (method 52)
+        "52 | 13051172 | 9000000006 | true",  // 10 digits starting with 9 -> method 20 (hand-derived)
+        "52 | 13051172 | 9000000005 | false", // same, wrong check digit (hand-derived)
+        "52 | 13051172 | 0004300150 | false", // fewer than 8 digits (hand-derived)
+        "52 | 13051172 | 0430015009 | false", // 9 digits (hand-derived)
+    })
+    void calculate_knownVectorsWithBlz(String code, String blz, String account, boolean expectedValid) {
+        assertVector(code, blz, account, expectedValid);
+    }
+
+    @Test
+    void calculate_m52_noFactorReachesRemainderTen_alwaysInvalid() {
+        // hand-derived: ESER 1172-4P-1541 has sum 141, remainder 9; 9 + k * 10 reaches remainder 10 only for k = 10
+        for (char p = '0'; p <= '9'; p++) {
+            char[] account = ("004" + p + "001541").toCharArray();
+            assertThat(GermanCheckDigitMethod.M52.calculate("13051172".toCharArray(), account).isValid())
+                .as("check digit %s", p).isFalse();
+        }
+    }
+
     @Test
     void calculate_c5_leadingZerosThenDigit3InRange_delegatesToM09() {
         assertThat(GermanCheckDigitMethod.C5.calculate(BLZ, "0030000000".toCharArray()).isChecked()).isFalse();
@@ -366,9 +394,13 @@ final class GermanCheckDigitMethodTest {
     }
 
     private static void assertVector(String code, String account, boolean expectedValid) {
+        assertVector(code, new String(BLZ), account, expectedValid);
+    }
+
+    private static void assertVector(String code, String blz, String account, boolean expectedValid) {
         GermanCheckDigitMethod method = GermanCheckDigitMethod.fromCode(code);
 
-        CheckDigitResult result = method.calculate(BLZ, account.toCharArray());
+        CheckDigitResult result = method.calculate(blz.toCharArray(), account.toCharArray());
 
         assertThat(result.isChecked()).as("method %s should perform a real check for %s", code, account).isTrue();
         assertThat(result.isValid()).as("method %s, account %s", code, account).isEqualTo(expectedValid);
@@ -631,10 +663,10 @@ final class GermanCheckDigitMethodTest {
 
     @Test
     void fromCode_unknownCode_throwsIllegalArgumentException() {
-        // "52" is deliberately not implemented (see class javadoc) - genuinely unknown to fromCode
+        // "12" is unassigned by the Bundesbank - genuinely unknown to fromCode
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> GermanCheckDigitMethod.fromCode("52"))
-            .withMessageContaining("52");
+            .isThrownBy(() -> GermanCheckDigitMethod.fromCode("12"))
+            .withMessageContaining("12");
     }
 
     @Test
