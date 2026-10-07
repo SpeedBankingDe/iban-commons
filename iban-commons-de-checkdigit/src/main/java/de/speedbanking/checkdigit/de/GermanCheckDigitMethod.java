@@ -2763,6 +2763,23 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code D4}.
+     * <p>
+     * Invalid if digit 1 (index 0) is {@code 0}. Otherwise prepends the constant
+     * {@code 428259} to digits 1-9 (index 0-8) and applies the {@link #M00} formula to
+     * those 15 digits, as {@link #C6} does; the check digit is at index 9.
+     */
+    D4 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 0) {
+                return CheckDigitResult.of(false);
+            }
+            return prefixedM00(account, "428259" + account[0]);
+        }
+    },
+
     /** Method {@code D6}. Delegates to {@link #M07}, then {@link #M03}, then {@link #M00}. */
     D6 {
         @Override
@@ -3158,7 +3175,7 @@ public enum GermanCheckDigitMethod {
 
     /**
      * Prepends a 7-digit {@code constant} to digits 2-9 (index 1-8) and applies the
-     * {@link #M00} formula to the resulting 15 digits. Used by {@link #C6} and {@link #E2}.
+     * {@link #M00} formula to the resulting 15 digits. Used by {@link #C6}, {@link #D4} and {@link #E2}.
      */
     private static CheckDigitResult prefixedM00(char[] account, String constant) {
         char[]  digits   = new char[15];
