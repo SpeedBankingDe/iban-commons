@@ -2688,6 +2688,15 @@ public enum GermanCheckDigitMethod {
             CheckDigitResult first = M00.calculate(blz, account);
             return first.isValid() ? first : M21.calculate(blz, account);
         }
+    },
+
+    /** Method {@code E4}. Delegates to {@link #M02}; if that fails, to {@link #M00}. */
+    E4 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            CheckDigitResult first = M02.calculate(blz, account);
+            return first.isValid() ? first : M00.calculate(blz, account);
+        }
     };
 
     /** Number of digits in a normalized German domestic account number ("Kontonummer"). */
