@@ -1393,19 +1393,18 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 73}.
      * <p>
-     * First applies the {@link #ausnahme51 Sachkonten exception} shared with {@link #M84}.
-     * If that does not decide the outcome, tries three variants at index 9: (A) modulus 10
-     * with cross sum, weights {@code {1,2,1,2,1,2}} over digits 4–9; (B) modulus 10 with
-     * cross sum, weights {@code {2,1,2,1,2}} over digits 5–9; (C) modulus 7 (same weights
-     * as B), check digit {@code (7 − sum % 7) % 7} — always returned as the final result if
-     * A and B both fail.
+     * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
+     * applies its exception for exactly these account numbers; its result is final.
+     * Otherwise tries three variants at index 9: (A) modulus 10 with cross sum, weights
+     * {@code {1,2,1,2,1,2}} over digits 4-9; (B) modulus 10 with cross sum, weights
+     * {@code {2,1,2,1,2}} over digits 5-9; (C) modulus 7 (same weights as B), check digit
+     * {@code (7 - sum % 7) % 7}, always returned as the final result if A and B both fail.
      */
     M73 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
-            CheckDigitResult exception = ausnahme51(account);
-            if (exception != null) {
-                return exception;
+            if (digitAt(account, 2) == 9) {
+                return M51.calculate(blz, account);
             }
 
             int sumA = weightedSum(account, WEIGHTS_121212, 3, true);
@@ -2783,7 +2782,7 @@ public enum GermanCheckDigitMethod {
     }
 
     /**
-     * The "Sachkonten" exception shared by {@link #M73} and {@link #M84}: applicable only
+     * The "Sachkonten" exception used by {@link #M84}: applicable only
      * when digit 3 (index 2) is {@code 9}. Tries modulus 11, weights
      * {@code {8,7,6,5,4,3,2}} over digits 3–9 (clamp-above-9, with an additional
      * remainder-1-to-0 override); if that fails, modulus 11, weights

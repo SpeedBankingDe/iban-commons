@@ -745,6 +745,39 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "73, 0003503398, true",  // Variante 1
+        "73, 0001340967, true",  // Variante 1
+        "73, 0003503391, true",  // Variante 2
+        "73, 0001340968, true",  // Variante 2
+        "73, 0003503392, true",  // Variante 3
+        "73, 0001340966, true",  // Variante 3
+        "73, 0000123456, true",  // Variante 3
+        "73, 0000121212, false", // Variante 3
+        "73, 0987654321, false", // Variante 3
+        "73, 0199100002, true",  // Ausnahme, method 51 Variante 1
+        "73, 0099100010, true",  // Ausnahme, method 51 Variante 1
+        "73, 2599100002, true",  // Ausnahme, method 51 Variante 1
+        "73, 0199100004, true",  // Ausnahme, method 51 Variante 2
+        "73, 2599100003, true",  // Ausnahme, method 51 Variante 2
+        "73, 3199204090, true",  // Ausnahme, method 51 Variante 2
+        "73, 0099345678, false", // Ausnahme, method 51 Variante 2
+        "73, 0099100110, false", // Ausnahme, method 51 Variante 2
+        "73, 0199100040, false", // Ausnahme, method 51 Variante 2
+        "73, 0099100061, true",  // hand-derived: Ausnahme, sum 153, remainder 10 gives check digit 1
+        "73, 0099100060, false", // hand-derived: same sum, check digit 0 is wrong
+        "73, 6992181420, false", // hand-derived: Ausnahme final, sums 152 and 293 expect 2 and 4
+        "73, 9995902668, false", // hand-derived: Ausnahme final, sums 199 and 370 expect 0 and 4
+        "73, 7292496222, false", // hand-derived: Ausnahme final, sums 189 and 277 expect 9 and 9
+        "73, 3797660392, false", // hand-derived: Ausnahme final, sums 214 and 307 expect 6 and 1
+        "73, 6992985554, false", // hand-derived: Ausnahme final, sums 225 and 366 expect 6 and 8
+        "73, 5690313213, false", // hand-derived: Ausnahme final, sums 115 and 219 expect 6 and 1
+    })
+    void calculate_m73_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
@@ -800,7 +833,7 @@ final class GermanCheckDigitMethodTest {
         "70, 0006900003, true",
         "70, 0006000002, true",
         "73, 0001000000, true",
-        "73, 0090000020, true",
+        "73, 0090000021, true",
         "73, 0190000007, true",
         "73, 0190000009, false",
         "74, 0000500004, true",
