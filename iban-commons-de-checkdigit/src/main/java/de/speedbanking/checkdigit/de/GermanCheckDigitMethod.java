@@ -2097,10 +2097,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code B7}.
      * <p>
-     * If the full account number falls within {@code [1000000, 5999999]} or
-     * {@code [700000000, 899999999]} <em>and</em> {@link #M01} validates it, the account is
-     * accepted. In every other case (including outside those ranges), no check is
-     * performed ({@link CheckDigitResult#NOT_CHECKED}).
+     * Accounts within {@code [1000000, 5999999]} or {@code [700000000, 899999999]} are
+     * checked with {@link #M01}; all other accounts are not checked ({@link #M09}).
      */
     B7 {
         @Override
@@ -2108,10 +2106,7 @@ public enum GermanCheckDigitMethod {
             long value = toLong(account);
             if ((value >= 1_000_000L && value <= 5_999_999L)
                 || (value >= 700_000_000L && value <= 899_999_999L)) {
-                CheckDigitResult result = M01.calculate(blz, account);
-                if (result.isValid()) {
-                    return result;
-                }
+                return M01.calculate(blz, account);
             }
             return M09.calculate(blz, account);
         }
