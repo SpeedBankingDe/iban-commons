@@ -866,15 +866,15 @@ public enum GermanCheckDigitMethod {
      * Method {@code 50}.
      * <p>
      * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 1–6 (index 0–5), clamp-above-9
-     * rule, compared at index 6. If that fails, the account number is conceptually shifted
-     * three digits to the left (digits 4–10 become digits 1–7, padded with three trailing
-     * zeros) and the same formula is retried on the shifted number.
+     * rule, compared at index 6. If that fails and digits 1-3 are zero (Unternummer 000 omitted),
+     * the account number is shifted three digits to the left (digits 4-10 become digits 1-7,
+     * padded with three trailing zeros) and the same formula is retried on the shifted number.
      */
     M50 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
             CheckDigitResult first = m50Attempt(account);
-            if (first.isValid()) {
+            if (first.isValid() || digitAt(account, 0) != 0 || digitAt(account, 1) != 0 || digitAt(account, 2) != 0) {
                 return first;
             }
             char[] shifted = new char[ACCOUNT_LENGTH];
