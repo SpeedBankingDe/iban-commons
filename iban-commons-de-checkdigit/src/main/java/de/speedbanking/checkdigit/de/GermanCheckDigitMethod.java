@@ -1504,8 +1504,9 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 84}.
      * <p>
-     * First applies the {@link #ausnahme51 Sachkonten exception} shared with {@link #M73}.
-     * If that does not decide the outcome, tries three variants at index 9, weights
+     * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
+     * applies its exception for exactly these account numbers; its result is final.
+     * Otherwise tries three variants at index 9, weights
      * {@code {6,5,4,3,2}} over digits 5–9 throughout: (A) modulus 11, clamp-above-9;
      * (B) modulus 7, {@code (7 − sum % 7) % 7} (mapped >9 to 0, though the formula never
      * exceeds 6); (C) modulus 10 with cross sum, weights {@code {2,1,2,1,2}}.
@@ -1513,9 +1514,8 @@ public enum GermanCheckDigitMethod {
     M84 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
-            CheckDigitResult exception = ausnahme51(account);
-            if (exception != null) {
-                return exception;
+            if (digitAt(account, 2) == 9) {
+                return M51.calculate(blz, account);
             }
 
             int sumA = weightedSum(account, WEIGHTS_65432, 4, false);
@@ -2789,43 +2789,6 @@ public enum GermanCheckDigitMethod {
     private static int wrapPlusFive(int value) {
         int wrapped = value + 5;
         return wrapped > 9 ? wrapped - 10 : wrapped;
-    }
-
-    /**
-     * The "Sachkonten" exception used by {@link #M84}: applicable only
-     * when digit 3 (index 2) is {@code 9}. Tries modulus 11, weights
-     * {@code {8,7,6,5,4,3,2}} over digits 3–9 (clamp-above-9, with an additional
-     * remainder-1-to-0 override); if that fails, modulus 11, weights
-     * {@code {10,9,8,7,6,5,4,3,2}} over all 9 digits, same rules. Both compared at index 9.
-     *
-     * @return the decided result if the exception applied and produced a definitive
-     *         answer; {@code null} if the exception does not apply to this account number
-     *         (the caller should then continue with its normal method logic)
-     */
-    private static CheckDigitResult ausnahme51(char[] account) {
-        if (digitAt(account, 2) != 9) {
-            return null;
-        }
-
-        int sumA = weightedSum(account, WEIGHTS_8765432, 2, false);
-        int       remainderA = mod11ClampAboveNine(sumA);
-        if (remainderA == 1) {
-            remainderA = 0;
-        }
-        if (digitAt(account, 9) == remainderA) {
-            return CheckDigitResult.of(true);
-        }
-
-        int sumB = weightedSum(account, WEIGHTS_109876543, 0, false);
-        int       remainderB = mod11ClampAboveNine(sumB);
-        if (remainderB == 1) {
-            remainderB = 0;
-        }
-        if (digitAt(account, 9) == remainderB) {
-            return CheckDigitResult.of(true);
-        }
-
-        return null;
     }
 
 }
