@@ -2641,6 +2641,26 @@ public enum GermanCheckDigitMethod {
             int sum = weightedSum(account, WEIGHTS_2121, 0, true) + 7;
             return compareToCheckDigit(account, mod10Complement(sum));
         }
+    },
+
+    /**
+     * Method {@code E1}.
+     * <p>
+     * Modulus 11, weights {@code {9,10,11,6,5,4,3,2,1}} applied to the ASCII values
+     * ({@code 48} to {@code 57}) of digits 1-9 (index 0-8), not to the digits
+     * themselves. Check digit = {@code sum % 11} (no complement); a remainder of
+     * {@code 10} never matches, so the account number is invalid.
+     */
+    E1 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = 0;
+            for (int i = 0; i < WEIGHTS_E1.length; i++) {
+                // the char value of a digit is its ASCII code
+                sum += account[i] * WEIGHTS_E1[i];
+            }
+            return compareToCheckDigit(account, sum % MODULUS_11);
+        }
     };
 
     /** Number of digits in a normalized German domestic account number ("Kontonummer"). */
@@ -2724,6 +2744,7 @@ public enum GermanCheckDigitMethod {
     private static final int[] WEIGHTS_B9A         = {1, 2, 3, 1, 2, 3, 1};
     private static final int[] WEIGHTS_C5          = {2, 1, 2, 1, 2};
     private static final int[] WEIGHTS_C6          = {2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2};
+    private static final int[] WEIGHTS_E1          = {9, 10, 11, 6, 5, 4, 3, 2, 1};
     private static final int[] M87_TAB1            = {0, 4, 3, 2, 6};
     private static final int[] M87_TAB2            = {7, 1, 5, 9, 8};
 
