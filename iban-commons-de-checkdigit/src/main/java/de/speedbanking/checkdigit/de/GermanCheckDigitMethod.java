@@ -2626,6 +2626,21 @@ public enum GermanCheckDigitMethod {
             }
             return M18.calculate(blz, account);
         }
+    },
+
+    /**
+     * Method {@code E0}.
+     * <p>
+     * Same as {@link #M00} (modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}}, cross sum),
+     * except that the constant {@code 7} is added to the sum before the complement
+     * {@code (10 - sum % 10) % 10} is taken.
+     */
+    E0 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = weightedSum(account, WEIGHTS_2121, 0, true) + 7;
+            return compareToCheckDigit(account, mod10Complement(sum));
+        }
     };
 
     /** Number of digits in a normalized German domestic account number ("Kontonummer"). */
