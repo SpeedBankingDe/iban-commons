@@ -363,6 +363,14 @@ final class GermanCheckDigitMethodTest {
         "53 | 16052072 | 9000000005 | false", // same, wrong check digit (hand-derived)
         "53 | 16052072 | 0038243225 | false", // fewer than 9 digits (hand-derived)
         "53 | 16052072 | 3824322560 | false", // 10 digits not starting with 9 (hand-derived)
+        "B6 | 80053782 | 9110000000 | true",  // Variante 1 test number (method 20)
+        "B6 | 80053782 | 0269876545 | true",  // Variante 1 test number (method 20)
+        "B6 | 80053782 | 9111000000 | false", // Variante 1 test number (method 20)
+        "B6 | 80053782 | 0269456780 | false", // Variante 1 test number (method 20)
+        "B6 | 80053782 | 0487310018 | true",  // Variante 2 test number (method 53)
+        "B6 | 80053762 | 0467310018 | false", // Variante 2 test number (method 53)
+        "B6 | 80053772 | 0477310018 | false", // Variante 2 test number (method 53)
+        "B6 | 80053782 | 0269000003 | false", // digits 1-5 02690 -> Variante 2; method 20 would accept it (hand-derived)
     })
     void calculate_knownVectorsWithBlz(String code, String blz, String account, boolean expectedValid) {
         assertVector(code, blz, account, expectedValid);
