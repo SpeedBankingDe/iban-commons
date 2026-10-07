@@ -1139,6 +1139,12 @@ final class GermanCheckDigitMethodTest {
         "83, 0099100002, true",  // Sachkonten
         "83, 0099100003, false", // hand-derived: Sachkonten, sum 141 expects 2
         "83, 0099100008, false", // hand-derived: Sachkonten, Kundenkonten Methode A would accept it
+        "83, 4699771221, false", // Sachkonten failing the calculation: invalid, see the M83 javadoc
+        "83, 6699843848, false",
+        "83, 6999272867, false",
+        "83, 8799646057, false",
+        "83, 8199019494, false",
+        "83, 1799793239, false",
         "83, 0099000300, true",  // hand-derived: Sachkonten, sum 144, result 10 becomes 0
     })
     void calculate_m83_bundesbankVectors(String code, String account, boolean expectedValid) {
