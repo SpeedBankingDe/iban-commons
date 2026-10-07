@@ -1615,6 +1615,31 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code 79}.
+     * <p>
+     * Modulus 10 with cross sum (as in {@link #M00}); the variant depends on digit 1
+     * (index 0). Digit 1 is {@code 3} to {@code 8}: delegates to {@link #M00}. Digit 1 is
+     * {@code 1}, {@code 2} or {@code 9}: weights {@code {1,2,1,2,1,2,1,2}} over digits 1-8
+     * (index 0-7), check digit {@code (10 - sum % 10) % 10} compared at index 8; digit 10
+     * is not checked. Digit 1 is {@code 0}: invalid, such account numbers were never
+     * issued.
+     */
+    M79 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int first = digitAt(account, 0);
+            if (first == 0) {
+                return CheckDigitResult.of(false);
+            }
+            if (first == 1 || first == 2 || first == 9) {
+                int sum = weightedSum(account, WEIGHTS_M68A, 0, true);
+                return compareAt(account, 8, mod10Complement(sum));
+            }
+            return M00.calculate(blz, account);
+        }
+    },
+
     /** Method {@code 81}. Delegates to {@link #M51} if digit 3 (index 2) is {@code 9}, else {@link #M32}. */
     M81 {
         @Override
