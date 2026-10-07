@@ -912,6 +912,27 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "D8, 1403414848, true",  // Variante 1
+        "D8, 6800000439, true",  // Variante 1
+        "D8, 6899999954, true",  // Variante 1
+        "D8, 3012084101, false", // Variante 1
+        "D8, 1062813622, false", // Variante 1
+        "D8, 0000260986, false", // Variante 1, below every range
+        "D8, 0123456789, false", // derived: between the two ranges
+    })
+    void calculate_d8_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @Test
+    void calculate_d8_variante2Range_notChecked() {
+        // derived: the spec lists no test number for Variante 2 (M09)
+        assertThat(GermanCheckDigitMethod.D8.calculate(BLZ, "0010000000".toCharArray()).isChecked()).isFalse();
+        assertThat(GermanCheckDigitMethod.D8.calculate(BLZ, "0099999999".toCharArray()).isChecked()).isFalse();
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
