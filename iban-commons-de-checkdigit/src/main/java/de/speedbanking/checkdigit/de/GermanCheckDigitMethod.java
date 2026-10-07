@@ -1450,6 +1450,22 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 72}.
+     * <p>
+     * Modulus 10, weights {@code {1,2,1,2,1,2}} over digits 4-9 (index 3-8), products
+     * greater than 9 reduced to their cross sum (as in {@link #M00}), check digit
+     * {@code (10 - sum % 10) % 10} compared at index 9. The sub-account number (digits 1
+     * and 2) and the account type (digit 3) are not weighted.
+     */
+    M72 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = weightedSum(account, WEIGHTS_121212, 3, true);
+            return compareToCheckDigit(account, mod10Complement(sum));
+        }
+    },
+
+    /**
      * Method {@code 73}.
      * <p>
      * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which

@@ -1039,6 +1039,18 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "72, 0000123455, true",  // hand-derived: 0+2+2+6+4+1 = 15
+        "72, 9990123455, true",  // hand-derived: digits 1-3 are not weighted
+        "72, 1234567897, true",  // hand-derived: 4+1+6+5+8+9 = 33
+        "72, 0000123454, false", // hand-derived
+        "72, 1234567890, false", // hand-derived
+    })
+    void calculate_m72_handDerivedVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
