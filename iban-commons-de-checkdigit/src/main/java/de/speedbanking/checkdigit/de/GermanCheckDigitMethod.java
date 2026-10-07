@@ -1375,15 +1375,14 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 71}.
      * <p>
-     * Modulus 11, weights {@code {6,5,4,3,2,1}} over digits 2–7 (index 1–6). Remainder
-     * {@code 10} maps to {@code 1}; all other values (including the permanently
-     * non-matching {@code 11}) are left unchanged.
+     * Modulus 11, weights {@code {6,5,4,3,2,1}} over digits 2-7 (index 1-6). Check digit =
+     * {@code (11 - sum % 11) % 11}; remainder 0 gives {@code 0}, remainder 1 gives {@code 1}.
      */
     M71 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
             int sum = weightedSum(account, WEIGHTS_M71, 1, false);
-            int       remainder = MODULUS_11 - sum % MODULUS_11;
+            int       remainder = mod11Complement(sum);
             if (remainder == 10) {
                 remainder = 1;
             }
