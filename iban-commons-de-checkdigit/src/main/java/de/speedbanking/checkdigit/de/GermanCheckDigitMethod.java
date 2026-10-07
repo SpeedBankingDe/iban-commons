@@ -2259,6 +2259,26 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code C0}.
+     * <p>
+     * Account numbers with exactly two leading zeros are checked with {@link #M52}
+     * (Variante 1, reads BLZ digits); if that fails, with {@link #M20} (Variante 2). All
+     * other account numbers are checked with {@link #M20} only.
+     */
+    C0 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 0 && digitAt(account, 1) == 0 && digitAt(account, 2) != 0) {
+                CheckDigitResult first = M52.calculate(blz, account);
+                if (first.isValid()) {
+                    return first;
+                }
+            }
+            return M20.calculate(blz, account);
+        }
+    },
+
+    /**
      * Method {@code C1}.
      * <p>
      * Delegates to {@link #M17} unless digit 1 (index 0) is {@code 5}, in which case:
