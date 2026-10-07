@@ -974,6 +974,34 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 53}.
+     * <p>
+     * Same calculation as {@link #M52}, but for 9-digit account numbers {@code XTPXXXXXX}
+     * (digits 2-10, index 1-9, with a non-zero digit 2). The ESER account number is built
+     * as BLZ digits 5 and 6, the account digit T (digit 3) in place of BLZ digit 7, BLZ
+     * digit 8, account digit 2, the check digit P (account digit 4), then account digits
+     * 5-10 with leading zeros removed. 10-digit account numbers starting with {@code 9}
+     * are checked with {@link #M20} instead; all other account numbers are rejected.
+     * <p>
+     * <strong>Implemented with reservation</strong>: account numbers with fewer than 9
+     * digits are rejected, since the specification only defines the 9-digit layout. The
+     * BLZ pattern {@code XXX5XXXX} is not enforced.
+     */
+    M53 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 9) {
+                return M20.calculate(blz, account);
+            }
+            if (digitAt(account, 0) != 0 || digitAt(account, 1) == 0) {
+                return CheckDigitResult.of(false);
+            }
+            char[] head = {blz[4], blz[5], account[2], blz[7], account[1], account[3]};
+            return eserCheck(head, account);
+        }
+    },
+
+    /**
      * Method {@code 54}.
      * <p>
      * Modulus 11, weights {@code {2,7,6,5,4,3,2}} over digits 3–9 (index 2–8); digits 1 and
@@ -2564,7 +2592,7 @@ public enum GermanCheckDigitMethod {
     private static final int[] WEIGHTS_C5          = {2, 1, 2, 1, 2};
     private static final int[] WEIGHTS_C6          = {2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2};
 
-    /** Weights of the ESER methods {@link #M52}, from right to left. */
+    /** Weights of the ESER methods {@link #M52} and {@link #M53}, from right to left. */
     private static final int[] WEIGHTS_ESER        = {2, 4, 8, 5, 10, 9, 7, 3, 6, 1, 2, 4};
 
     /** Number of leading ESER digits up to and including the check digit. */
@@ -2817,7 +2845,7 @@ public enum GermanCheckDigitMethod {
     }
 
     /**
-     * Shared check of the ESER methods {@link #M52}.
+     * Shared check of the ESER methods {@link #M52} and {@link #M53}.
      * <p>
      * The ESER account number is {@code head} (six digits, the check digit last) followed
      * by account digits 5-10 (index 4-9) without leading zeros. Its digits are weighted
