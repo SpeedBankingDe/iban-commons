@@ -1446,21 +1446,19 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 76}.
      * <p>
-     * Tries a primary check (compared at index 7, {@code crc = sum % 11}, no complement)
-     * whose weights and offset depend on the leading zero pattern of digits 2–3
-     * (index 1–2): both zero → weights {@code {5,4,3,2}} over digits 4–7; only digit 2
-     * zero → weights {@code {6,5,4,3,2}} over digits 3–7; otherwise weights
-     * {@code {7,6,5,4,3,2}} over digits 2–7. If that fails, retries with the analogous
-     * pattern on digits 4–5 (index 3–4), compared at index 9.
+     * Kontoart at digit 1, weights {@code {7,6,5,4,3,2}} over digits 2-7, {@code crc = sum % 11}
+     * (no complement) compared at index 7. If that fails and digits 1-2 are zero (Unterkonto
+     * 00 omitted), retries with the Kontoart at digit 3 and the Stammnummer at digits 4-9,
+     * compared at index 9. The Kontoart must be 0, 4, 6, 7, 8 or 9.
      */
     M76 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
-            CheckDigitResult primary = m76Branch(account, digitAt(account, 1) == 0, digitAt(account, 2) == 0, 7);
-            if (primary.isValid()) {
+            CheckDigitResult primary = m76Attempt(account, 0);
+            if (primary.isValid() || digitAt(account, 0) != 0 || digitAt(account, 1) != 0) {
                 return primary;
             }
-            return m76Branch(account, digitAt(account, 3) == 0, digitAt(account, 4) == 0, 9);
+            return m76Attempt(account, 2);
         }
     },
 
@@ -2751,27 +2749,14 @@ public enum GermanCheckDigitMethod {
         return compareAt(account, 6, mod11ClampAboveNine(sum));
     }
 
-    /**
-     * One branch of {@link #M76}: picks weights/offset from the zero pattern of two
-     * indicator digits, computes {@code sum % 11} (no complement), and compares at
-     * {@code compareIndex}.
-     */
-    private static CheckDigitResult m76Branch(
-            char[] account, boolean firstIndicatorZero, boolean secondIndicatorZero, int compareIndex) {
-        int[] weights;
-        int offset;
-        if (firstIndicatorZero && secondIndicatorZero) {
-            weights = WEIGHTS_5432;
-            offset  = compareIndex - 4;
-        } else if (secondIndicatorZero) {
-            weights = WEIGHTS_65432;
-            offset  = compareIndex - 5;
-        } else {
-            weights = WEIGHTS_765432;
-            offset  = compareIndex - 6;
+    /** One attempt of {@link #M76}: Kontoart at {@code kontoartIndex}, Stammnummer in the next six digits, check digit after it. */
+    private static CheckDigitResult m76Attempt(char[] account, int kontoartIndex) {
+        int kontoart = digitAt(account, kontoartIndex);
+        if (kontoart == 1 || kontoart == 2 || kontoart == 3 || kontoart == 5) {
+            return CheckDigitResult.of(false);
         }
-        int sum = weightedSum(account, weights, offset, false);
-        return compareAt(account, compareIndex, sum % MODULUS_11);
+        int sum = weightedSum(account, WEIGHTS_765432, kontoartIndex + 1, false);
+        return compareAt(account, kontoartIndex + 7, sum % MODULUS_11);
     }
 
     /** Accumulator formula shared by {@link #M91}... not applicable; kept private to {@link #B9}. */
