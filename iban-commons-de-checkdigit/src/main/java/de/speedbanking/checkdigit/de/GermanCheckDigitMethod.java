@@ -1664,6 +1664,45 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 87}.
+     * <p>
+     * Sachkonten exception (digit 3 / index 2 equals {@code 9}) delegates to {@link #M51}.
+     * Otherwise tries, all compared at index 9: (A) the Bundesbank pseudo code over digits
+     * 4-9 with the result tables {@code TAB1}/{@code TAB2}, see {@link #calculateM87A};
+     * (B) {@link #M33}; (C) modulus 7, weights {@code {6,5,4,3,2}} over digits 5-9,
+     * {@code (7 - sum % 7) % 7}; (D) modulus 11, weights {@code {7,6,5,4,3,2}} over
+     * digits 4-9, clamp-above-9 as in method {@code 06}.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the pseudo code of method A skips
+     * leading zeros from digit 4 without an upper bound, so it reads past digit 10 when
+     * digits 4-10 are all {@code 0}. The skip stops at digit 10 here, which gives the same
+     * result wherever the specification is defined.
+     */
+    M87 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9) {
+                return M51.calculate(blz, account);
+            }
+            CheckDigitResult a = calculateM87A(account);
+            if (a.isValid()) {
+                return a;
+            }
+            CheckDigitResult b = M33.calculate(blz, account);
+            if (b.isValid()) {
+                return b;
+            }
+            int sumC = weightedSum(account, WEIGHTS_65432, 4, false);
+            CheckDigitResult c = compareToCheckDigit(account, mod7Complement(sumC));
+            if (c.isValid()) {
+                return c;
+            }
+            int sumD = weightedSum(account, WEIGHTS_765432, 3, false);
+            return compareToCheckDigit(account, mod11ClampAboveNine(sumD));
+        }
+    },
+
+    /**
      * Method {@code 88}.
      * <p>
      * Modulus 11, clamp-above-9 rule, compared at index 9. Weights and offset depend on
@@ -2632,6 +2671,8 @@ public enum GermanCheckDigitMethod {
     private static final int[] WEIGHTS_B9A         = {1, 2, 3, 1, 2, 3, 1};
     private static final int[] WEIGHTS_C5          = {2, 1, 2, 1, 2};
     private static final int[] WEIGHTS_C6          = {2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2};
+    private static final int[] M87_TAB1            = {0, 4, 3, 2, 6};
+    private static final int[] M87_TAB2            = {7, 1, 5, 9, 8};
 
     /** Weights of the ESER methods {@link #M52} and {@link #M53}, from right to left. */
     private static final int[] WEIGHTS_ESER        = {2, 4, 8, 5, 10, 9, 7, 3, 6, 1, 2, 4};
@@ -2801,6 +2842,87 @@ public enum GermanCheckDigitMethod {
         System.arraycopy(account, 1, digits, 7, 8);
         int sum = weightedSum(digits, WEIGHTS_C6, 0, true);
         return compareToCheckDigit(account, mod10Complement(sum));
+    }
+
+    /**
+     * Method A of {@link #M87}, translated from the Bundesbank pseudo code. {@code i} is
+     * the 1-based digit position of the specification; {@code konto[i]} may become
+     * {@code 10}.
+     */
+    private static CheckDigitResult calculateM87A(char[] account) {
+        int[] konto = new int[ACCOUNT_LENGTH + 1];
+        for (int k = 1; k <= ACCOUNT_LENGTH; k++) {
+            konto[k] = digitAt(account, k - 1);
+        }
+        int i = 4;
+        while (konto[i] == 0 && i < ACCOUNT_LENGTH) {
+            i++;
+        }
+        int c2 = i % 2;
+        int d2 = 0;
+        int a5 = 0;
+        while (i < ACCOUNT_LENGTH) {
+            switch (konto[i]) {
+                case 0:
+                    konto[i] = 5;
+                    break;
+                case 1:
+                    konto[i] = 6;
+                    break;
+                case 5:
+                    konto[i] = 10;
+                    break;
+                case 6:
+                    konto[i] = 1;
+                    break;
+                default:
+                    break;
+            }
+            if (c2 == d2) {
+                if (konto[i] > 5) {
+                    if (c2 == 0 && d2 == 0) {
+                        c2 = 1;
+                        d2 = 1;
+                        a5 = a5 + 6 - (konto[i] - 6);
+                    } else {
+                        c2 = 0;
+                        d2 = 0;
+                        a5 = a5 + konto[i];
+                    }
+                } else {
+                    c2 = c2 == 0 && d2 == 0 ? 1 : 0;
+                    a5 = a5 + konto[i];
+                }
+            } else {
+                if (konto[i] > 5) {
+                    if (c2 == 0) {
+                        c2 = 1;
+                        d2 = 0;
+                        a5 = a5 - 6 + (konto[i] - 6);
+                    } else {
+                        c2 = 0;
+                        d2 = 1;
+                        a5 = a5 - konto[i];
+                    }
+                } else {
+                    c2 = c2 == 0 ? 1 : 0;
+                    a5 = a5 - konto[i];
+                }
+            }
+            i++;
+        }
+        while (a5 < 0 || a5 > 4) {
+            a5 = a5 > 4 ? a5 - MODULUS_5 : a5 + MODULUS_5;
+        }
+        int p = d2 == 0 ? M87_TAB1[a5] : M87_TAB2[a5];
+        if (p == konto[ACCOUNT_LENGTH]) {
+            return CheckDigitResult.of(true);
+        }
+        if (konto[4] == 0) {
+            p = p > 4 ? p - MODULUS_5 : p + MODULUS_5;
+            return CheckDigitResult.of(p == konto[ACCOUNT_LENGTH]);
+        }
+        return CheckDigitResult.of(false);
     }
 
     private static long toLong(char[] account) {

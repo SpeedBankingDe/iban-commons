@@ -418,6 +418,39 @@ final class GermanCheckDigitMethodTest {
         assertThat(GermanCheckDigitMethod.M95.calculate(BLZ, "0969854394".toCharArray()).isChecked()).isFalse();
     }
 
+    // Method 87: Bundesbank test numbers; rows marked "derived" change the check digit of a spec number
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource(delimiter = '|', value = {
+        "87 | 0000000406 | true",  // Methode A
+        "87 | 0000051768 | true",  // Methode A
+        "87 | 0010701590 | true",  // Methode A
+        "87 | 0010720185 | true",  // Methode A
+        "87 | 0000000407 | false", // derived from 0000000406, fails A to D
+        "87 | 0010701591 | false", // derived from 0010701590, fails A to D
+        "87 | 0000100005 | true",  // Methode B and C
+        "87 | 0000393814 | true",  // Methode B and C
+        "87 | 0000950360 | true",  // Methode B and C
+        "87 | 3199500501 | true",  // Methode B and C, digit 3 is 9 so the Ausnahme applies
+        "87 | 0000100006 | false", // derived from 0000100005, fails A to D
+        "87 | 0000393815 | false", // derived from 0000393814, fails A to D
+        "87 | 0001975641 | true",  // Methode D
+        "87 | 0001988654 | true",  // Methode D
+        "87 | 0001924592 | false", // Methode D
+        "87 | 0199100002 | true",  // Ausnahme, test numbers of method 51 Variante 1
+        "87 | 0099100010 | true",  // Ausnahme, method 51 Variante 1
+        "87 | 2599100002 | true",  // Ausnahme, method 51 Variante 1
+        "87 | 0199100004 | true",  // Ausnahme, method 51 Variante 2
+        "87 | 2599100003 | true",  // Ausnahme, method 51 Variante 2
+        "87 | 3199204090 | true",  // Ausnahme, method 51 Variante 2
+        "87 | 0099345678 | false", // Ausnahme, method 51 Variante 2
+        "87 | 0099100110 | false", // Ausnahme, method 51 Variante 2
+        "87 | 0199100040 | false", // Ausnahme, method 51 Variante 2
+    })
+    void calculate_m87_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
     private static void assertVector(String code, String account, boolean expectedValid) {
         assertVector(code, new String(BLZ), account, expectedValid);
     }
