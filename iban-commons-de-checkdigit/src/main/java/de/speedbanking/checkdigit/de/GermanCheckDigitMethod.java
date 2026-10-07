@@ -2780,6 +2780,33 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code D5}.
+     * <p>
+     * If digits 3 and 4 (index 2, 3) are both {@code 9}, only Variante 1 applies:
+     * modulus 11, weights {@code {8,7,6,5,4,3,2}} over digits 3-9 (index 2-8),
+     * clamp-above-9 rule as in {@link #M06}. Otherwise one sum is formed with weights
+     * {@code {7,6,5,4,3,2}} over digits 4-9 (index 3-8) and tried in order: (2) modulus 11,
+     * clamp-above-9; (3) {@code (7 - sum % 7) % 7}; (4) {@code (10 - sum % 10) % 10}, no
+     * cross sum. All compared at index 9.
+     */
+    D5 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9 && digitAt(account, 3) == 9) {
+                int sum = weightedSum(account, WEIGHTS_8765432, 2, false);
+                return compareToCheckDigit(account, mod11ClampAboveNine(sum));
+            }
+            int sum = weightedSum(account, WEIGHTS_765432, 3, false);
+            CheckDigitResult second = compareToCheckDigit(account, mod11ClampAboveNine(sum));
+            if (second.isValid()) {
+                return second;
+            }
+            CheckDigitResult third = compareToCheckDigit(account, mod7Complement(sum));
+            return third.isValid() ? third : compareToCheckDigit(account, mod10Complement(sum));
+        }
+    },
+
     /** Method {@code D6}. Delegates to {@link #M07}, then {@link #M03}, then {@link #M00}. */
     D6 {
         @Override

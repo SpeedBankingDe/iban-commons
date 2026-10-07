@@ -1199,6 +1199,36 @@ final class GermanCheckDigitMethodTest {
     void calculate_d4_bundesbankVectors(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
     }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "D5, 5999242133, true",  // Variante 1 worked example: 184
+        "D5, 5999718138, true",  // Variante 1
+        "D5, 1799222116, true",  // Variante 1
+        "D5, 0099632004, true",  // Variante 1
+        "D5, 3299632008, false", // Variante 1; Variante 4 would accept it (hand-derived)
+        "D5, 1999204293, false", // Variante 1
+        "D5, 0399242139, false", // Variante 1
+        "D5, 0004711173, true",  // Variante 2, also the worked example
+        "D5, 0007093330, true",  // Variante 2
+        "D5, 0000127787, true",  // Variante 2
+        "D5, 0004711172, true",  // false in Variante 2, true in Variante 3
+        "D5, 8623420004, false", // false in Variante 2; sum 55 also fails Variante 3 and 4 (hand-derived)
+        "D5, 0001123458, false", // false in Variante 2 and 3; sum 57 also fails Variante 4 (hand-derived)
+        "D5, 0007093335, true",  // Variante 3
+        "D5, 8623410000, true",  // false in Variante 3; sum 50 passes Variante 4 (hand-derived)
+        "D5, 0004711174, true",  // Variante 4 worked example: 96
+        "D5, 0000100062, true",  // Variante 4
+        "D5, 0000100088, true",  // Variante 4
+        "D5, 0000100084, false", // Variante 4
+        "D5, 0000100085, false", // Variante 4
+    })
+    void calculate_d5_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
