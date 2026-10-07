@@ -1580,6 +1580,24 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 77}.
+     * <p>
+     * Modulus 11 over digits 6-10 (index 5-9), the check digit included: weights
+     * {@code {5,4,3,2,1}}; the account number is valid if the sum leaves no remainder when
+     * divided by 11. Otherwise the sum is recalculated with weights {@code {5,4,3,4,5}},
+     * which must also leave no remainder; if it does, the account number is invalid.
+     */
+    M77 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (weightedSum(account, WEIGHTS_54321, 5, false) % MODULUS_11 == 0) {
+                return CheckDigitResult.of(true);
+            }
+            return CheckDigitResult.of(weightedSum(account, WEIGHTS_M77B, 5, false) % MODULUS_11 == 0);
+        }
+    },
+
+    /**
      * Method {@code 78}.
      * <p>
      * If digits 1–2 (index 0–1) sum to zero while digit 3 (index 2) does not, no check is
@@ -2820,6 +2838,8 @@ public enum GermanCheckDigitMethod {
     private static final int[] WEIGHTS_M68B        = {1, 0, 0, 2, 1, 2, 1, 2};
     private static final int[] WEIGHTS_M71         = {6, 5, 4, 3, 2, 1};
     private static final int[] WEIGHTS_M73         = {2, 1, 2, 1, 2};
+    private static final int[] WEIGHTS_54321       = {5, 4, 3, 2, 1};
+    private static final int[] WEIGHTS_M77B        = {5, 4, 3, 4, 5};
     private static final int[] WEIGHTS_M91B        = {2, 3, 4, 5, 6, 7};
     private static final int[] WEIGHTS_M91C        = {10, 9, 8, 7, 6, 5, 0, 4, 3, 2};
     private static final int[] WEIGHTS_M92         = {1, 7, 3, 1, 7, 3};
