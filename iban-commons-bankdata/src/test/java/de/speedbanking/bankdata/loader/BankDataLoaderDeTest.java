@@ -9,6 +9,8 @@ import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bankdata.spi.BankDataParseException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -106,6 +108,27 @@ final class BankDataLoaderDeTest {
         assertThat((Object) records.get(0).getBic()).isNull();
     }
 
+    @ParameterizedTest(name = "[{index}] method {0} -> {1}")
+    @CsvSource(delimiter = '|', value = {
+        "09 | 09",
+        "A4 | A4",
+        "'' |",   // quoted empty field
+        "   |",   // unquoted empty field
+    })
+    void parse_checkDigitMethodColumn_carriedAsCheckDigitMethod(String method, String expected) throws Exception {
+        String methodField = method == null ? "" : "\"" + method + "\"";
+        String content = "Bankleitzahl;Merkmal;Bezeichnung;PLZ;Ort;Kurzbezeichnung;PAN;BIC;Pruefzifferberechnungsmethode;"
+            + "Datensatznummer;Aenderungskennzeichen;Bankleitzahlloeschung;Nachfolge-Bankleitzahl\n"
+            + "\"37040044\";\"1\";\"Commerzbank\";\"50447\";\"Koeln\";\"Commerzbank Koeln\";\"24370\";"
+            + "\"COBADEFFXXX\";" + methodField + ";\"006143\";\"U\";\"0\";\"00000000\"\n";
+        InputStream in = new ByteArrayInputStream(content.getBytes(WINDOWS_1252));
+
+        List<BankData> records = loader.parse(in, "test-version");
+
+        assertThat(records).hasSize(1);
+        assertThat(records.get(0).getCheckDigitMethod()).isEqualTo(expected);
+    }
+
     @Test
     void parse_sampleFile_skipsHeaderDeletedAndBiclessRows_andHandlesQuotingAndUmlauts() throws Exception {
         List<BankData> records;
@@ -131,6 +154,10 @@ final class BankDataLoaderDeTest {
         BankData withUmlaut = findByBankCode(records, "30000000");
         assertThat(withUmlaut.getBankName()).isEqualTo("Müllerbank München AG");
         assertThat(withUmlaut.getCity()).isEqualTo("München");
+
+        assertThat(mainOffice.checkDigitMethod()).contains("09");
+        assertThat(withUmlaut.checkDigitMethod()).contains("A4");
+        assertThat(findByBankCode(records, "20000000").checkDigitMethod()).isEmpty();
 
         assertThat(records).allMatch(r -> r.getSourceVersion().equals("test-version"));
     }

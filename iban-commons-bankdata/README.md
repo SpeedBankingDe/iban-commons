@@ -56,6 +56,23 @@ Optional<BankData> byBic = BankDataLookup.byBic("COBADEFFXXX");
 
 `BankDataLookup` never throws for "not found", "country not supported", or "network unreachable" - all three simply produce an `Optional.empty()`.
 
+### Fields
+
+A `BankData` record carries the country code, bank code, optional branch code, BIC, bank name,
+postal code, city, check digit method and source version. Every optional field has a getter that
+returns `null` (e.g. `getCheckDigitMethod()`) and an accessor that returns an `Optional` (e.g.
+`checkDigitMethod()`).
+
+The check digit method is the identifier of the national account check digit method the bank
+uses. Only Germany publishes it: it is the `Pruefzifferberechnungsmethode` column of the
+Bundesbank BLZ directory, a two-character code such as `09` or `A4`. It is empty for every other
+country.
+
+```java
+BankDataLookup.byBankCode("DE", "37040044")
+    .flatMap(BankData::checkDigitMethod); // Optional[13]
+```
+
 A small runnable sample (`BankDataLookupSample`) generates a few random, valid IBANs and prints each institution's resolved BIC and bank name:
 ```bash
 cd iban-commons-bankdata
@@ -71,7 +88,8 @@ mvn test-compile exec:java@bank-data-lookup-sample
    same way otherwise, just without a bundled offline snapshot: the first lookup requires network
    access.
 2. **Local cache.** Once refreshed at least once, data is persisted as a single CSV file per
-   country to a local cache directory (`${user.home}/.iban-commons/bankdata` by default; see
+   country (header `bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod`, see
+   `BankDataFormat`) to a local cache directory (`${user.home}/.iban-commons/bankdata` by default; see
    [`BankDataConfig`](#configuration)) and survives JVM restarts. Persisting a refresh writes to a
    temporary file first and then atomically renames it into place, so a crash mid-write can never
    leave a partially written file at the final path.
