@@ -1410,7 +1410,7 @@ public enum GermanCheckDigitMethod {
                 return b;
             }
 
-            int sumC = weightedSum(account, WEIGHTS_M73, 4, false);
+            int sumC = weightedSum(account, WEIGHTS_M73, 4, true);
             return compareToCheckDigit(account, mod7Complement(sumC));
         }
     },
