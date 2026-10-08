@@ -111,6 +111,10 @@ final class GermanCheckDigitMethodTest {
         "11, 1234567890, false",
         "13, 0123456600, true",
         "13, 0123456700, false",
+        "13, 0001234566, true",
+        "13, 0505315957, false",
+        "13, 5658815185, false",
+        "13, 1674350112, false",
         "14, 0001234560, true",
         "14, 0001234561, false",
         "15, 0000012343, true",
@@ -171,6 +175,11 @@ final class GermanCheckDigitMethodTest {
         "46, 0012345600, false",
         "48, 0012345600, true",
         "48, 0012345610, false",
+        "50, 4000005001, true",
+        "50, 4444442001, true",
+        "50, 0004000005, true",
+        "50, 1939699805, false",
+        "50, 0034329406, false",
         "55, 1234567895, true",
         "55, 1234567896, false",
         "56, 1234567892, true",
@@ -189,6 +198,12 @@ final class GermanCheckDigitMethodTest {
         "65, 1234567580, false",
         "66, 0123456784, true",
         "66, 0123456785, false",
+        "66, 0100154508, true",
+        "66, 0101154508, true",
+        "66, 0100154516, true",
+        "66, 0101154516, true",
+        "66, 1023843920, false",
+        "66, 5953334918, false",
         "67, 1234567400, true",
         "67, 1234567500, false",
         "68, 0123456782, true",
@@ -199,12 +214,25 @@ final class GermanCheckDigitMethodTest {
         "70, 1234567893, false",
         "71, 0123456001, true",
         "71, 0123456002, false",
+        "71, 7000000000, true",
+        "71, 7286737790, true",
+        "71, 7101234007, true",
+        "71, 7000000001, false",
+        "71, 7286737791, false",
         "73, 0001234566, true",
         "73, 0001234568, false",
         "74, 1234567897, true",
         "74, 1234567898, false",
         "76, 0112345200, true",
         "76, 0112345300, false",
+        "76, 0006543200, true",
+        "76, 9012345600, true",
+        "76, 7876543100, true",
+        "76, 0000123456, true",
+        "76, 0503234900, true",
+        "76, 5755404113, false",
+        "76, 4149469382, false",
+        "76, 7103061265, false",
         "78, 1234567897, true",
         "78, 1234567898, false",
         "85, 0001234560, true",
@@ -237,6 +265,15 @@ final class GermanCheckDigitMethodTest {
         "B0, 1000000405, false",
         "B4, 9941510001, true", // Variante 1 / M00 (Bundesbank test vector)
         "B4, 9941510002, false",
+        "B7, 0700001529, true",
+        "B7, 0810011825, true",
+        "B7, 0005922372, true",
+        "B7, 0001057886, false",
+        "B7, 0003815570, false",
+        "B7, 0005620516, false",
+        "B7, 0740912243, false",
+        "B7, 0893524479, false",
+        "B7, 0838427558, false",
         "B9, 0012345673, true",
         "B9, 0012345674, false",
         "C5, 0000123455, true",
@@ -274,7 +311,7 @@ final class GermanCheckDigitMethodTest {
         "B8 | 4273675928 | false", // both invalid, outside the 'not checked' exception ranges
         "84 | 2806520667 | true",  // no Ausnahme, sumA (Modulus 11) valid
         "84 | 3607756696 | true",  // no Ausnahme, sumA invalid, sumB (Modulus 7) valid
-        "84 | 9400189902 | true",  // no Ausnahme, sumA/sumB invalid, sumC (Modulus 10) valid
+        "84 | 0000240961 | true",  // no Ausnahme, sumA/sumB invalid, sumC (Modulus 10) valid
         "84 | 2100969422 | false", // no Ausnahme, all three formulas invalid
         "84 | 0898857649 | true",  // Ausnahme applies, first Modulus-11 variant matches
         "84 | 5791244665 | true",  // Ausnahme applies, first variant fails, second matches
@@ -302,6 +339,59 @@ final class GermanCheckDigitMethodTest {
     })
     void calculate_knownVectors_branchCoverage(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
+    }
+
+    // Methods that read BLZ digits: test numbers and worked examples from the Bundesbank specification
+
+    @ParameterizedTest(name = "[{index}] method {0}: BLZ {1}, account {2}")
+    @CsvSource(delimiter = '|', value = {
+        "52 | 13051172 | 0043001500 | true",  // worked example, check digit 3
+        "52 | 13051172 | 0042001500 | false", // worked example with a wrong check digit (hand-derived)
+        "52 | 13051172 | 0048726458 | true",  // C0 Variante 1 test number (method 52)
+        "52 | 13051172 | 0082335729 | false", // C0 Variante 1 test number (method 52)
+        "52 | 13051172 | 0029837521 | false", // C0 Variante 1 test number (method 52)
+        "52 | 13051172 | 9000000006 | true",  // 10 digits starting with 9 -> method 20 (hand-derived)
+        "52 | 13051172 | 9000000005 | false", // same, wrong check digit (hand-derived)
+        "52 | 13051172 | 0004300150 | false", // fewer than 8 digits (hand-derived)
+        "52 | 13051172 | 0430015009 | false", // 9 digits (hand-derived)
+        "53 | 16052072 | 0382432256 | true",  // worked example, check digit 2
+        "53 | 16052072 | 0383432256 | false", // worked example with a wrong check digit (hand-derived)
+        "53 | 80053782 | 0487310018 | true",  // B6 Variante 2 test number (method 53)
+        "53 | 80053762 | 0467310018 | false", // B6 Variante 2 test number (method 53)
+        "53 | 80053772 | 0477310018 | false", // B6 Variante 2 test number (method 53)
+        "53 | 16052072 | 9000000006 | true",  // 10 digits starting with 9 -> method 20 (hand-derived)
+        "53 | 16052072 | 9000000005 | false", // same, wrong check digit (hand-derived)
+        "53 | 16052072 | 0038243225 | false", // fewer than 9 digits (hand-derived)
+        "53 | 16052072 | 3824322560 | false", // 10 digits not starting with 9 (hand-derived)
+        "B6 | 80053782 | 9110000000 | true",  // Variante 1 test number (method 20)
+        "B6 | 80053782 | 0269876545 | true",  // Variante 1 test number (method 20)
+        "B6 | 80053782 | 9111000000 | false", // Variante 1 test number (method 20)
+        "B6 | 80053782 | 0269456780 | false", // Variante 1 test number (method 20)
+        "B6 | 80053782 | 0487310018 | true",  // Variante 2 test number (method 53)
+        "B6 | 80053762 | 0467310018 | false", // Variante 2 test number (method 53)
+        "B6 | 80053772 | 0477310018 | false", // Variante 2 test number (method 53)
+        "B6 | 80053782 | 0269000003 | false", // digits 1-5 02690 -> Variante 2; method 20 would accept it (hand-derived)
+        "C0 | 13051172 | 0043001500 | true",  // Variante 1 test number; Variante 2 alone would reject it (hand-derived)
+        "C0 | 13051172 | 0048726458 | true",  // Variante 1 test number
+        "C0 | 13051172 | 0082335729 | true",  // Variante 1 test number (false), accepted by Variante 2 test number
+        "C0 | 13051172 | 0029837521 | false", // Variante 1 test number (false), Variante 2 also fails (hand-derived)
+        "C0 | 13051172 | 0734192657 | true",  // Variante 2 test number
+        "C0 | 13051172 | 6932875274 | true",  // Variante 2 test number
+        "C0 | 13051172 | 0132572975 | false", // Variante 2 test number
+        "C0 | 13051172 | 3038752371 | false", // Variante 2 test number
+    })
+    void calculate_knownVectorsWithBlz(String code, String blz, String account, boolean expectedValid) {
+        assertVector(code, blz, account, expectedValid);
+    }
+
+    @Test
+    void calculate_m52_noFactorReachesRemainderTen_alwaysInvalid() {
+        // hand-derived: ESER 1172-4P-1541 has sum 141, remainder 9; 9 + k * 10 reaches remainder 10 only for k = 10
+        for (char p = '0'; p <= '9'; p++) {
+            char[] account = ("004" + p + "001541").toCharArray();
+            assertThat(GermanCheckDigitMethod.M52.calculate("13051172".toCharArray(), account).isValid())
+                .as("check digit %s", p).isFalse();
+        }
     }
 
     @Test
@@ -362,9 +452,13 @@ final class GermanCheckDigitMethodTest {
     }
 
     private static void assertVector(String code, String account, boolean expectedValid) {
+        assertVector(code, new String(BLZ), account, expectedValid);
+    }
+
+    private static void assertVector(String code, String blz, String account, boolean expectedValid) {
         GermanCheckDigitMethod method = GermanCheckDigitMethod.fromCode(code);
 
-        CheckDigitResult result = method.calculate(BLZ, account.toCharArray());
+        CheckDigitResult result = method.calculate(blz.toCharArray(), account.toCharArray());
 
         assertThat(result.isChecked()).as("method %s should perform a real check for %s", code, account).isTrue();
         assertThat(result.isValid()).as("method %s, account %s", code, account).isEqualTo(expectedValid);
@@ -627,10 +721,10 @@ final class GermanCheckDigitMethodTest {
 
     @Test
     void fromCode_unknownCode_throwsIllegalArgumentException() {
-        // "52" is deliberately not implemented (see class javadoc) - genuinely unknown to fromCode
+        // "12" is unassigned by the Bundesbank - genuinely unknown to fromCode
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> GermanCheckDigitMethod.fromCode("52"))
-            .withMessageContaining("52");
+            .isThrownBy(() -> GermanCheckDigitMethod.fromCode("12"))
+            .withMessageContaining("12");
     }
 
     @Test
@@ -741,6 +835,58 @@ final class GermanCheckDigitMethodTest {
 
     @ParameterizedTest(name = "[{index}] method {0}: account {1}")
     @CsvSource({
+        "73, 0003503398, true",  // Variante 1
+        "73, 0001340967, true",  // Variante 1
+        "73, 0003503391, true",  // Variante 2
+        "73, 0001340968, true",  // Variante 2
+        "73, 0003503392, true",  // Variante 3
+        "73, 0001340966, true",  // Variante 3
+        "73, 0000123456, true",  // Variante 3
+        "73, 0000121212, false", // Variante 3
+        "73, 0987654321, false", // Variante 3
+        "73, 0199100002, true",  // Ausnahme, method 51 Variante 1
+        "73, 0099100010, true",  // Ausnahme, method 51 Variante 1
+        "73, 2599100002, true",  // Ausnahme, method 51 Variante 1
+        "73, 0199100004, true",  // Ausnahme, method 51 Variante 2
+        "73, 2599100003, true",  // Ausnahme, method 51 Variante 2
+        "73, 3199204090, true",  // Ausnahme, method 51 Variante 2
+        "73, 0099345678, false", // Ausnahme, method 51 Variante 2
+        "73, 0099100110, false", // Ausnahme, method 51 Variante 2
+        "73, 0199100040, false", // Ausnahme, method 51 Variante 2
+        "73, 0099100061, true",  // hand-derived: Ausnahme, sum 153, remainder 10 gives check digit 1
+        "73, 0099100060, false", // hand-derived: same sum, check digit 0 is wrong
+        "73, 6992181420, false", // hand-derived: Ausnahme final, sums 152 and 293 expect 2 and 4
+        "73, 9995902668, false", // hand-derived: Ausnahme final, sums 199 and 370 expect 0 and 4
+        "73, 7292496222, false", // hand-derived: Ausnahme final, sums 189 and 277 expect 9 and 9
+        "73, 3797660392, false", // hand-derived: Ausnahme final, sums 214 and 307 expect 6 and 1
+        "73, 6992985554, false", // hand-derived: Ausnahme final, sums 225 and 366 expect 6 and 8
+        "73, 5690313213, false", // hand-derived: Ausnahme final, sums 115 and 219 expect 6 and 1
+    })
+    void calculate_m73_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "84, 0199100002, true",  // Ausnahme, method 51 Variante 1
+        "84, 0099100010, true",  // Ausnahme, method 51 Variante 1
+        "84, 2599100002, true",  // Ausnahme, method 51 Variante 1
+        "84, 0199100004, true",  // Ausnahme, method 51 Variante 2
+        "84, 2599100003, true",  // Ausnahme, method 51 Variante 2
+        "84, 3199204090, true",  // Ausnahme, method 51 Variante 2
+        "84, 0099345678, false", // Ausnahme, method 51 Variante 2
+        "84, 0099100110, false", // Ausnahme, method 51 Variante 2
+        "84, 0199100040, false", // Ausnahme, method 51 Variante 2
+        "84, 0099100061, true",  // hand-derived: Ausnahme, sum 153, remainder 10 gives check digit 1
+        "84, 0099100060, false", // hand-derived: same sum, check digit 0 is wrong
+        "84, 4591220536, false", // hand-derived: Ausnahme final, sums 122 and 207 expect 0 and 2
+    })
+    void calculate_m84_ausnahme51Vectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
         // Mutation-coverage gap-closing vectors: each exercises a specific branch, boundary or
         // helper (mod9Complement, ausnahme51, recursiveCrossSum, m24EffectiveDigits, wrapPlusFive,
         // m76Branch, calculateM93) that the vectors above never reached.
@@ -796,12 +942,12 @@ final class GermanCheckDigitMethodTest {
         "70, 0006900003, true",
         "70, 0006000002, true",
         "73, 0001000000, true",
-        "73, 0090000020, true",
+        "73, 0090000021, true",
         "73, 0190000007, true",
         "73, 0190000009, false",
         "74, 0000500004, true",
         "76, 0001234800, true",
-        "76, 0501234800, true",
+        "76, 0501234800, false",
         "76, 0561234200, true",
         "76, 0000034952, true",
         "85, 0099000008, true",
@@ -870,6 +1016,8 @@ final class GermanCheckDigitMethodTest {
     @CsvSource({
         // Boundary vectors for range-gated "no check performed" branches (M45, M95, M99, A0, B8, C5, D0).
         "45, 4800000000",
+        "66, 0983393104",
+        "66, 0901468782",
         "95, 0000000001",
         "95, 0001999999",
         "95, 0009000000",
@@ -900,4 +1048,27 @@ final class GermanCheckDigitMethodTest {
         assertThat(result.isValid()).as("method %s, account %s", code, account).isTrue();
     }
 
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "84, 0000240699, true",  // Methode A
+        "84, 0000350982, true",  // Methode A
+        "84, 0000461059, true",  // Methode A
+        "84, 0000240692, true",  // Methode B
+        "84, 0000350985, true",  // Methode B
+        "84, 0000461052, true",  // Methode B
+        "84, 0000240961, true",  // Methode C: 4+4+0+9+12 = 29; with cross sum it would expect 0
+        "84, 0000350984, true",  // Methode C
+        "84, 0000461054, true",  // Methode C
+        "84, 0000240965, false", // Methode A, B and C
+        "84, 0000350980, false", // Methode A, B and C
+        "84, 0000461053, false", // Methode A, B and C
+        "84, 4076923062, true",  // hand-derived: sum 88 expects A 0, B 3; C sum 38 expects 2
+        "84, 2016316085, true",  // hand-derived: sum 63 expects A 3, B 0; C sum 35 expects 5
+        "84, 8588547083, false", // hand-derived: sum 94 expects A 5, B 4; C sum 44 expects 6
+        "84, 6778117499, false", // hand-derived: sum 69 expects A 8, B 1; C sum 39 expects 1
+        "84, 5928525469, false", // hand-derived: sum 84 expects A 4, B 0; C sum 38 expects 2
+    })
+    void calculate_m84_bundesbankVectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
 }
