@@ -29,6 +29,12 @@ import java.util.Objects;
  * these, {@link #isChecked()} is {@code false} and {@link #isValid()} is {@code true}
  * by convention, so that callers who only branch on {@link #isValid()} tolerate the
  * account number rather than rejecting it.
+ * <p>
+ * A method returns {@link #NOT_CHECKED} only where the Bundesbank specification defines no
+ * check digit for the account number ("nicht pruefbar, da diese Nummern keine Pruefziffer
+ * enthalten"). An account number that fails the calculation is always invalid, also where
+ * the specification calls it "nicht pruefbar": method 91 lists account numbers that fail
+ * every variant as "Testkontonummern (falsch)".
  *
  * @since 1.9.0
  */
@@ -38,8 +44,9 @@ public final class CheckDigitResult {
     private static final CheckDigitResult INVALID = new CheckDigitResult(false, true);
 
     /**
-     * Sentinel result for methods that perform no check digit verification at all
-     * (method {@code 09}, and the unverifiable ranges of method {@code 08}).
+     * Sentinel result for account numbers without a check digit, for example method {@code 09}
+     * and the ranges of other methods where the specification defines no check digit. Not
+     * used for account numbers that fail the calculation.
      */
     public static final CheckDigitResult NOT_CHECKED = new CheckDigitResult(true, false);
 

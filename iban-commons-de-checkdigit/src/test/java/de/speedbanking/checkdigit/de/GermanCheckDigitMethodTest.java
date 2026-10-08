@@ -243,6 +243,8 @@ final class GermanCheckDigitMethodTest {
         "90, 0001234561, false",
         "91, 1234560000, true",
         "91, 1234561000, false",
+        "91, 8840010000, false", // Variante 4 "falsch" test number, fails every variant: "nicht pruefbar" is invalid
+        "91, 8840057000, false", // Variante 4 "falsch" test number, fails every variant
         "92, 0001234569, true",
         "92, 0001234560, false",
         "93, 6714790000, true", // Fall a, Modulus 11 (Bundesbank test vector)
