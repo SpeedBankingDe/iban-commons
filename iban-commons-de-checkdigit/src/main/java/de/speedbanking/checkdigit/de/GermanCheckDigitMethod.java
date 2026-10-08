@@ -943,6 +943,65 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 52}.
+     * <p>
+     * Applies to 8-digit account numbers {@code XPXXXXXX} (digits 3-10, index 2-9, with a
+     * non-zero digit 3). The check runs on the account number of the ESER legacy system,
+     * built as BLZ digits 5-8, account digit 3, the check digit P (account digit 4), then
+     * account digits 5-10 with leading zeros removed. See {@link #eserCheck} for the
+     * modulus 11 factor search. 10-digit account numbers starting with {@code 9} are
+     * checked with {@link #M20} instead; all other account numbers are rejected.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification labels the BLZ
+     * group of the ESER pattern as the variable-length part, but its worked example
+     * removes the leading zeros of the trailing account digits ({@code 001500} becomes
+     * {@code 1500}); the example is followed. Account numbers with fewer than 8 digits
+     * are rejected, since the specification only defines the 8-digit layout. The BLZ
+     * pattern {@code XXX5XXXX} is not enforced.
+     */
+    M52 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 9) {
+                return M20.calculate(blz, account);
+            }
+            if (digitAt(account, 0) != 0 || digitAt(account, 1) != 0 || digitAt(account, 2) == 0) {
+                return CheckDigitResult.of(false);
+            }
+            char[] head = {blz[4], blz[5], blz[6], blz[7], account[2], account[3]};
+            return eserCheck(head, account);
+        }
+    },
+
+    /**
+     * Method {@code 53}.
+     * <p>
+     * Same calculation as {@link #M52}, but for 9-digit account numbers {@code XTPXXXXXX}
+     * (digits 2-10, index 1-9, with a non-zero digit 2). The ESER account number is built
+     * as BLZ digits 5 and 6, the account digit T (digit 3) in place of BLZ digit 7, BLZ
+     * digit 8, account digit 2, the check digit P (account digit 4), then account digits
+     * 5-10 with leading zeros removed. 10-digit account numbers starting with {@code 9}
+     * are checked with {@link #M20} instead; all other account numbers are rejected.
+     * <p>
+     * <strong>Implemented with reservation</strong>: account numbers with fewer than 9
+     * digits are rejected, since the specification only defines the 9-digit layout. The
+     * BLZ pattern {@code XXX5XXXX} is not enforced.
+     */
+    M53 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 9) {
+                return M20.calculate(blz, account);
+            }
+            if (digitAt(account, 0) != 0 || digitAt(account, 1) == 0) {
+                return CheckDigitResult.of(false);
+            }
+            char[] head = {blz[4], blz[5], account[2], blz[7], account[1], account[3]};
+            return eserCheck(head, account);
+        }
+    },
+
+    /**
      * Method {@code 54}.
      * <p>
      * Modulus 11, weights {@code {2,7,6,5,4,3,2}} over digits 3–9 (index 2–8); digits 1 and
@@ -1391,6 +1450,22 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 72}.
+     * <p>
+     * Modulus 10, weights {@code {1,2,1,2,1,2}} over digits 4-9 (index 3-8), products
+     * greater than 9 reduced to their cross sum (as in {@link #M00}), check digit
+     * {@code (10 - sum % 10) % 10} compared at index 9. The sub-account number (digits 1
+     * and 2) and the account type (digit 3) are not weighted.
+     */
+    M72 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = weightedSum(account, WEIGHTS_121212, 3, true);
+            return compareToCheckDigit(account, mod10Complement(sum));
+        }
+    },
+
+    /**
      * Method {@code 73}.
      * <p>
      * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
@@ -1453,6 +1528,39 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 75}.
+     * <p>
+     * Modulus 10, weights {@code {2,1,2,1,2}} over a 5-digit base number, products
+     * greater than 9 reduced to their cross sum (as in {@link #M00}), check digit
+     * {@code (10 - sum % 10) % 10}. The position depends on the length of the account
+     * number: 6 or 7 digits use digits 5-9 (index 4-8) with the check digit at index 9;
+     * 9 digits use digits 2-6 (index 1-5) with the check digit at index 6, or, if the
+     * first of the 9 digits (index 1) is {@code 9}, digits 3-7 (index 2-6) with the check
+     * digit at index 7.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification only defines 6-,
+     * 7- and 9-digit account numbers, so all other lengths are rejected. Its layout table
+     * also has a row labelled "10stell." that shows a leading zero; it is read as the
+     * 9-digit layout.
+     */
+    M75 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int length = significantDigits(account);
+            if (length == 6 || length == 7) {
+                int sum = weightedSum(account, WEIGHTS_M73, 4, true);
+                return compareToCheckDigit(account, mod10Complement(sum));
+            }
+            if (length == 9) {
+                int offset = digitAt(account, 1) == 9 ? 2 : 1;
+                int sum    = weightedSum(account, WEIGHTS_M73, offset, true);
+                return compareAt(account, offset + 5, mod10Complement(sum));
+            }
+            return CheckDigitResult.of(false);
+        }
+    },
+
+    /**
      * Method {@code 76}.
      * <p>
      * Kontoart at digit 1, weights {@code {7,6,5,4,3,2}} over digits 2-7, {@code crc = sum % 11}
@@ -1472,6 +1580,24 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 77}.
+     * <p>
+     * Modulus 11 over digits 6-10 (index 5-9), the check digit included: weights
+     * {@code {5,4,3,2,1}}; the account number is valid if the sum leaves no remainder when
+     * divided by 11. Otherwise the sum is recalculated with weights {@code {5,4,3,4,5}},
+     * which must also leave no remainder; if it does, the account number is invalid.
+     */
+    M77 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (weightedSum(account, WEIGHTS_54321, 5, false) % MODULUS_11 == 0) {
+                return CheckDigitResult.of(true);
+            }
+            return CheckDigitResult.of(weightedSum(account, WEIGHTS_M77B, 5, false) % MODULUS_11 == 0);
+        }
+    },
+
+    /**
      * Method {@code 78}.
      * <p>
      * If digits 1–2 (index 0–1) sum to zero while digit 3 (index 2) does not, no check is
@@ -1486,6 +1612,53 @@ public enum GermanCheckDigitMethod {
             }
             int sum = weightedSum(account, WEIGHTS_2121, 0, true);
             return compareToCheckDigit(account, mod10Complement(sum));
+        }
+    },
+
+    /**
+     * Method {@code 79}.
+     * <p>
+     * Modulus 10 with cross sum (as in {@link #M00}); the variant depends on digit 1
+     * (index 0). Digit 1 is {@code 3} to {@code 8}: delegates to {@link #M00}. Digit 1 is
+     * {@code 1}, {@code 2} or {@code 9}: weights {@code {1,2,1,2,1,2,1,2}} over digits 1-8
+     * (index 0-7), check digit {@code (10 - sum % 10) % 10} compared at index 8; digit 10
+     * is not checked. Digit 1 is {@code 0}: invalid, such account numbers were never
+     * issued.
+     */
+    M79 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int first = digitAt(account, 0);
+            if (first == 0) {
+                return CheckDigitResult.of(false);
+            }
+            if (first == 1 || first == 2 || first == 9) {
+                int sum = weightedSum(account, WEIGHTS_M68A, 0, true);
+                return compareAt(account, 8, mod10Complement(sum));
+            }
+            return M00.calculate(blz, account);
+        }
+    },
+
+    /**
+     * Method {@code 80}.
+     * <p>
+     * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
+     * applies its exception for exactly these account numbers. Otherwise: (A) modulus 10,
+     * weights {@code {2,1,2,1,2}} over digits 5-9 (index 4-8), products greater than 9
+     * reduced to their cross sum, check digit {@code (10 - sum % 10) % 10}; if that fails,
+     * (B) the same sum with check digit {@code (7 - sum % 7) % 7}. Both compared at
+     * index 9.
+     */
+    M80 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9) {
+                return M51.calculate(blz, account);
+            }
+            int sum = weightedSum(account, WEIGHTS_M73, 4, true);
+            CheckDigitResult a = compareToCheckDigit(account, mod10Complement(sum));
+            return a.isValid() ? a : compareToCheckDigit(account, mod7Complement(sum));
         }
     },
 
@@ -1510,6 +1683,46 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 83}.
+     * <p>
+     * If digits 3 and 4 (index 2, 3) are both {@code 9} (Sachkonten): modulus 11, weights
+     * {@code {8,7,6,5,4,3,2}} over digits 3-9 (index 2-8), clamp-above-9 rule, compared at
+     * index 9; no other calculation follows.
+     * <p>
+     * Otherwise (Kundenkonten), tries three methods at index 9: (A) {@link #M32};
+     * (B) {@link #M33}; (C) if digit 10 (index 9) is {@code 7}, {@code 8} or {@code 9} the
+     * account is rejected outright, otherwise modulus 7, weights {@code {6,5,4,3,2}} over
+     * digits 5-9, check digit {@code (7 - sum % 7) % 7}.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification calls account
+     * numbers that fail every calculation "nicht pruefbar". They are reported as invalid:
+     * for {@link #M91}, with the same wording, the specification lists accounts that fail
+     * every variant as "Testkontonummern (falsch)".
+     */
+    M83 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9 && digitAt(account, 3) == 9) {
+                int sum = weightedSum(account, WEIGHTS_8765432, 2, false);
+                return compareToCheckDigit(account, mod11ClampAboveNine(sum));
+            }
+            CheckDigitResult a = M32.calculate(blz, account);
+            if (a.isValid()) {
+                return a;
+            }
+            CheckDigitResult b = M33.calculate(blz, account);
+            if (b.isValid()) {
+                return b;
+            }
+            if (digitAt(account, 9) >= 7) {
+                return CheckDigitResult.of(false);
+            }
+            int sumC = weightedSum(account, WEIGHTS_65432, 4, false);
+            return compareToCheckDigit(account, mod7Complement(sumC));
+        }
+    },
+
+    /**
      * Method {@code 84}.
      * <p>
      * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
@@ -1517,7 +1730,8 @@ public enum GermanCheckDigitMethod {
      * Otherwise tries three variants at index 9, weights
      * {@code {6,5,4,3,2}} over digits 5–9 throughout: (A) modulus 11, clamp-above-9;
      * (B) modulus 7, {@code (7 − sum % 7) % 7} (mapped >9 to 0, though the formula never
-     * exceeds 6); (C) modulus 10 with cross sum, weights {@code {2,1,2,1,2}}.
+     * exceeds 6); (C) modulus 10, weights {@code {2,1,2,1,2}}, products added without cross sum
+     * ("entsprechen dem Verfahren 06").
      */
     M84 {
         @Override
@@ -1538,7 +1752,7 @@ public enum GermanCheckDigitMethod {
                 return b;
             }
 
-            int sumC = weightedSum(account, WEIGHTS_M73, 4, true);
+            int sumC = weightedSum(account, WEIGHTS_M73, 4, false);
             return compareToCheckDigit(account, mod10Complement(sumC));
         }
     },
@@ -1604,6 +1818,45 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code 87}.
+     * <p>
+     * Sachkonten exception (digit 3 / index 2 equals {@code 9}) delegates to {@link #M51}.
+     * Otherwise tries, all compared at index 9: (A) the Bundesbank pseudo code over digits
+     * 4-9 with the result tables {@code TAB1}/{@code TAB2}, see {@link #calculateM87A};
+     * (B) {@link #M33}; (C) modulus 7, weights {@code {6,5,4,3,2}} over digits 5-9,
+     * {@code (7 - sum % 7) % 7}; (D) modulus 11, weights {@code {7,6,5,4,3,2}} over
+     * digits 4-9, clamp-above-9 as in method {@code 06}.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the pseudo code of method A skips
+     * leading zeros from digit 4 without an upper bound, so it reads past digit 10 when
+     * digits 4-10 are all {@code 0}. The skip stops at digit 10 here, which gives the same
+     * result wherever the specification is defined.
+     */
+    M87 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9) {
+                return M51.calculate(blz, account);
+            }
+            CheckDigitResult a = calculateM87A(account);
+            if (a.isValid()) {
+                return a;
+            }
+            CheckDigitResult b = M33.calculate(blz, account);
+            if (b.isValid()) {
+                return b;
+            }
+            int sumC = weightedSum(account, WEIGHTS_65432, 4, false);
+            CheckDigitResult c = compareToCheckDigit(account, mod7Complement(sumC));
+            if (c.isValid()) {
+                return c;
+            }
+            int sumD = weightedSum(account, WEIGHTS_765432, 3, false);
+            return compareToCheckDigit(account, mod11ClampAboveNine(sumD));
+        }
+    },
+
+    /**
      * Method {@code 88}.
      * <p>
      * Modulus 11, clamp-above-9 rule, compared at index 9. Weights and offset depend on
@@ -1616,6 +1869,37 @@ public enum GermanCheckDigitMethod {
             int sum = digitAt(account, 2) == 9
                 ? weightedSum(account, WEIGHTS_8765432, 2, false)
                 : weightedSum(account, WEIGHTS_765432, 3, false);
+            return compareToCheckDigit(account, mod11ClampAboveNine(sum));
+        }
+    },
+
+    /**
+     * Method {@code 89}.
+     * <p>
+     * Depends on the length of the account number. 8 or 9 digits: delegates to
+     * {@link #M10}. 7 digits: modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4-9
+     * (index 3-8), each product replaced by its cross sum before adding (e.g. {@code 45}
+     * counts as {@code 9}), clamp-above-9 rule as in {@link #M06}, compared at index 9.
+     * Account numbers with 1 to 6 or 10 digits carry no check digit and are not checked
+     * ({@link CheckDigitResult#NOT_CHECKED}).
+     * <p>
+     * <strong>Implemented with reservation</strong>: the cross sum is taken once, so the
+     * product {@code 49} counts as {@code 13}; the specification does not say to repeat it.
+     */
+    M89 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int length = significantDigits(account);
+            if (length == 8 || length == 9) {
+                return M10.calculate(blz, account);
+            }
+            if (length != 7) {
+                return CheckDigitResult.NOT_CHECKED;
+            }
+            int sum = 0;
+            for (int i = 0; i < WEIGHTS_765432.length; i++) {
+                sum += crossSum(digitAt(account, 3 + i) * WEIGHTS_765432[i]);
+            }
             return compareToCheckDigit(account, mod11ClampAboveNine(sum));
         }
     },
@@ -1801,6 +2085,27 @@ public enum GermanCheckDigitMethod {
             }
             long value = digitAt(account, 0) == 0 ? toLong(account) : 0;
             return CheckDigitResult.of(value >= 1_300_000L && value <= 99_399_999L);
+        }
+    },
+
+    /**
+     * Method {@code 97}.
+     * <p>
+     * Modulus 11 of the account number itself: the value of digits 1-9 (index 0-8), the
+     * check digit left out, is divided by 11. The remainder is the check digit, a
+     * remainder of {@code 10} gives check digit {@code 0}; compared at index 9.
+     * <p>
+     * <strong>Implemented with reservation</strong>: the specification only defines
+     * account numbers with 5 to 10 digits, so shorter account numbers are rejected.
+     */
+    M97 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (significantDigits(account) < 5) {
+                return CheckDigitResult.of(false);
+            }
+            int remainder = (int) (toLong(account) / MODULUS_10 % MODULUS_11);
+            return compareToCheckDigit(account, remainder % MODULUS_10);
         }
     },
 
@@ -2094,6 +2399,27 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
+     * Method {@code B6}.
+     * <p>
+     * Variante 1: account numbers with digit 1 (index 0) in {@code 1}-{@code 9}, or with
+     * digits 1-5 in {@code 02691}-{@code 02699}, are checked with {@link #M20}. Variante 2:
+     * all other account numbers are checked with {@link #M53}, which reads BLZ digits.
+     * <p>
+     * <strong>Implemented with reservation</strong>: account numbers with two or more
+     * leading zeros reach {@link #M53}, which defines only 9-digit account numbers and
+     * therefore rejects them.
+     */
+    B6 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            boolean variante1 = digitAt(account, 0) != 0
+                || (digitAt(account, 1) == 2 && digitAt(account, 2) == 6 && digitAt(account, 3) == 9
+                    && digitAt(account, 4) != 0);
+            return variante1 ? M20.calculate(blz, account) : M53.calculate(blz, account);
+        }
+    },
+
+    /**
      * Method {@code B7}.
      * <p>
      * Accounts within {@code [1000000, 5999999]} or {@code [700000000, 899999999]} are
@@ -2177,6 +2503,26 @@ public enum GermanCheckDigitMethod {
                 return compareToCheckDigit(account, wrapPlusFive(crc));
             }
             return CheckDigitResult.of(false);
+        }
+    },
+
+    /**
+     * Method {@code C0}.
+     * <p>
+     * Account numbers with exactly two leading zeros are checked with {@link #M52}
+     * (Variante 1, reads BLZ digits); if that fails, with {@link #M20} (Variante 2). All
+     * other account numbers are checked with {@link #M20} only.
+     */
+    C0 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 0 && digitAt(account, 1) == 0 && digitAt(account, 2) != 0) {
+                CheckDigitResult first = M52.calculate(blz, account);
+                if (first.isValid()) {
+                    return first;
+                }
+            }
+            return M20.calculate(blz, account);
         }
     },
 
@@ -2418,6 +2764,50 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code D4}.
+     * <p>
+     * Invalid if digit 1 (index 0) is {@code 0}. Otherwise prepends the constant
+     * {@code 428259} to digits 1-9 (index 0-8) and applies the {@link #M00} formula to
+     * those 15 digits, as {@link #C6} does; the check digit is at index 9.
+     */
+    D4 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) == 0) {
+                return CheckDigitResult.of(false);
+            }
+            return prefixedM00(account, "428259" + account[0]);
+        }
+    },
+
+    /**
+     * Method {@code D5}.
+     * <p>
+     * If digits 3 and 4 (index 2, 3) are both {@code 9}, only Variante 1 applies:
+     * modulus 11, weights {@code {8,7,6,5,4,3,2}} over digits 3-9 (index 2-8),
+     * clamp-above-9 rule as in {@link #M06}. Otherwise one sum is formed with weights
+     * {@code {7,6,5,4,3,2}} over digits 4-9 (index 3-8) and tried in order: (2) modulus 11,
+     * clamp-above-9; (3) {@code (7 - sum % 7) % 7}; (4) {@code (10 - sum % 10) % 10}, no
+     * cross sum. All compared at index 9.
+     */
+    D5 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 2) == 9 && digitAt(account, 3) == 9) {
+                int sum = weightedSum(account, WEIGHTS_8765432, 2, false);
+                return compareToCheckDigit(account, mod11ClampAboveNine(sum));
+            }
+            int sum = weightedSum(account, WEIGHTS_765432, 3, false);
+            CheckDigitResult second = compareToCheckDigit(account, mod11ClampAboveNine(sum));
+            if (second.isValid()) {
+                return second;
+            }
+            CheckDigitResult third = compareToCheckDigit(account, mod7Complement(sum));
+            return third.isValid() ? third : compareToCheckDigit(account, mod10Complement(sum));
+        }
+    },
+
     /** Method {@code D6}. Delegates to {@link #M07}, then {@link #M03}, then {@link #M00}. */
     D6 {
         @Override
@@ -2434,6 +2824,44 @@ public enum GermanCheckDigitMethod {
         }
     },
 
+    /**
+     * Method {@code D7}.
+     * <p>
+     * Modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}} applied to digits 1-9 (index 0-8),
+     * products greater than 9 reduced to their cross sum (as in {@link #M00}). Unlike
+     * {@link #M00}, the check digit is the units digit of the sum itself
+     * ({@code sum % 10}), not its complement.
+     */
+    D7 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = weightedSum(account, WEIGHTS_2121, 0, true);
+            return compareToCheckDigit(account, sum % MODULUS_10);
+        }
+    },
+
+    /**
+     * Method {@code D8}.
+     * <p>
+     * Selects the variant by account number range: {@code 1000000000} to
+     * {@code 9999999999} delegates to {@link #M00}; {@code 0010000000} to
+     * {@code 0099999999} delegates to {@link #M09} (not checked). Account numbers
+     * outside both ranges are invalid.
+     */
+    D8 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            long value = toLong(account);
+            if (value >= 1_000_000_000L) {
+                return M00.calculate(blz, account);
+            }
+            if (value >= 10_000_000L && value <= 99_999_999L) {
+                return M09.calculate(blz, account);
+            }
+            return CheckDigitResult.of(false);
+        }
+    },
+
     /** Method {@code D9}. Delegates to {@link #M00}, then {@link #M10}, then {@link #M18}. */
     D9 {
         @Override
@@ -2447,6 +2875,77 @@ public enum GermanCheckDigitMethod {
                 return second;
             }
             return M18.calculate(blz, account);
+        }
+    },
+
+    /**
+     * Method {@code E0}.
+     * <p>
+     * Same as {@link #M00} (modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}}, cross sum),
+     * except that the constant {@code 7} is added to the sum before the complement
+     * {@code (10 - sum % 10) % 10} is taken.
+     */
+    E0 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = weightedSum(account, WEIGHTS_2121, 0, true) + 7;
+            return compareToCheckDigit(account, mod10Complement(sum));
+        }
+    },
+
+    /**
+     * Method {@code E1}.
+     * <p>
+     * Modulus 11, weights {@code {9,10,11,6,5,4,3,2,1}} applied to the ASCII values
+     * ({@code 48} to {@code 57}) of digits 1-9 (index 0-8), not to the digits
+     * themselves. Check digit = {@code sum % 11} (no complement); a remainder of
+     * {@code 10} never matches, so the account number is invalid.
+     */
+    E1 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            int sum = 0;
+            for (int i = 0; i < WEIGHTS_E1.length; i++) {
+                // the char value of a digit is its ASCII code
+                sum += account[i] * WEIGHTS_E1[i];
+            }
+            return compareToCheckDigit(account, sum % MODULUS_11);
+        }
+    },
+
+    /**
+     * Method {@code E2}.
+     * <p>
+     * Invalid if digit 1 (index 0) is {@code 6} to {@code 9}. Otherwise prepends the
+     * constant {@code 438320x} ({@code x} = digit 1) to digits 2-9 (index 1-8) and
+     * applies the {@link #M00} formula to those 15 digits, as {@link #C6} does; the
+     * check digit is at index 9.
+     */
+    E2 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            if (digitAt(account, 0) > 5) {
+                return CheckDigitResult.of(false);
+            }
+            return prefixedM00(account, "438320" + account[0]);
+        }
+    },
+
+    /** Method {@code E3}. Delegates to {@link #M00}; if that fails, to {@link #M21}. */
+    E3 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            CheckDigitResult first = M00.calculate(blz, account);
+            return first.isValid() ? first : M21.calculate(blz, account);
+        }
+    },
+
+    /** Method {@code E4}. Delegates to {@link #M02}; if that fails, to {@link #M00}. */
+    E4 {
+        @Override
+        CheckDigitResult calculate(char[] blz, char[] account) {
+            CheckDigitResult first = M02.calculate(blz, account);
+            return first.isValid() ? first : M00.calculate(blz, account);
         }
     };
 
@@ -2522,6 +3021,8 @@ public enum GermanCheckDigitMethod {
     private static final int[] WEIGHTS_M68B        = {1, 0, 0, 2, 1, 2, 1, 2};
     private static final int[] WEIGHTS_M71         = {6, 5, 4, 3, 2, 1};
     private static final int[] WEIGHTS_M73         = {2, 1, 2, 1, 2};
+    private static final int[] WEIGHTS_54321       = {5, 4, 3, 2, 1};
+    private static final int[] WEIGHTS_M77B        = {5, 4, 3, 4, 5};
     private static final int[] WEIGHTS_M91B        = {2, 3, 4, 5, 6, 7};
     private static final int[] WEIGHTS_M91C        = {10, 9, 8, 7, 6, 5, 0, 4, 3, 2};
     private static final int[] WEIGHTS_M92         = {1, 7, 3, 1, 7, 3};
@@ -2531,6 +3032,18 @@ public enum GermanCheckDigitMethod {
     private static final int[] WEIGHTS_B9A         = {1, 2, 3, 1, 2, 3, 1};
     private static final int[] WEIGHTS_C5          = {2, 1, 2, 1, 2};
     private static final int[] WEIGHTS_C6          = {2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2};
+    private static final int[] WEIGHTS_E1          = {9, 10, 11, 6, 5, 4, 3, 2, 1};
+    private static final int[] M87_TAB1            = {0, 4, 3, 2, 6};
+    private static final int[] M87_TAB2            = {7, 1, 5, 9, 8};
+
+    /** Weights of the ESER methods {@link #M52} and {@link #M53}, from right to left. */
+    private static final int[] WEIGHTS_ESER        = {2, 4, 8, 5, 10, 9, 7, 3, 6, 1, 2, 4};
+
+    /** Number of leading ESER digits up to and including the check digit. */
+    private static final int ESER_HEAD_LENGTH = 6;
+
+    /** Remainder the ESER factor search must reach. */
+    private static final int ESER_TARGET_REMAINDER = 10;
 
     /**
      * {@link #C6} prepends one of these 7-digit constants — selected by digit 1 (index 0)
@@ -2685,12 +3198,100 @@ public enum GermanCheckDigitMethod {
      * {@link #M00} (weights {@code {2,1,...,2}}, cross sum) to those 15 digits.
      */
     private static CheckDigitResult calculateC6(char[] account) {
-        String  constant = C6_CONSTANTS[digitAt(account, 0)];
+        return prefixedM00(account, C6_CONSTANTS[digitAt(account, 0)]);
+    }
+
+    /**
+     * Prepends a 7-digit {@code constant} to digits 2-9 (index 1-8) and applies the
+     * {@link #M00} formula to the resulting 15 digits. Used by {@link #C6}, {@link #D4} and {@link #E2}.
+     */
+    private static CheckDigitResult prefixedM00(char[] account, String constant) {
         char[]  digits   = new char[15];
         constant.getChars(0, 7, digits, 0);
         System.arraycopy(account, 1, digits, 7, 8);
         int sum = weightedSum(digits, WEIGHTS_C6, 0, true);
         return compareToCheckDigit(account, mod10Complement(sum));
+    }
+
+    /**
+     * Method A of {@link #M87}, translated from the Bundesbank pseudo code. {@code i} is
+     * the 1-based digit position of the specification; {@code konto[i]} may become
+     * {@code 10}.
+     */
+    private static CheckDigitResult calculateM87A(char[] account) {
+        int[] konto = new int[ACCOUNT_LENGTH + 1];
+        for (int k = 1; k <= ACCOUNT_LENGTH; k++) {
+            konto[k] = digitAt(account, k - 1);
+        }
+        int i = 4;
+        while (konto[i] == 0 && i < ACCOUNT_LENGTH) {
+            i++;
+        }
+        int c2 = i % 2;
+        int d2 = 0;
+        int a5 = 0;
+        while (i < ACCOUNT_LENGTH) {
+            switch (konto[i]) {
+                case 0:
+                    konto[i] = 5;
+                    break;
+                case 1:
+                    konto[i] = 6;
+                    break;
+                case 5:
+                    konto[i] = 10;
+                    break;
+                case 6:
+                    konto[i] = 1;
+                    break;
+                default:
+                    break;
+            }
+            if (c2 == d2) {
+                if (konto[i] > 5) {
+                    if (c2 == 0 && d2 == 0) {
+                        c2 = 1;
+                        d2 = 1;
+                        a5 = a5 + 6 - (konto[i] - 6);
+                    } else {
+                        c2 = 0;
+                        d2 = 0;
+                        a5 = a5 + konto[i];
+                    }
+                } else {
+                    c2 = c2 == 0 && d2 == 0 ? 1 : 0;
+                    a5 = a5 + konto[i];
+                }
+            } else {
+                if (konto[i] > 5) {
+                    if (c2 == 0) {
+                        c2 = 1;
+                        d2 = 0;
+                        a5 = a5 - 6 + (konto[i] - 6);
+                    } else {
+                        c2 = 0;
+                        d2 = 1;
+                        a5 = a5 - konto[i];
+                    }
+                } else {
+                    c2 = c2 == 0 ? 1 : 0;
+                    a5 = a5 - konto[i];
+                }
+            }
+            i++;
+        }
+        while (a5 < 0 || a5 > 4) {
+            a5 = a5 > 4 ? a5 - MODULUS_5 : a5 + MODULUS_5;
+        }
+        int p = d2 == 0 ? M87_TAB1[a5] : M87_TAB2[a5];
+        if (p == konto[ACCOUNT_LENGTH]) {
+            return CheckDigitResult.of(true);
+        }
+        if (konto[4] == 0) {
+            p = p > 4 ? p - MODULUS_5 : p + MODULUS_5;
+            return CheckDigitResult.of(p == konto[ACCOUNT_LENGTH]);
+        }
+        return CheckDigitResult.of(false);
     }
 
     private static long toLong(char[] account) {
@@ -2699,6 +3300,15 @@ public enum GermanCheckDigitMethod {
             value = value * MODULUS_10 + (c - '0');
         }
         return value;
+    }
+
+    /** Number of digits of the account number without its leading zeros. */
+    private static int significantDigits(char[] account) {
+        int start = 0;
+        while (start < ACCOUNT_LENGTH && account[start] == '0') {
+            start++;
+        }
+        return ACCOUNT_LENGTH - start;
     }
 
     /** Non-recursive cross sum of a non-negative integer (sum of its decimal digits). */
@@ -2773,6 +3383,43 @@ public enum GermanCheckDigitMethod {
             sum          += contribution;
         }
         return sum;
+    }
+
+    /**
+     * Shared check of the ESER methods {@link #M52} and {@link #M53}.
+     * <p>
+     * The ESER account number is {@code head} (six digits, the check digit last) followed
+     * by account digits 5-10 (index 4-9) without leading zeros. Its digits are weighted
+     * from right to left with {@link #WEIGHTS_ESER}, the check digit counting as 0. The
+     * expected check digit is the factor 0-9 for which {@code sum % 11} plus the factor
+     * times the weight over the check digit leaves remainder 10 when divided by 11. If
+     * no factor reaches remainder 10, the account number cannot be used.
+     */
+    private static CheckDigitResult eserCheck(char[] head, char[] account) {
+        int start = 4;
+        while (start < ACCOUNT_LENGTH && account[start] == '0') {
+            start++;
+        }
+        int    length = ESER_HEAD_LENGTH + ACCOUNT_LENGTH - start;
+        char[] eser   = new char[length];
+        System.arraycopy(head, 0, eser, 0, ESER_HEAD_LENGTH);
+        System.arraycopy(account, start, eser, ESER_HEAD_LENGTH, ACCOUNT_LENGTH - start);
+
+        int checkIndex = ESER_HEAD_LENGTH - 1;
+        int sum        = 0;
+        for (int i = 0; i < length; i++) {
+            if (i != checkIndex) {
+                sum += digitAt(eser, i) * WEIGHTS_ESER[length - 1 - i];
+            }
+        }
+        int remainder   = sum % MODULUS_11;
+        int checkWeight = WEIGHTS_ESER[length - 1 - checkIndex];
+        for (int factor = 0; factor <= MAX_DIGIT; factor++) {
+            if ((remainder + factor * checkWeight) % MODULUS_11 == ESER_TARGET_REMAINDER) {
+                return CheckDigitResult.of(digitAt(eser, checkIndex) == factor);
+            }
+        }
+        return CheckDigitResult.of(false);
     }
 
     /** Adds 5 to a single-digit value, wrapping back into {@code [0, 9]}. Used by {@link #B9}. */
