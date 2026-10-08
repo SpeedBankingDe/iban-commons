@@ -54,6 +54,9 @@ import java.util.regex.Pattern;
  * same BLZ, and only the head office record reliably has a BIC. So we dedup by bank code,
  * preferring the head office (a branch record already kept for a BLZ gets replaced if the head
  * office turns up later in the file).
+ * <p>
+ * The {@code Pruefzifferberechnungsmethode} column is carried as
+ * {@link BankData#getCheckDigitMethod()}. All records of one BLZ share the same method.
  *
  * @since 1.8.12
  */
@@ -73,7 +76,7 @@ public final class BankDataLoaderDe extends AbstractCountryBankDataLoader<BankDa
     public static final URI     DEFAULT_SOURCE_URI              = BankDataLoaderDefaults.sourceUri("DE");
 
     /** The CSV filename is stable even though the blob ID/hash before it isn't. */
-    private static final Pattern CSV_LINK_PATTERN                = Pattern.compile("href=\"([^\"]*blz-aktuell-csv-data\\.csv)\"");
+    private static final Pattern CSV_LINK_PATTERN               = Pattern.compile("href=\"([^\"]*blz-aktuell-csv-data\\.csv)\"");
 
     private static final char   FIELD_SEPARATOR                 = ';';
 
@@ -88,6 +91,7 @@ public final class BankDataLoaderDe extends AbstractCountryBankDataLoader<BankDa
         PLZ(3),
         ORT(4),
         BIC(7),
+        PRUEFZIFFER_BERECHNUNGSMETHODE(8),
         AENDERUNGSKENNZEICHEN(10),
         NACHFOLGE_BANKLEITZAHL(12);
 
@@ -159,8 +163,14 @@ public final class BankDataLoaderDe extends AbstractCountryBankDataLoader<BankDa
         String bankName = getColumns().getOrEmpty(Column.BEZEICHNUNG, fields);
         String postalCode = getColumns().getOrNull(Column.PLZ, fields);
         String city = getColumns().getOrNull(Column.ORT, fields);
+        String checkDigitMethod = getColumns().getOrNull(Column.PRUEFZIFFER_BERECHNUNGSMETHODE, fields);
 
-        BankData bankData = new BankData(getCountryCode(), bankCode, bic, bankName, postalCode, city, sourceVersion);
+        BankData bankData = BankData.builder(getCountryCode(), bankCode, bankName, sourceVersion)
+            .bic(bic)
+            .postalCode(postalCode)
+            .city(city)
+            .checkDigitMethod(checkDigitMethod)
+            .build();
         // a head-office record always wins (and overwrites an earlier branch record already
         // kept for this BLZ), since only the head-office record reliably carries a BIC (see
         // class Javadoc); a branch record only fills in if nothing has been kept for this BLZ yet

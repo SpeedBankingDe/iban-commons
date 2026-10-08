@@ -11,6 +11,8 @@ import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bic.Bic;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,6 +38,44 @@ final class BankDataFormatTest {
         List<BankData> readBack = BankDataFormat.read(new ByteArrayInputStream(out.toByteArray()), UTF_8, "DE", "v1");
 
         assertThat(readBack).containsExactly(withBic, withoutOptionalFields);
+    }
+
+    @Test
+    void writeThenRead_checkDigitMethod_roundTrips() throws Exception {
+        BankData withMethod = BankData.builder("DE", "37040044", "Commerzbank", "v1")
+            .bic(Bic.of("COBADEFFXXX")).postalCode("50447").city("Koeln").checkDigitMethod("13").build();
+        BankData withoutMethod = new BankData("DE", "20000000", null, "Musterbank", null, null, "v1");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        BankDataFormat.write(out, Arrays.asList(withMethod, withoutMethod));
+        String content = new String(out.toByteArray(), UTF_8);
+
+        assertThat(content).isEqualTo("%s\n%s\n%s\n", BankDataFormat.HEADER_LINE,
+            "37040044;;COBADEFFXXX;Commerzbank;50447;Koeln;;13",
+            "20000000;;;Musterbank;;;;");
+
+        List<BankData> readBack = BankDataFormat.read(new ByteArrayInputStream(out.toByteArray()), UTF_8, "DE", "v1");
+
+        assertThat(readBack).containsExactly(withMethod, withoutMethod);
+        assertThat(readBack.get(0).checkDigitMethod()).contains("13");
+        assertThat(readBack.get(1).checkDigitMethod()).isEmpty();
+    }
+
+    @ParameterizedTest(name = "[{index}] {1}")
+    @CsvSource(delimiter = '|', value = {
+        "10000000;;MARKDEF1100;Bundesbank;10591;Berlin;;   | empty checkDigitMethod column",
+        "10000000;;MARKDEF1100;Bundesbank;10591;Berlin;    | no checkDigitMethod column",
+        "10000000;;MARKDEF1100;Bundesbank;10591;Berlin     | neither flags nor checkDigitMethod column",
+    })
+    void read_rowWithoutCheckDigitMethod_readsEmptyCheckDigitMethod(String row, String reason) throws Exception {
+        String content = BankDataFormat.HEADER_LINE + "\n" + row + "\n";
+
+        List<BankData> records = BankDataFormat.read(
+            new ByteArrayInputStream(content.getBytes(UTF_8)), UTF_8, "DE", "v1");
+
+        assertThat(records).hasSize(1);
+        assertThat(records.get(0).getCity()).isEqualTo("Berlin");
+        assertThat(records.get(0).checkDigitMethod()).isEmpty();
     }
 
     @Test

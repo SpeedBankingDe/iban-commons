@@ -7,6 +7,8 @@ import de.speedbanking.bic.Bic;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 /**
  * Unit tests for {@link BankData}.
@@ -61,6 +63,26 @@ final class BankDataTest {
         assertThat(data.bic()).contains(bic);
         assertThat(data.postalCode()).contains("10117");
         assertThat(data.city()).contains("Berlin");
+    }
+
+    @Test
+    void checkDigitMethod_builderWithMethod_returnsMethod() throws Exception {
+        BankData data = BankData.builder("DE", "37040044", "Commerzbank", "v1")
+            .bic(Bic.of("COBADEFFXXX")).postalCode("50447").city("Koeln").checkDigitMethod("13").build();
+
+        assertThat(data.getCheckDigitMethod()).isEqualTo("13");
+        assertThat(data.checkDigitMethod()).contains("13");
+        assertThat(data.getCity()).isEqualTo("Koeln");
+        assertThat(data.getSourceVersion()).isEqualTo("v1");
+        assertThat(data.toString()).contains("checkDigitMethod=13");
+    }
+
+    @Test
+    void checkDigitMethod_constructorWithoutMethod_returnsEmpty() {
+        BankData data = new BankData("DE", "10000000", null, "Bundesbank", "10117", "Berlin", "v1");
+
+        assertThat((Object) data.getCheckDigitMethod()).isNull();
+        assertThat(data.checkDigitMethod()).isEmpty();
     }
 
     @Test
@@ -153,6 +175,27 @@ final class BankDataTest {
     void equalsAndHashCode_differentCity_notEqual() {
         BankData a = new BankData("DE", "10000000", null, "Bundesbank", "10117", "Berlin", "v1");
         BankData b = new BankData("DE", "10000000", null, "Bundesbank", "10117", "Frankfurt", "v1");
+
+        assertThat(a).isNotEqualTo(b);
+    }
+
+    @Test
+    void equalsAndHashCode_sameCheckDigitMethod_areEqual() {
+        BankData a = BankData.builder("DE", "10000000", "Bundesbank", "v1").checkDigitMethod("09").build();
+        BankData b = BankData.builder("DE", "10000000", "Bundesbank", "v1").checkDigitMethod("09").build();
+
+        assertThat(a).isEqualTo(b).hasSameHashCodeAs(b);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} vs {1}")
+    @CsvSource(delimiter = '|', nullValues = "NULL", value = {
+        "09   | A4",
+        "09   | NULL",
+        "NULL | 09",
+    })
+    void equalsAndHashCode_differentCheckDigitMethod_notEqual(String method, String otherMethod) {
+        BankData a = BankData.builder("DE", "10000000", "Bundesbank", "v1").checkDigitMethod(method).build();
+        BankData b = BankData.builder("DE", "10000000", "Bundesbank", "v1").checkDigitMethod(otherMethod).build();
 
         assertThat(a).isNotEqualTo(b);
     }

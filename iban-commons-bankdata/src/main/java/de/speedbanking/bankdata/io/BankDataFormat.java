@@ -17,6 +17,7 @@ package de.speedbanking.bankdata.io;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bic.Bic;
@@ -32,6 +33,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,7 +43,7 @@ import java.util.List;
  * UTF-8, semicolon-separated, {@code \n} line endings (no CRLF, so the bundled fallback files diff
  * cleanly in Git), with a single header row identical for every country:
  * <pre>
- * bankCode;branchCode;bic;bankName;postalCode;city;flags
+ * bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
  * </pre>
  * Semicolon rather than comma, the same convention every raw national source this module parses
  * already uses, and it keeps quoting rare: a comma inside a bank name (common, e.g. {@code "Muster
@@ -54,7 +56,14 @@ import java.util.List;
  * with any double quote it contains doubled, exactly as required by RFC 4180. The {@code flags} column
  * is reserved for future use (e.g. an inactive-institute marker) and is always empty in this
  * version, keeping it present from the start avoids a format migration on the first extension.
- * Nullable fields ({@code bic}, {@code postalCode}, {@code city}) are written as empty strings.
+ * The {@code checkDigitMethod} column carries {@link BankData#getCheckDigitMethod()}, populated only
+ * for countries whose source publishes a national account check digit method (currently Germany).
+ * Nullable fields ({@code bic}, {@code postalCode}, {@code city}, {@code checkDigitMethod}) are
+ * written as empty strings.
+ * <p>
+ * The writer always writes every column. The reader is lenient about trailing columns: a row may
+ * end after {@code city}, {@code flags}, or {@code checkDigitMethod}, and a missing column reads as
+ * empty.
  * <p>
  * This format is independent of any specific country: it is what a {@code CountryBankDataLoader}
  * produces after parsing a country's raw source, and what {@code CountryDataCache} reads back from
@@ -71,9 +80,12 @@ public final class BankDataFormat {
     private static final char LINE_FEED       = '\n';
     private static final char CARRIAGE_RETURN = '\r';
 
-    private static final List<String> HEADER  = asList(
-        "bankCode", "branchCode", "bic", "bankName", "postalCode", "city", "flags");
-    private static final int          HEADER_MIN_LEN = HEADER.size() - 1;
+    @SuppressWarnings("InlineTrivialConstant")
+    private static final String EMPTY = "";
+
+    private static final List<String> HEADER         = Arrays.stream(Column.values()).map(c -> c.header).collect(toList());
+    // a row may end after CITY, the columns from FLAGS on are optional, see class Javadoc
+    private static final int          HEADER_MIN_LEN = Column.FLAGS.index;
 
     /**
      * The exact CSV header line every bank data file starts with, identical for every country.
@@ -112,35 +124,54 @@ public final class BankDataFormat {
         return result;
     }
 
+    /**
+     * Returns whether the given row has no content, i.e. no field or a single empty field.
+     */
     private static boolean isBlankRow(List<String> row) {
-        return row.size() == 1 && row.get(0).isEmpty();
+        return row.isEmpty() || (row.size() == 1 && row.get(0).isEmpty());
     }
 
+    /**
+     * Maps one data row to a {@link BankData} record, rejecting a row that is too short or lacks a
+     * required field.
+     */
     private static BankData toBankData(List<String> fields, String countryCode, String sourceVersion, int rowNumber) throws IOException {
         if (fields.size() < HEADER_MIN_LEN) {
-            throw new IOException("Malformed bank data CSV row " + rowNumber + ": expected at least " + HEADER_MIN_LEN + " fields, got " + fields.size());
+            throw new IOException(String.format("Malformed bank data CSV row %s: expected at least %s fields, got %s",
+                rowNumber, HEADER_MIN_LEN, fields.size()));
         }
 
-        String bankCode = fields.get(0);
-        String branchCode = emptyToNull(fields.get(1));
-        String bicField = fields.get(2);
-        String bankName = fields.get(3);
-        String postalCode = emptyToNull(fields.get(4));
-        String city = emptyToNull(fields.get(5));
+        String bankCode = Column.BANK_CODE.get(fields);
+        String branchCode = emptyToNull(Column.BRANCH_CODE.get(fields));
+        String bicField = Column.BIC.get(fields);
+        String bankName = Column.BANK_NAME.get(fields);
+        String postalCode = emptyToNull(Column.POSTAL_CODE.get(fields));
+        String city = emptyToNull(Column.CITY.get(fields));
+        String checkDigitMethod = emptyToNull(Column.CHECK_DIGIT_METHOD.get(fields));
 
         // the field-count check above only guards against a short/truncated row; it says nothing
         // about a row that has the right shape but an empty required field (e.g. a stray leading
         // separator), which BankData's constructor itself would happily accept (it only rejects
         // null, not "")
         if (bankCode.isEmpty() || bankName.isEmpty()) {
-            throw new IOException("Malformed bank data CSV row " + rowNumber + ": bankCode and bankName must not be empty");
+            throw new IOException(String.format("Malformed bank data CSV row %s: %s and %s must not be empty",
+                rowNumber, Column.BANK_CODE.header, Column.BANK_NAME.header));
         }
 
         Bic bic = bicField.isEmpty() ? null : Bic.tryParse(bicField).orElse(null);
 
-        return new BankData(countryCode, bankCode, branchCode, bic, bankName, postalCode, city, sourceVersion);
+        return BankData.builder(countryCode, bankCode, bankName, sourceVersion)
+            .branchCode(branchCode)
+            .bic(bic)
+            .postalCode(postalCode)
+            .city(city)
+            .checkDigitMethod(checkDigitMethod)
+            .build();
     }
 
+    /**
+     * Returns {@code null} for an empty string, the value itself otherwise.
+     */
     private static String emptyToNull(String value) {
         return value.isEmpty() ? null : value;
     }
@@ -159,17 +190,21 @@ public final class BankDataFormat {
         for (BankData entry : records) {
             writeRow(writer, asList(
                 entry.getBankCode(),
-                entry.getBranchCode() != null ? entry.getBranchCode() : "",
-                entry.getBic() != null ? entry.getBic().toString() : "",
+                entry.branchCode().orElse(EMPTY),
+                entry.bic().map(Bic::toString).orElse(EMPTY),
                 entry.getBankName(),
-                entry.getPostalCode() != null ? entry.getPostalCode() : "",
-                entry.getCity() != null ? entry.getCity() : "",
-                "" // reserved flags column, always empty in this version
+                entry.postalCode().orElse(EMPTY),
+                entry.city().orElse(EMPTY),
+                EMPTY, // reserved flags column, always empty in this version
+                entry.checkDigitMethod().orElse(EMPTY)
             ));
         }
         writer.flush();
     }
 
+    /**
+     * Writes one row of fields, separated and quoted as needed, followed by a line feed.
+     */
     private static void writeRow(Writer writer, List<String> fields) throws IOException {
         for (int i = 0; i < fields.size(); i++) {
             if (i > 0) {
@@ -180,10 +215,13 @@ public final class BankDataFormat {
         writer.write(LINE_FEED);
     }
 
+    /**
+     * Returns the given value as a CSV field, quoted if it contains a separator, quote or line break.
+     */
     private static String csvField(String value) {
-        String safe = value != null ? value : "";
+        String safe = value != null ? value : EMPTY;
         boolean needsQuoting = safe.indexOf(FIELD_SEPARATOR) >= 0 || safe.indexOf(QUOTE) >= 0
-            || safe.indexOf(LINE_FEED) >= 0 || safe.indexOf(CARRIAGE_RETURN) >= 0;
+             || safe.indexOf(LINE_FEED) >= 0 || safe.indexOf(CARRIAGE_RETURN) >= 0;
         if (!needsQuoting) {
             return safe;
         }
@@ -226,17 +264,20 @@ public final class BankDataFormat {
      * instead of one large one.
      */
     private static final class RowParser {
-        private final char                separator;
-        private final List<List<String>>  rows       = new ArrayList<>();
-        private final StringBuilder        field      = new StringBuilder();
-        private List<String>              currentRow = new ArrayList<>();
-        private boolean                   inQuotes;
-        private boolean                   rowPending;
+        private final char               separator;
+        private final List<List<String>> rows       = new ArrayList<>();
+        private final StringBuilder      field      = new StringBuilder();
+        private List<String>             currentRow = new ArrayList<>();
+        private boolean                  inQuotes;
+        private boolean                  rowPending;
 
         private RowParser(char separator) {
             this.separator = separator;
         }
 
+        /**
+         * Consumes one character, inside or outside a quoted field.
+         */
         private void consume(char ch, PushbackReader reader) throws IOException {
             rowPending = true;
             if (inQuotes) {
@@ -246,6 +287,9 @@ public final class BankDataFormat {
             }
         }
 
+        /**
+         * Consumes one character inside a quoted field, where a doubled quote is a literal quote.
+         */
         private void consumeQuoted(char ch, PushbackReader reader) throws IOException {
             if (ch != QUOTE) {
                 field.append(ch);
@@ -262,6 +306,9 @@ public final class BankDataFormat {
             }
         }
 
+        /**
+         * Consumes one character outside a quoted field.
+         */
         private void consumeUnquoted(char ch, PushbackReader reader) throws IOException {
             if (ch == QUOTE) {
                 inQuotes = true;
@@ -274,6 +321,9 @@ public final class BankDataFormat {
             }
         }
 
+        /**
+         * Ends the current row at a line break; a CR LF pair counts as one line break.
+         */
         private void consumeLineBreak(char ch, PushbackReader reader) throws IOException {
             if (ch == CARRIAGE_RETURN) {
                 int next = reader.read();
@@ -287,17 +337,55 @@ public final class BankDataFormat {
             rowPending = false;
         }
 
+        /**
+         * Adds the current field to the current row and starts a new field.
+         */
         private void endField() {
             currentRow.add(field.toString());
             field.setLength(0);
         }
 
+        /**
+         * Adds a last row that is not terminated by a line break.
+         */
         private void finish() {
             if (rowPending) {
                 endField();
                 rows.add(currentRow);
             }
         }
+    }
+
+    /**
+     * The columns of the format, declared in file order.
+     */
+    private enum Column {
+
+        BANK_CODE(0, "bankCode"),
+        BRANCH_CODE(1, "branchCode"),
+        BIC(2, "bic"),
+        BANK_NAME(3, "bankName"),
+        POSTAL_CODE(4, "postalCode"),
+        CITY(5, "city"),
+        FLAGS(6, "flags"),
+        CHECK_DIGIT_METHOD(7, "checkDigitMethod");
+
+        private final int    index;
+        private final String header;
+
+        Column(int index, String header) {
+            this.index = index;
+            this.header = header;
+        }
+
+        /**
+         * Returns this column's field of the given row, or an empty string if the row ends before
+         * this column (only allowed for the optional trailing columns, see class Javadoc).
+         */
+        String get(List<String> fields) {
+            return index < fields.size() ? fields.get(index) : EMPTY;
+        }
+
     }
 
 }

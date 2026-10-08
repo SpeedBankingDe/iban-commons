@@ -57,6 +57,24 @@ final class BankDataLookupTest {
     }
 
     @Test
+    void byBankCode_bundledGermanBankCode_returnsCheckDigitMethod() {
+        // 37040044 (Commerzbank, Koeln) uses Pruefzifferberechnungsmethode 13 in the Bundesbank
+        // BLZ directory the bundled DE.csv is a snapshot of
+        Optional<BankData> result = BankDataLookup.byBankCode("DE", "37040044");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().checkDigitMethod()).contains("13");
+    }
+
+    @Test
+    void byBankCode_bundledNonGermanBankCode_returnsNoCheckDigitMethod() {
+        Optional<BankData> result = BankDataLookup.byBankCode("PL", "101", "0000");
+
+        assertThat(result).isPresent();
+        assertThat(result.get().checkDigitMethod()).isEmpty();
+    }
+
+    @Test
     void find_iban_bundledAustrianBankCode_resolves() {
         // AT27 2060 1002 3457 3201: bank code 20601 (Sparkasse Bregenz Bank AG) is a real entry in
         // the live OeNB SEPA-Zahlungsverkehrs-Verzeichnis the bundled AT.csv fixture is a
