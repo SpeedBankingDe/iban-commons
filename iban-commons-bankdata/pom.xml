@@ -45,6 +45,14 @@
             <artifactId>iban-commons</artifactId>
         </dependency>
 
+        <!-- only needed for GermanAccountCheck -->
+        <dependency>
+            <groupId>de.speedbanking</groupId>
+            <artifactId>iban-commons-de-checkdigit</artifactId>
+            <version>${project.version}</version>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

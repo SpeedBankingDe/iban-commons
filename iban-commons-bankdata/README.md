@@ -79,6 +79,28 @@ cd iban-commons-bankdata
 mvn test-compile exec:java@bank-data-lookup-sample
 ```
 
+## Checking a German account number
+
+`GermanAccountCheck.check(Iban)` takes the check digit method of the bank from the bank data and verifies the
+account number with `iban-commons-de-checkdigit`. This module declares that dependency as optional, so add it
+to your build if you use the check:
+
+```xml
+<dependency>
+    <groupId>de.speedbanking</groupId>
+    <artifactId>iban-commons-de-checkdigit</artifactId>
+    <version>${iban-commons.version}</version>
+</dependency>
+```
+
+```java
+GermanAccountCheckResult result = GermanAccountCheck.check(Iban.of("DE89370400440532013000")); // VALID
+```
+
+The result is `VALID`, `INVALID`, `NOT_CHECKED` (the method defines no check digit for the number),
+`BANK_CODE_UNKNOWN`, `METHOD_UNKNOWN` (the bank data has no method, e.g. an older cache file) or
+`METHOD_NOT_IMPLEMENTED`.
+
 ## How data is loaded
 
 1. **Offline fallback ("Urladung").** Most supported countries ship a bundled classpath snapshot
