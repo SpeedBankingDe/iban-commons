@@ -17,6 +17,7 @@ package de.speedbanking.bankdata.loader;
 
 import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bankdata.io.BankDataFormat;
+import de.speedbanking.bankdata.io.ColumnDefinition;
 import de.speedbanking.bankdata.spi.BankDataParseException;
 import de.speedbanking.bic.Bic;
 

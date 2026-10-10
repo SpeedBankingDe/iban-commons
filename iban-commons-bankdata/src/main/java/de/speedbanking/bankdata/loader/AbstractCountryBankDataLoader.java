@@ -19,6 +19,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.bankdata.BankDataConfig;
+import de.speedbanking.bankdata.io.ColumnDefinition;
+import de.speedbanking.bankdata.io.Columns;
 import de.speedbanking.bankdata.spi.BankDataParseException;
 import de.speedbanking.bankdata.spi.CountryBankDataLoader;
 import de.speedbanking.util.Country;
