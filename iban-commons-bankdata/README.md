@@ -245,6 +245,31 @@ If your use of this module is licensing-sensitive, verify the current terms your
   what this module needs, no formulas, no cell styles, no multiple sheets, not a general-purpose
   spreadsheet library.
 
+## German IBANs and account check digits
+
+`GermanIban` is a validated German IBAN, parsed like `Iban`. `toIban()` gives access to the usual
+`Iban` API, and `getAccountCheckResult()` checks the account number against the check digit method
+the Bundesbank publishes for the bank, taken from the bank data. The check uses
+`iban-commons-de-checkdigit`, which this module declares as optional, so add it to your build if
+you call `getAccountCheckResult()`:
+
+```xml
+<dependency>
+    <groupId>de.speedbanking</groupId>
+    <artifactId>iban-commons-de-checkdigit</artifactId>
+    <version>${iban-commons.version}</version>
+</dependency>
+```
+
+```java
+GermanIban iban = GermanIban.of("DE89370400440532013000"); // InvalidIbanException if not German
+GermanAccountCheckResult result = iban.getAccountCheckResult(); // VALID
+```
+
+The result is `VALID`, `INVALID`, `NOT_CHECKED` (the method defines no check digit for the number),
+`BANK_CODE_UNKNOWN`, `METHOD_UNKNOWN` (the bank data has no method for the bank) or
+`METHOD_NOT_IMPLEMENTED`.
+
 ## License
 
 This project is licensed under the **Apache License, Version 2.0**, see [`../LICENSE.txt`](../LICENSE.txt).
