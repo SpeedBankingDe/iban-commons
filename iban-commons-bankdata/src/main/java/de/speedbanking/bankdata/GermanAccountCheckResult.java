@@ -16,7 +16,7 @@
 package de.speedbanking.bankdata;
 
 /**
- * Outcome of {@link GermanAccountCheck#check(de.speedbanking.iban.Iban)}.
+ * Outcome of {@link GermanIban#getAccountCheckResult()}.
  *
  * @since 1.8.12
  */
@@ -34,9 +34,10 @@ public enum GermanAccountCheckResult {
     /** The bank code is not in the bank data. */
     BANK_CODE_UNKNOWN,
 
-    /** The bank data carries no check digit method for the bank, for example an older cache file. */
+    /** The bank data carries no check digit method for the bank. */
     METHOD_UNKNOWN,
 
     /** The method of the bank is not implemented by {@code iban-commons-de-checkdigit}. */
     METHOD_NOT_IMPLEMENTED
+
 }

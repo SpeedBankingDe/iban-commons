@@ -45,7 +45,7 @@
             <artifactId>iban-commons</artifactId>
         </dependency>
 
-        <!-- only needed for GermanAccountCheck -->
+        <!-- only needed for GermanIban.getAccountCheckResult() -->
         <dependency>
             <groupId>de.speedbanking</groupId>
             <artifactId>iban-commons-de-checkdigit</artifactId>
