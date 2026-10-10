@@ -19,6 +19,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
 import de.speedbanking.bankdata.BankData;
+import de.speedbanking.bankdata.io.ColumnDefinition;
+import de.speedbanking.bankdata.io.Columns;
 import de.speedbanking.bankdata.io.MinimalXlsxReader;
 import de.speedbanking.bankdata.spi.BankDataParseException;
 import de.speedbanking.bic.Bic;

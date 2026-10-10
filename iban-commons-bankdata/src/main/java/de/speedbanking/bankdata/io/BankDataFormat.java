@@ -83,9 +83,8 @@ public final class BankDataFormat {
     @SuppressWarnings("InlineTrivialConstant")
     private static final String EMPTY = "";
 
-    private static final List<String> HEADER         = Arrays.stream(Column.values()).map(c -> c.header).collect(toList());
-    // a row may end after CITY, the columns from FLAGS on are optional, see class Javadoc
-    private static final int          HEADER_MIN_LEN = Column.FLAGS.index;
+    private static final Columns<Column> COLUMNS = Columns.of(Column.class);
+    private static final List<String>    HEADER  = Arrays.stream(Column.values()).map(Column::getCamelCaseName).collect(toList());
 
     /**
      * The exact CSV header line every bank data file starts with, identical for every country.
@@ -136,18 +135,18 @@ public final class BankDataFormat {
      * required field.
      */
     private static BankData toBankData(List<String> fields, String countryCode, String sourceVersion, int rowNumber) throws IOException {
-        if (fields.size() < HEADER_MIN_LEN) {
+        if (fields.size() < COLUMNS.getMinColumnCount()) {
             throw new IOException(String.format("Malformed bank data CSV row %s: expected at least %s fields, got %s",
-                rowNumber, HEADER_MIN_LEN, fields.size()));
+                rowNumber, COLUMNS.getMinColumnCount(), fields.size()));
         }
 
-        String bankCode = Column.BANK_CODE.get(fields);
-        String branchCode = emptyToNull(Column.BRANCH_CODE.get(fields));
-        String bicField = Column.BIC.get(fields);
-        String bankName = Column.BANK_NAME.get(fields);
-        String postalCode = emptyToNull(Column.POSTAL_CODE.get(fields));
-        String city = emptyToNull(Column.CITY.get(fields));
-        String checkDigitMethod = emptyToNull(Column.CHECK_DIGIT_METHOD.get(fields));
+        String bankCode = COLUMNS.getOrEmpty(Column.BANK_CODE, fields);
+        String branchCode = COLUMNS.getOrNull(Column.BRANCH_CODE, fields);
+        String bicField = COLUMNS.getOrEmpty(Column.BIC, fields);
+        String bankName = COLUMNS.getOrEmpty(Column.BANK_NAME, fields);
+        String postalCode = COLUMNS.getOrNull(Column.POSTAL_CODE, fields);
+        String city = COLUMNS.getOrNull(Column.CITY, fields);
+        String checkDigitMethod = COLUMNS.getOrNull(Column.CHECK_DIGIT_METHOD, fields);
 
         // the field-count check above only guards against a short/truncated row; it says nothing
         // about a row that has the right shape but an empty required field (e.g. a stray leading
@@ -155,7 +154,7 @@ public final class BankDataFormat {
         // null, not "")
         if (bankCode.isEmpty() || bankName.isEmpty()) {
             throw new IOException(String.format("Malformed bank data CSV row %s: %s and %s must not be empty",
-                rowNumber, Column.BANK_CODE.header, Column.BANK_NAME.header));
+                rowNumber, Column.BANK_CODE.getCamelCaseName(), Column.BANK_NAME.getCamelCaseName()));
         }
 
         Bic bic = bicField.isEmpty() ? null : Bic.tryParse(bicField).orElse(null);
@@ -167,13 +166,6 @@ public final class BankDataFormat {
             .city(city)
             .checkDigitMethod(checkDigitMethod)
             .build();
-    }
-
-    /**
-     * Returns {@code null} for an empty string, the value itself otherwise.
-     */
-    private static String emptyToNull(String value) {
-        return value.isEmpty() ? null : value;
     }
 
     /**
@@ -357,33 +349,40 @@ public final class BankDataFormat {
     }
 
     /**
-     * The columns of the format, declared in file order.
+     * The columns of the format, declared in file order. The header names are the camel case
+     * names of the constants.
      */
-    private enum Column {
+    enum Column implements ColumnDefinition {
 
-        BANK_CODE(0, "bankCode"),
-        BRANCH_CODE(1, "branchCode"),
-        BIC(2, "bic"),
-        BANK_NAME(3, "bankName"),
-        POSTAL_CODE(4, "postalCode"),
-        CITY(5, "city"),
-        FLAGS(6, "flags"),
-        CHECK_DIGIT_METHOD(7, "checkDigitMethod");
+        BANK_CODE(0),
+        BRANCH_CODE(1),
+        BIC(2),
+        BANK_NAME(3),
+        POSTAL_CODE(4),
+        CITY(5),
+        FLAGS(6, true),
+        CHECK_DIGIT_METHOD(7, true);
 
-        private final int    index;
-        private final String header;
+        private final int     index;
+        private final boolean optional;
 
-        Column(int index, String header) {
-            this.index = index;
-            this.header = header;
+        Column(int index) {
+            this(index, false);
         }
 
-        /**
-         * Returns this column's field of the given row, or an empty string if the row ends before
-         * this column (only allowed for the optional trailing columns, see class Javadoc).
-         */
-        String get(List<String> fields) {
-            return index < fields.size() ? fields.get(index) : EMPTY;
+        Column(int index, boolean optional) {
+            this.index = index;
+            this.optional = optional;
+        }
+
+        @Override
+        public int getIndex() {
+            return index;
+        }
+
+        @Override
+        public boolean isOptional() {
+            return optional;
         }
 
     }
