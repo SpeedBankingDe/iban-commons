@@ -102,9 +102,9 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 19200;;SCHOATWWXXX;Schoellerbank Aktiengesellschaft;1010;Wien;;
 19210;;SPBAATWWB99;bank99 AG;1020;Wien;;
 19220;;WISMATWWXXX;Bank Winter & Co. AG;1010;Wien;;
-19242;;;Scalable Capital Bank GmbH Zweigniederlassung Österreich;1020;Wien;;
+19242;;SCABATW2XXX;Scalable Capital Bank GmbH Zweigniederlassung Österreich;1020;Wien;;
 19250;;DIRAAT2SXXX;BAWAG P.S.K. Bank für Arbeit und Wirtschaft und Österreichische Postsparkasse Aktiengesellschaft;1100;Wien;;
-19325;;;ODDO BHF SCA, Niederlassung Österreich;1190;Wien;;
+19325;;;ODDO BHF SCA, Niederlassung Österreich;1010;Wien;;
 19360;;INGBATWWXXX;ING Austria Branch of ING Bank N.V.;1020;Wien;;
 19380;;DENEATW1XXX;Bankhaus Denzel Aktiengesellschaft;1030;Wien;;
 19390;;BMASAT21XXX;BMW Austria Bank GmbH;5020;Salzburg;;
@@ -146,7 +146,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 20228;;SPKDAT21XXX;KREMSER BANK UND SPARKASSEN AKTIENGESELLSCHAFT;3500;Krems an der Donau;;
 20230;;SPLSAT21XXX;Sparkasse Langenlois;3550;Langenlois;;
 20241;;SPNGAT21XXX;Sparkasse Neunkirchen;2620;Neunkirchen/ NÖ;;
-20245;;SPPOAT21XXX;Sparkasse Pottenstein N.Ö.;2563;Pottenstein a.d. Triesting;;
+20245;;SPPOAT21XXX;Sparkasse Baden;2500;Baden bei Wien;;
 20246;;SPPDAT21XXX;Sparkasse Poysdorf AG;2170;Poysdorf;;
 20256;;SPSPAT21XXX;SPARKASSE NIEDERÖSTERREICH MITTE WEST AKTIENGESELLSCHAFT;3100;St.Pölten;;
 20257;;SPSBAT21XXX;Sparkasse Amstetten Scheibbs AG;3300;Amstetten (NÖ);;
