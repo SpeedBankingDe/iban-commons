@@ -93,7 +93,7 @@
 
     <properties>
         <releaseJavaVersion>8</releaseJavaVersion>
-        <buildJavaVersion>17</buildJavaVersion>
+        <buildJavaVersion>21</buildJavaVersion>
 
         <child.project.url.inherit.append.path>false</child.project.url.inherit.append.path>
 
@@ -123,7 +123,7 @@
 
         <deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</deploy.snapshot.url>
 
-        <dep.checkstyle.version>12.3.1</dep.checkstyle.version>
+        <dep.checkstyle.version>14.3.0</dep.checkstyle.version>
         <!-- Path relative to each sub-module; both modules share the same ruleset location -->
         <check.checkstyle.ruleset>${project.rootDirectory}/build/checkstyle-rules.xml</check.checkstyle.ruleset>
 
@@ -138,8 +138,7 @@
         <dep.plugin.enforcer.version>3.6.3</dep.plugin.enforcer.version>
         <dep.plugin.figlet.version>1.0.0</dep.plugin.figlet.version>
         <dep.plugin.resources.version>3.5.0</dep.plugin.resources.version>
-        <!-- last error-prone version compatible with Java 17; 2.43.0+ requires Java 21 -->
-        <dep.plugin.error-prone.version>2.42.0</dep.plugin.error-prone.version>
+        <dep.plugin.error-prone.version>2.50.0</dep.plugin.error-prone.version>
         <dep.plugin.error-prone-support.version>0.26.0</dep.plugin.error-prone-support.version>
         <dep.plugin.exec.version>3.6.3</dep.plugin.exec.version>
         <dep.plugin.gpg.version>3.2.8</dep.plugin.gpg.version>

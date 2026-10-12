@@ -64,7 +64,7 @@ Add support for new country XY
 ## 🏗️ Development Setup
 
 ### Prerequisites
-- **JDK 17** or higher required to build the project
+- **JDK 21** or higher required to build the project
 - Maven 3.9+
 - Git
 - Spare Time

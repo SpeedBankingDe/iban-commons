@@ -139,6 +139,8 @@ public abstract class InvalidBaseException extends RuntimeException {
      * @param obj the reference object with which to compare
      * @return {@code true} if this object is the same as {@code obj}
      */
+    // value equality is part of the API; all ValidationError implementations are enums
+    @SuppressWarnings({"ThrowableEqualsHashCode", "ReferenceEquality"})
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -157,6 +159,7 @@ public abstract class InvalidBaseException extends RuntimeException {
      *
      * @return a hash code value
      */
+    @SuppressWarnings("ThrowableEqualsHashCode")
     @Override
     public int hashCode() {
         return Objects.hash(reason, input, countryCode);

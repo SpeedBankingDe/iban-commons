@@ -43,6 +43,8 @@ final class BundledDataRefreshToolTest {
         assertThat(Arrays.stream(new String[0]).anyMatch(arg -> "-h".equals(arg) || "--help".equals(arg))).isFalse();
     }
 
+    // the suggested Charset overloads need Java 10, the release target is Java 8
+    @SuppressWarnings("JdkObsolete")
     @Test
     void printUsage_mentionsInvocationAndSupportedCountries() throws UnsupportedEncodingException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

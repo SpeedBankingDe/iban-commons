@@ -5,7 +5,6 @@ import static de.speedbanking.bic.BicValidationError.ILLEGAL_CHARACTERS;
 import static de.speedbanking.bic.BicValidationError.INCORRECT_LENGTH;
 import static de.speedbanking.bic.BicValidationError.INVALID_BANK_CODE;
 import static de.speedbanking.bic.BicValidationError.INVALID_COUNTRY;
-import static de.speedbanking.bic.BicValidationError.values;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,7 +62,7 @@ final class BicValidationErrorTest {
     @DisplayName("All expected enum constants should exist in the correct order")
     @Test
     void constants_shouldExist_inCorrectOrder() {
-        assertThat(values()).containsExactly(
+        assertThat(BicValidationError.values()).containsExactly(
             EMPTY,
             INCORRECT_LENGTH,
             INVALID_BANK_CODE,
