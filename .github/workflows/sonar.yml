@@ -34,11 +34,11 @@ jobs:
             uses: actions/setup-java@v6
             with:
                 java-version: '21'
-                distribution: zulu
+                distribution: temurin
                 cache: maven
 
         -   name: Cache SonarQube packages
-            uses: actions/cache@v4
+            uses: actions/cache@v6
             with:
                 path: ~/.sonar/cache
                 key: ${{ runner.os }}-sonar
@@ -50,7 +50,7 @@ jobs:
                 SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
             run: >
                 mvn --batch-mode --file pom.xml verify
-                org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar
+                org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar
                 -Dsonar.organization=speedbankingde
                 -Dsonar.projectKey=SpeedBankingDe_iban-commons
                 -Dsonar.host.url=https://sonarcloud.io
