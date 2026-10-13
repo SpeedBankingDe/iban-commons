@@ -18,6 +18,11 @@ concurrency:
 permissions:
     contents: read
 
+# PMD analyzes against the build JDK while the code targets Java 8,
+# the compiler's --release already guards the API level.
+env:
+    PMD_JAVA_DISABLE_AUX_CLASSPATH_WARNINGS: true
+
 jobs:
 
     analyze:
