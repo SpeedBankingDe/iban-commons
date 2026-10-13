@@ -812,6 +812,33 @@
             </build>
         </profile>
 
+        <!-- fork the test JVM onto the JDK toolchain given by test.jdk, to verify the Java 8
+             bytecode at runtime on older JDKs while the build itself needs JDK 21. Requires that
+             JDK registered in ~/.m2/toolchains.xml (see ci.yml). Usage: mvn -Dtest.jdk=8 clean verify -->
+        <profile>
+            <id>toolchain-tests</id>
+            <activation>
+                <property>
+                    <name>test.jdk</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <jdkToolchain>
+                                <version>${test.jdk}</version>
+                            </jdkToolchain>
+                            <!-- Java 8 does not know EnableDynamicAgentLoading and would refuse to start -->
+                            <argLine>@{surefireArgLine} -XX:+IgnoreUnrecognizedVMOptions -XX:+EnableDynamicAgentLoading -Xmx2048m</argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <!-- Activated for release:prepare and release:perform goals -->
             <id>release</id>

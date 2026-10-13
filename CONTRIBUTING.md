@@ -77,6 +77,9 @@ mvn clean install
 
 # Running all tests
 mvn test
+
+# Running the tests on Java 8 (needs a JDK 8 in ~/.m2/toolchains.xml)
+mvn -Dtest.jdk=8 clean verify
 ```
 
 ### Code Quality Checks

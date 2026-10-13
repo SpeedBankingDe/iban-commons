@@ -98,11 +98,12 @@ These are established, non-obvious conventions - follow them rather than default
 ```bash
 mvn clean verify                               # full build: compile, checkstyle, pmd, tests, jacoco
 mvn -pl iban-commons-bankdata -am clean verify # single module + its dependencies
+mvn -Dtest.jdk=8 clean verify                  # fork the tests onto a JDK 8 toolchain, as CI does
 ```
 
 Default goal is `clean verify` (see root `pom.xml`). Checkstyle and PMD run as part of `verify` and fail the build on violations — there is no separate lint step to remember.
 
-- **Java**: compiled targeting Java 8 (`releaseJavaVersion`) for source compatibility, built with Java 21 (`buildJavaVersion`)
+- **Java**: compiled targeting Java 8 (`releaseJavaVersion`) for source compatibility, built with Java 21 (`buildJavaVersion`). CI also runs the tests on Java 8 via the `toolchain-tests` profile; `iban-commons-validation` keeps its tests on the build JDK, since Hibernate Validator 8 needs Java 11
 - **Git branch convention**: feature branches for non-trivial work; commit messages stay concise, present-tense, capability-first (describe what a squashed commit adds/does, not the bugs it fixed along the way)
 
 ## Release Process

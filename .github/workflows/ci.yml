@@ -24,20 +24,24 @@ jobs:
             fail-fast: false
             matrix:
                 os: [ubuntu-latest, windows-latest]
-                java: ['21']
+                java: ['8', '21']
         runs-on: ${{ matrix.os }}
         steps:
         -   uses: actions/checkout@v7
 
-        -   name: Set up JDK ${{ matrix.java }}
+        -   name: Set up JDK 21 (build) and JDK ${{ matrix.java }} (test toolchain)
+            # installing matrix.java alongside 21 registers both in ~/.m2/toolchains.xml; the
+            # last version listed becomes JAVA_HOME/the JDK that runs Maven itself.
             uses: actions/setup-java@v6
             with:
-                java-version: ${{ matrix.java }}
+                java-version: |
+                    ${{ matrix.java }}
+                    21
                 distribution: temurin
                 cache: maven
 
-        -   name: Build with Maven/JDK ${{ matrix.java }} on ${{ matrix.os }}
-            run: mvn --batch-mode --file pom.xml clean verify
+        -   name: Build with Maven/JDK 21 on ${{ matrix.os }}, tests forked onto JDK ${{ matrix.java }}
+            run: mvn --batch-mode --file pom.xml "-Dtest.jdk=${{ matrix.java }}" clean verify
 
     deploy:
         needs: build

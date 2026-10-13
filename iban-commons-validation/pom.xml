@@ -107,4 +107,33 @@
         </plugins>
     </build>
 
+    <profiles>
+
+        <!-- Hibernate Validator 8, the test-scoped Bean Validation provider, needs Java 11,
+             so with -Dtest.jdk=8 the tests of this module stay on the build JDK -->
+        <profile>
+            <id>toolchain-tests-java8</id>
+            <activation>
+                <property>
+                    <name>test.jdk</name>
+                    <value>8</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <jdkToolchain>
+                                <version>${buildJavaVersion}</version>
+                            </jdkToolchain>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+
 </project>
