@@ -36,7 +36,7 @@ import java.util.Objects;
  * the specification calls it "nicht pruefbar": method 91 lists account numbers that fail
  * every variant as "Testkontonummern (falsch)".
  *
- * @since 1.9.0
+ * @since 1.8.10
  */
 public final class CheckDigitResult {
 

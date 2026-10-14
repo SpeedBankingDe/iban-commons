@@ -1,6 +1,6 @@
-# 🏦 IBAN Commons
+# IBAN Commons
 
-> Ultra-fast, allocation-free, zero-dependency IBAN & BIC toolkit for Java 8+
+**Ultra-fast, allocation-free, zero-dependency IBAN & BIC toolkit for Java 8+**
 
 <div align="center">
   <a href="https://central.sonatype.com/artifact/de.speedbanking/iban-commons"><img src="https://img.shields.io/maven-central/v/de.speedbanking/iban-commons?label=Maven%20Central&style=flat-square" alt="Maven Central Version"></a>
@@ -20,7 +20,7 @@ Designed for high-performance enterprise applications, it covers 127 countries, 
 
 An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module is available for verifying German domestic account number ("Kontonummer") check digits against a Bankleitzahl (BLZ) — standalone and independent of `iban-commons`.
 
-An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolves the BIC and bank name behind an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL), with a bundled offline fallback dataset and lazy background refresh.
+An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolves the BIC and bank name behind an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL, NL, ES, FR), with a bundled offline fallback dataset and lazy background refresh.
 
 ## Why IBAN Commons?
 
@@ -85,7 +85,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 -----
 
-## ✨ Key Features
+## 🔑 Key Features
 
 * **Zero Dependencies & Small Footprint**
 
@@ -280,7 +280,7 @@ Bic.tryParse("INVALIDBIC").ifPresentOrElse(
 
 An optional, standalone module implementing the Deutsche Bundesbank's
 [*"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"*](https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320) —
-122 of the 127 assignable check digit methods (`00`–`99`, `A0`–`D9`) used to verify a German domestic
+all 144 assigned check digit methods (`00`–`99`, `A0`–`E4`) used to verify a German domestic
 account number ("Kontonummer") against a Bankleitzahl (BLZ).
 
 It operates purely on BLZ + Kontonummer + method code and has **zero dependency on `iban-commons`**
@@ -297,10 +297,12 @@ examples, and full method coverage details.
 
 An optional module resolving the BIC and bank name of the institution behind an IBAN or a raw
 country-specific bank code (German BLZ, Austrian Bankleitzahl, Swiss BC-Nummer, Czech kod banky,
-Belgian bank code, Polish numer rozliczeniowy), self-hosted and open-source. Initial country
-coverage: **DE, AT, CH, CZ, BE, PL**.
+Belgian bank code, Polish numer rozliczeniowy, Dutch bank identifier, Spanish codigo de entidad,
+French code banque), self-hosted and open-source. Country coverage: **DE, AT, CH, CZ, BE, PL, NL,
+ES, FR**. For German IBANs, `GermanIban` additionally checks the account number against the check
+digit method the Bundesbank publishes for the bank.
 
-Ships a small bundled offline fallback dataset per country so lookups work immediately without
+Ships a bundled offline fallback dataset per country so lookups work immediately without
 network access, then lazily refreshes itself in the background against each country's official
 bank directory, persisting the result to a local cache directory that survives JVM restarts.
 Depends on `iban-commons` (reuses `Iban` and `Bic`).
@@ -355,11 +357,11 @@ Iban iban = Iban.of("GB82WEST12345698765432");
 
 -----
 
-## ⏱️ Performance Benchmarks
+## 📊 Performance Benchmarks
 
 `iban-commons` is designed for **high throughput** and **minimal overhead**.
 
-We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries: [iban4j](http://www.iban4j.org/), [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/), [garvelink java-iban](https://github.com/barend/java-iban), and [jbanking](https://github.com/marcwrobel/jbanking).
+We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `iban-commons` against popular Java IBAN libraries: [iban4j](https://www.iban4j.org/), [Apache Commons Validator](https://commons.apache.org/proper/commons-validator/), [garvelink java-iban](https://github.com/barend/java-iban), and [jbanking](https://github.com/marcwrobel/jbanking).
 
 Measured on **Intel Core i7-1165G7 @ 2.80GHz**, OpenJDK 21.0.7, Linux, single core (`taskset -c 0`),
 ParallelGC (`-XX:+UseParallelGC`), `-XX:-StackTraceInThrowable`, `-Xms2G -Xmx2G`.
@@ -403,15 +405,21 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 
 ## 🆕 What's New in 1.8.12
 
-### Country Log Formatting
-New `Country.getLongName()` formats a country for log messages as `"Name (CODE)"`, e.g. `"Germany (DE)"`, sparing callers from writing the same concatenation themselves.
+### Bank Data Lookup Module
+New optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolving BIC and bank name from an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL, NL, ES, FR), with a bundled offline fallback dataset and a lazy, non-blocking background refresh against each country's official bank directory. For Germany, each record also carries the check digit method the Bundesbank publishes for the bank. Depends on `iban-commons`.
+
+### German IBANs with Account Check
+New `GermanIban` in `iban-commons-bankdata` is a validated German IBAN whose `getAccountCheckResult()` checks the account number against the check digit method of the bank, using the bank data above and `iban-commons-de-checkdigit` as an optional dependency.
+
+### Complete German Check Digit Methods
+`iban-commons-de-checkdigit` now implements all 144 assigned Bundesbank check digit methods (`00` to `99`, `A0` to `E4`), up from 122. New are the ESER methods `52` and `53` with `B6` and `C0` built on them, `72`, `75`, `77`, `79`, `80`, `83`, `87`, `89`, `97`, `D4`, `D5`, `D7`, `D8` and `E0` to `E4`. Methods `13`, `50`, `66`, `71`, `73`, `76`, `84` and `B7` were corrected where they deviated from the specification.
+
+### Build Requirement: JDK 21
+The project now requires JDK 21 to build. The compiled artifacts remain binary-compatible with Java 8, and CI runs the test suite on Java 8 as well.
 
 -----
 
 ## 🆕 What's New in 1.8.11
-
-### Bank Data Lookup Module
-New optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolving BIC and bank name from an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL), with a bundled offline fallback dataset and a lazy, non-blocking background refresh against each country's official bank directory. Depends on `iban-commons`.
 
 ### IBAN Registry Release 103
 `IbanRegistry` is now cross-checked against SWIFT IBAN Registry Release 103 (Sep 2026), up from Release 100. The only structural change: Brazil's bank identifier and account-type/control digits are now alphanumeric instead of numeric/alpha-only (`8!c...1!c1!c` instead of `8!n...1!a1!c`).
@@ -526,7 +534,7 @@ The project now requires JDK 17+ to build. The compiled artifact remains fully b
 127 countries including all from the SWIFT IBAN Registry Release 103 (September 2026):
 - All SEPA countries including major economies: Germany, UK, Switzerland, Norway, etc.
 - All known non-SEPA countries that support IBAN
-- Full list available in the [source code](src/main/java/de/speedbanking/iban/IbanRegistry.java)
+- Full list available in the [source code](iban-commons/src/main/java/de/speedbanking/iban/IbanRegistry.java)
 </details>
 
 <details>
@@ -634,12 +642,12 @@ mvn clean verify
 
 ## 💬 Support & Community
 
-- 💡 Questions? Ask in [Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)
-- 🐛 Found a bug? Open an [Issue](https://github.com/SpeedBankingDe/iban-commons/issues)
-- 📚 API Reference: [Javadoc on javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/)
-- 🌐 Website: [www.speedbanking.de](https://www.speedbanking.de/)
+- Questions? Ask in [Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)
+- Found a bug or missing a feature? Open an [Issue](https://github.com/SpeedBankingDe/iban-commons/issues)
+- API Reference: [Javadoc on javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/)
+- Website: [www.speedbanking.de](https://www.speedbanking.de/)
 
-** Please star this repo if you find it useful! **
+**Please star this repo 🌟 if you find it useful.**
 
 -----
 

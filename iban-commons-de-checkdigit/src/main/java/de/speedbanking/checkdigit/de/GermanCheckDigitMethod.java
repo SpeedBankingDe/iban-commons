@@ -34,40 +34,24 @@ import java.util.Map;
  * right-justified and zero-padded. The check digit position varies by method — most
  * commonly the last digit (index 9), but a number of methods (e.g. {@link #M13},
  * {@link #M17}, {@link #M23}) place it elsewhere within the number. A handful of
- * methods (e.g. {@link #M51}, and method {@code 52}, not implemented — see below)
+ * methods (e.g. {@link #M51} and {@link #M52})
  * also read digits from the BLZ.
  *
  * <h2>Coverage</h2>
- * The reference source used to derive these algorithms defines 128 method codes.
+ * The reference source used to derive these algorithms defines 145 method codes.
  * Of those, {@code 12} is explicitly marked as unassigned ("12 is not used") and is
- * therefore not registered here either. Of the remaining 127, <strong>122 are
- * implemented</strong>; five are deliberately left out, grouped into three categories
- * below. For all unimplemented codes, including {@code 12}, {@link #fromCode(String)}
- * throws {@link IllegalArgumentException} — see {@link GermanAccountCheckDigit} for
- * how that propagates to callers.
+ * therefore not registered here either. <strong>All remaining 144 are
+ * implemented</strong>. For {@code 12} and any other unknown code,
+ * {@link #fromCode(String)} throws {@link IllegalArgumentException}, see
+ * {@link GermanAccountCheckDigit} for how that propagates to callers.
  * <p>
- * <strong>Deliberately not implemented</strong> (all three categories, for the same
- * underlying reason — the risk of a silent transcription error outweighs the value
- * of a formula nobody can cross-check without the authoritative Bundesbank text):
- * <ul>
- *   <li><strong>{@code 52}, {@code 53}</strong> — build a combined "ESER-Nummer" that
- *       interleaves specific BLZ digits with the account number at computed offsets,
- *       then search for a matching factor via a modular loop. The offset arithmetic
- *       is intricate enough that a transcription error would silently produce a
- *       plausible-looking but wrong result.</li>
- *   <li><strong>{@code 87}</strong> — a stateful digit-substitution algorithm with
- *       running parity/carry variables threaded across the whole account number.</li>
- *   <li><strong>{@code B6}, {@code C0}</strong> — delegate part of their logic to
- *       {@code 53} and {@code 52} respectively, so they are incomplete without them.</li>
- * </ul>
- * <p>
- * All 122 implemented methods are exercised by the test suite. A handful were
+ * All implemented methods are exercised by the test suite. A handful were
  * implemented "with reservation" where the reference source itself flags ambiguity
  * (see {@link #C7}) or where an unusual, asymmetric formula was replicated literally
  * rather than "corrected" to a more regular pattern (see {@link #M57}) — these are
  * called out in the javadoc of the affected constant.
  *
- * @since 1.9.0
+ * @since 1.8.10
  *
  * @see <a href="https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320">
  *      Deutsche Bundesbank: Prüfzifferberechnungsmethoden</a>

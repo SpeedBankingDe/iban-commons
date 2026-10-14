@@ -31,9 +31,9 @@
 
     <name>${project.organization.name} IBAN Commons</name>
     <description>
-        Zero-dependency, zero-allocation, high-performance Java 8 library for IBAN and BIC validation,
-        parsing, building, and formatting. Supports 127 countries from SWIFT IBAN Registry (ISO 13616)
-        and other sources, as well as  BIC validation per ISO 9362. Android-compatible (API 21+).
+        Ultra-fast, allocation-free, zero-dependency Java 8+ toolkit for IBAN and BIC validation,
+        parsing, building, and formatting. Supports 127 countries from the SWIFT IBAN Registry (ISO 13616)
+        and other sources, as well as BIC validation per ISO 9362. Android-compatible (API 21+).
     </description>
 
     <dependencies>

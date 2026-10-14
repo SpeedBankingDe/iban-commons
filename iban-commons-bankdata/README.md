@@ -25,13 +25,13 @@ This module depends on [`iban-commons`](../README.md) (it reuses `Iban` and `Bic
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons-bankdata</artifactId>
-    <version>1.8.11-SNAPSHOT</version>
+    <version>1.8.12</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons-bankdata:1.8.11-SNAPSHOT'
+implementation 'de.speedbanking:iban-commons-bankdata:1.8.12'
 ```
 
 ```java
@@ -42,9 +42,9 @@ import de.speedbanking.iban.Iban;
 Optional<BankData> bank = BankDataLookup.byIban(Iban.of("DE89370400440532013000"));
 
 bank.ifPresent(b -> {
-    System.out.println(b.getBankName());  // "Commerzbank AG" (once real data is loaded)
-    System.out.println(b.getBic());       // e.g. "COBADEFFXXX"
-    System.out.println(b.getCity());      // e.g. "Frankfurt am Main"
+    System.out.println(b.getBankName());  // "Commerzbank"
+    System.out.println(b.getBic());       // "COBADEFFXXX"
+    System.out.println(b.getCity());      // "Köln"
 });
 
 // or look up directly by country-specific bank code, without an IBAN:
@@ -174,7 +174,7 @@ disk, whether it was selected implicitly (no arguments) or named explicitly on t
 this is enforced in code, not just documented, so there is no way to accidentally regenerate
 `CH.csv` by running the tool without arguments.
 
-## ⚠️ Data accuracy disclaimer
+## Data accuracy disclaimer
 
 **This module is provided on a best-effort basis and comes with no guarantee of correctness, completeness, or timeliness of the bank data it returns.** `BankDataLookup` results are derived from third-party national bank registries and, for `ES`/`FR`, the European Central Bank (Deutsche Bundesbank, OeNB, SIX Interbank Clearing, Ceska narodni banka, Nationale Bank van Belgie / Banque Nationale de Belgique, Narodowy Bank Polski, Betaalvereniging Nederland, European Central Bank) that publish and amend their data on their own schedule, outside this project's control. A result may be outdated between refreshes (background refresh only runs after the configured staleness threshold is reached, see [How data is loaded](#how-data-is-loaded)), and a failed refresh silently continues serving the last known good, potentially stale, data rather than failing the lookup. Do not treat a `BankData` record as authoritative for payment routing, compliance, or other decisions where
 incorrect or outdated bank data could cause harm; always validate against an authoritative source for such use cases, and use `BankData.getSourceVersion()` to check the vintage of a given result.
@@ -183,7 +183,7 @@ In addition, at the time of this release the download URLs and raw column layout
 
 `ES` and `FR` are both sourced from the same ECB file (see `AbstractBankDataLoaderEcb`'s class Javadoc), which lists every euro-area credit institution the ECB tracks, keyed by an internal `RIAD_CODE` registration identifier. For most countries in that file `RIAD_CODE` bears no relation to the country's actual IBAN bank code, but for Spain and France specifically it was verified, against known real-world bank codes, to equal the actual national bank code (`código de entidad` / `code banque`) - this is why only these two countries use this source, not every country the file happens to list.
 
-## ⚠️ Data licensing
+## Data licensing
 
 Every source this module downloads from publishes its own terms of use, separate from and independent of the Apache-2.0 license this module itself is published under; downloading, caching, and returning `BankData` records derived from that source at runtime is covered by "personal or business use" language common to most of them, but **bundling a snapshot of the raw data inside this module's own jar and redistributing it via Maven Central to every consumer, including for commercial use, is a materially different act** and was evaluated per source before this release:
 
@@ -199,10 +199,10 @@ Every source this module downloads from publishes its own terms of use, separate
 | ES      | European Central Bank                                    | ✅ Yes                    | ECB's website disclaimer permits reproduction/redistribution, including where the information is incorporated into a commercially sold product, conditional on citing the ECB as the source and, for a sold product, disclosing that the information is available free of charge on the ECB's website (see [Notable implementation choices](#notable-implementation-choices) for where that attribution lives)                        |
 | FR      | European Central Bank                                    | ✅ Yes                    | Same ECB source and terms as `ES` above                                                                                                                                                                                                                                                                                                                |
 
-For `CH`, `BankDataLookup` still works exactly the same way, it just cannot answer a lookup with zero network access on first use the way the other six countries can (see [How data is loaded](#how-data-is-loaded)); once a live download has succeeded once, the local cache file takes over and offline lookups work from then on, same as any other country.
+For `CH`, `BankDataLookup` still works exactly the same way, it just cannot answer a lookup with zero network access on first use the way the other eight countries can (see [How data is loaded](#how-data-is-loaded)); once a live download has succeeded once, the local cache file takes over and offline lookups work from then on, same as any other country.
 
 **This assessment is the result of reading each source's publicly posted terms, not legal advice.**
-If your use of this module is licensing-sensitive, verify the current terms yourself. Written permission has been requested from SIX Interbank Clearing to bundle their data the same way the other six sources already are; this section will be updated (and the snapshot added) if and when that permission is granted. If you represent SIX and can help move that along, please open an issue.
+If your use of this module is licensing-sensitive, verify the current terms yourself. Written permission has been requested from SIX Interbank Clearing to bundle their data the same way the other sources already are; this section will be updated (and the snapshot added) if and when that permission is granted. If you represent SIX and can help move that along, please open an issue.
 
 ## Notable implementation choices
 

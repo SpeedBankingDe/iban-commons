@@ -9,9 +9,9 @@
 
 `iban-commons-de-checkdigit` implements the Deutsche Bundesbank's
 [*"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"*](https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320) —
-the catalogue of check digit algorithms (methods `00`–`99`, `A0`–`D9`) used to verify a German
-domestic account number ("Kontonummer") against a Bankleitzahl (BLZ). **122 of the 127 assignable
-method codes** are implemented; see [Coverage](#coverage) below for what's left out and why.
+the catalogue of check digit algorithms (methods `00`–`99`, `A0`–`E4`) used to verify a German
+domestic account number ("Kontonummer") against a Bankleitzahl (BLZ). **All 144 assigned method
+codes** are implemented, see [Coverage](#coverage) below.
 
 This module is part of the [`iban-commons`](../README.md) project but is **deliberately standalone**:
 it has zero dependency on `iban-commons` (or anything else) and can be used entirely on its own by
@@ -64,20 +64,13 @@ your application, feed that method code straight into `GermanAccountCheckDigit.v
 
 ## Coverage
 
-Of the 128 method codes defined by the reference source, `12` is explicitly marked as unassigned
-("12 is not used") and is not registered. Of the remaining 127, **122 are implemented**; five are
-deliberately left out because the risk of a silent transcription error outweighs the value of a
-formula nobody can cross-check without the authoritative Bundesbank text:
+Of the 145 method codes defined by the reference source, `12` is explicitly marked as unassigned
+("12 is not used") and is not registered. **All remaining 144 are implemented**, which covers every
+method the Bundesbank BLZ directory currently assigns to a bank.
 
-| Code(s)      | Reason                                                                                                  |
-|--------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| `52`, `53`   | Build a combined "ESER-Nummer" interleaving specific BLZ digits with the account number at computed offsets, then search for a matching factor via a modular loop. |
-| `87`         | A stateful digit-substitution algorithm with running parity/carry variables threaded across the whole account number.            |
-| `B6`, `C0`   | Delegate part of their logic to `53` and `52` respectively, so they're incomplete without them.                                   |
-
-All 122 implemented methods are exercised by the test suite against real Bundesbank test account
+All implemented methods are exercised by the test suite against real Bundesbank test account
 numbers where the reference source provides them. `GermanAccountCheckDigit.verify(...)` throws
-`IllegalArgumentException` for any of the codes above (or any other unknown code) — see the
+`IllegalArgumentException` for `12` and any other unknown code, see the
 [`GermanCheckDigitMethod`](src/main/java/de/speedbanking/checkdigit/de/GermanCheckDigitMethod.java)
 class javadoc for the full per-method breakdown, including a few implemented "with reservation"
 where the reference source itself is ambiguous.

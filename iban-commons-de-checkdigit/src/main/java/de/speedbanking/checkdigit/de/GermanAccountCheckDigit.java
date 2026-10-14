@@ -34,7 +34,7 @@ import static java.util.Objects.requireNonNull;
  * }
  * }</pre>
  *
- * @since 1.9.0
+ * @since 1.8.10
  *
  * @see GermanCheckDigitMethod
  */
