@@ -3070,7 +3070,7 @@ public enum GermanCheckDigitMethod {
         requireNonNull(code, "code must not be null");
         GermanCheckDigitMethod method = BY_CODE.get(code);
         if (method == null) {
-            throw new IllegalArgumentException("Unknown or not-yet-implemented check digit method: " + code);
+            throw new IllegalArgumentException(String.format("Unknown check digit method: %s", code));
         }
         return method;
     }
