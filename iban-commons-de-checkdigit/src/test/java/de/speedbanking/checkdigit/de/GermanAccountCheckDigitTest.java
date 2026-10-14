@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -75,10 +76,12 @@ final class GermanAccountCheckDigitTest {
             .isThrownBy(() -> GermanAccountCheckDigit.verify("XX", "10000000", "1234567897"));
     }
 
-    @Test
-    void verify_blzTooLong_throwsIllegalArgumentException() {
+    @ParameterizedTest(name = "[{index}] blz {0}")
+    @ValueSource(strings = {"123456789", "1234567", "1"})
+    void verify_blzNotEightDigits_throwsIllegalArgumentException(String blz) {
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> GermanAccountCheckDigit.verify("00", "123456789", "1234567897"));
+            .isThrownBy(() -> GermanAccountCheckDigit.verify("00", blz, "1234567897"))
+            .withMessageContaining("exactly 8 digits");
     }
 
     @Test

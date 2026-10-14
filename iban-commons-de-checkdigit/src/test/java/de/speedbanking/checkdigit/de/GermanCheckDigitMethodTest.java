@@ -191,12 +191,16 @@ final class GermanCheckDigitMethodTest {
         "60, 0012345675, false",
         "61, 1234567490, true",
         "61, 1234567590, false",
+        "61, 0260760481, true",  // Ausnahme, digit 9 == 8: digits 9 and 10 count, example from the spec
+        "61, 0260760581, false", // same branch, wrong check digit
         "63, 0123456600, true",
         "63, 0123456700, false",
         "64, 1234562000, true",
         "64, 1234563000, false",
         "65, 1234567480, true",
         "65, 1234567580, false",
+        "65, 1234567590, true",  // Ausnahme, digit 9 == 9: digits 9 and 10 count, example from the spec
+        "65, 1234567490, false", // same branch, wrong check digit
         "66, 0123456784, true",
         "66, 0123456785, false",
         "66, 0100154508, true",
