@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -58,6 +60,13 @@ final class GermanAccountCheckDigitTest {
 
         assertThat(result.isChecked()).isFalse();
         assertThat(result.isValid()).isTrue();
+    }
+
+    // Expected results come from the specification itself, independent of this implementation.
+    @ParameterizedTest(name = "[{index}] method {0}: account {2} -> {3}")
+    @CsvFileSource(resources = "bundesbank-test-accounts.csv")
+    void verify_bundesbankTestAccount_matchesSpecification(String methodCode, String blz, String accountNumber, boolean valid) {
+        assertThat(GermanAccountCheckDigit.verify(methodCode, blz, accountNumber).isValid()).isEqualTo(valid);
     }
 
     @Test

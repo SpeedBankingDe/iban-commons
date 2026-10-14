@@ -632,18 +632,15 @@ public enum GermanCheckDigitMethod {
      * Method {@code 35}.
      * <p>
      * Modulus 11, weights {@code {10,9,8,7,6,5,4,3,2}} (same as {@link #M07}/{@link #M10}).
-     * Remainder {@code 11} collapses to {@code 0}; remainder {@code 10} falls back to
-     * accepting the account if digits 9 and 10 (index 8 and 9) are equal — the same
-     * fallback rule used by {@link #M16}.
+     * Like {@link #M31}, the check digit is the raw remainder {@code sum % 11}, without a
+     * complement step; a remainder of {@code 10} accepts the account if digits 9 and 10
+     * (index 8 and 9) are equal.
      */
     M35 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
             int sum = weightedSum(account, WEIGHTS_109876543, 0, false);
-            int       remainder = MODULUS_11 - sum % MODULUS_11;
-            if (remainder == 11) {
-                remainder = 0;
-            }
+            int remainder = sum % MODULUS_11;
             if (remainder == 10) {
                 return CheckDigitResult.of(digitAt(account, 8) == digitAt(account, 9));
             }
@@ -1043,26 +1040,20 @@ public enum GermanCheckDigitMethod {
      * <ul>
      *   <li>{@code 00} is always rejected.</li>
      *   <li>Six consecutive digits equal to the first digit, starting with {@code 7} or
-     *       {@code 8} (e.g. {@code 7777770000}), is always accepted.</li>
-     *   <li>{@code 40}, {@code 50}, {@code 91}, {@code 99} are always accepted.</li>
-     *   <li>A documented set of "first" values places the check digit at index 9, using
-     *       modulus 10 with weights {@code {1,2,1,2,1,2,1,2,1}} and cross sum.</li>
-     *   <li>A second documented set places the check digit at index 2, using modulus 10
-     *       over all 10 digits with weights {@code {1,2,0,1,2,1,2,1,2,1}} (position 2
-     *       zero-weighted so the check digit does not pollute its own checksum) and cross
-     *       sum.</li>
-     *   <li>{@code 01}–{@code 31}: accepted only if digits 3–4 form {@code 01}–{@code 12}
-     *       and digit 7 is less than {@code 5}.</li>
-     *   <li>Everything else: accepted only for the single historically-documented
-     *       exception account number {@code 0185125434}.</li>
+     *       {@code 8} (e.g. {@code 7777770000}), are not checked (method {@code 09}).</li>
+     *   <li>Variante 3, {@code 40}, {@code 50}, {@code 91}, {@code 99}: not checked
+     *       (method {@code 09}).</li>
+     *   <li>Variante 1, a documented set of "first" values including {@code 73}-{@code 82},
+     *       places the check digit at index 9, using modulus 10 with weights
+     *       {@code {1,2,1,2,1,2,1,2,1}} and cross sum.</li>
+     *   <li>Variante 2, a second documented set, places the check digit at index 2, using
+     *       modulus 10 over all 10 digits with weights {@code {1,2,0,1,2,1,2,1,2,1}}
+     *       (position 2 zero-weighted so the check digit does not pollute its own checksum)
+     *       and cross sum.</li>
+     *   <li>Variante 4, {@code 01}-{@code 31}: accepted only if digits 3-4 form
+     *       {@code 01}-{@code 12} and digit 7 is less than {@code 5}, or if the account
+     *       number is the documented exception {@code 0185125434}.</li>
      * </ul>
-     * <strong>Implemented with reservation</strong> — replicated faithfully from the
-     * reference source's branch order, but that order makes the final "historical
-     * exception account" branch effectively unreachable: every possible value of
-     * "first" (00–99) is already covered by one of the preceding branches (including
-     * {@code 0185125434} itself, whose "first" is {@code 01}, which the {@code 01}–{@code 31}
-     * month-range branch rejects before the fallback is ever reached). This is a
-     * pre-existing quirk carried over as-is rather than "corrected" by reordering.
      */
     M57 {
         @Override
@@ -1083,16 +1074,16 @@ public enum GermanCheckDigitMethod {
                     }
                 }
                 if (allSame) {
-                    return CheckDigitResult.of(true);
+                    return CheckDigitResult.NOT_CHECKED;
                 }
             }
 
             if (first == 40 || first == 50 || first == 91 || first == 99) {
-                return CheckDigitResult.of(true);
+                return CheckDigitResult.NOT_CHECKED;
             }
 
             if (first == 51 || first == 55 || first == 61 || (first >= 64 && first <= 66)
-                || first == 70 || first == 73 || (first >= 75 && first <= 82) || first == 88
+                || first == 70 || (first >= 73 && first <= 82) || first == 88
                 || first == 94 || first == 95) {
                 int sum = weightedSum(account, WEIGHTS_M57A, 0, true);
                 return compareToCheckDigit(account, mod10Complement(sum));
@@ -1101,19 +1092,19 @@ public enum GermanCheckDigitMethod {
             if ((first >= 32 && first <= 39) || (first >= 41 && first <= 49)
                 || (first >= 52 && first <= 54) || (first >= 56 && first <= 60)
                 || first == 62 || first == 63 || (first >= 67 && first <= 69)
-                || first == 71 || first == 72 || first == 74
+                || first == 71 || first == 72
                 || (first >= 83 && first <= 87) || first == 89 || first == 90
                 || first == 92 || first == 93 || (first >= 96 && first <= 98)) {
                 int sum = weightedSum(account, WEIGHTS_M57B, 0, true);
                 return compareAt(account, 2, mod10Complement(sum));
             }
 
-            if (first >= 1 && first <= 31) {
-                int second = digitAt(account, 2) * 10 + digitAt(account, 3);
-                return CheckDigitResult.of(second >= 1 && second <= 12 && digitAt(account, 6) < 5);
+            // the remaining values of "first" are 01-31 (Variante 4)
+            if (Arrays.equals(account, M57_EXCEPTION_ACCOUNT)) {
+                return CheckDigitResult.of(true);
             }
-
-            return CheckDigitResult.of(Arrays.equals(account, M57_EXCEPTION_ACCOUNT));
+            int second = digitAt(account, 2) * 10 + digitAt(account, 3);
+            return CheckDigitResult.of(second >= 1 && second <= 12 && digitAt(account, 6) < 5);
         }
     },
 
@@ -1362,7 +1353,7 @@ public enum GermanCheckDigitMethod {
      * If not (or if skipped straight here): a digit-transformation check using
      * {@link #TRANSFORM_TABLE}, traversing digits 9 down to 1 (index 8 down to 0), row
      * {@code (9 − i) % 4} for position {@code i} counted from 9 down to 1. Check digit =
-     * {@code 10 − sum % 10}, compared at index 9.
+     * {@code (10 − sum % 10) % 10}, as in {@link #M29}, compared at index 9.
      */
     M69 {
         @Override
@@ -1390,7 +1381,7 @@ public enum GermanCheckDigitMethod {
                 int translated = TRANSFORM_TABLE[(9 - i) % 4][digit];
                 sum += translated;
             }
-            return compareToCheckDigit(account, MODULUS_10 - sum % MODULUS_10);
+            return compareToCheckDigit(account, mod10Complement(sum));
         }
     },
 
@@ -1784,7 +1775,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 86}. Sachkonten exception (digit 3 / index 2 equals {@code 9})
      * delegates to {@link #M51}. Otherwise tries modulus 10 with cross sum, weights
-     * {@code {1,2,1,2,1,2}} over digits 4–9; if that fails, delegates to {@link #M33}.
+     * {@code {1,2,1,2,1,2}} over digits 4–9; if that fails, delegates to {@link #M32}.
      */
     M86 {
         @Override
@@ -1797,7 +1788,7 @@ public enum GermanCheckDigitMethod {
             if (a.isValid()) {
                 return a;
             }
-            return M33.calculate(blz, account);
+            return M32.calculate(blz, account);
         }
     },
 
@@ -1891,16 +1882,18 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 90}.
      * <p>
-     * "Sachkonten" (digit 3 / index 2 equals {@code 9}): modulus 11, weights
-     * {@code {8,7,6,5,4,3,2}} over digits 3–9, clamp-above-9, compared at index 9 —
-     * this branch's result is returned directly, with no further fallback.
+     * "Sachkonten" (digit 3 / index 2 equals {@code 9}), method F: modulus 11, weights
+     * {@code {8,7,6,5,4,3,2}} over digits 3-9, clamp-above-9, compared at index 9. This
+     * branch's result is returned directly, with no further fallback.
      * <p>
-     * Otherwise tries, all over digits 5–9 (weights {@code {6,5,4,3,2}}) except E,
-     * compared at index 9: (A) modulus 11, clamp-above-9; (B) modulus 7,
-     * {@code (7 − sum % 7) % 7}, {@code 7 → 0}; (C) modulus 9, {@code (9 − sum % 9) % 9},
-     * with an extra requirement that digit 10 itself is not {@code 9}; (D) modulus 10 with
-     * cross sum, weights {@code {2,1,2,1,2}}; (E, always returned as the final fallback)
-     * modulus 7, weights {@code {1,2,1,2,1,2}} over digits 4–9.
+     * Otherwise tries, all compared at index 9: (A) modulus 11, weights
+     * {@code {7,6,5,4,3,2}} over digits 4-9, clamp-above-9; then over digits 5-9:
+     * (B) modulus 11, weights {@code {6,5,4,3,2}}, clamp-above-9; (C) modulus 7, same
+     * weights, {@code (7 - sum % 7) % 7}; (D) modulus 9, same weights,
+     * {@code (9 - sum % 9) % 9}, with an extra requirement that digit 10 itself is not
+     * {@code 9}; (E) modulus 10, weights {@code {2,1,2,1,2}}, without cross sum; and
+     * finally (G, always returned as the final fallback) modulus 7, weights
+     * {@code {1,2,1,2,1,2}} over digits 4-9.
      */
     M90 {
         @Override
@@ -1934,7 +1927,7 @@ public enum GermanCheckDigitMethod {
                 return CheckDigitResult.of(true);
             }
 
-            int sumE = weightedSum(account, WEIGHTS_M73, 4, true);
+            int sumE = weightedSum(account, WEIGHTS_M73, 4, false);
             CheckDigitResult e = compareToCheckDigit(account, mod10Complement(sumE));
             if (e.isValid()) {
                 return e;
@@ -2461,16 +2454,19 @@ public enum GermanCheckDigitMethod {
      * {@code sum % 10}. If that does not match, adds {@code 5} (wrapping at {@code 10}) and
      * compares again.
      * <p>
-     * If digits 1–3 are all zero: modulus 11 (no complement — the raw remainder is the
-     * check digit directly), weights {@code {6,5,4,3,2,1}} over digits 4–9 (index 3–8). If
-     * that does not match, the same {@code +5} wrap-around retry applies.
+     * If digits 1–3 are zero and digit 4 (index 3) is positive: modulus 11 (no complement,
+     * the raw remainder is the check digit directly), weights {@code {6,5,4,3,2,1}} over
+     * digits 4–9 (index 3–8). If that does not match, the same {@code +5} wrap-around retry
+     * applies.
      * <p>
-     * Otherwise the account is rejected outright.
+     * Otherwise, with fewer than two or more than three leading zeros, the account is
+     * rejected outright.
      */
     B9 {
         @Override
         CheckDigitResult calculate(char[] blz, char[] account) {
-            if (digitAt(account, 0) == 0 && digitAt(account, 1) == 0 && digitAt(account, 2) > 0) {
+            int length = significantDigits(account);
+            if (length == 8) {
                 int sum = computeB9Sum(account, 2, WEIGHTS_B9A);
                 int crc = sum % MODULUS_10;
                 if (digitAt(account, 9) == crc) {
@@ -2478,7 +2474,7 @@ public enum GermanCheckDigitMethod {
                 }
                 return compareToCheckDigit(account, wrapPlusFive(crc));
             }
-            if (digitAt(account, 0) == 0 && digitAt(account, 1) == 0 && digitAt(account, 2) == 0) {
+            if (length == 7) {
                 int sum = weightedSum(account, WEIGHTS_M71, 3, false);
                 int crc = sum % MODULUS_11;
                 if (digitAt(account, 9) == crc) {
@@ -2693,7 +2689,8 @@ public enum GermanCheckDigitMethod {
      * sequence: a constant prefix {@code {4,3,6,3,3,8}}, followed by digit 1 (index 0),
      * followed by digits 2–9 (index 1–8); each element is multiplied by an alternating
      * weight ({@code 2,1,2,1,…}, starting at {@code 2}), and the cross sum of each product
-     * is accumulated. Check digit = {@code 10 − sum % 10}, compared at index 9.
+     * is accumulated. Check digit = {@code (10 − sum % 10) % 10} (as in {@link #M00}),
+     * compared at index 9.
      */
     D1 {
         @Override
@@ -2719,7 +2716,7 @@ public enum GermanCheckDigitMethod {
                 int product = sequence[i] * weight;
                 sum += crossSum(product);
             }
-            return compareToCheckDigit(account, MODULUS_10 - sum % MODULUS_10);
+            return compareToCheckDigit(account, mod10Complement(sum));
         }
     },
 

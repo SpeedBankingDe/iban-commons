@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * Unit tests for {@link GermanCheckDigitMethod}.
@@ -325,19 +326,23 @@ final class GermanCheckDigitMethodTest {
         "A8 | 2003798909 | true",  // digit 3 != 9, sumA (Modulus 11, weights 7-2) valid
         "A8 | 4809387549 | true",  // sumA invalid, sumB (Modulus 10) valid
         "A8 | 8001465264 | false", // sumA/sumB invalid
-        "35 | 6187376609 | true",  // remainder in [1,9], normal comparison
-        "35 | 8041465264 | false", // same branch, mismatch
-        "35 | 2879069222 | true",  // remainder == 10 -> compares digit 9 to digit 10 instead
-        "35 | 2091253128 | false", // same branch, digits differ
-        "35 | 1739348370 | true",  // sum % 11 == 0 -> remainder 11 collapses to 0
+        "35 | 6187376602 | true",  // remainder in [0,9] is the check digit itself
+        "35 | 6187376609 | false", // same branch, mismatch
+        "35 | 1000000144 | true",  // remainder == 10 -> compares digit 9 to digit 10 instead
+        "35 | 1000000145 | false", // same branch, digits differ
+        "35 | 1739348370 | true",  // sum % 11 == 0 -> check digit 0
         "86 | 4809387549 | true",  // own formula (Modulus 10) valid
-        "86 | 4703625701 | true",  // own formula invalid, delegates to M33 (valid)
-        "86 | 8001465264 | false", // own formula and M33 delegate both invalid
+        "86 | 0001123890 | true",  // own formula invalid, delegates to M32 (valid, digit 4 counts)
+        "86 | 8001465264 | false", // own formula and M32 delegate both invalid
         "95 | 0041465264 | false", // digit 1 == 0 but outside every reserved range -> formula applies
         "57 | 5100000003 | true",  // 'first' selects the WEIGHTS_M57A formula, compared at index 9
         "57 | 5100000004 | false", // same branch, mismatch
         "57 | 3230000000 | true",  // 'first' selects the WEIGHTS_M57B formula, compared at index 2
         "57 | 3240000000 | false", // same branch, mismatch
+        "57 | 7400060823 | true",  // 74 belongs to Variante 1 (73 to 82)
+        "57 | 0185125434 | true",  // documented exception within Variante 4
+        "69 | 9700000050 | true",  // Variante 2 only, transformation sum 20 -> check digit 0
+        "D1 | 0900000000 | true",  // sum 40 -> check digit 0, as in method 00
     })
     void calculate_knownVectors_branchCoverage(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
@@ -405,6 +410,15 @@ final class GermanCheckDigitMethodTest {
     void calculate_c5_leadingSevenOrEightException_delegatesToM09() {
         assertThat(GermanCheckDigitMethod.C5.calculate(BLZ, "7000000000".toCharArray()).isChecked()).isFalse();
         assertThat(GermanCheckDigitMethod.C5.calculate(BLZ, "8500000000".toCharArray()).isChecked()).isFalse();
+    }
+
+    @ParameterizedTest(name = "[{index}] account {0}")
+    @ValueSource(strings = {"7777778800", "8888880000", "4000000000", "5001050352", "9100000000", "9900000000"})
+    void calculate_m57_method09Range_notChecked(String account) {
+        CheckDigitResult result = GermanCheckDigitMethod.M57.calculate(BLZ, account.toCharArray());
+
+        assertThat(result.isChecked()).isFalse();
+        assertThat(result.isValid()).isTrue();
     }
 
     @Test
@@ -1314,7 +1328,7 @@ final class GermanCheckDigitMethodTest {
         "76, 0000034952, true",
         "85, 0099000008, true",
         "85, 0001000000, true",
-        "86, 0001000000, true",
+        "86, 0001000004, true",
         "88, 0090000005, true",
         "88, 0000000000, true",
         "90, 0090000000, false",
@@ -1353,7 +1367,9 @@ final class GermanCheckDigitMethodTest {
         "B8, 9000000007, false",
         "B8, 9110000001, false",
         "B9, 0010000004, true",
-        "B9, 0000000000, true",
+        "B9, 0000000000, false", // more than three leading zeros
+        "B9, 0001000006, true",  // three leading zeros, Variante 2
+        "B9, 0000100005, false", // four leading zeros, rejected although the Variante 2 sum matches
         "B9, 0010000009, true",
         "B9, 0020000000, true",
         "C5, 0000000000, false",

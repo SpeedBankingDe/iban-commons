@@ -412,7 +412,7 @@ New optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) 
 New `GermanIban` in `iban-commons-bankdata` is a validated German IBAN whose `getAccountCheckResult()` checks the account number against the check digit method of the bank, using the bank data above and `iban-commons-de-checkdigit` as an optional dependency.
 
 ### Complete German Check Digit Methods
-`iban-commons-de-checkdigit` now implements all 144 assigned Bundesbank check digit methods (`00` to `99`, `A0` to `E4`), up from 122. New are the ESER methods `52` and `53` with `B6` and `C0` built on them, `72`, `75`, `77`, `79`, `80`, `83`, `87`, `89`, `97`, `D4`, `D5`, `D7`, `D8` and `E0` to `E4`. Methods `13`, `50`, `66`, `71`, `73`, `76`, `84` and `B7` were corrected where they deviated from the specification.
+`iban-commons-de-checkdigit` now implements all 144 assigned Bundesbank check digit methods (`00` to `99`, `A0` to `E4`), up from 122. New are the ESER methods `52` and `53` with `B6` and `C0` built on them, `72`, `75`, `77`, `79`, `80`, `83`, `87`, `89`, `97`, `D4`, `D5`, `D7`, `D8` and `E0` to `E4`. Methods `13`, `35`, `50`, `57`, `66`, `69`, `71`, `73`, `76`, `84`, `86`, `90`, `B7`, `B9` and `D1` were corrected where they deviated from the specification, and the test suite now checks every test account number listed in the specification.
 
 ### Build Requirement: JDK 21
 The project now requires JDK 21 to build. The compiled artifacts remain binary-compatible with Java 8, and CI runs the test suite on Java 8 as well.
