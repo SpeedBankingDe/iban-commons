@@ -54,10 +54,10 @@ public final class IbanPatternConverter {
      * Cache of already-parsed segment lists, keyed by the exact pattern notation string.
      * <p>
      * {@link #parseSegments} is called repeatedly with the same, small, fixed set of pattern
-     * strings (the structural patterns defined once per country in {@code IbanRegistry}) — most
-     * prominently once per component on every single {@code IbanBuilder#build()} call. Since a
-     * given pattern notation always parses to the same result, caching avoids repeating the
-     * regex matching and {@code Segment} list construction on every call.
+     * strings (the structural patterns defined once per country in {@code IbanRegistry}), for
+     * example while building the country regexes and the per-position character types of the
+     * IBAN components. Since a given pattern notation always parses to the same result, caching
+     * avoids repeating the regex matching and {@code Segment} list construction on every call.
      * <p>
      * Mirrors the caching approach of {@link de.speedbanking.util.PatternCache}: an unbounded,
      * thread-safe map. This is safe for the library's own, closed set of country patterns; a
@@ -70,10 +70,9 @@ public final class IbanPatternConverter {
     /**
      * Cache of already-built regex strings, keyed by the exact pattern notation string.
      * <p>
-     * Mirrors {@link #SEGMENT_CACHE}: {@link #buildRegex(String, List)} is called once per
-     * component with an explicit (non-random) value on every {@code IbanBuilder#build()} call,
-     * always with the same small, fixed set of pattern strings. Caching avoids rebuilding the
-     * same regex string (and the {@code StringBuilder} it takes to build it) on every call.
+     * Mirrors {@link #SEGMENT_CACHE}: {@link #buildRegex(String, List)} is typically called with
+     * the same small, fixed set of pattern strings. Caching avoids rebuilding the same regex
+     * string (and the {@code StringBuilder} it takes to build it) on every call.
      */
     private static final ConcurrentMap<String, String> REGEX_CACHE = new ConcurrentHashMap<>();
 

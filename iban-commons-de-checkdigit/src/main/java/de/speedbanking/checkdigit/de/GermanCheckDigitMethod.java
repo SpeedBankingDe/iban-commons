@@ -3171,6 +3171,7 @@ public enum GermanCheckDigitMethod {
      * the 1-based digit position of the specification; {@code konto[i]} may become
      * {@code 10}.
      */
+    @SuppressWarnings("java:S3776") // literal translation of the pseudo code, kept comparable to the specification
     private static CheckDigitResult calculateM87A(char[] account) {
         int[] konto = new int[ACCOUNT_LENGTH + 1];
         for (int k = 1; k <= ACCOUNT_LENGTH; k++) {

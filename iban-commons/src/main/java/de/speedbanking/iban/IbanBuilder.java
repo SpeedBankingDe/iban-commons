@@ -34,8 +34,6 @@ import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Mod97;
 
 import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -52,17 +50,22 @@ import java.util.concurrent.ThreadLocalRandom;
 public class IbanBuilder<B extends IbanBuilder<B>> {
 
     /** Marks a BBAN position that no component has written yet, see {@link #build()}. */
-    private static final char                                           UNSET         = '\0';
+    private static final char UNSET = '\0';
 
     /**
-     * Per-thread working buffers of {@link #build()}, one per country, each exactly as long as
-     * the country's IBAN. The map and each buffer are created lazily on first use, a buffer is
-     * prepared for reuse at the start of every call (see {@link #buildBuffer(IbanComponent)}).
-     * A buffer never leaves {@code build()}: the result is copied into a {@link String} before
-     * returning.
+     * Per-thread working buffers of {@link #build()}, one per country, indexed by the ordinal of
+     * the {@link IbanRegistry} entry and each exactly as long as the country's IBAN. The array
+     * and each buffer are created lazily on first use, a buffer is prepared for reuse at the
+     * start of every call (see {@link #buildBuffer(IbanComponent)}). A buffer never leaves
+     * {@code build()}: the result is copied into a {@link String} before returning.
+     * <p>
+     * The thread-local value holds JDK types only, so a pooled thread outliving the application
+     * does not keep this library's class loader alive; this is why the buffers are not kept in
+     * a map keyed by {@link IbanRegistry}. Being bounded per thread, they are never removed.
      */
-    private static final ThreadLocal<Map<IbanRegistry, char[]>>         BUILD_BUFFERS = ThreadLocal
-        .withInitial(() -> new EnumMap<>(IbanRegistry.class));
+    @SuppressWarnings("java:S5164") // small, bounded per-thread buffers of JDK types only, see above
+    private static final ThreadLocal<char[][]> BUILD_BUFFERS = ThreadLocal
+        .withInitial(() -> new char[IbanRegistry.values().length][]);
 
     /** The registry entry defining this builder's country structure, never {@code null}. */
     private final IbanRegistry countryData;
@@ -219,15 +222,17 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * is reset since unset positions are filled with fresh random characters later and must not
      * keep the content of the previous IBAN.
      */
+    @SuppressWarnings("EnumOrdinal")
     private char[] buildBuffer(IbanComponent bban) {
-        Map<IbanRegistry, char[]> buffers = BUILD_BUFFERS.get();
-        char[] buffer = buffers.get(countryData);
+        int index = countryData.ordinal();
+        char[][] buffers = BUILD_BUFFERS.get();
+        char[] buffer = buffers[index];
         if (buffer == null) {
             buffer = new char[countryData.getIbanLength()];
             String countryCode = countryData.getBaseCountry().getCountryCode();
             buffer[0] = countryCode.charAt(0);
             buffer[1] = countryCode.charAt(1);
-            buffers.put(countryData, buffer);
+            buffers[index] = buffer;
         }
         buffer[IbanRegistry.INDEX_CHECK_DIGIT1] = '0';
         buffer[IbanRegistry.INDEX_CHECK_DIGIT2] = '0';

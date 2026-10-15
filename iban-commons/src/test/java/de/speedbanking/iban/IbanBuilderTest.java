@@ -294,7 +294,7 @@ final class IbanBuilderTest {
             .accountNumber("532013000")
             .build();
 
-        assertThat(iban.toString()).isEqualTo("DE89370400440532013000");
+        assertThatIban(iban).hasToString("DE89370400440532013000");
     }
 
     @DisplayName("build: the reused buffer neither keeps random content nor content of a failed build")
@@ -315,7 +315,7 @@ final class IbanBuilderTest {
             .bankCode("37040044")
             .accountNumber("532013000")
             .build();
-        assertThat(iban.toString()).isEqualTo("DE89370400440532013000");
+        assertThatIban(iban).hasToString("DE89370400440532013000");
     }
 
     @DisplayName("resolveComponent: pattern mismatch with exact length throws InvalidIbanException")

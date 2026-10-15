@@ -65,6 +65,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * serialized form holds only the IBAN string, and {@code volatile} to publish the holder
      * safely across threads.
      */
+    @SuppressWarnings("java:S3077") // Parts only holds volatile fields, see there
     private transient volatile Parts  parts;
 
     /**
