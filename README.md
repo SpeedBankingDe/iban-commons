@@ -414,6 +414,12 @@ New `GermanIban` in `iban-commons-bankdata` is a validated German IBAN whose `ge
 ### Complete German Check Digit Methods
 `iban-commons-de-checkdigit` now implements all 144 assigned Bundesbank check digit methods (`00` to `99`, `A0` to `E4`), up from 122. New are the ESER methods `52` and `53` with `B6` and `C0` built on them, `72`, `75`, `77`, `79`, `80`, `83`, `87`, `89`, `97`, `D4`, `D5`, `D7`, `D8` and `E0` to `E4`. Methods `13`, `35`, `50`, `57`, `66`, `69`, `71`, `73`, `76`, `84`, `86`, `90`, `B7`, `B9` and `D1` were corrected where they deviated from the specification, and the test suite now checks every test account number listed in the specification.
 
+### Faster IbanBuilder
+`IbanBuilder` checks component values character by character against their pattern instead of using a regex, generates random characters only for BBAN positions no component sets, and works on a reused per-thread buffer. Building a DE IBAN from bank code and account number is about 2.6 times as fast as in 1.8.11 and allocates 120 instead of 564 bytes, compared to 1,604 bytes for iban4j, which it now outperforms by a factor of 2.4.
+
+### Smaller Iban Objects
+The parts that `Iban` caches for its getters (`getBankCode()`, `getAccountNumber()`, `toFormattedString()` and others) now live in a holder created on first access. An `Iban` whose parts are never requested takes 24 instead of 48 bytes on the heap.
+
 ### Build Requirement: JDK 21
 The project now requires JDK 21 to build. The compiled artifacts remain binary-compatible with Java 8, and CI runs the test suite on Java 8 as well.
 
