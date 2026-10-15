@@ -127,7 +127,7 @@ final class GermanAccountCheckDigitTest {
     }
 
     @Test
-    void privateConstructor_shouldThrowException() throws Exception {
+    void privateConstructor_invoked_throwsUnsupportedOperationException() throws Exception {
         Constructor<GermanAccountCheckDigit> constructor = GermanAccountCheckDigit.class.getDeclaredConstructor();
         assertThat(Modifier.isPrivate(constructor.getModifiers())).isTrue();
 

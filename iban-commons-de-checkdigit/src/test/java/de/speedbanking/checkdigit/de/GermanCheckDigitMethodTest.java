@@ -651,11 +651,6 @@ final class GermanCheckDigitMethodTest {
     @Test
     void calculate_m57_rangeOneToThirtyOne_invalidMonth_rejected() {
         // "first" = 15, digits 3-4 = 00 is not a valid month (01-12) -> rejected.
-        // Note: the reference source's final "historical exception account" fallback
-        // (see M57 javadoc) is unreachable for any input, since every possible value of
-        // "first" (0-99) is already covered by an earlier branch in the dispatch chain -
-        // this is a pre-existing quirk of the specification/reference source, not
-        // something introduced by this reimplementation.
         assertThat(GermanCheckDigitMethod.M57.calculate(BLZ, "1500000000".toCharArray()).isValid()).isFalse();
     }
 
@@ -762,7 +757,7 @@ final class GermanCheckDigitMethodTest {
     // Methods 37, 39, 47, 62, 82, A2, A3, A5, A7, A9, B1, B2, B3, B5, C1, C2, C3, C4, C8, C9,
     // D2, D3, D6, D9: previously had no test vectors at all (round-tripped via fromCode()/
     // getCode() only, never through calculate() itself) - found via a pitest mutation-coverage
-    // gap that contradicted this class's own "all 122 implemented methods are exercised" claim.
+    // gap, although this class claims that all implemented methods are exercised.
     // For the delegating/fallback methods, at least one vector per branch is included so the
     // branch selection itself (not just the arithmetic) is verified.
 
