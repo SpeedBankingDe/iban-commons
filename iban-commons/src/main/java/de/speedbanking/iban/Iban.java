@@ -58,42 +58,14 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     private final IbanRegistry        countryData;
 
     /**
-     * Caches the two IBAN check digits (positions 3 and 4) upon first access.<br>
-     * Marked {@code transient} so deserialization recomputes on next access,
-     * and {@code volatile} to ensure the written value is visible across threads.
-     * Multiple threads may compute and write the same value; this is harmless
-     * because String assignment is atomic and all threads derive the identical result.
+     * Lazily created cache of the parts returned by the getters, see {@link #parts()}.
+     * <p>
+     * Kept in a separate object so that an {@code Iban} whose parts are never requested carries
+     * a single reference instead of one per cached part. Marked {@code transient}, since the
+     * serialized form holds only the IBAN string, and {@code volatile} to publish the holder
+     * safely across threads.
      */
-    private transient volatile String checkDigits;
-
-    /** Caches the Basic Bank Account Number (BBAN) part upon first access. */
-    private transient volatile String bban;
-
-    /**
-     * Caches the Bank Code part of the BBAN upon first access.
-     * May remain {@code null} if the country's BBAN structure does not define a bank code.
-     */
-    private transient volatile String bankCode;
-
-    /**
-     * Caches the Branch Code part of the BBAN upon first access.
-     * May remain {@code null} if the country's BBAN structure does not define a branch code.
-     */
-    private transient volatile String branchCode;
-
-    /** Caches the Account Number part of the BBAN upon first access. */
-    private transient volatile String accountNumber;
-
-    /**
-     * Caches the National Check Digit part of the BBAN upon first access.
-     * May remain {@code null} if the country's BBAN structure does not define a national check digit.
-     */
-    private transient volatile String nationalCheckDigit;
-
-    /**
-     * Caches the IBAN formatted for display in groups of four characters (per ISO standard).
-     */
-    private transient volatile String formattedString;
+    private transient volatile Parts  parts;
 
     /**
      * Package-private constructor.
@@ -369,10 +341,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String getCheckDigits() {
-        if (checkDigits == null) {
-            checkDigits = ibanStr.substring(IbanRegistry.INDEX_CHECK_DIGIT1, IbanRegistry.INDEX_BBAN);
+        Parts p = parts();
+        if (p.checkDigits == null) {
+            p.checkDigits = ibanStr.substring(IbanRegistry.INDEX_CHECK_DIGIT1, IbanRegistry.INDEX_BBAN);
         }
-        return checkDigits;
+        return p.checkDigits;
     }
 
     /**
@@ -388,10 +361,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String getBban() {
-        if (bban == null) {
-            bban = ibanStr.substring(IbanRegistry.INDEX_BBAN);
+        Parts p = parts();
+        if (p.bban == null) {
+            p.bban = ibanStr.substring(IbanRegistry.INDEX_BBAN);
         }
-        return bban;
+        return p.bban;
     }
 
     /**
@@ -408,10 +382,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String getBankCode() {
-        if (bankCode == null) {
-            bankCode = countryData.getBankCodeComponent().extractFrom(ibanStr);
+        Parts p = parts();
+        if (p.bankCode == null) {
+            p.bankCode = countryData.getBankCodeComponent().extractFrom(ibanStr);
         }
-        return bankCode;
+        return p.bankCode;
     }
 
     /**
@@ -422,13 +397,15 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String getBranchCode() {
-        if (branchCode == null) {
-            IbanComponent component = countryData.getBranchCodeComponent();
-            if (component != null) {
-                branchCode = component.extractFrom(ibanStr);
-            }
+        IbanComponent component = countryData.getBranchCodeComponent();
+        if (component == null) {
+            return null;
         }
-        return branchCode;
+        Parts p = parts();
+        if (p.branchCode == null) {
+            p.branchCode = component.extractFrom(ibanStr);
+        }
+        return p.branchCode;
     }
 
     /**
@@ -457,10 +434,11 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String getAccountNumber() {
-        if (accountNumber == null) {
-            accountNumber = countryData.getAccountNumberComponent().extractFrom(ibanStr);
+        Parts p = parts();
+        if (p.accountNumber == null) {
+            p.accountNumber = countryData.getAccountNumberComponent().extractFrom(ibanStr);
         }
-        return accountNumber;
+        return p.accountNumber;
     }
 
     /**
@@ -471,13 +449,15 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.1
      */
     public String getNationalCheckDigit() {
-        if (nationalCheckDigit == null) {
-            IbanComponent component = countryData.getNationalCheckDigitComponent();
-            if (component != null) {
-                nationalCheckDigit = component.extractFrom(ibanStr);
-            }
+        IbanComponent component = countryData.getNationalCheckDigitComponent();
+        if (component == null) {
+            return null;
         }
-        return nationalCheckDigit;
+        Parts p = parts();
+        if (p.nationalCheckDigit == null) {
+            p.nationalCheckDigit = component.extractFrom(ibanStr);
+        }
+        return p.nationalCheckDigit;
     }
 
     /**
@@ -516,11 +496,30 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @since 1.8.0
      */
     public String toFormattedString() {
-        if (formattedString == null) {
+        Parts p = parts();
+        if (p.formattedString == null) {
             // delegate formatting to external Formatter
-            formattedString = Formatter.format(toString());
+            p.formattedString = Formatter.format(toString());
         }
-        return formattedString;
+        return p.formattedString;
+    }
+
+    /**
+     * Returns the cache of this IBAN's parts, creating it on first use.
+     * <p>
+     * Concurrent first calls may each create a holder and one of them wins; values cached in a
+     * losing holder are simply computed again, which is harmless since all threads derive the
+     * identical result.
+     *
+     * @return the parts cache, never {@code null}
+     */
+    private Parts parts() {
+        Parts result = parts;
+        if (result == null) {
+            result = new Parts();
+            parts = result;
+        }
+        return result;
     }
 
     /**
@@ -763,6 +762,26 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     private void readObjectNoData() throws InvalidObjectException {
         throw new InvalidObjectException(
             Iban.class.getSimpleName() + " must be deserialized via its " + Memento.class.getSimpleName() + " proxy");
+    }
+
+    /**
+     * Lazily computed parts of an {@link Iban}, each cached upon first access.
+     * <p>
+     * The fields are {@code volatile} so a written value is visible across threads. Multiple
+     * threads may compute and write the same value; this is harmless because String assignment
+     * is atomic and all threads derive the identical result. A part the country does not define
+     * (branch code, national check digit) is never stored.
+     *
+     * @since 1.8.12
+     */
+    private static final class Parts {
+        private volatile String checkDigits;
+        private volatile String bban;
+        private volatile String bankCode;
+        private volatile String branchCode;
+        private volatile String accountNumber;
+        private volatile String nationalCheckDigit;
+        private volatile String formattedString;
     }
 
     /**
