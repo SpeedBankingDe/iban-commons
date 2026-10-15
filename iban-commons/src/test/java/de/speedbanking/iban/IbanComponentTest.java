@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.speedbanking.iban.IbanComponent.IbanComponentType;
+import de.speedbanking.iban.IbanComponent.PositionTypes;
+import de.speedbanking.iban.util.IbanCharType;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -177,6 +179,30 @@ final class IbanComponentTest {
             assertThatThrownBy(() -> component.extractFrom(source))
                 .isInstanceOf(ArrayIndexOutOfBoundsException.class);
         }
+    }
+
+    @DisplayName("getPositionTypes() flattens the pattern segments into one character type per position")
+    @Test
+    void getPositionTypes_mixedPattern_flattensSegments() {
+        IbanComponent component = new IbanComponent(IbanComponentType.BBAN, "2!n3!a1!c", 4, 6);
+
+        PositionTypes types = component.getPositionTypes();
+
+        assertThat(types.length()).isEqualTo(6);
+        assertThat(types.get(1)).isEqualTo(IbanCharType.NUMERIC);
+        assertThat(types.get(2)).isEqualTo(IbanCharType.ALPHABETIC);
+        assertThat(types.get(5)).isEqualTo(IbanCharType.ALPHANUMERIC);
+        assertThat(types.isZeroPaddable()).isFalse();
+        assertThat(component.getPositionTypes()).isSameAs(types);
+    }
+
+    @DisplayName("getPositionTypes() allows zero padding if every position accepts digits")
+    @ParameterizedTest(name = "[{index}] pattern {0}")
+    @ValueSource(strings = {"10!n", "4!n6!c", "8!c"})
+    void getPositionTypes_numericOrAlphanumericPattern_isZeroPaddable(String pattern) {
+        IbanComponent component = new IbanComponent(IbanComponentType.ACCOUNT_NUMBER, pattern, 8, 10);
+
+        assertThat(component.getPositionTypes().isZeroPaddable()).isTrue();
     }
 
     @DisplayName("toString() contains the class name and all fields")

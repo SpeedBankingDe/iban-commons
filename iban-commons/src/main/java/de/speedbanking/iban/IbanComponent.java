@@ -18,6 +18,11 @@ package de.speedbanking.iban;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.iban.IbanRegistry.StructureData;
+import de.speedbanking.iban.util.IbanCharType;
+import de.speedbanking.iban.util.IbanPatternConverter;
+import de.speedbanking.iban.util.IbanPatternConverter.Segment;
+
+import java.util.List;
 
 /**
  * Immutable pairing of a component's type, character pattern and position within the IBAN.
@@ -32,6 +37,9 @@ final class IbanComponent {
     private final String            patternStr;
     private final int               beginIndex;
     private final int               length;
+
+    /** Character types per position, derived lazily from the pattern, see {@link #getPositionTypes()}. */
+    private PositionTypes positionTypes;
 
     IbanComponent(IbanComponentType type, String patternStr, int beginIndex, int length) {
         this.type = requireNonNull(type, "type required");
@@ -92,6 +100,25 @@ final class IbanComponent {
     }
 
     /**
+     * Returns the character type of each position of this component, parsed once from the
+     * pattern notation and cached afterwards.
+     * <p>
+     * The cache is initialized racily: concurrent first calls may each parse the pattern, but
+     * {@link PositionTypes} is immutable and safely published through its final fields.
+     *
+     * @return the position types, never {@code null}
+     * @throws IllegalArgumentException if the pattern is not a valid IBAN structure notation
+     */
+    PositionTypes getPositionTypes() {
+        PositionTypes result = positionTypes;
+        if (result == null) {
+            result = new PositionTypes(IbanPatternConverter.parseSegments(patternStr));
+            positionTypes = result;
+        }
+        return result;
+    }
+
+    /**
      * Extracts this component's substring directly from the given full IBAN string.
      *
      * @param ibanStr the full, normalized IBAN string
@@ -120,6 +147,62 @@ final class IbanComponent {
             + ", pattern=" + patternStr
             + ", beginIndex=" + beginIndex
             + ", length=" + length + "]";
+    }
+
+    /**
+     * The character type of each position of a component, flattened from its pattern segments,
+     * so that a value can be checked and generated position by position without a regex.
+     *
+     * @since 1.8.12
+     */
+    static final class PositionTypes {
+        private final IbanCharType[] types;
+        private final boolean        zeroPaddable;
+
+        /**
+         * Flattens the given segments into one character type per position.
+         *
+         * @param segments the parsed pattern segments, must not be null
+         */
+        PositionTypes(List<Segment> segments) {
+            types = new IbanCharType[IbanPatternConverter.calculateTotalLength(segments)];
+            int pos = 0;
+            for (Segment segment : segments) {
+                for (int i = 0; i < segment.getLength(); i++) {
+                    types[pos++] = segment.getCharType();
+                }
+            }
+            zeroPaddable = IbanPatternConverter.allMatch(segments, Segment::isNumericOrAlphanumeric);
+        }
+
+        /**
+         * Returns the number of positions.
+         *
+         * @return the total length of the pattern
+         */
+        int length() {
+            return types.length;
+        }
+
+        /**
+         * Returns the character type at the given position.
+         *
+         * @param pos the zero-based position within the component
+         * @return the character type, never {@code null}
+         */
+        IbanCharType get(int pos) {
+            return types[pos];
+        }
+
+        /**
+         * Returns whether a shorter value may be left-padded with {@code '0'}, which is the case
+         * if every position accepts digits.
+         *
+         * @return {@code true} if all positions are numeric or alphanumeric
+         */
+        boolean isZeroPaddable() {
+            return zeroPaddable;
+        }
     }
 
     /**

@@ -99,15 +99,15 @@ final class CountryValidatorsTest {
 
             Assumptions.assumeFalse(validator.getNcdCalculator() instanceof NoOpNcdCalculatorBase);
 
-            StringBuilder badNcdIban = new StringBuilder(countryData.getIbanExample());
+            char[] badNcdIban = countryData.getIbanExample().toCharArray();
             IbanComponent ncdComponent = countryData.getNationalCheckDigitComponent();
             for (int idx = ncdComponent.getBeginIndex(); idx < ncdComponent.getEndIndex(); idx++) {
-                char c = badNcdIban.charAt(idx);
+                char c = badNcdIban[idx];
 
                 if (Character.isDigit(c)) {
-                    badNcdIban.setCharAt(idx, c == '0' ? '1' : '0');
+                    badNcdIban[idx] = c == '0' ? '1' : '0';
                 } else {
-                    badNcdIban.setCharAt(idx, c == 'Z' ? 'A' : (char) (c + 1));
+                    badNcdIban[idx] = c == 'Z' ? 'A' : (char) (c + 1);
                 }
             }
 
@@ -118,7 +118,7 @@ final class CountryValidatorsTest {
             IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
 
             assertThat(validator.validateIban(badNcdIban))
-                .as("Validation should fail for %s using iban with invalid NCD '%s'", countryData.name(), badNcdIban)
+                .as("Validation should fail for %s using iban with invalid NCD '%s'", countryData.name(), new String(badNcdIban))
                 .isFalse();
 
         } finally {

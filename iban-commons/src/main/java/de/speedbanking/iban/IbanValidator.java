@@ -486,6 +486,35 @@ public final class IbanValidator {
     }
 
     /**
+     * Validates an already normalized IBAN, uppercase and without spaces, up to and including
+     * its BBAN structure, but not its checksum.
+     * <p>
+     * Used by {@link IbanBuilder} on its own working buffer, which avoids the copy into the
+     * validation buffer, the checksum calculation and the result object of {@link #validate(CharSequence)}.
+     *
+     * @param iban the normalized IBAN, exactly as long as the IBAN; must not be {@code null}
+     * @return the first validation error found, or {@code null} if the structure is valid
+     * @since 1.8.12
+     */
+    static IbanValidationError validateStructure(char[] iban) {
+        if (iban.length < MIN_IBAN_LENGTH || iban.length > MAX_IBAN_LENGTH) {
+            return IbanValidationError.INCORRECT_LENGTH;
+        }
+
+        IbanRegistry countryData = IbanRegistry.getBaseEntryByCode(iban[0], iban[1]);
+        if (countryData == null) {
+            return IbanValidationError.INVALID_COUNTRY;
+        } else if (iban.length != countryData.getIbanLength()) {
+            return IbanValidationError.INCORRECT_LENGTH_COUNTRY;
+        } else if (isNotDigit(iban[IbanRegistry.INDEX_CHECK_DIGIT1]) || isNotDigit(iban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
+            return IbanValidationError.INVALID_CHECK_DIGITS;
+        } else if (!getCountryValidator(countryData).validateIban(iban)) {
+            return IbanValidationError.INVALID_STRUCTURE;
+        }
+        return null;
+    }
+
+    /**
      * {@link String}-optimized overload of {@link #validate(CharSequence)}.
      * <p>
      * Resolved statically by the Java compiler when the caller passes a {@link String},

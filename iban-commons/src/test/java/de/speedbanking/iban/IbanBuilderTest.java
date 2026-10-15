@@ -32,6 +32,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -198,34 +199,14 @@ final class IbanBuilderTest {
         assertThatNullPointerException().isThrownBy(() -> Segment.of(null, 5));
     }
 
-    @DisplayName("padLeft: pads string with leading characters when shorter than target length")
-    @Test
-    void padLeft_shorterInput_padsWithGivenChar() {
-        assertThat(IbanBuilder.padLeft("123", 6, '0')).isEqualTo("000123");
-    }
-
-    @DisplayName("padLeft: returns input unchanged when already at or above target length")
-    @Test
-    void padLeft_inputAtOrAboveTargetLength_returnsUnchanged() {
-        assertThat(IbanBuilder.padLeft("123456", 6, '0')).isEqualTo("123456");
-        assertThat(IbanBuilder.padLeft("1234567", 6, '0')).isEqualTo("1234567");
-    }
-
-    @DisplayName("padLeft: returns null or empty input unchanged")
-    @Test
-    void padLeft_nullOrEmptyInput_returnsUnchanged() {
-        assertThat(IbanBuilder.padLeft(null, 6, '0')).isNull();
-        assertThat(IbanBuilder.padLeft("", 6, '0')).isEmpty();
-    }
-
     @DisplayName("resolveComponent: numeric input shorter than required length is left-padded with zeros")
     @Test
     void resolveComponent_shortNumericInput_isPadded() {
         IbanBuilder<?> builder = IbanRegistry.FO.builder();
         IbanComponent component = builder.getCountryData().getStructureData().getComponent(ACCOUNT_NUMBER);
-        StringBuilder result = builder.resolveComponent(component, "12345");
+        char[] result = builder.resolveComponent(component, "12345");
 
-        assertThat(result).hasSize(18).hasToString("        000012345 ");
+        assertThat(new String(result)).isEqualTo("        000012345 ");
     }
 
     @DisplayName("resolveComponent: invalid bank code input throws InvalidIbanException with INVALID_BANK_CODE")
@@ -256,7 +237,7 @@ final class IbanBuilderTest {
         assertThatNullPointerException()
             .isThrownBy(() -> builder.resolveComponent(null, null, "1234"));
         assertThatNullPointerException()
-            .isThrownBy(() -> builder.resolveComponent(new StringBuilder(), null, "1234"));
+            .isThrownBy(() -> builder.resolveComponent(new char[0], null, "1234"));
     }
 
     @DisplayName("resolveComponent: input with invalid characters for pattern throws InvalidIbanException")
@@ -270,7 +251,7 @@ final class IbanBuilderTest {
             .hasFieldOrPropertyWithValue("reason", IbanValidationError.INVALID_BANK_CODE);
     }
 
-    @DisplayName("resolveComponent: short input for non-numeric segment is not padded and fails regex validation")
+    @DisplayName("resolveComponent: short input for non-numeric segment is not padded and fails validation")
     @Test
     void resolveComponent_shortAlphabeticInput_failsValidation() {
         // SC nationalCode pattern is '3!a' (ALPHABETIC); input length (2) < requiredLength (3)
@@ -283,6 +264,58 @@ final class IbanBuilderTest {
         assertThatInvalidIbanException()
             .isThrownBy(builder::build)
             .hasFieldOrPropertyWithValue("reason", IbanValidationError.INVALID_STRUCTURE);
+    }
+
+    @DisplayName("resolveComponent: empty input is rejected instead of being padded to zeros")
+    @Test
+    void resolveComponent_emptyInput_throwsInvalidIbanException() {
+        IbanBuilder<?> builder = IbanRegistry.DE.builder();
+
+        assertThatInvalidIbanException()
+            .isThrownBy(() -> builder.bankCode("").build())
+            .hasFieldOrPropertyWithValue("reason", IbanValidationError.INVALID_BANK_CODE);
+    }
+
+    @DisplayName("build: no random characters are drawn when the components cover the whole BBAN")
+    @Test
+    void build_componentsCoverBban_drawsNoRandomCharacters() {
+        Random failingRandom = new Random() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public int nextInt(int bound) {
+                throw new AssertionError("no random character expected");
+            }
+        };
+
+        Iban iban = IbanRegistry.DE.<StandardIbanBuilder>builder()
+            .withRandom(failingRandom)
+            .bankCode("37040044")
+            .accountNumber("532013000")
+            .build();
+
+        assertThat(iban.toString()).isEqualTo("DE89370400440532013000");
+    }
+
+    @DisplayName("build: the reused buffer neither keeps random content nor content of a failed build")
+    @Test
+    void build_repeatedOnSameThread_startsFromCleanBuffer() {
+        Random random = new Random(42);
+        Iban first = IbanRegistry.DE.<StandardIbanBuilder>builder().withRandom(random).bankCode("37040044").build();
+        Iban second = IbanRegistry.DE.<StandardIbanBuilder>builder().withRandom(random).bankCode("37040044").build();
+
+        assertThat(first.getAccountNumber()).isNotEqualTo(second.getAccountNumber());
+
+        StandardIbanBuilder failing = IbanRegistry.DE.<StandardIbanBuilder>builder()
+            .bankCode("37040044")
+            .accountNumber("53201300X");
+        assertThatInvalidIbanException().isThrownBy(failing::build);
+
+        Iban iban = IbanRegistry.DE.<StandardIbanBuilder>builder()
+            .bankCode("37040044")
+            .accountNumber("532013000")
+            .build();
+        assertThat(iban.toString()).isEqualTo("DE89370400440532013000");
     }
 
     @DisplayName("resolveComponent: pattern mismatch with exact length throws InvalidIbanException")
@@ -299,20 +332,21 @@ final class IbanBuilderTest {
             .hasFieldOrPropertyWithValue("reason", IbanValidationError.INVALID_STRUCTURE);
     }
 
-    /**
-     * Ensures that when {@code fixCheckDigits} is invoked on an IBAN whose check digits are
-     * already correct, the validation short-circuits and the buffer is returned unchanged.
-     */
-    @DisplayName("fixCheckDigits: returns unchanged buffer when check digits are already valid")
-    @Test
-    @SuppressWarnings("UnnecessaryStringBuilder")
-    void fixCheckDigits_alreadyValid_returnsUnchangedEarly() {
-        StringBuilder sb = new StringBuilder("GL2164711234567890");
+    @DisplayName("fixCheckDigits: overwrites the check digits in place with the correct value")
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
+    @CsvSource({
+        "GL0064711234567890,            GL2164711234567890",
+        "GL2164711234567890,            GL2164711234567890",
+        "GL9964711234567890,            GL2164711234567890",
+        "PS00RLKTIVUU04P3AF3VJKXZE9RAZ, PS55RLKTIVUU04P3AF3VJKXZE9RAZ",
+    })
+    void fixCheckDigits_anyPreviousCheckDigits_writesCorrectOnes(String input, String expected) {
+        char[] iban = input.toCharArray();
 
-        StringBuilder result = IbanBuilder.fixCheckDigits(sb);
+        char[] result = IbanBuilder.fixCheckDigits(iban);
 
-        assertThat(result).isSameAs(sb)
-            .hasToString(sb.toString());
+        assertThat(result).isSameAs(iban);
+        assertThat(new String(result)).isEqualTo(expected);
     }
 
     /**
@@ -361,36 +395,6 @@ final class IbanBuilderTest {
             .contains(ACCOUNT_NUMBER.getLabel() + '=' + "12345678901");
     }
 
-    /**
-     * Test-only implementation of {@link IbanBuilder} designed to simulate a corrupting subclass
-     * that appends unexpected characters beyond the country's defined IBAN length.
-     */
-    private static final class LengthCorruptingIbanBuilder extends IbanBuilder<LengthCorruptingIbanBuilder> {
-
-        LengthCorruptingIbanBuilder(IbanRegistry countryData) {
-            super(countryData);
-        }
-
-        @Override
-        protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
-            return ibanBuilder.append("EXTRA");
-        }
-    }
-
-    /**
-     * Ensures internal consistency guards trigger an {@link IllegalStateException} if custom or corrupt
-     * subclasses append components that violate the exact target length for the specified country.
-     */
-    @DisplayName("build: subclass corrupting IBAN length throws IllegalStateException")
-    @Test
-    void build_subclassCorruptsLength_throwsIllegalStateException() {
-        IbanBuilder<?> corruptedBuilder = new LengthCorruptingIbanBuilder(IbanRegistry.FO);
-
-        assertThatThrownBy(corruptedBuilder::build)
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("invalid IBAN length");
-    }
-
     @DisplayName("fixCheckDigits: throws InvalidIbanException when input is null")
     @Test
     void fixCheckDigits_shouldThrowException_whenInputIsNull() {
@@ -409,41 +413,10 @@ final class IbanBuilderTest {
     })
     void fixCheckDigits_shouldThrowException_whenLengthIsOutOfBounds(String invalidIban) {
         assertThatInvalidIbanException()
-            .isThrownBy(() -> IbanBuilder.fixCheckDigits(invalidIban))
+            .isThrownBy(() -> IbanBuilder.fixCheckDigits(invalidIban.toCharArray()))
             .withNoCause()
             .withMessage("%s (%s): '%s'", INCORRECT_LENGTH.getText(), INCORRECT_LENGTH, invalidIban)
             .hasFieldOrPropertyWithValue("reason", INCORRECT_LENGTH);
-    }
-
-    /**
-     * Verifies in-place mutation performance behavior. Passing a {@link StringBuilder} instance
-     * to {@code fixCheckDigits} must modify and return the exact same buffer instance rather than
-     * allocating new objects.
-     */
-    @DisplayName("fixCheckDigits: reuses existing StringBuilder instance to prevent re-allocation")
-    @Test
-    @SuppressWarnings("UnnecessaryStringBuilder")
-    void fixCheckDigits_shouldReuseInstance_whenInputIsStringBuilder() {
-        StringBuilder inputBuffer = new StringBuilder("GL0064711234567890");
-        StringBuilder resultBuffer = IbanBuilder.fixCheckDigits(inputBuffer);
-
-        assertThat(resultBuffer)
-            .as("The returned StringBuilder must be identical to the input instance")
-            .isSameAs(inputBuffer)
-            .as("The check digits must be correctly computed and mutated inside the buffer")
-            .hasToString(inputBuffer.toString());
-    }
-
-    @DisplayName("fixCheckDigits: creates new StringBuilder instance when input is non-StringBuilder CharSequence")
-    @Test
-    void fixCheckDigits_shouldCreateNewStringBuilder_whenInputIsString() {
-        String input = "PS55RLKTIVUU04P3AF3VJKXZE9RAZ";
-
-        StringBuilder resultBuffer = IbanBuilder.fixCheckDigits(input);
-
-        assertThat(resultBuffer)
-            .as("A new StringBuilder instance must be allocated with computed check digits")
-            .hasToString(input);
     }
 
     @DisplayName("fixNationalCheckDigit: returns unchanged buffer for country without NCD requirement")
@@ -451,11 +424,11 @@ final class IbanBuilderTest {
     void fixNationalCheckDigit_noNcdField_returnsUnchanged() {
         assertThat(IbanRegistry.GL.getNationalCheckDigitComponent()).isNull();
 
-        StringBuilder sb = new StringBuilder("GL5864711234567890");
-        StringBuilder result  = IbanBuilder.fixNationalCheckDigit(IbanRegistry.GL, sb);
+        char[] iban = "GL5864711234567890".toCharArray();
+        char[] result = IbanBuilder.fixNationalCheckDigit(IbanRegistry.GL, iban);
 
-        assertThat(result).isSameAs(sb)
-                          .hasToString("GL5864711234567890");
+        assertThat(result).isSameAs(iban);
+        assertThat(new String(result)).isEqualTo("GL5864711234567890");
     }
 
     /**
@@ -466,7 +439,7 @@ final class IbanBuilderTest {
     @Test
     void fixNationalCheckDigit_wrongLength_throws() {
         assertThatInvalidIbanException()
-            .isThrownBy(() -> IbanBuilder.fixNationalCheckDigit(IbanRegistry.GL, new StringBuilder("GL00")))
+            .isThrownBy(() -> IbanBuilder.fixNationalCheckDigit(IbanRegistry.GL, "GL00".toCharArray()))
             .withMessageStartingWith("IBAN has incorrect length for specified country");
     }
 
@@ -474,7 +447,7 @@ final class IbanBuilderTest {
     @Test
     void fixNationalCheckDigit_nullCountryData_throwsNPE() {
         assertThatNullPointerException()
-            .isThrownBy(() -> IbanBuilder.fixNationalCheckDigit(null, new StringBuilder()));
+            .isThrownBy(() -> IbanBuilder.fixNationalCheckDigit(null, new char[0]));
     }
 
     @DisplayName("fixNationalCheckDigit: throws NullPointerException when ibanBuilder is null")

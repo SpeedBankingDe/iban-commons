@@ -27,13 +27,15 @@ import static de.speedbanking.iban.IbanComponent.IbanComponentType.NATIONAL_CODE
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.iban.IbanComponent.IbanComponentType;
-import de.speedbanking.iban.util.IbanPatternConverter;
-import de.speedbanking.iban.util.IbanPatternConverter.Segment;
+import de.speedbanking.iban.IbanComponent.PositionTypes;
+import de.speedbanking.iban.util.IbanCharType;
+import de.speedbanking.util.CharUtil;
 import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Mod97;
-import de.speedbanking.util.PatternCache;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -48,6 +50,19 @@ import java.util.concurrent.ThreadLocalRandom;
  * @since 1.8.9
  */
 public class IbanBuilder<B extends IbanBuilder<B>> {
+
+    /** Marks a BBAN position that no component has written yet, see {@link #build()}. */
+    private static final char                                           UNSET         = '\0';
+
+    /**
+     * Per-thread working buffers of {@link #build()}, one per country, each exactly as long as
+     * the country's IBAN. The map and each buffer are created lazily on first use, a buffer is
+     * prepared for reuse at the start of every call (see {@link #buildBuffer(IbanComponent)}).
+     * A buffer never leaves {@code build()}: the result is copied into a {@link String} before
+     * returning.
+     */
+    private static final ThreadLocal<Map<IbanRegistry, char[]>>         BUILD_BUFFERS = ThreadLocal
+        .withInitial(() -> new EnumMap<>(IbanRegistry.class));
 
     /** The registry entry defining this builder's country structure, never {@code null}. */
     private final IbanRegistry countryData;
@@ -162,180 +177,188 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * Builds and returns a fully formatted and valid IBAN instance.
      *
      * @return the constructed IBAN
-     * @throws IllegalStateException if a subclass hook alters the IBAN length to an invalid value
-     * @throws InvalidIbanException  if the assembled IBAN string unexpectedly fails validation
+     * @throws InvalidIbanException if a component value does not match its pattern, or if the
+     *                              assembled IBAN unexpectedly fails structural validation
      */
     public final Iban build() {
-        String countryCode = getCountryData().getBaseCountry().getCountryCode();
-        int expectedLength = getCountryData().getIbanLength();
+        // Start from country code, "00" check-digit placeholder (fixed up below) and an unset
+        // BBAN. The bank code and account number ranges are written right away;
+        // appendSubclassComponents() writes any further country-specific sub-ranges. BBAN
+        // positions this library does not expose as a settable component are filled with random,
+        // pattern-valid content afterwards, so countries with a not fully modeled BBAN still
+        // produce a structurally valid IBAN, without generating characters that a component
+        // overwrites anyway.
+        IbanComponent bban = getCountryData().getStructureData().getComponent(BBAN);
+        char[] iban = buildBuffer(bban);
 
-        // Seed with country code, "00" check-digit placeholder (fixed up below) and a random,
-        // but pattern-valid, BBAN. The bank code and account number ranges are overwritten right
-        // away; appendSubclassComponents() overwrites any further country-specific sub-ranges.
-        // Any BBAN positions this library does not expose as a settable component are left with
-        // their random, pattern-valid content, so countries with a not fully modeled BBAN still
-        // produce a structurally valid IBAN.
-        StringBuilder ibanBuilder = new StringBuilder(expectedLength)
-            .append(countryCode)
-            .append("00");
+        resolveComponent(iban, getCountryData().getBankCodeComponent(), bankCode);
+        resolveComponent(iban, getCountryData().getAccountNumberComponent(), accountNumber);
 
-        resolveComponent(ibanBuilder, getCountryData().getStructureData().getComponent(BBAN), null);
-        resolveComponent(ibanBuilder, getCountryData().getBankCodeComponent(), bankCode);
-        resolveComponent(ibanBuilder, getCountryData().getAccountNumberComponent(), accountNumber);
+        appendSubclassComponents(iban);
 
-        appendSubclassComponents(ibanBuilder);
-
-        // safeguard against structural alteration in subclass hook
-        if (ibanBuilder.length() != expectedLength) {
-            throw new IllegalStateException("Subclass component modification of '" + ibanBuilder
-                + "' resulted in invalid IBAN length: " + ibanBuilder.length()
-                + " (expected: " + expectedLength + ")");
-        }
+        fillUnsetPositions(iban, bban);
 
         // always calculate NCD regardless of IbanConfig#isCalculateNcd
-        fixNationalCheckDigit(getCountryData(), ibanBuilder);
+        fixNationalCheckDigit(getCountryData(), iban);
 
-        fixCheckDigits(ibanBuilder);
+        fixCheckDigits(iban);
 
-        // fixCheckDigits() already ran a full structural validation (with placeholder check
-        // digits, whose value does not influence structure validation) and just installed the
+        // fixCheckDigits() already ran a full structural validation and just installed the
         // correct checksum, so the result is provably valid at this point. Re-parsing it via
         // Iban.of() would repeat that same structural + checksum validation for no benefit;
         // constructing directly (this class shares Iban's package) skips that redundant pass.
-        return new Iban(ibanBuilder, getCountryData());
+        return new Iban(new String(iban), getCountryData());
+    }
+
+    /**
+     * Returns this thread's working buffer for the builder's country, holding the country code,
+     * the {@code "00"} check-digit placeholder and an {@link #UNSET} BBAN.
+     * <p>
+     * The country code is written once when the buffer is created. The check digits are reset so
+     * that a national check digit calculator never sees those of the previous IBAN, and the BBAN
+     * is reset since unset positions are filled with fresh random characters later and must not
+     * keep the content of the previous IBAN.
+     */
+    private char[] buildBuffer(IbanComponent bban) {
+        Map<IbanRegistry, char[]> buffers = BUILD_BUFFERS.get();
+        char[] buffer = buffers.get(countryData);
+        if (buffer == null) {
+            buffer = new char[countryData.getIbanLength()];
+            String countryCode = countryData.getBaseCountry().getCountryCode();
+            buffer[0] = countryCode.charAt(0);
+            buffer[1] = countryCode.charAt(1);
+            buffers.put(countryData, buffer);
+        }
+        buffer[IbanRegistry.INDEX_CHECK_DIGIT1] = '0';
+        buffer[IbanRegistry.INDEX_CHECK_DIGIT2] = '0';
+        Arrays.fill(buffer, bban.getBeginIndex(), bban.getEndIndex(), UNSET);
+        return buffer;
     }
 
     /**
      * Extension hook for subclasses to insert additional BBAN components.
      * <p>
-     * The provided {@code ibanBuilder} argument is already pre-populated with a default BBAN pattern
-     * as well as the resolved bank code and account number components.
+     * The provided {@code iban} array has the country's IBAN length and already contains the
+     * resolved bank code and account number components. BBAN positions that no component writes
+     * are filled with random, pattern-valid characters after this hook returns.
      *
-     * @param ibanBuilder the in-progress IBAN string builder
-     * @return the string builder argument, potentially modified
+     * @param iban the in-progress IBAN, modified in place
+     * @return the {@code iban} argument, potentially modified
      */
-    protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
+    protected char[] appendSubclassComponents(char[] iban) {
         // default implementation returns the argument
-        return ibanBuilder;
+        return iban;
     }
 
     /**
-     * Helper overload primarily for testing. Resolves a component into a new StringBuilder
-     * pre-filled with spaces up to the country's IBAN length.
+     * Helper overload primarily for testing. Resolves a component into a new array of the
+     * country's IBAN length, pre-filled with spaces.
      *
      * @param ibanComponent the IBAN component specification, must not be null
      * @param input         the input character sequence, may be null
-     * @return a new StringBuilder instance containing the resolved component at its target position
+     * @return a new array containing the resolved component at its target position
      */
-    StringBuilder resolveComponent(IbanComponent ibanComponent, CharSequence input) {
-        int length = countryData.getIbanLength();
-        StringBuilder sb = new StringBuilder(length);
-
-        for (int i = 0; i < length; i++) {
-            sb.append(' ');
-        }
-
-        return resolveComponent(sb, ibanComponent, input);
+    char[] resolveComponent(IbanComponent ibanComponent, CharSequence input) {
+        char[] iban = new char[countryData.getIbanLength()];
+        Arrays.fill(iban, ' ');
+        return resolveComponent(iban, ibanComponent, input);
     }
 
     /**
-     * Resolves an IBAN component directly into the provided {@link StringBuilder} target,
-     * avoiding intermediate String allocations when generating random values or padding inputs.
+     * Resolves an IBAN component directly into the provided target array, either from the given
+     * input or, if there is none, with random characters matching the component's pattern.
      *
-     * @param target        the IBAN string builder to mutate, must not be null
+     * @param target        the IBAN to modify in place, must not be null
      * @param ibanComponent the IBAN component specification, must not be null
      * @param input         the input character sequence, may be null
-     * @return the mutated target StringBuilder instance
+     * @return the {@code target} argument
      */
-    StringBuilder resolveComponent(StringBuilder target, IbanComponent ibanComponent, CharSequence input) {
+    char[] resolveComponent(char[] target, IbanComponent ibanComponent, CharSequence input) {
         requireNonNull(target, "target must not be null");
         requireNonNull(ibanComponent, "component must not be null");
 
-        List<Segment> segments = IbanPatternConverter.parseSegments(ibanComponent.getPattern());
+        PositionTypes types = ibanComponent.getPositionTypes();
         int beginIndex = ibanComponent.getBeginIndex();
 
         if (input == null) {
-            writeRandomSegments(target, segments, beginIndex);
+            Random rng = getRandom();
+            for (int i = 0; i < types.length(); i++) {
+                target[beginIndex + i] = randomChar(types.get(i), rng);
+            }
         } else {
-            writeInputComponent(target, ibanComponent, segments, beginIndex, input);
+            writeInputComponent(target, ibanComponent, types, input);
         }
         return target;
     }
 
     /**
-     * Writes random characters for every segment directly into the target buffer, used when
-     * generating a component with no explicit input.
+     * Fills every BBAN position that is still {@link #UNSET} with a random character of the
+     * position's character type.
      */
-    private void writeRandomSegments(StringBuilder target, List<Segment> segments, int beginIndex) {
-        Random rng = getRandom();
-        int currentPos = beginIndex;
-        for (Segment segment : segments) {
-            SourceChars sourceChars = sourceCharsFor(segment);
-            for (int j = 0; j < segment.getLength(); j++) {
-                writeChar(target, currentPos++, sourceChars.nextChar(rng));
+    private void fillUnsetPositions(char[] target, IbanComponent bban) {
+        PositionTypes types = bban.getPositionTypes();
+        int beginIndex = bban.getBeginIndex();
+        Random rng = null;
+        for (int i = 0; i < types.length(); i++) {
+            if (target[beginIndex + i] == UNSET) {
+                if (rng == null) {
+                    rng = getRandom();
+                }
+                target[beginIndex + i] = randomChar(types.get(i), rng);
             }
         }
     }
 
     /**
-     * Returns the character source matching a segment's character class.
+     * Returns a random character of the given character type.
      */
-    private static SourceChars sourceCharsFor(Segment segment) {
-        if (segment.isNumeric()) {
-            return SourceChars.NUMERIC;
-        } else if (segment.isAlphabetic()) {
-            return SourceChars.ALPHABETIC;
+    private static char randomChar(IbanCharType type, Random rng) {
+        switch (type) {
+            case NUMERIC:
+                return SourceChars.NUMERIC.nextChar(rng);
+            case ALPHABETIC:
+                return SourceChars.ALPHABETIC.nextChar(rng);
+            default:
+                return SourceChars.ALPHANUMERIC.nextChar(rng);
         }
-        return SourceChars.ALPHANUMERIC;
     }
 
     /**
-     * Validates the given input against the component's pattern (padding it first if applicable),
-     * then writes the zero-padding (if any) and the input characters directly into the target
-     * buffer, avoiding an intermediate String allocation for the padded result.
+     * Returns whether {@code ch} is allowed at a position of the given character type.
      */
-    private void writeInputComponent(StringBuilder target, IbanComponent ibanComponent, List<Segment> segments, int beginIndex, CharSequence input) {
-        int requiredLength = IbanPatternConverter.calculateTotalLength(segments);
+    private static boolean matches(IbanCharType type, char ch) {
+        switch (type) {
+            case NUMERIC:
+                return CharUtil.isDigit(ch);
+            case ALPHABETIC:
+                return CharUtil.isUpperCase(ch);
+            case ALPHANUMERIC:
+                return CharUtil.isDigitOrUpperCase(ch);
+            default:
+                return ch == ' ';
+        }
+    }
+
+    /**
+     * Validates the given input position by position against the component's character types,
+     * as if it were left-padded with {@code '0'} where the component allows that, then writes
+     * the padding and the input characters directly into the target buffer.
+     */
+    private void writeInputComponent(char[] target, IbanComponent ibanComponent, PositionTypes types, CharSequence input) {
         int inputLen = input.length();
-        if (inputLen > requiredLength) {
+        int paddingLen = types.length() - inputLen;
+        boolean valid = inputLen > 0 && paddingLen >= 0 && (paddingLen == 0 || types.isZeroPaddable());
+        for (int i = 0; valid && i < inputLen; i++) {
+            valid = matches(types.get(paddingLen + i), input.charAt(i));
+        }
+        if (!valid) {
             throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
         }
 
-        int paddingLen = requiredLength - inputLen;
-        boolean canPad = paddingLen > 0 && IbanPatternConverter.allMatch(segments, Segment::isNumericOrAlphanumeric);
-
-        validateAgainstPattern(ibanComponent, segments, input, requiredLength, canPad);
-
-        int currentPos = beginIndex;
-        for (int i = 0; canPad && i < paddingLen; i++) {
-            writeChar(target, currentPos++, '0');
-        }
+        int beginIndex = ibanComponent.getBeginIndex();
+        Arrays.fill(target, beginIndex, beginIndex + paddingLen, '0');
         for (int i = 0; i < inputLen; i++) {
-            writeChar(target, currentPos++, input.charAt(i));
-        }
-    }
-
-    /**
-     * Validates the input (or its zero-padded representation, if padding will be applied) against
-     * the component's regex pattern, throwing if it does not match.
-     */
-    private void validateAgainstPattern(IbanComponent ibanComponent, List<Segment> segments, CharSequence input, int requiredLength, boolean canPad) {
-        String regex = IbanPatternConverter.buildRegex(ibanComponent.getPattern(), segments);
-        CharSequence checkTarget = canPad ? padLeft(input.toString(), requiredLength, '0') : input;
-        if (!PatternCache.getDefault().getPattern(regex).matcher(checkTarget).matches()) {
-            throw InvalidIbanException.of(errorFor(ibanComponent.getType()), input, getCountryData().getCountryCode());
-        }
-    }
-
-    /**
-     * Writes a single character into the target buffer at {@code pos}: overwrites the existing
-     * placeholder character if {@code pos} already lies within the buffer, or appends it otherwise.
-     */
-    private static void writeChar(StringBuilder target, int pos, char ch) {
-        if (pos < target.length()) {
-            target.setCharAt(pos, ch);
-        } else {
-            target.append(ch);
+            target[beginIndex + paddingLen + i] = input.charAt(i);
         }
     }
 
@@ -366,72 +389,40 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     }
 
     /**
-     * Pads the specified string on the left with a given character until it reaches the target length.
+     * Validates the structure of the given IBAN and overwrites its ISO 7064 Mod 97-10 check
+     * digits (index 2 and 3) with the correct value, in place.
      * <p>
-     * If the input string is already equal to or longer than the target length, or if it is
-     * {@code null} or empty, the original string is returned unchanged.
+     * The check digits are first set to {@code "00"} to calculate the required remainder
+     * {@code R}, then the final check digits {@code CD = 98 - R} are written. Their previous
+     * content is irrelevant and is not validated.
      *
-     * @param str          the string to pad, may be {@code null} or empty
-     * @param targetLength the desired total length of the padded string
-     * @param padChar      the character used for left-padding
-     * @return the left-padded string, or the original string if no padding is required
+     * @param iban the normalized IBAN, exactly as long as its country's IBAN; modified in place
+     * @return the {@code iban} argument with the correct check digits applied
+     * @throws InvalidIbanException if {@code iban} is {@code null} or fails structural validation
      */
-    static String padLeft(String str, int targetLength, char padChar) {
-        if (str == null || str.isEmpty()) {
-            return str;
-        }
-        int paddingLen = targetLength - str.length();
-        if (paddingLen <= 0) {
-            return str;
-        }
-        StringBuilder sb = new StringBuilder(targetLength);
-        for (int i = 0; i < paddingLen; i++) {
-            sb.append(padChar);
-        }
-        return sb.append(str).toString();
-    }
-
-    /**
-     * Calculates the correct ISO 7064 Mod 97-10 check digits for the given IBAN string
-     * and overwrites the digits at the check digit positions (index 2 and 3).
-     * <p>
-     * This method temporarily sets the check digits to {@code "00"} to calculate the
-     * required remainder {@code R}, then determines the final check digits {@code CD = 98 - R}.
-     * <p>
-     * Note: If the input argument is an instance of {@link StringBuilder}, it will be
-     * modified in-place to achieve zero-allocation performance.
-     *
-     * @param iban the IBAN character sequence (must already be of the full IBAN length,
-     *             with placeholders at the check digit position); if a {@code StringBuilder}
-     *             is passed, it is mutated in place, otherwise a copy is created
-     * @return a {@code StringBuilder} instance with the correct check digits applied
-     * @throws InvalidIbanException if the structural validation fails for reasons other than the checksum
-     */
-    static StringBuilder fixCheckDigits(CharSequence iban) {
-        IbanValidationResult result = IbanValidator.validate(iban);
-
-        if (result.error != null && result.error != IbanValidationError.INVALID_CHECKSUM) {
-            throw InvalidIbanException.of(result.error, iban);
+    static char[] fixCheckDigits(char[] iban) {
+        if (iban == null) {
+            throw InvalidIbanException.of(IbanValidationError.EMPTY);
         }
 
-        StringBuilder sb = iban instanceof StringBuilder ? (StringBuilder) iban : new StringBuilder(iban);
-
-        if (result.isValid()) {
-            return sb;
+        if (iban.length > IbanRegistry.INDEX_CHECK_DIGIT2) {
+            iban[IbanRegistry.INDEX_CHECK_DIGIT1] = '0';
+            iban[IbanRegistry.INDEX_CHECK_DIGIT2] = '0';
         }
 
-        // set placeholders to "00" (required for correct calculation context)
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, '0');
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, '0');
+        IbanValidationError error = IbanValidator.validateStructure(iban);
+        if (error != null) {
+            throw InvalidIbanException.of(error, new String(iban));
+        }
 
         // calculate the required check digits value (98 - modulo result)
-        int checkDigitsValue = Mod97.MAX_CHECK_DIGIT_VALUE - Mod97.calculate(sb);
+        int checkDigitsValue = Mod97.MAX_CHECK_DIGIT_VALUE - Mod97.calculate(iban);
 
         // manual zero-padding: faster than String.format
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT1, (char) ('0' + (checkDigitsValue / 10)));
-        sb.setCharAt(IbanRegistry.INDEX_CHECK_DIGIT2, (char) ('0' + (checkDigitsValue % 10)));
+        iban[IbanRegistry.INDEX_CHECK_DIGIT1] = (char) ('0' + (checkDigitsValue / 10));
+        iban[IbanRegistry.INDEX_CHECK_DIGIT2] = (char) ('0' + (checkDigitsValue % 10));
 
-        return sb;
+        return iban;
     }
 
     /**
@@ -447,36 +438,34 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * </ul>
      *
      * @param countryData the registry entry for the country, may not be {@code null}
-     * @param ibanBuilder the mutable IBAN string with {@code "00"} ISO check-digit placeholders
-     *                    and a randomly generated BBAN; modified in-place; may not be {@code null}
-     * @return {@code ibanBuilder}, unmodified if no NCD field is defined for the country
-     *         or if the {@link CountryValidator} does not implement
-     *         {@link NationalCheckDigitCalculator}; otherwise the NCD field is
-     *         overwritten in-place and the same instance is returned
+     * @param iban        the IBAN with a completely written BBAN; modified in place; may not
+     *                    be {@code null}
+     * @return {@code iban}, unmodified if no NCD field is defined for the country or if the
+     *         {@link CountryValidator} does not implement {@link NationalCheckDigitCalculator};
+     *         otherwise with the NCD field overwritten in place
      */
-    static StringBuilder fixNationalCheckDigit(IbanRegistry countryData, StringBuilder ibanBuilder) {
+    static char[] fixNationalCheckDigit(IbanRegistry countryData, char[] iban) {
         requireNonNull(countryData, "countryData must not be null");
-        requireNonNull(ibanBuilder, "ibanBuilder must not be null");
+        requireNonNull(iban, "iban must not be null");
 
-        if (ibanBuilder.length() != countryData.getIbanLength()) {
-            throw InvalidIbanException.of(IbanValidationError.INCORRECT_LENGTH_COUNTRY, ibanBuilder, countryData.getCountryCode());
+        if (iban.length != countryData.getIbanLength()) {
+            throw InvalidIbanException.of(IbanValidationError.INCORRECT_LENGTH_COUNTRY, new String(iban), countryData.getCountryCode());
         }
 
         // only countries with a registered NCD field are relevant
         IbanComponent ncdCompo = countryData.getNationalCheckDigitComponent();
         if (ncdCompo == null) {
-            return ibanBuilder;
+            return iban;
         }
 
         // verify validator interface safely before casting
         CountryValidator validator = IbanValidator.getCountryValidator(countryData);
         if (validator instanceof NationalCheckDigitCalculator) {
-            char[] ncd = ((NationalCheckDigitCalculator) validator).calculateNationalCheckDigit(ibanBuilder);
-            // write the computed NCD into the StringBuilder
-            ibanBuilder.replace(ncdCompo.getBeginIndex(), ncdCompo.getEndIndex(), new String(ncd));
+            char[] ncd = ((NationalCheckDigitCalculator) validator).calculateNationalCheckDigit(iban);
+            System.arraycopy(ncd, 0, iban, ncdCompo.getBeginIndex(), ncd.length);
         }
 
-        return ibanBuilder;
+        return iban;
     }
 
     @Override
@@ -682,8 +671,8 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         }
 
         @Override
-        protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
-            return resolveComponent(ibanBuilder, getCountryData().getStructureData().getComponent(BRANCH_CODE), branchCode);
+        protected char[] appendSubclassComponents(char[] iban) {
+            return resolveComponent(iban, getCountryData().getStructureData().getComponent(BRANCH_CODE), branchCode);
         }
 
         @Override
@@ -745,9 +734,9 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         }
 
         @Override
-        protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
-            super.appendSubclassComponents(ibanBuilder);
-            return resolveComponent(ibanBuilder, ibanComponent, customValue);
+        protected char[] appendSubclassComponents(char[] iban) {
+            super.appendSubclassComponents(iban);
+            return resolveComponent(iban, ibanComponent, customValue);
         }
 
         @Override
@@ -790,9 +779,9 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         }
 
         @Override
-        protected StringBuilder appendSubclassComponents(StringBuilder ibanBuilder) {
-            resolveComponent(ibanBuilder, getCountryData().getStructureData().getComponent(BRANCH_CODE), branchCode);
-            return super.appendSubclassComponents(ibanBuilder);
+        protected char[] appendSubclassComponents(char[] iban) {
+            resolveComponent(iban, getCountryData().getStructureData().getComponent(BRANCH_CODE), branchCode);
+            return super.appendSubclassComponents(iban);
         }
 
         @Override
