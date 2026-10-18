@@ -30,9 +30,9 @@ import java.time.Duration;
  * with {@code releaseJavaVersion=8}, consistent with the rest of the {@code iban-commons} project.
  * <p>
  * {@link HttpURLConnection#setInstanceFollowRedirects(boolean)} does not follow redirects across
- * protocol changes (e.g. {@code http -> https}), so this implementation manually follows a single
- * additional redirect hop when it encounters a {@code 301}, {@code 302}, {@code 303}, {@code 307},
- * or {@code 308} response.
+ * protocol changes (e.g. {@code http -> https}), and does not follow a {@code 308} at all, so this
+ * implementation manually follows a single additional redirect hop when it still receives a
+ * {@code 301}, {@code 302}, {@code 303}, {@code 307}, or {@code 308} response.
  * <p>
  * <strong>Why a browser {@code User-Agent}.</strong> Several of the national sources this module
  * downloads from (see the per-country {@code BankDataLoader*} classes) block or degrade requests

@@ -129,13 +129,13 @@ final class HttpDownloaderTest {
 
     @Test
     void download_redirectWithMalformedLocationHeader_throwsIOException() throws Exception {
-        // HttpURLConnection follows a same-protocol redirect internally (getResponseCode() would
-        // already return the followed response), so this module's own manual redirect handling in
-        // HttpDownloader.download() only ever sees a 3xx for a protocol-changing hop (http -> https,
-        // per the class Javadoc); a raw, unencoded space in that Location header is not a valid RFC
-        // 3986 URI reference, and URI.resolve(String) throws an unchecked IllegalArgumentException
-        // for it, which must be caught and wrapped rather than surfacing as an undeclared
-        // RuntimeException to the caller
+        // HttpURLConnection follows a same-protocol redirect other than 308 internally
+        // (getResponseCode() would already return the followed response), so this module's own
+        // manual redirect handling in HttpDownloader.download() only sees a 302 for a
+        // protocol-changing hop (http -> https, per the class Javadoc); a raw, unencoded space in
+        // that Location header is not a valid RFC 3986 URI reference, and URI.resolve(String)
+        // throws an unchecked IllegalArgumentException for it, which must be caught and wrapped
+        // rather than surfacing as an undeclared RuntimeException to the caller
         server = startServer("/bad-location", exchange -> {
             exchange.getResponseHeaders().add("Location", "https://exa mple.invalid/new");
             exchange.sendResponseHeaders(302, -1);
