@@ -347,6 +347,26 @@ final class GermanCheckDigitMethodTest {
         "57 | 0185125434 | true",  // documented exception within Variante 4
         "69 | 9700000050 | true",  // Variante 2 only, transformation sum 20 -> check digit 0
         "D1 | 0900000000 | true",  // sum 40 -> check digit 0, as in method 00
+        "11 | 7565512567 | true",  // remainder 2 to 10 -> 11 minus remainder
+        "11 | 7565512568 | false", // same branch, mismatch
+        "11 | 4013990490 | true",  // sum % 11 == 0 -> check digit 0
+        "11 | 4013990491 | false", // same branch, mismatch
+        "16 | 8628902330 | true",  // sum % 11 == 0 -> check digit 0
+        "16 | 9058147700 | true",  // sum % 11 == 1 -> valid because digits 9 and 10 are equal
+        "16 | 8067065405 | false", // sum % 11 == 1, digits 9 and 10 differ
+        "23 | 2074466609 | true",  // sum % 11 == 1 -> valid because digits 6 and 7 are equal
+        "23 | 9948837550 | false", // sum % 11 == 1, digits 6 and 7 differ
+        "66 | 0191965701 | true",  // sum % 11 == 0 -> check digit 1
+        "66 | 0191965700 | false", // same branch, mismatch
+        "66 | 0242044820 | true",  // sum % 11 == 1 -> check digit 0
+        "66 | 0242044821 | false", // same branch, mismatch
+        "68 | 8889654328 | true",  // 10 digits, digit 4 is 9 (worked example in the specification)
+        "68 | 6363212347 | false", // 10 digits, digit 4 is not 9 although the sum matches
+        "83 | 0734257540 | true",  // Methode A invalid, Methode B valid
+        "83 | 0734257541 | false", // Methode A, B and C invalid
+        "85 | 1699508230 | true",  // digits 3 and 4 are 99, sum % 11 == 0 -> check digit 0
+        "85 | 4099043982 | false", // digits 3 and 4 are 99, sum % 11 == 1 -> result 10 never matches
+        "87 | 0865873781 | true",  // Methode A and B invalid, Methode C (Modulus 7) valid
     })
     void calculate_knownVectors_branchCoverage(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
@@ -922,6 +942,22 @@ final class GermanCheckDigitMethodTest {
         "84, 4591220536, false", // hand-derived: Ausnahme final, sums 122 and 207 expect 0 and 2
     })
     void calculate_m84_ausnahme51Vectors(String code, String account, boolean expectedValid) {
+        assertVector(code, account, expectedValid);
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource({
+        "86, 0199100002, true",  // Ausnahme, method 51 Variante 1
+        "86, 0099100010, true",  // Ausnahme, method 51 Variante 1
+        "86, 2599100002, true",  // Ausnahme, method 51 Variante 1
+        "86, 0199100004, true",  // Ausnahme, method 51 Variante 2
+        "86, 2599100003, true",  // Ausnahme, method 51 Variante 2
+        "86, 3199204090, true",  // Ausnahme, method 51 Variante 2
+        "86, 0099345678, false", // Ausnahme, method 51 Variante 2
+        "86, 0099100110, false", // Ausnahme, method 51 Variante 2
+        "86, 0199100040, false", // Ausnahme, method 51 Variante 2
+    })
+    void calculate_m86_ausnahme51Vectors(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
     }
 
