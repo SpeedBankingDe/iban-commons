@@ -1,11 +1,16 @@
 package de.speedbanking.bankdata.loader;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 import de.speedbanking.bankdata.BankData;
+import de.speedbanking.bankdata.spi.BankDataParseException;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
@@ -42,6 +47,31 @@ final class BankDataLoaderAtTest {
             .hasToString("BKAUATWWXXX");
         assertThat(headOffice.getPostalCode()).isEqualTo("1020");
         assertThat(headOffice.getCity()).isEqualTo("Wien");
+    }
+
+    @Test
+    void parse_shortRowsAndRowWithEmptyBankCode_areSkipped() throws Exception {
+        String content = "Kennzeichen;Identnummer;Bankleitzahl;Institutsart;Sektor;Firmenbuchnummer;Bankenname;Strasse;PLZ;Ort;"
+            + "Postadresse / Strasse;Postadresse / PLZ;Postadresse / Ort;Postfach;Bundesland;Telefon;Fax;E-Mail;SWIFT-Code\n"
+            + "Hauptanstalt;1;;KI;;;Ohne Bankleitzahl;;1010;Wien;;;;;Wien;;;;\n"
+            + "Hauptanstalt;2;12000;KI;;;UniCredit Bank Austria AG;;1020;Wien;;;;;Wien;;;;BKAUATWWXXX\n"
+            + "Ende der Liste\n"
+            + "\n";
+        InputStream in = new ByteArrayInputStream(content.getBytes(ISO_8859_1));
+
+        List<BankData> records = loader.parse(in, "test-version");
+
+        assertThat(records).extracting(BankData::getBankCode).containsExactly("12000");
+    }
+
+    @Test
+    void parse_sourceWithoutHeaderRow_throwsBankDataParseException() {
+        // e.g. an HTML error page delivered instead of the CSV export
+        InputStream in = new ByteArrayInputStream("<html><body>Wartungsarbeiten</body></html>\n".getBytes(ISO_8859_1));
+
+        assertThatThrownBy(() -> loader.parse(in, "test-version"))
+            .isInstanceOf(BankDataParseException.class)
+            .hasMessageContaining("header row with a 'Bankleitzahl' column not found");
     }
 
 }

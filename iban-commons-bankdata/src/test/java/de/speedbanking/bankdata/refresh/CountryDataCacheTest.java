@@ -18,6 +18,8 @@ import de.speedbanking.bankdata.spi.CountryBankDataLoader;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +46,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Unit tests for {@link CountryDataCache}, exercising the refresh orchestration (lazy sync load,
@@ -452,6 +458,51 @@ final class CountryDataCacheTest {
         // a 5xx status is transient (unlike a 4xx), exercising isPermanentFailure()'s false branch
         // for an actual HttpDownloadException, distinct from the "not even an HttpDownloadException" case
         assertDescribeFailureBranchIsExercised("YF", () -> new HttpDownloadException("server error", HttpURLConnection.HTTP_INTERNAL_ERROR));
+    }
+
+    @ParameterizedTest(name = "[{index}] HTTP {0} -> {1}")
+    @CsvSource({
+        "400, SEVERE",
+        "404, SEVERE",
+        "429, WARNING", // rate limited, expected to recover by itself
+        "499, SEVERE",
+        "500, WARNING",
+    })
+    void triggerAsyncRefreshIfStale_httpStatus_onlyClientErrorsOtherThan429LoggedAsPermanent(int statusCode, String expectedLevel) throws Exception {
+        List<LogRecord> published = new CopyOnWriteArrayList<>();
+        Handler capturingHandler = new Handler() {
+            @Override
+            public void publish(LogRecord logRecord) {
+                published.add(logRecord);
+            }
+
+            @Override
+            public void flush() {
+                // no-op
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+        };
+        Logger delegate = Logger.getLogger(CountryDataCache.class.getName());
+        delegate.addHandler(capturingHandler);
+        try {
+            ThrowingDownloader downloader = new ThrowingDownloader(() -> new HttpDownloadException("failed", statusCode));
+            CountryDataCache cache = new CountryDataCache(new FakeLoader("YG"), downloader);
+
+            cache.getOrLoadSync();
+            cache.triggerAsyncRefreshIfStale();
+            awaitRefresh(cache);
+        } finally {
+            delegate.removeHandler(capturingHandler);
+        }
+
+        assertThat(published)
+            .filteredOn(logRecord -> logRecord.getThrown() instanceof HttpDownloadException)
+            .extracting(LogRecord::getLevel)
+            .containsExactly(Level.parse(expectedLevel));
     }
 
     private static void assertDescribeFailureBranchIsExercised(String countryCode, Supplier<IOException> exceptionSupplier) throws Exception {

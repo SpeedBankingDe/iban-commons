@@ -13,10 +13,12 @@ import de.speedbanking.bic.Bic;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.List;
 
@@ -182,9 +184,10 @@ final class BankDataFormatTest {
             .hasMessageContaining("bankName");
     }
 
-    @Test
-    void writeThenRead_bankNameContainingQuoteAndNewline_roundTrips() throws Exception {
-        BankData entry = new BankData("DE", "40000000", null, "Muster\"bank\"\nAG", null, null, "v1");
+    @ParameterizedTest
+    @ValueSource(strings = {"Muster\"bank\"\nAG", "Muster\rbank", "Muster\r\nbank"})
+    void writeThenRead_bankNameContainingQuoteOrLineBreak_roundTrips(String bankName) throws Exception {
+        BankData entry = new BankData("DE", "40000000", null, bankName, null, null, "v1");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         BankDataFormat.write(out, singletonList(entry));
@@ -193,6 +196,35 @@ final class BankDataFormatTest {
             new ByteArrayInputStream(out.toByteArray()), UTF_8, "DE", "v1");
 
         assertThat(readBack).containsExactly(entry);
+    }
+
+    @Test
+    void read_blankLineBetweenRows_skipped() throws Exception {
+        String content = BankDataFormat.HEADER_LINE + "\n"
+            + "10000000;;MARKDEF1100;Bundesbank;10117;Berlin;\n"
+            + "\n"
+            + "20000000;;;Musterbank;;;\n";
+
+        List<BankData> records = BankDataFormat.read(
+            new ByteArrayInputStream(content.getBytes(UTF_8)), UTF_8, "DE", "v1");
+
+        assertThat(records).extracting(BankData::getBankCode).containsExactly("10000000", "20000000");
+    }
+
+    @ParameterizedTest(name = "[{index}] {2}")
+    @CsvSource(delimiter = '|', value = {
+        "'a;b\nc;d\n'             | [[a, b], [c, d]]  | LF line endings",
+        "'a;b\r\nc;d\r\n'         | [[a, b], [c, d]]  | CR LF line endings",
+        "'a;b\rc;d\r'             | [[a, b], [c, d]]  | bare CR line endings",
+        "'a;b\nc;d'               | [[a, b], [c, d]]  | last row without line break",
+        "'a;\"b;c\"'              | [[a, b;c]]        | quoted field at the end of the source",
+        "'\"say \"\"hi\"\"\";x\n' | [[say \"hi\", x]] | doubled quote inside a quoted field",
+        "'a;;\n'                  | [[a, , ]]         | empty fields",
+    })
+    void parseQuotedFields_variousInputs_splitsRowsAndFields(String input, String expected, String reason) throws Exception {
+        List<List<String>> rows = BankDataFormat.parseQuotedFields(new StringReader(input), ';');
+
+        assertThat(rows).hasToString(expected);
     }
 
 }

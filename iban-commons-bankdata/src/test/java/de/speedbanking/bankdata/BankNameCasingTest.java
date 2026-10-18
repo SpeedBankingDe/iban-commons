@@ -79,4 +79,12 @@ final class BankNameCasingTest {
         assertThat(BankNameCasing.toDisplayCase("VAN LANSCHOT BANKIERS")).isEqualTo("Van Lanschot Bankiers");
     }
 
+    @Test
+    void displayCase_tokensWithoutLettersOrWithSurroundingPunctuation_onlyLettersRecased() {
+        // number-only and punctuation-only tokens (and the empty token between two spaces) are
+        // kept as they are, punctuation around a word does not stop the word from being recased
+        assertThat(BankNameCasing.toDisplayCase("SPARKASSE 1822 - (MÜNCHEN)")).isEqualTo("Sparkasse 1822 - (München)");
+        assertThat(BankNameCasing.toDisplayCase("\"HAUSBANK\"  ZWEI")).isEqualTo("\"Hausbank\"  Zwei");
+    }
+
 }

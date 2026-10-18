@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatComparable;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
+
 import de.speedbanking.iban.Iban;
 import de.speedbanking.iban.IbanValidationError;
 import de.speedbanking.iban.InvalidIbanException;
@@ -32,8 +34,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Arrays;
 
 /**
  * Unit tests for {@link GermanIban}.
@@ -138,6 +142,50 @@ final class GermanIbanTest {
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes.toByteArray()))) {
             assertThat(in.readObject()).isEqualTo(iban);
         }
+    }
+
+    @Test
+    void deserialization_streamWithNonGermanIban_throwsInvalidObjectException() throws Exception {
+        // a tampered stream: the German IBAN replaced by a valid British one of the same length,
+        // which the Iban itself accepts, so only GermanIban's own country check can reject it
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        try (ObjectOutputStream out = new ObjectOutputStream(bytes)) {
+            out.writeObject(GermanIban.of("DE89370400440532013000"));
+        }
+        byte[] tampered = replace(bytes.toByteArray(), "DE89370400440532013000", "GB82WEST12345698765432");
+
+        assertThatExceptionOfType(InvalidObjectException.class)
+            .isThrownBy(() -> {
+                try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(tampered))) {
+                    in.readObject();
+                }
+            })
+            .withMessage("Not a German IBAN");
+    }
+
+    @Test
+    void equals_sameInstanceNullOtherTypeOrOtherIban_comparesByIban() {
+        GermanIban iban = GermanIban.of("DE89370400440532013000");
+
+        assertThat(iban.equals(iban)).isTrue();
+        assertThat(iban.equals(null)).isFalse();
+        assertThat(iban.equals((Object) iban.toIban())).isFalse();
+        assertThat(iban).isNotEqualTo(GermanIban.of("DE02120300000000202051"));
+    }
+
+    /**
+     * Replaces the single occurrence of an ASCII string in a byte array with another of the same length.
+     */
+    private static byte[] replace(byte[] data, String search, String replacement) {
+        byte[] searchBytes = search.getBytes(US_ASCII);
+        byte[] result = data.clone();
+        for (int i = 0; i <= result.length - searchBytes.length; i++) {
+            if (Arrays.equals(Arrays.copyOfRange(result, i, i + searchBytes.length), searchBytes)) {
+                System.arraycopy(replacement.getBytes(US_ASCII), 0, result, i, searchBytes.length);
+                return result;
+            }
+        }
+        throw new AssertionError(String.format("%s not found in serialized data", search));
     }
 
 }

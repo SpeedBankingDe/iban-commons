@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Integration tests for {@link Downloader#createDefault()} (backed by {@code HttpDownloader}),
@@ -71,6 +72,49 @@ final class HttpDownloaderTest {
         byte[] result = Downloader.createDefault().download(uri("/old"), TIMEOUT, TIMEOUT);
 
         assertThat(result).isEqualTo(body);
+    }
+
+    @Test
+    void download_permanentRedirect308_followedManuallyToRelativeLocation() throws Exception {
+        // HttpURLConnection does not follow a 308 by itself (neither on Java 8 nor on current
+        // JDKs), so this hop goes through the manual redirect handling, including the resolution
+        // of a relative Location against the request URI
+        byte[] body = "redirected-payload".getBytes(UTF_8);
+        server = startServer("/", exchange -> {
+            if ("/dir/old".equals(exchange.getRequestURI().getPath())) {
+                exchange.getResponseHeaders().add("Location", "new");
+                exchange.sendResponseHeaders(308, -1);
+                exchange.close();
+            } else if ("/dir/new".equals(exchange.getRequestURI().getPath())) {
+                exchange.sendResponseHeaders(200, body.length);
+                try (OutputStream out = exchange.getResponseBody()) {
+                    out.write(body);
+                }
+            } else {
+                exchange.sendResponseHeaders(404, -1);
+                exchange.close();
+            }
+        });
+
+        byte[] result = Downloader.createDefault().download(uri("/dir/old"), TIMEOUT, TIMEOUT);
+
+        assertThat(result).isEqualTo(body);
+    }
+
+    @Test
+    void download_secondManualRedirect_throwsHttpDownloadExceptionWithRedirectStatus() throws Exception {
+        AtomicInteger requests = new AtomicInteger();
+        server = startServer("/loop", exchange -> {
+            requests.incrementAndGet();
+            exchange.getResponseHeaders().add("Location", "/loop");
+            exchange.sendResponseHeaders(308, -1);
+            exchange.close();
+        });
+
+        assertThatThrownBy(() -> Downloader.createDefault().download(uri("/loop"), TIMEOUT, TIMEOUT))
+            .isInstanceOf(HttpDownloadException.class)
+            .satisfies(ex -> assertThat(((HttpDownloadException) ex).getStatusCode()).isEqualTo(308));
+        assertThat(requests).hasValue(2);
     }
 
     @Test

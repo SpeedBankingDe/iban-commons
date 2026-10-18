@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXParseException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -137,6 +138,114 @@ final class MinimalXlsxReaderTest {
             .isInstanceOf(IOException.class)
             .isNotInstanceOf(NumberFormatException.class)
             .hasMessageContaining("not-a-number");
+    }
+
+    @Test
+    void read_richTextSharedString_concatenatesRunsAndIgnoresPhoneticHint() throws Exception {
+        // pretty-printed on purpose: the whitespace between the elements are text nodes that the
+        // walk over the direct <si> children has to skip
+        String sharedStringsXml =
+            "<sst xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\">\n"
+            + "  <si>\n"
+            + "    <r><t xml:space=\"preserve\">Test </t></r>\n"
+            + "    <r><rPr><b/></rPr><t>Bank</t></r>\n"
+            + "    <r><rPr><b/></rPr></r>\n"
+            + "    <rPh sb=\"0\" eb=\"4\"><t>phonetic</t></rPh>\n"
+            + "  </si>\n"
+            + "</sst>";
+
+        String sheetXml = SHEET_XML_HEADER
+            + "<row r=\"1\"><c r=\"A1\" t=\"s\"><v>0</v></c></row>"
+            + SHEET_XML_FOOTER;
+
+        byte[] xlsx = buildXlsx(sharedStringsXml, sheetXml);
+
+        List<String[]> rows;
+        try (ByteArrayInputStream in = new ByteArrayInputStream(xlsx)) {
+            rows = MinimalXlsxReader.read(in);
+        }
+
+        assertThat(rows).hasSize(1);
+        assertThat(rows.get(0)).containsExactly("Test Bank");
+    }
+
+    @Test
+    void read_inlineStringsAndEmptyOrDanglingValues_returnTextOrEmptyString() throws Exception {
+        String sharedStringsXml = "<sst><si><t>Shared</t></si></sst>";
+
+        String sheetXml = SHEET_XML_HEADER
+            + "<row r=\"1\">"
+            + "<c r=\"A1\" t=\"inlineStr\"><is><t>Inline</t></is></c>"
+            + "<c r=\"B1\" t=\"inlineStr\"><is/></c>"
+            + "<c r=\"C1\" t=\"s\"><v></v></c>"
+            + "<c r=\"D1\" t=\"s\"/>"
+            + "<c r=\"E1\" t=\"s\"><v>1</v></c>"
+            + "<c r=\"F1\" t=\"s\"><v>-1</v></c>"
+            + "<c r=\"G1\"/>"
+            + "<c r=\"H1\" t=\"s\"><v>0</v></c>"
+            + "</row>"
+            + SHEET_XML_FOOTER;
+
+        byte[] xlsx = buildXlsx(sharedStringsXml, sheetXml);
+
+        List<String[]> rows;
+        try (ByteArrayInputStream in = new ByteArrayInputStream(xlsx)) {
+            rows = MinimalXlsxReader.read(in);
+        }
+
+        assertThat(rows).hasSize(1);
+        assertThat(rows.get(0)).containsExactly("Inline", "", "", "", "", "", "", "Shared");
+    }
+
+    @Test
+    void read_cellReferenceWithTooManyColumnLetters_positionedByElementOrder() throws Exception {
+        // eight column letters would overflow the int column index, so the reference is treated
+        // like a missing one instead of producing a negative or huge index
+        String sheetXml = SHEET_XML_HEADER
+            + "<row><c r=\"A1\"><v>A</v></c><c r=\"ABCDEFGH1\"><v>B</v></c></row>"
+            + SHEET_XML_FOOTER;
+
+        byte[] xlsx = buildXlsx("<sst/>", sheetXml);
+
+        List<String[]> rows;
+        try (ByteArrayInputStream in = new ByteArrayInputStream(xlsx)) {
+            rows = MinimalXlsxReader.read(in);
+        }
+
+        assertThat(rows).hasSize(1);
+        assertThat(rows.get(0)).containsExactly("A", "B");
+    }
+
+    @Test
+    void read_malformedSheetXml_throwsIOException() throws Exception {
+        byte[] xlsx = buildXlsx("<sst/>", SHEET_XML_HEADER + "<row>");
+
+        assertThatThrownBy(() -> {
+            try (ByteArrayInputStream in = new ByteArrayInputStream(xlsx)) {
+                MinimalXlsxReader.read(in);
+            }
+        })
+            .isInstanceOf(IOException.class)
+            .hasMessage("Failed to parse XLSX XML part");
+    }
+
+    @Test
+    void read_sheetXmlWithDoctype_throwsIOException() throws Exception {
+        // XXE hardening: a DOCTYPE declaration is rejected before any entity could be resolved
+        String sheetXml = "<?xml version=\"1.0\"?>"
+            + "<!DOCTYPE worksheet [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]>"
+            + "<worksheet><sheetData><row><c t=\"inlineStr\"><is><t>&xxe;</t></is></c></row></sheetData></worksheet>";
+
+        byte[] xlsx = buildXlsx("<sst/>", sheetXml);
+
+        assertThatThrownBy(() -> {
+            try (ByteArrayInputStream in = new ByteArrayInputStream(xlsx)) {
+                MinimalXlsxReader.read(in);
+            }
+        })
+            .isInstanceOf(IOException.class)
+            .hasMessage("Failed to parse XLSX XML part")
+            .hasRootCauseInstanceOf(SAXParseException.class);
     }
 
     @Test

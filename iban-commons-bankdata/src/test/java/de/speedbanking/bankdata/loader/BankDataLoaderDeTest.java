@@ -130,6 +130,44 @@ final class BankDataLoaderDeTest {
     }
 
     @Test
+    void parse_branchRowsAroundHeadOfficeRow_headOfficeRecordWins() throws Exception {
+        // only the head-office record (Merkmal 1) carries the BIC, so it must replace a branch
+        // record kept earlier for the same BLZ, and must not be replaced by a later branch record
+        String content = "Bankleitzahl;Merkmal;Bezeichnung;PLZ;Ort;Kurzbezeichnung;PAN;BIC;Pruefzifferberechnungsmethode;"
+            + "Datensatznummer;Aenderungskennzeichen;Bankleitzahlloeschung;Nachfolge-Bankleitzahl\n"
+            + "\"37040044\";\"2\";\"Commerzbank\";\"53003\";\"Bonn\";\"Commerzbank Bonn\";\"24370\";"
+            + "\"\";\"13\";\"006144\";\"U\";\"0\";\"00000000\"\n"
+            + "\"37040044\";\"1\";\"Commerzbank\";\"50447\";\"Koeln\";\"Commerzbank Koeln\";\"24370\";"
+            + "\"COBADEFFXXX\";\"13\";\"006143\";\"U\";\"0\";\"00000000\"\n"
+            + "\"37040044\";\"2\";\"Commerzbank\";\"51373\";\"Leverkusen\";\"Commerzbank Leverkusen\";\"24370\";"
+            + "\"\";\"13\";\"006145\";\"U\";\"0\";\"00000000\"\n";
+        InputStream in = new ByteArrayInputStream(content.getBytes(WINDOWS_1252));
+
+        List<BankData> records = loader.parse(in, "test-version");
+
+        assertThat(records).hasSize(1);
+        assertThat(records.get(0).getCity()).isEqualTo("Koeln");
+        assertThat((Object) records.get(0).getBic()).hasToString("COBADEFFXXX");
+    }
+
+    @Test
+    void parse_blankLinesAndRowWithEmptyBankCode_areSkipped() throws Exception {
+        String content = "Bankleitzahl;Merkmal;Bezeichnung;PLZ;Ort;Kurzbezeichnung;PAN;BIC;Pruefzifferberechnungsmethode;"
+            + "Datensatznummer;Aenderungskennzeichen;Bankleitzahlloeschung;Nachfolge-Bankleitzahl\n"
+            + "\n"
+            + "\"\";\"1\";\"Ohne BLZ\";\"10117\";\"Berlin\";\"Ohne BLZ\";\"\";"
+            + "\"\";\"09\";\"000001\";\"U\";\"0\";\"00000000\"\n"
+            + "\"10000000\";\"1\";\"Bundesbank Berlin\";\"10117\";\"Berlin\";\"BBk Berlin\";\"20100\";"
+            + "\"MARKDEF1100\";\"09\";\"011380\";\"U\";\"0\";\"00000000\"\n"
+            + "\n";
+        InputStream in = new ByteArrayInputStream(content.getBytes(WINDOWS_1252));
+
+        List<BankData> records = loader.parse(in, "test-version");
+
+        assertThat(records).extracting(BankData::getBankCode).containsExactly("10000000");
+    }
+
+    @Test
     void parse_sampleFile_skipsHeaderDeletedAndBiclessRows_andHandlesQuotingAndUmlauts() throws Exception {
         List<BankData> records;
         try (InputStream in = getClass().getResourceAsStream("/bankdata/raw/DE-sample.txt")) {
