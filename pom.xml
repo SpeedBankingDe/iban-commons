@@ -103,9 +103,9 @@
 
         <project.copyrightYear>2026</project.copyrightYear>
 
-        <dep.junit.version>5.14.4</dep.junit.version>
+        <dep.junit.version>5.14.4</dep.junit.version> <!-- JUnit 6 requires Java 17 -->
         <dep.assertj.version>3.27.7</dep.assertj.version>
-        <dep.mockito.version>4.11.0</dep.mockito.version>
+        <dep.mockito.version>4.11.0</dep.mockito.version> <!-- Mockito 5 requires Java 11 -->
         <dep.pitest-junit5-plugin.version>1.2.3</dep.pitest-junit5-plugin.version>
 
         <developer1Id>spannm</developer1Id>
