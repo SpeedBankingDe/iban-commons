@@ -840,6 +840,22 @@
         </profile>
 
         <profile>
+            <!-- skip time-consuming steps: mvn -Pfast
+                 Error Prone stays on, add -Dcheck.skip-errorprone to switch it off as well -->
+            <id>fast</id>
+            <properties>
+                <!-- skip compiling the tests, not just running them -->
+                <maven.test.skip>true</maven.test.skip>
+                <checkstyle.skip>true</checkstyle.skip>
+                <pmd.skip>true</pmd.skip>
+                <license.skip>true</license.skip>
+                <jacoco.skip>true</jacoco.skip>
+                <cyclonedx.skip>true</cyclonedx.skip>
+                <maven.source.skip>true</maven.source.skip>
+            </properties>
+        </profile>
+
+        <profile>
             <!-- Activated for release:prepare and release:perform goals -->
             <id>release</id>
 
