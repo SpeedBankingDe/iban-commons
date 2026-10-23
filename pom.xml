@@ -119,7 +119,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss.SSS</maven.build.timestamp.format>
+        <!-- Reproducible builds: fixed timestamp for archive entries and the Build-Time manifest entry,
+             updated automatically by maven-release-plugin on release:prepare -->
+        <project.build.outputTimestamp>2026-10-15T12:15:14Z</project.build.outputTimestamp>
 
         <deploy.snapshot.url>https://central.sonatype.com/repository/maven-snapshots/</deploy.snapshot.url>
 
@@ -348,11 +350,11 @@
                                 <addDefaultEntries>true</addDefaultEntries>
                                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>  <!-- Implementation-Title/Version/Vendor -->
                                 <addDefaultSpecificationEntries>false</addDefaultSpecificationEntries>
-                                <addBuildEnvironmentEntries>true</addBuildEnvironmentEntries>  <!-- Build-Jdk, Build-Os, Build-Tool -->
+                                <addBuildEnvironmentEntries>false</addBuildEnvironmentEntries>  <!-- Build-Jdk, Build-Os, Build-Tool vary by machine, so leave them out -->
                             </manifest>
 
                             <manifestEntries>
-                                <Build-Time>${maven.build.timestamp}</Build-Time>
+                                <Build-Time>${project.build.outputTimestamp}</Build-Time>
                                 <Project-Java-Version>${releaseJavaVersion}</Project-Java-Version>
                                 <Project-Url>${project.url}</Project-Url>
                                 <Project-Inception-Year>${project.inceptionYear}</Project-Inception-Year>
