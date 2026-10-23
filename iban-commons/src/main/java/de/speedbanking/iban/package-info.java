@@ -6,8 +6,8 @@
  * rules per country are held by {@link de.speedbanking.iban.IbanRegistry}, which also provides
  * access to {@link de.speedbanking.iban.IbanBuilder country builders} for constructing IBANs from
  * their components. Validation is performed by {@link de.speedbanking.iban.IbanValidator} through
- * a fail-fast pipeline of country-specific {@link de.speedbanking.iban.CountryValidator}
- * implementations (see {@link de.speedbanking.iban.CountryValidators}), optionally combined with a
+ * a fail-fast pipeline whose country-specific {@link de.speedbanking.iban.CountryValidator}
+ * is derived from the registry's BBAN pattern, optionally combined with a
  * {@link de.speedbanking.iban.NationalCheckDigitCalculator} (see
  * {@link de.speedbanking.iban.NationalCheckDigitCalculators}).
  * <p>

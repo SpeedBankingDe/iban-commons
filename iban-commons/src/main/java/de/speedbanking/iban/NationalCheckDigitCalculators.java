@@ -20,46 +20,101 @@ import static java.util.Objects.requireNonNull;
 import de.speedbanking.util.Mod97;
 import de.speedbanking.util.UtilityClasses;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
- * Container class for all country-specific {@link NationalCheckDigitCalculator}
- * implementations.
+ * Container class for all {@link NationalCheckDigitCalculator} implementations.
  * <p>
- * Contains all National Check Digit (NCD) algorithms used in IBAN structures.
+ * Contains all National Check Digit (NCD) algorithms used in IBAN structures. Each algorithm
+ * is implemented once and shared by all countries using it, e.g. the French Cle RIB by France,
+ * Monaco, Tunisia and several West-African countries. The calculator for a country is
+ * obtained via {@link #forCountry(IbanRegistry)}, which passes the country to the calculator's
+ * constructor.
  *
- * <h3>Design rules</h3>
- * <ul>
- *   <li><strong>Base countries</strong> extend {@link NcdCalculatorBase} directly and
- *       implement the full algorithm</li>
- *   <li><strong>Derived countries</strong> extend a base country implementation
- *       (e.g., all French territories extend {@link FR})</li>
- *   <li><strong>MOD 97-10 countries</strong> extend {@link Mod97RemainderOneNcdCalculatorBase}.</li>
- *   <li><strong>No validated NCD</strong> (algorithm not specified or unknown)
- *       extend {@link NoOpNcdCalculatorBase}</li>
- *   <li>No duplicated logic — algorithms are shared through inheritance.</li>
- * </ul>
- *
- * <h3>Base class hierarchy</h3>
+ * <h3>Class hierarchy</h3>
  * <pre>
- * NationalCheckDigitCalculator               (interface)
- * └── NcdCalculatorBase                      (abstract — holds countryData, default validate, mod97)
- *     ├── NoOpNcdCalculatorBase              (abstract — no NCD validation, passthrough)
- *     ├── Mod97RemainderOneNcdCalculatorBase (abstract — ISO 7064 MOD 97-10, remainder == 1)
- *     └── (concrete country classes)
+ * NationalCheckDigitCalculator            (interface)
+ * └── NcdCalculatorBase                   (abstract, holds countryData, default validate, mod97)
+ *     ├── NoOpNcdCalculator               (no NCD validation, passthrough)
+ *     ├── Mod97RemainderOneNcdCalculator  (ISO 7064 MOD 97-10, remainder == 1)
+ *     └── AL, AO, BE, EE, ES, FI, FR, ... (algorithms named after the country defining them)
  * </pre>
  *
  * @since 1.8.5
  *
  * @see NationalCheckDigitCalculator
  * @see NcdCalculatorBase
- * @see Mod97RemainderOneNcdCalculatorBase
+ * @see Mod97RemainderOneNcdCalculator
  */
 @SuppressWarnings("checkstyle:VisibilityModifier")
 final class NationalCheckDigitCalculators {
 
+    /** Calculator factories by base country code. */
+    private static final Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> FACTORIES = createFactories();
+
+    /** Not instantiable. */
     private NationalCheckDigitCalculators() {
         throw UtilityClasses.cannotInstantiate(getClass());
+    }
+
+    /**
+     * Creates the NCD calculator for the given country.
+     *
+     * @param countryData the registry entry of a country with an NCD; must not be {@code null}
+     * @return a new calculator for the base country of {@code countryData}, never {@code null}
+     * @throws IllegalArgumentException if no NCD algorithm is known for the country
+     *
+     * @since 1.8.13
+     */
+    static NationalCheckDigitCalculator forCountry(IbanRegistry countryData) {
+        IbanRegistry baseCountry = countryData.getBaseCountry();
+        Function<IbanRegistry, NationalCheckDigitCalculator> factory = FACTORIES.get(baseCountry.getCountryCode());
+        if (factory == null) {
+            throw new IllegalArgumentException(String.format("No national check digit algorithm for %s", baseCountry.getCountryCode()));
+        }
+        return factory.apply(baseCountry);
+    }
+
+    /**
+     * Maps each base country with an NCD to the factory of its algorithm.
+     *
+     * @return the factories by base country code
+     */
+    private static Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> createFactories() {
+        Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> factories = new HashMap<>();
+        register(factories, AL::new, "AL");
+        register(factories, AO::new, "AO");
+        register(factories, BE::new, "BE");
+        register(factories, EE::new, "EE");
+        register(factories, ES::new, "ES");
+        register(factories, FI::new, "FI");
+        register(factories, HU::new, "HU");
+        register(factories, NO::new, "NO");
+        register(factories, IT::new, "IT", "SM");
+        register(factories, FR::new, "FR", "DJ", "MC", "TN",
+            "BF", "BJ", "CF", "CM", "GQ", "KM", "SN"); // West-African CFA franc zone
+        register(factories, Mod97RemainderOneNcdCalculator::new,
+            "BA", "ME", "MK", "MZ", "PT", "RS", "SI", "TL", "XK");
+        register(factories, NoOpNcdCalculator::new,
+            "CG", "CI", "FO", "GW", "MG", "ML", "MR", "NE", "SE", "TD", "TR");
+        return factories;
+    }
+
+    /**
+     * Registers the given factory for all given country codes.
+     *
+     * @param factories    the map to add to
+     * @param factory      the calculator factory
+     * @param countryCodes the base country codes using the algorithm
+     */
+    private static void register(Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> factories,
+        Function<IbanRegistry, NationalCheckDigitCalculator> factory, String... countryCodes) {
+        for (String countryCode : countryCodes) {
+            factories.put(countryCode, factory);
+        }
     }
 
     /**
@@ -73,6 +128,15 @@ final class NationalCheckDigitCalculators {
      */
     static final class AL extends NcdCalculatorBase {
         private static final int[] WEIGHTS = {9, 7, 3, 1, 9, 7, 3};
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        AL(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -100,6 +164,15 @@ final class NationalCheckDigitCalculators {
      * is allocated.
      */
     static final class AO extends NcdCalculatorBase {
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        AO(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -134,16 +207,6 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit calculator for <strong>Bosnia and Herzegovina (BA)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class BA extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    /**
      * National Check Digit calculator for <strong>Belgium (BE)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 3n bank + 7n account + 2n NCD = 12 digits (IBAN length 16).
@@ -154,6 +217,15 @@ final class NationalCheckDigitCalculators {
      * Result range: {@code 01–97}.
      */
     static final class BE extends NcdCalculatorBase {
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        BE(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -180,6 +252,15 @@ final class NationalCheckDigitCalculators {
      */
     static final class EE extends NcdCalculatorBase {
         private static final int[] WEIGHTS = {7, 3, 1};
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        EE(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -213,6 +294,15 @@ final class NationalCheckDigitCalculators {
     static final class ES extends NcdCalculatorBase {
 
         private static final int[] WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        ES(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -279,6 +369,15 @@ final class NationalCheckDigitCalculators {
 
         private static final int[] WEIGHTS = {2, 1};
 
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        FI(IbanRegistry countryData) {
+            super(countryData);
+        }
+
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
             int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
@@ -298,25 +397,6 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit calculator for the <strong>Faroe Islands (FO)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for FO.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class FO extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Sweden (SE)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a single standardised NCD algorithm for SE
-     * as validation rules vary across individual bank clearing numbers.<br>
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class SE extends NoOpNcdCalculatorBase {
-    }
-
-    /**
      * National Check Digit calculator for <strong>France (FR)</strong> and all associated
      * territories.
      * <p>
@@ -326,7 +406,7 @@ final class NationalCheckDigitCalculators {
      * New Caledonia (NC), Saint Barthélemy (BL), Saint Martin (MF),
      * Saint Pierre and Miquelon (PM), Wallis and Futuna (WF), Monaco (MC),
      * and several West-African countries (BF, BJ, CF, CM, GQ, KM, SN).
-     * Tunisia (TN) uses the same formula.
+     * Tunisia (TN) and Djibouti (DJ) use the same formula.
      * <p>
      * <strong>RIB — Clé RIB (Relevé d'Identité Bancaire):</strong>
      * Two-digit checksum {@code 01–97} at the end of the BBAN.
@@ -349,10 +429,17 @@ final class NationalCheckDigitCalculators {
      *   <tr><td>8</td><td>H, Q, Y</td></tr>
      *   <tr><td>9</td><td>I, R, Z</td></tr>
      * </table>
-     * <p>
-     * Not declared {@code final} to allow territory subclasses to inherit this implementation.
      */
-    static class FR extends NcdCalculatorBase {
+    static final class FR extends NcdCalculatorBase {
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        FR(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -414,10 +501,6 @@ final class NationalCheckDigitCalculators {
         }
     }
 
-    /** Djibouti (DJ) — uses France (FR) algorithm. */
-    static final class DJ extends FR {
-    }
-
     /**
      * National Check Digit calculator for <strong>Hungary (HU)</strong>.
      * <p>
@@ -432,6 +515,15 @@ final class NationalCheckDigitCalculators {
      */
     static final class HU extends NcdCalculatorBase {
         private static final int[] WEIGHTS = {9, 7, 3, 1};
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        HU(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -468,10 +560,8 @@ final class NationalCheckDigitCalculators {
      *   <li>Sum all values and take {@code sum % 26}.</li>
      *   <li>Convert result (0–25) to letter {@code 'A'–'Z'}.</li>
      * </ol>
-     *
-     * <p>Not declared {@code final} to allow {@link SM} to inherit this implementation.
      */
-    static class IT extends NcdCalculatorBase {
+    static final class IT extends NcdCalculatorBase {
 
         /**
          * Lookup table for characters at <em>odd</em> positions (1-based).
@@ -483,6 +573,15 @@ final class NationalCheckDigitCalculators {
             2, 4, 18, 20, 11, 3, 6, 8, 12, 14, // 'K' – 'T'
             16, 10, 22, 25, 24, 23             // 'U' – 'Z'
         };
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        IT(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
@@ -501,49 +600,6 @@ final class NationalCheckDigitCalculators {
 
             return oneLetter(sum % 26);
         }
-    }
-
-    /** Monaco (MC) — uses France (FR) algorithm. */
-    static final class MC extends FR {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Montenegro (ME)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class ME extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>North Macedonia (MK)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class MK extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Mauritania (MR)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for MR.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class MR extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Mozambique (MZ)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class MZ extends Mod97RemainderOneNcdCalculatorBase {
     }
 
     /**
@@ -567,6 +623,15 @@ final class NationalCheckDigitCalculators {
 
         private static final int[] WEIGHTS = {5, 4, 3, 2, 7, 6, 5, 4, 3, 2};
 
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        NO(IbanRegistry countryData) {
+            super(countryData);
+        }
+
         @Override
         public char[] calculateNationalCheckDigit(final char[] iban) {
             int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
@@ -587,180 +652,12 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit calculator for <strong>Portugal (PT)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     * Algorithm identical to Bosnia and Herzegovina (BA) and Montenegro (ME).
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class PT extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Serbia (RS)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class RS extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Slovenia (SI)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     * Algorithm identical to Bosnia and Herzegovina (BA) and Portugal (PT).
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class SI extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    /** San Marino (SM) — uses Italy (IT) algorithm. */
-    static final class SM extends IT {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Timor-Leste (TL)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class TL extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    /** Tunisia (TN) — uses France (FR) algorithm. */
-    static final class TN extends FR {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Turkey (TR)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for TR.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class TR extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Kosovo (XK)</strong>.
-     * <p>
-     * Uses ISO 7064 MOD 97-10. The full BBAN must produce remainder {@code 1}.
-     *
-     * @see Mod97RemainderOneNcdCalculatorBase
-     */
-    static final class XK extends Mod97RemainderOneNcdCalculatorBase {
-    }
-
-    // -------------------------------------------------------------------------
-    // West-African CFA-franc zone — all use the France (FR) / Clé RIB algorithm
-    // -------------------------------------------------------------------------
-
-    /** Burkina Faso (BF) — uses France (FR) algorithm. */
-    static final class BF extends FR {
-    }
-
-    /** Benin (BJ) — uses France (FR) algorithm. */
-    static final class BJ extends FR {
-    }
-
-    /** Central African Republic (CF) — uses France (FR) algorithm. */
-    static final class CF extends FR {
-    }
-
-    /** Cameroon (CM) — uses France (FR) algorithm. */
-    static final class CM extends FR {
-    }
-
-    /** Equatorial Guinea (GQ) — uses France (FR) algorithm. */
-    static final class GQ extends FR {
-    }
-
-    /** Comoros (KM) — uses France (FR) algorithm. */
-    static final class KM extends FR {
-    }
-
-    /** Senegal (SN) — uses France (FR) algorithm. */
-    static final class SN extends FR {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Congo (CG)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for CG.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class CG extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Côte d'Ivoire (CI)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for CI.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class CI extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Guinea-Bissau (GW)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for GW.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class GW extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Madagascar (MG)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for MG.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class MG extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Mali (ML)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for ML.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class ML extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Niger (NE)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for NE.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class NE extends NoOpNcdCalculatorBase {
-    }
-
-    /**
-     * National Check Digit calculator for <strong>Chad (TD)</strong>.
-     * <p>
-     * The SWIFT IBAN Registry does not specify a standardised NCD algorithm for TD.
-     * Validation accepts any well-formed IBAN of the correct length.
-     */
-    static final class TD extends NoOpNcdCalculatorBase {
-    }
-
-    // =========================================================================
-    // Base classes
-    // =========================================================================
-
-    /**
      * Abstract base class for all NCD calculators.
      * <p>
      * Provides:
      * <ul>
-     *   <li>Auto-wiring of {@link #countryData} from the class's simple name via
-     *       {@link IbanRegistry#getByCode(CharSequence)}.</li>
+     *   <li>The {@link #countryData} and {@link #ncdComponent} of the country passed
+     *       to the constructor.</li>
      *   <li>A default {@link #validateNationalCheckDigit} implementation that extracts
      *       the NCD from the IBAN and compares it to {@link #calculateNationalCheckDigit}.</li>
      *   <li>Shared constants ({@link #BBAN_START}, {@link #MODULO_BASE},
@@ -770,9 +667,9 @@ final class NationalCheckDigitCalculators {
      *   <li>A {@link #toString()} that includes the country code.</li>
      * </ul>
      * <p>
-     * Subclasses must implement {@link #calculateNationalCheckDigit(CharSequence)} and may
-     * override {@link #validateNationalCheckDigit(CharSequence)} when a more efficient or
-     * structurally different validation is required (e.g., {@link FR}).
+     * Subclasses must implement {@link #calculateNationalCheckDigit(char[])} and may
+     * override {@link #validateNationalCheckDigit(char[])} when a more efficient or
+     * structurally different validation is required (e.g., {@link Mod97RemainderOneNcdCalculator}).
      */
     abstract static class NcdCalculatorBase implements NationalCheckDigitCalculator {
 
@@ -809,22 +706,22 @@ final class NationalCheckDigitCalculators {
                 .mapToObj(i -> new char[] {(char) ('A' + i)})
                 .toArray(char[][]::new);
 
-        /** Country-specific registry data, i.e. the enum entry in {@link IbanRegistry}, resolved at construction time. */
+        /** Country-specific registry data, i.e. the enum entry in {@link IbanRegistry} passed at construction time. */
         final IbanRegistry            countryData;
 
-        /** The optional National Check Digit (NCD) component within the IBAN. */
+        /** The National Check Digit (NCD) component within the IBAN. */
         final IbanComponent           ncdComponent;
 
         /**
-         * Resolves {@link #countryData} from the concrete subclass's simple name.
+         * Creates the calculator for the given country.
          *
-         * @throws NullPointerException if the class name does not match any registered country code
+         * @param countryData the registry entry of a country with an NCD; must not be {@code null}
+         * @throws NullPointerException if {@code countryData} is {@code null} or has no NCD component
          */
-        NcdCalculatorBase() {
-            final String clazzName = getClass().getSimpleName();
-            countryData = requireNonNull(IbanRegistry.getByCode(clazzName),
-                clazzName + " is not a supported IBAN country code");
-            ncdComponent = countryData.getNationalCheckDigitComponent();
+        NcdCalculatorBase(IbanRegistry countryData) {
+            this.countryData = requireNonNull(countryData, "countryData must not be null");
+            ncdComponent = requireNonNull(countryData.getNationalCheckDigitComponent(),
+                () -> String.format("%s has no national check digit", countryData.getCountryCode()));
         }
 
         /**
@@ -912,23 +809,39 @@ final class NationalCheckDigitCalculators {
             return Mod97.calculateRange(data, offset, length);
         }
 
+        /**
+         * Returns a human-readable representation in the format
+         * {@code "Algorithm[XX, NCD component]"}, e.g. {@code "FR[MC, NCD ...]"}.
+         *
+         * @return a non-{@code null} string identifying algorithm and country
+         */
         @Override
         public final String toString() {
-            final String className = getClass().getName();
-            return className.substring(className.lastIndexOf('.') + 1) + "[NCD " + ncdComponent + ']';
+            return String.format("%s[%s, NCD %s]", getClass().getSimpleName(), countryData.getCountryCode(), ncdComponent);
         }
     }
 
     /**
-     * Base class for countries where no standardised NCD algorithm is specified by the
+     * Calculator for countries where no standardised NCD algorithm is specified by the
      * SWIFT IBAN Registry.
      * <p>
      * {@link #calculateNationalCheckDigit} returns the NCD already present in the
      * IBAN unchanged (passthrough). {@link #validateNationalCheckDigit} (inherited from
      * {@link NcdCalculatorBase}) will therefore always return {@code true} for a structurally
      * valid IBAN of the correct length.
+     *
+     * @since 1.8.13
      */
-    abstract static class NoOpNcdCalculatorBase extends NcdCalculatorBase {
+    static final class NoOpNcdCalculator extends NcdCalculatorBase {
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country without a specified NCD algorithm
+         */
+        NoOpNcdCalculator(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         /**
          * Returns the NCD value already present in {@code iban} without recomputing it.
@@ -943,11 +856,11 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * Base class for countries that use the ISO 7064 MOD 97-10 algorithm where the
+     * Calculator for countries that use the ISO 7064 MOD 97-10 algorithm where the
      * <em>full</em> BBAN (including the NCD) must produce a remainder of exactly {@code 1}
      * when divided by {@code 97}.
      * <p>
-     * This is the standard algorithm used by BA, ME, MK, MZ, PT, RS, SI, TL, XK and others.
+     * This is the standard algorithm used by BA, ME, MK, MZ, PT, RS, SI, TL and XK.
      * <p>
      * <strong>Calculation:</strong>
      * {@code NCD = 98 − ((prefix_remainder × 100) mod 97)}, where
@@ -956,18 +869,29 @@ final class NationalCheckDigitCalculators {
      * <p>
      * <strong>Validation:</strong>
      * {@code mod97(full_BBAN) == 1}.
+     *
+     * @since 1.8.13
      */
-    abstract static class Mod97RemainderOneNcdCalculatorBase extends NcdCalculatorBase {
+    static final class Mod97RemainderOneNcdCalculator extends NcdCalculatorBase {
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using this algorithm
+         */
+        Mod97RemainderOneNcdCalculator(IbanRegistry countryData) {
+            super(countryData);
+        }
 
         /**
          * Computes the two-digit NCD using the MOD 97-10 formula:
          * {@code 98 − ((prefix_remainder × 100) mod 97)}.
          *
          * @param iban the normalized IBAN
-         * @return two-element {@link CharSequence} with the zero-padded NCD (e.g. {@code {'0', '7'}})
+         * @return two-element {@code char[]} with the zero-padded NCD (e.g. {@code {'0', '7'}})
          */
         @Override
-        public final char[] calculateNationalCheckDigit(final char[] iban) {
+        public char[] calculateNationalCheckDigit(final char[] iban) {
             int remainder = mod97(iban, BBAN_START, ncdComponent.getBeginIndex() - BBAN_START);
             remainder = (remainder * 100) % MODULO_BASE;
 
@@ -981,7 +905,7 @@ final class NationalCheckDigitCalculators {
          * @return {@code true} if the full BBAN produces remainder {@code 1}
          */
         @Override
-        public final boolean validateNationalCheckDigit(final char[] iban) {
+        public boolean validateNationalCheckDigit(final char[] iban) {
             int bbanLength = countryData.getIbanLength() - BBAN_START;
             return mod97(iban, BBAN_START, bbanLength) == 1;
         }

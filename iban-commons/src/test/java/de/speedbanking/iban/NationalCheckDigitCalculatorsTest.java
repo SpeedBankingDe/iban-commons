@@ -1,6 +1,7 @@
 package de.speedbanking.iban;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.speedbanking.iban.NationalCheckDigitCalculators.NcdCalculatorBase;
 import de.speedbanking.test.TestUtil;
@@ -8,10 +9,9 @@ import de.speedbanking.test.TestUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
@@ -23,32 +23,57 @@ final class NationalCheckDigitCalculatorsTest {
         TestUtil.assertConstructorIsPrivate(NationalCheckDigitCalculators.class);
     }
 
-    @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("provideNcdCalculatorClasses")
-    void toString_shouldFollowCustomFormat(Class<? extends NcdCalculatorBase> clazz) throws Exception {
-        Constructor<? extends NcdCalculatorBase> constructor = clazz.getDeclaredConstructor();
-        constructor.setAccessible(true);
-        NcdCalculatorBase calculator = constructor.newInstance();
-
-        String toString = calculator.toString();
-
-        String expectedToString = String.format("%s$%s[NCD %s]",
-            NationalCheckDigitCalculators.class.getSimpleName(),
-            clazz.getSimpleName(),
-            calculator.ncdComponent);
-
-        assertThat(toString)
-            .as("Check toString() format for class %s", clazz.getSimpleName())
-            .isNotNull()
-            .isEqualTo(expectedToString);
+    static Stream<IbanRegistry> ncdCountries() {
+        return IbanRegistry.ALL_COUNTRIES.stream()
+            .filter(IbanRegistry::hasNationalCheckDigit);
     }
 
-    @SuppressWarnings("unchecked")
-    private static Stream<Class<? extends NcdCalculatorBase>> provideNcdCalculatorClasses() {
-        return Stream.of(NationalCheckDigitCalculators.class.getDeclaredClasses())
-            .filter(NcdCalculatorBase.class::isAssignableFrom)
-            .filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
-            .map(clazz -> (Class<? extends NcdCalculatorBase>) clazz);
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("ncdCountries")
+    void forCountry_ncdCountry_returnsCalculatorOfBaseCountry(IbanRegistry countryData) {
+        NcdCalculatorBase calculator = (NcdCalculatorBase) NationalCheckDigitCalculators.forCountry(countryData);
+
+        assertThat(calculator.countryData).isSameAs(countryData.getBaseCountry());
+        assertThat(calculator.ncdComponent).isEqualTo(countryData.getBaseCountry().getNationalCheckDigitComponent());
+        assertThat(calculator).hasToString("%s[%s, NCD %s]",
+            calculator.getClass().getSimpleName(), countryData.getBaseCountry().getCountryCode(), calculator.ncdComponent);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
+    @CsvSource(delimiter = '|', value = {
+        "FR | FR",
+        "GP | FR",
+        "MC | FR",
+        "SN | FR",
+        "IT | IT",
+        "SM | IT",
+        "PT | Mod97RemainderOneNcdCalculator",
+        "SE | NoOpNcdCalculator",
+    })
+    void forCountry_sharedAlgorithm_returnsAlgorithmClass(IbanRegistry countryData, String algorithm) {
+        assertThat(NationalCheckDigitCalculators.forCountry(countryData).getClass().getSimpleName())
+            .isEqualTo(algorithm);
+    }
+
+    @Test
+    void constructor_countryWithoutNcd_throwsNullPointerException() {
+        assertThatThrownBy(() -> new NationalCheckDigitCalculators.FR(IbanRegistry.DE))
+            .isExactlyInstanceOf(NullPointerException.class)
+            .hasMessage("DE has no national check digit");
+    }
+
+    @Test
+    void constructor_nullCountry_throwsNullPointerException() {
+        assertThatThrownBy(() -> new NationalCheckDigitCalculators.FR(null))
+            .isExactlyInstanceOf(NullPointerException.class)
+            .hasMessage("countryData must not be null");
+    }
+
+    @Test
+    void forCountry_countryWithoutNcd_throwsIllegalArgumentException() {
+        assertThatThrownBy(() -> NationalCheckDigitCalculators.forCountry(IbanRegistry.DE))
+            .isExactlyInstanceOf(IllegalArgumentException.class)
+            .hasMessage("No national check digit algorithm for DE");
     }
 
 }

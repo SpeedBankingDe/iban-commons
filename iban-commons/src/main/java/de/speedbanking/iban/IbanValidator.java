@@ -61,9 +61,10 @@ import java.util.stream.Stream;
  * and {@link #validate(String)} entry points, so callers passing {@link String} literals
  * or variables pay no runtime dispatch cost.
  * <p>
- * All internal loops in {@link CountryValidator} implementations and {@link Mod97} operate
- * directly on {@code char[]} arrays, keeping every hot callsite monomorphic and allowing
- * the JIT to inline and auto-vectorize aggressively.
+ * All internal loops in {@link CountryValidator} and {@link Mod97} operate directly on
+ * {@code char[]} arrays. {@link CountryValidator} is a single final class whose checks are
+ * derived from the BBAN pattern, which keeps the hot callsite monomorphic and allows
+ * the JIT to inline aggressively.
  *
  * <h2>Thread safety</h2>
  * This class is thread-safe. The {@link #VALIDATION_BUFFER} thread-local isolates
@@ -101,7 +102,7 @@ public final class IbanValidator {
      */
     private static final CountryValidator[] VALIDATORS =
         Stream.of(IbanRegistry.values())
-            .map(cd -> cd.isBaseCountry() ? loadCountryValidator(cd) : null)
+            .map(cd -> cd.isBaseCountry() ? new CountryValidator(cd) : null)
             .toArray(CountryValidator[]::new);
 
     /**
@@ -140,31 +141,11 @@ public final class IbanValidator {
     }
 
     /**
-     * Dynamically loads and instantiates the country-specific IBAN validator
-     * using reflection based on the country code extracted from the given IBAN registry entry.
-     * <p>
-     * This method expects the validator implementation to be defined as a public
-     * nested static class within the {@code CountryValidators} class,
-     * named after the country code (e.g., {@code CountryValidators.AD} for "AD").
+     * Returns the validator of the base country of the given registry entry.
      *
-     * @param countryData the IBAN registry entry containing the target country code
-     * @return the instantiated {@link CountryValidator} for the given country; never {@code null}
-     * @throws IllegalStateException if the validator class cannot be found or instantiated
-     *
-     * @see CountryValidator
-     * @see CountryValidators
-     * @see IbanRegistry
+     * @param countryData the IBAN registry entry; must not be {@code null}
+     * @return the {@link CountryValidator} of the base country; never {@code null}
      */
-    static CountryValidator loadCountryValidator(IbanRegistry countryData) {
-        String className = CountryValidators.class.getName() + '$' + countryData.getBaseCountry().getCountryCode();
-        try {
-            Class<?> cls = Class.forName(className);
-            return (CountryValidator) cls.getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException ex) {
-            throw new IllegalStateException("Could not instantiate class '" + className + "':", ex);
-        }
-    }
-
     @SuppressWarnings("EnumOrdinal")
     static CountryValidator getCountryValidator(IbanRegistry countryData) {
         return VALIDATORS[countryData.getBaseCountry().ordinal()];
@@ -344,7 +325,7 @@ public final class IbanValidator {
 
         return countryData != null
             && len == countryData.getIbanLength()
-            // BBAN structure check (country-specific) — wrap once so CountryValidators see a monomorphic type
+            // BBAN structure check (country-specific)
             && getCountryValidator(countryData).validateIban(normIban)
             && Mod97.isValid(normIban, len);
     }

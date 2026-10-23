@@ -432,21 +432,15 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
     /**
      * Overwrites the National Check Digit (NCD) field in {@code ibanBuilder} with the value
-     * computed by the country's {@link NationalCheckDigitCalculator}, if one is available.
+     * computed by the country's {@link NationalCheckDigitCalculator}.
      * <p>
-     * This method is a no-op when:
-     * <ul>
-     *   <li>the country has no NCD field
-     *       ({@link IbanRegistry#getNationalCheckDigitComponent()} returns {@code null}), or</li>
-     *   <li>the country's {@link CountryValidator} does not implement
-     *       {@link NationalCheckDigitCalculator}.</li>
-     * </ul>
+     * This method is a no-op when the country has no NCD field
+     * ({@link IbanRegistry#getNationalCheckDigitComponent()} returns {@code null}).
      *
      * @param countryData the registry entry for the country, may not be {@code null}
      * @param iban        the IBAN with a completely written BBAN; modified in place; may not
      *                    be {@code null}
-     * @return {@code iban}, unmodified if no NCD field is defined for the country or if the
-     *         {@link CountryValidator} does not implement {@link NationalCheckDigitCalculator};
+     * @return {@code iban}, unmodified if no NCD field is defined for the country,
      *         otherwise with the NCD field overwritten in place
      */
     static char[] fixNationalCheckDigit(IbanRegistry countryData, char[] iban) {
@@ -463,12 +457,8 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
             return iban;
         }
 
-        // verify validator interface safely before casting
-        CountryValidator validator = IbanValidator.getCountryValidator(countryData);
-        if (validator instanceof NationalCheckDigitCalculator) {
-            char[] ncd = ((NationalCheckDigitCalculator) validator).calculateNationalCheckDigit(iban);
-            System.arraycopy(ncd, 0, iban, ncdCompo.getBeginIndex(), ncd.length);
-        }
+        char[] ncd = IbanValidator.getCountryValidator(countryData).calculateNationalCheckDigit(iban);
+        System.arraycopy(ncd, 0, iban, ncdCompo.getBeginIndex(), ncd.length);
 
         return iban;
     }

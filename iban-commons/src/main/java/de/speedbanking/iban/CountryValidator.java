@@ -15,64 +15,273 @@
  */
 package de.speedbanking.iban;
 
+import static de.speedbanking.util.CharUtil.isAllDigitOrUpperCase;
+import static de.speedbanking.util.CharUtil.isAllDigits;
+import static de.speedbanking.util.CharUtil.isAllUpperCase;
 import static de.speedbanking.util.CharUtil.toCharArray;
 
+import de.speedbanking.iban.util.IbanPatternConverter;
+import de.speedbanking.iban.util.IbanPatternConverter.Segment;
 import de.speedbanking.util.CharUtil;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
- * Functional interface for country-specific IBAN structure validation.
+ * Validates the BBAN structure of the IBANs of one country.
  * <p>
- * Each supported country provides a concrete implementation in {@link CountryValidators}
- * that validates the BBAN portion of the IBAN according to its national format rules.
- *
- * <h3>National Check Digit validation</h3>
- * Validators for countries that embed a National Check Digit (NCD) in their BBAN extend
- * {@link AbstractNcdCountryValidator}, which additionally implements
- * {@link NationalCheckDigitCalculator}.  The {@code validateIban} implementation of such
- * validators calls {@link NationalCheckDigitCalculator#validateNationalCheckDigit(char[])}
- * as part of its boolean expression.
- *
- * <h3>Implementations</h3>
- * All country-specific implementations live in {@link CountryValidators} and are generated
- * by a code generator. They are not intended to be referenced directly —  use
- * {@link IbanValidator#getCountryValidator(IbanRegistry)} to obtain the validator for
- * a specific country.
+ * The checks are derived once from the country's BBAN pattern in {@link IbanRegistry}.
+ * Adjacent segments of the same character type are merged, and every numeric or alphabetic
+ * segment becomes an index range that must consist of digits or uppercase letters only.
+ * Alphanumeric segments need no check of their own, since the validation pipeline only passes
+ * on IBANs made of digits and uppercase ASCII letters. A BBAN consisting of a single
+ * alphanumeric segment is still checked as a whole.
+ * <p>
+ * For countries with a National Check Digit (NCD), {@link #validateIban(char[])} also verifies
+ * the NCD using the calculator provided by {@link NationalCheckDigitCalculators#forCountry(IbanRegistry)}.
+ * <p>
+ * Instances are immutable and thread-safe. Use {@link IbanValidator#getCountryValidator(IbanRegistry)}
+ * to obtain the validator for a country.
  *
  * @since 1.8.0
  *
- * @see CountryValidators
- * @see AbstractCountryValidator
- * @see AbstractNcdCountryValidator
+ * @see IbanValidator
  * @see NationalCheckDigitCalculator
  */
-@FunctionalInterface
-interface CountryValidator {
+final class CountryValidator {
+
+    /** Empty range array for character types that need no check. */
+    private static final int[]                 NO_RANGES = new int[0];
+
+    /** Country-specific registry data, always a base country. */
+    private final IbanRegistry                 countryData;
+
+    /** Begin (inclusive) and end (exclusive) index pairs of the IBAN ranges that must be all digits. */
+    private final int[]                        digitRanges;
+
+    /** Begin (inclusive) and end (exclusive) index pairs of the IBAN ranges that must be all uppercase letters. */
+    private final int[]                        upperCaseRanges;
+
+    /** Begin (inclusive) and end (exclusive) index pairs of the IBAN ranges that must be all digits or uppercase letters. */
+    private final int[]                        digitOrUpperCaseRanges;
+
+    /** The NCD calculator of the country, {@code null} if the country has no NCD. */
+    private final NationalCheckDigitCalculator ncdCalculator;
+
+    /**
+     * Creates the validator for the given country from its BBAN pattern.
+     *
+     * @param countryData the registry entry of a base country; must not be {@code null}
+     * @throws IllegalArgumentException if the BBAN pattern contains a space segment
+     *
+     * @since 1.8.13
+     */
+    CountryValidator(IbanRegistry countryData) {
+        this(countryData, countryData.getBbanPattern());
+    }
+
+    /**
+     * Creates the validator for the given country from the given BBAN pattern.
+     * <p>
+     * Separate from {@link #CountryValidator(IbanRegistry)} so that tests can derive
+     * validators from patterns not present in the registry.
+     *
+     * @param countryData the registry entry of a base country; must not be {@code null}
+     * @param bbanPattern the BBAN pattern in registry notation, e.g. {@code "4!a4!n2!n8!c"}
+     * @throws IllegalArgumentException if the BBAN pattern contains a space segment
+     *
+     * @since 1.8.13
+     */
+    CountryValidator(IbanRegistry countryData, String bbanPattern) {
+        this.countryData = countryData;
+
+        List<Segment> segments = IbanPatternConverter.aggregateSegments(
+            IbanPatternConverter.parseSegments(bbanPattern));
+
+        int[] digits = new int[segments.size() * 2];
+        int digitCount = 0;
+        int[] upperCase = new int[segments.size() * 2];
+        int upperCaseCount = 0;
+
+        int begin = IbanRegistry.INDEX_BBAN;
+        for (Segment segment : segments) {
+            int end = begin + segment.getLength();
+            switch (segment.getCharType()) {
+                case NUMERIC:
+                    digits[digitCount++] = begin;
+                    digits[digitCount++] = end;
+                    break;
+                case ALPHABETIC:
+                    upperCase[upperCaseCount++] = begin;
+                    upperCase[upperCaseCount++] = end;
+                    break;
+                case ALPHANUMERIC:
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Unsupported segment %s in BBAN pattern %s of %s",
+                        segment.toPatternNotation(), bbanPattern, countryData.getCountryCode()));
+            }
+            begin = end;
+        }
+
+        digitRanges = Arrays.copyOf(digits, digitCount);
+        upperCaseRanges = Arrays.copyOf(upperCase, upperCaseCount);
+        digitOrUpperCaseRanges = segments.size() == 1 && segments.get(0).isAlphanumeric()
+            ? new int[] {IbanRegistry.INDEX_BBAN, begin}
+            : NO_RANGES;
+
+        ncdCalculator = countryData.hasNationalCheckDigit()
+            ? NationalCheckDigitCalculators.forCountry(countryData)
+            : null;
+    }
 
     /**
      * Validates the BBAN structure inside the given IBAN character array.
      * <p>
      * Assumes that elementary validations (overall length, character set) have already
-     * been performed upstream.  The array is therefore guaranteed to contain only digits
-     * and uppercase ASCII letters — no {@code null} check, length check, or
+     * been performed upstream. The array is therefore guaranteed to contain only digits
+     * and uppercase ASCII letters, no {@code null} check, length check, or
      * {@link CharUtil#isDigitOrUpperCase(char)} check is needed inside this method.
      *
      * @param iban the fully assembled, normalized IBAN as a {@code char[]}
-     * @return {@code true} if the IBAN conforms to the country's structural rules,
-     *         {@code false} otherwise
+     * @return {@code true} if the IBAN conforms to the country's structural rules
+     *         and, if present, its National Check Digit is valid, {@code false} otherwise
      */
-    boolean validateIban(char[] iban);
+    boolean validateIban(char[] iban) {
+        return isAllDigitsInRanges(iban, digitRanges)
+            && isAllUpperCaseInRanges(iban, upperCaseRanges)
+            && isAllDigitOrUpperCaseInRanges(iban, digitOrUpperCaseRanges)
+            && validateNationalCheckDigit(iban);
+    }
 
     /**
      * Validates the BBAN structure of the given character sequence.
      * <p>
-     * This default method converts the sequence to a char array before calling
-     * the primary validation logic.
+     * Converts the sequence to a {@code char[]} before calling {@link #validateIban(char[])}.
+     * Note that this involves an array allocation.
      *
      * @param iban the IBAN character sequence to validate
-     * @return true if valid, false otherwise
+     * @return {@code true} if valid, {@code false} otherwise
      */
-    default boolean validateIban(final CharSequence iban) {
+    boolean validateIban(CharSequence iban) {
         return validateIban(toCharArray(iban));
+    }
+
+    /**
+     * Validates the National Check Digit (NCD) of the given IBAN.
+     *
+     * @param iban the normalized IBAN as a {@code char[]}
+     * @return {@code true} if the country has no NCD, NCD validation is disabled in
+     *         {@link IbanConfig}, or the NCD is valid
+     *
+     * @since 1.8.13
+     */
+    boolean validateNationalCheckDigit(char[] iban) {
+        return ncdCalculator == null
+            || !IbanConfig.isValidateNcd()
+            || ncdCalculator.validateNationalCheckDigit(iban);
+    }
+
+    /**
+     * Computes the National Check Digit (NCD) for the given IBAN.
+     * <p>
+     * If NCD calculation is disabled in {@link IbanConfig}, the NCD already present in
+     * {@code iban} is returned unchanged.
+     *
+     * @param iban the normalized IBAN as a {@code char[]}
+     * @return the NCD as a char array, its length matches the NCD field width
+     * @throws IllegalStateException if the country has no NCD
+     *
+     * @since 1.8.13
+     */
+    char[] calculateNationalCheckDigit(char[] iban) {
+        if (ncdCalculator == null) {
+            throw new IllegalStateException(String.format("%s has no national check digit", countryData.getCountryCode()));
+        }
+        return IbanConfig.isCalculateNcd()
+            ? ncdCalculator.calculateNationalCheckDigit(iban)
+            : countryData.getNationalCheckDigitComponent().extractFrom(iban);
+    }
+
+    /**
+     * Returns the registry entry this validator was created for.
+     *
+     * @return the base country's registry entry, never {@code null}
+     *
+     * @since 1.8.13
+     */
+    IbanRegistry getCountryData() {
+        return countryData;
+    }
+
+    /**
+     * Returns the NCD calculator of the country.
+     *
+     * @return the calculator, {@code null} if the country has no NCD
+     *
+     * @since 1.8.13
+     */
+    NationalCheckDigitCalculator getNcdCalculator() {
+        return ncdCalculator;
+    }
+
+    /**
+     * Returns a human-readable representation of this validator in the format
+     * {@code "XX[Country Name]"}, e.g. {@code "DE[Germany]"}.
+     *
+     * @return a non-{@code null} string identifying this validator
+     */
+    @Override
+    public String toString() {
+        return String.format("%s[%s]", countryData.getCountryCode(), countryData.getCountryName());
+    }
+
+    /**
+     * Checks that all given ranges of the IBAN consist of digits only.
+     *
+     * @param iban   the IBAN
+     * @param ranges begin and end index pairs
+     * @return {@code true} if every range is all digits
+     */
+    private static boolean isAllDigitsInRanges(char[] iban, int[] ranges) {
+        for (int i = 0; i < ranges.length; i += 2) {
+            if (!isAllDigits(iban, ranges[i], ranges[i + 1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks that all given ranges of the IBAN consist of uppercase letters only.
+     *
+     * @param iban   the IBAN
+     * @param ranges begin and end index pairs
+     * @return {@code true} if every range is all uppercase letters
+     */
+    private static boolean isAllUpperCaseInRanges(char[] iban, int[] ranges) {
+        for (int i = 0; i < ranges.length; i += 2) {
+            if (!isAllUpperCase(iban, ranges[i], ranges[i + 1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Checks that all given ranges of the IBAN consist of digits or uppercase letters only.
+     *
+     * @param iban   the IBAN
+     * @param ranges begin and end index pairs
+     * @return {@code true} if every range is all digits or uppercase letters
+     */
+    private static boolean isAllDigitOrUpperCaseInRanges(char[] iban, int[] ranges) {
+        for (int i = 0; i < ranges.length; i += 2) {
+            if (!isAllDigitOrUpperCase(iban, ranges[i], ranges[i + 1])) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

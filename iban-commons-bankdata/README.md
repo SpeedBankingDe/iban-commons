@@ -148,8 +148,8 @@ This module logs via plain `java.util.logging` (no new dependency), so it never 
 
 ## Extending to another country
 
-Implement `de.speedbanking.bankdata.spi.CountryBankDataLoader` for the new country's raw source format. This module wires loaders through an internal, fixed registry (`BankDataRegistry`) rather than `ServiceLoader`/`META-INF/services` discovery, consistent with `IbanRegistry`/
-`CountryValidators` elsewhere in this project. Third-party pluggability beyond the loaders shipped with this module (i.e. registering your own `CountryBankDataLoader` without forking this module) is not part of this release.
+Implement `de.speedbanking.bankdata.spi.CountryBankDataLoader` for the new country's raw source format. This module wires loaders through an internal, fixed registry (`BankDataRegistry`) rather than `ServiceLoader`/`META-INF/services` discovery, consistent with `IbanRegistry`
+elsewhere in this project. Third-party pluggability beyond the loaders shipped with this module (i.e. registering your own `CountryBankDataLoader` without forking this module) is not part of this release.
 
 ## Regenerating bundled data
 

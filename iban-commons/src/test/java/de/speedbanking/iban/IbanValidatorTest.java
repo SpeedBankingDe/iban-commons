@@ -27,7 +27,7 @@ import java.util.Locale;
 /**
  * JUnit test class for {@link IbanValidator}.
  */
-@SuppressWarnings("checkstyle:MethodName")
+@SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
 final class IbanValidatorTest {
 
     // A valid German IBAN for positive tests
@@ -61,22 +61,12 @@ final class IbanValidatorTest {
         TestUtil.assertConstructorIsPrivate(IbanValidator.class);
     }
 
-    @DisplayName("Should load country validator when base country registry is provided")
-    @ParameterizedTest(name = "[{index}] {0}")
-    @EnumSource(value = IbanRegistry.class, names = {"DE", "AT", "CH"})
-    void loadCountryValidator_ShouldReturnValidator_WhenCountryDataIsValid(IbanRegistry countryData) {
-        CountryValidator validator = IbanValidator.loadCountryValidator(countryData);
-        assertThat(validator).isNotNull();
-        assertThat(validator.getClass().getSimpleName()).isEqualTo(countryData.getCountryCode());
-    }
-
-    @DisplayName("Should load country validator when derived country registry is provided")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = IbanRegistry.class, names = {"AX", "BL", "GF", "GG", "GP", "IM", "JE", "MF", "MQ", "NC", "PF", "PM", "RE", "TF", "WF", "YT"})
-    void loadCountryValidator_ShouldThrowException_WhenValidatorClassIsMissing(IbanRegistry countryData) {
-        CountryValidator validator = IbanValidator.loadCountryValidator(countryData);
-        assertThat(validator).isNotNull();
-        assertThat(validator.getClass().getSimpleName()).doesNotContain("$" + countryData.getCountryCode());
+    void getCountryValidator_derivedCountry_returnsValidatorOfBaseCountry(IbanRegistry countryData) {
+        assertThat(IbanValidator.getCountryValidator(countryData))
+            .isNotNull()
+            .isSameAs(IbanValidator.getCountryValidator(countryData.getBaseCountry()));
     }
 
     @DisplayName("validate should return valid result for valid raw IBAN")
