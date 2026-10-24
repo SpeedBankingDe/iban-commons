@@ -271,11 +271,10 @@
                     <configuration>
                         <release>${releaseJavaVersion}</release>
                         <debug>true</debug>
-                        <debuglevel>lines,vars,source</debuglevel>
+                        <debuglevel>lines,source</debuglevel>
                         <showWarnings>true</showWarnings>
                         <showDeprecation>true</showDeprecation>
                         <compilerArgument>-Xlint:all,-options</compilerArgument>
-                        <parameters>true</parameters>
                     </configuration>
                 </plugin>
 
