@@ -15,13 +15,14 @@
  */
 package de.speedbanking.iban.util;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.UtilityClasses;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +58,7 @@ public final class IbanPatternConverter {
      * strings (the structural patterns defined once per country in {@code IbanRegistry}), for
      * example while building the country regexes and the per-position character types of the
      * IBAN components. Since a given pattern notation always parses to the same result, caching
-     * avoids repeating the regex matching and {@code Segment} list construction on every call.
+     * avoids repeating the regex matching and {@code Segments} construction on every call.
      * <p>
      * Mirrors the caching approach of {@link de.speedbanking.util.PatternCache}: an unbounded,
      * thread-safe map. This is safe for the library's own, closed set of country patterns; a
@@ -65,12 +66,12 @@ public final class IbanPatternConverter {
      * pattern strings would grow this cache without bound, so this method should not be used as
      * a target for arbitrary, untrusted pattern input in a hot path.
      */
-    private static final ConcurrentMap<String, List<Segment>> SEGMENT_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Segments> SEGMENT_CACHE = new ConcurrentHashMap<>();
 
     /**
      * Cache of already-built regex strings, keyed by the exact pattern notation string.
      * <p>
-     * Mirrors {@link #SEGMENT_CACHE}: {@link #buildRegex(String, List)} is typically called with
+     * Mirrors {@link #SEGMENT_CACHE}: {@link #convertToRegex(String)} is typically called with
      * the same small, fixed set of pattern strings. Caching avoids rebuilding the same regex
      * string (and the {@code StringBuilder} it takes to build it) on every call.
      */
@@ -85,19 +86,17 @@ public final class IbanPatternConverter {
 
     /**
      * Parses the IBAN-style structure notation, validates the syntax, and converts
-     * the components into a list of {@code Segment} objects.
+     * the components into {@link Segments}.
      * <p>
-     * Results are cached by exact input string (see {@link #SEGMENT_CACHE}); the returned list
-     * is unmodifiable and, for a given input, always the same shared instance — callers must not
-     * rely on being able to mutate it, and must not mutate {@code Segment} instances it contains
-     * (they are immutable already).
+     * Results are cached by exact input string (see {@link #SEGMENT_CACHE}); the returned
+     * segments are immutable and, for a given input, always the same shared instance.
      *
      * @param patternNotation the IBAN structure pattern string (e.g., "4!a16!c")
-     * @return an unmodifiable, sequential list of validated segments (intermediate format)
+     * @return the sequential, validated segments (intermediate format)
      * @throws IllegalArgumentException if the pattern is null, empty, contains illegal
      *         characters, or an unknown character type.
      */
-    public static List<Segment> parseSegments(String patternNotation) {
+    public static Segments parseSegments(String patternNotation) {
         if (patternNotation == null) {
             throw new IllegalArgumentException("Pattern notation must not be null");
         } else if (patternNotation.isEmpty()) {
@@ -116,11 +115,11 @@ public final class IbanPatternConverter {
      * — not the cheap upfront validation — is memoized in {@link #SEGMENT_CACHE}.
      *
      * @param patternNotation the pre-validated IBAN structure pattern string
-     * @return an unmodifiable, sequential list of validated segments
+     * @return the sequential, validated segments
      * @throws IllegalArgumentException if the pattern contains illegal characters, an unknown
      *         character type, or a length value that is too large
      */
-    private static List<Segment> doParseSegments(String patternNotation) {
+    private static Segments doParseSegments(String patternNotation) {
         // use the pre-compiled pattern to create a matcher for the input
         Matcher matcher = SEGMENT_PATTERN.matcher(patternNotation);
         List<Segment> segments = new ArrayList<>();
@@ -170,47 +169,7 @@ public final class IbanPatternConverter {
                     lastIndex, trailing));
         }
 
-        return unmodifiableList(segments);
-    }
-
-    /**
-     * Creates a new unmodifiable list by aggregating all subsequent segments of the same character type,
-     * adding up their lengths. This is a form of Run-Length Encoding (RLE).
-     *
-     * @param segments the input list of segments
-     * @return a new list with consecutive segments of the same type merged
-     */
-    @SuppressWarnings("MixedMutabilityReturnType")
-    public static List<Segment> aggregateSegments(List<Segment> segments) {
-        if (segments == null || segments.isEmpty()) {
-            return emptyList();
-        }
-
-        List<Segment> aggregated = new ArrayList<>();
-
-        // start with the first segment as the current segment to be combined
-        Segment current = segments.get(0);
-
-        // iterate starting from the second element
-        for (int i = 1; i < segments.size(); i++) {
-            Segment next = segments.get(i);
-
-            // check if the current segment's type matches the next one
-            if (next.getCharType() == current.getCharType()) {
-                // If yes: combine lengths
-                current = current.addLength(next.getLength());
-            } else {
-                // If no: the run is broken. Finalize the current combined segment and add it to the result
-                aggregated.add(current);
-                // start a new run with the 'next' segment
-                current = next;
-            }
-        }
-
-        // add the last accumulated segment after the loop finishes
-        aggregated.add(current);
-
-        return unmodifiableList(aggregated);
+        return new Segments(segments);
     }
 
     /**
@@ -223,53 +182,9 @@ public final class IbanPatternConverter {
      */
     public static String convertToRegex(String patternNotation) {
         // parsing and validation
-        List<Segment> segments = aggregateSegments(parseSegments(patternNotation));
+        Segments segments = parseSegments(patternNotation);
 
-        return buildRegex(patternNotation, segments);
-    }
-
-    /**
-     * Constructs the final Java Regex string from a sequential list of validated segments.
-     * This method handles the concatenation of character sets and the application of quantifiers.
-     *
-     * @param segments the list of validated segments (intermediate format)
-     * @return the resulting Java regular expression string (e.g., "[A-Z]{4}[A-Z0-9]{16}")
-     */
-    public static String buildRegex(List<Segment> segments) {
-        if (segments == null || segments.isEmpty()) {
-            return null;
-        }
-
-        StringBuilder regexBuilder = new StringBuilder();
-
-        for (Segment segment : segments) {
-            // append the character set (e.g., "[A-Z0-9]")
-            regexBuilder.append(segment.getCharType().getRegexPattern());
-
-            // append the fixed-length quantifier (e.g., "{16}")
-            if (segment.getLength() > 1) {
-                regexBuilder.append('{').append(segment.getLength()).append('}');
-            }
-        }
-
-        return regexBuilder.toString();
-    }
-
-    /**
-     * Cached variant of {@link #buildRegex(List)}, keyed by the pattern notation the segments
-     * were parsed from.
-     * <p>
-     * Results are cached by exact {@code patternNotation} string (see {@link #REGEX_CACHE});
-     * for a given input, the returned regex string is always the same shared instance.
-     *
-     * @param patternNotation the IBAN structure pattern string the segments were parsed from
-     *                        (used only as the cache key), must not be null
-     * @param segments        the list of validated segments (intermediate format) to build the
-     *                        regex from on a cache miss
-     * @return the resulting Java regular expression string (e.g., "[A-Z]{4}[A-Z0-9]{16}")
-     */
-    public static String buildRegex(String patternNotation, List<Segment> segments) {
-        return REGEX_CACHE.computeIfAbsent(patternNotation, p -> buildRegex(segments));
+        return REGEX_CACHE.computeIfAbsent(patternNotation, p -> segments.aggregate().toRegex());
     }
 
     /**
@@ -289,59 +204,6 @@ public final class IbanPatternConverter {
     }
 
     /**
-     * Checks whether all segments in the given {@link Iterable} consist strictly of numeric characters.
-     *
-     * @param segments the iterable of pattern segments to inspect
-     * @return true if all segments are numeric, false otherwise
-     */
-    public static boolean isAllNumeric(Iterable<Segment> segments) {
-        return allMatch(segments, Segment::isNumeric);
-    }
-
-    /**
-     * Checks whether all segments in the given {@link Iterable} satisfy the provided predicate.
-     * <p>
-     * Returns {@code true} if the iterable is empty.
-     *
-     * @param segments the iterable of pattern segments to inspect, must not be null
-     * @param predicate the condition to evaluate for each segment, must not be null
-     * @return true if all segments match the predicate, false otherwise
-     * @throws NullPointerException if {@code segments} or {@code predicate} is null
-     */
-    public static boolean allMatch(Iterable<Segment> segments, Predicate<Segment> predicate) {
-        requireNonNull(segments, "segments must not be null");
-        requireNonNull(predicate, "predicate must not be null");
-
-        for (Segment segment : segments) {
-            if (!predicate.test(segment)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Calculates the total length of all segments in the given {@link Iterable}.
-     * <p>
-     * Returns 0 if the provided iterable is {@code null} or empty.
-     *
-     * @param segments the iterable of pattern segments to inspect, may be null
-     * @return the combined total length of all segments
-     */
-    public static int calculateTotalLength(Iterable<Segment> segments) {
-        if (segments == null) {
-            return 0;
-        }
-        int totalLen = 0;
-        for (Segment segment : segments) {
-            if (segment != null) {
-                totalLen += segment.getLength();
-            }
-        }
-        return totalLen;
-    }
-
-    /**
      * Computes the total length (in characters) by summing the lengths of all segments in the given
      * pattern string (e.g. {@code "4!n4!n12!c"} yields {@code 4 + 4 + 12 = 20}).
      *
@@ -349,7 +211,7 @@ public final class IbanPatternConverter {
      * @return the total length
      */
     public static int calculateTotalLength(String pattern) {
-        return calculateTotalLength(parseSegments(pattern));
+        return parseSegments(pattern).totalLength();
     }
 
     /**
@@ -506,4 +368,241 @@ public final class IbanPatternConverter {
         }
     }
 
+    /**
+     * Immutable, sequential segments of an IBAN structure pattern, as returned by
+     * {@link #parseSegments(String)}.
+     *
+     * @since 1.8.13
+     */
+    public static final class Segments implements Iterable<Segment> {
+
+        /** The segments in pattern order, never exposed in modifiable form. */
+        private final List<Segment> list;
+
+        /** The combined length of all segments, computed once on construction. */
+        private final int           totalLength;
+
+        /**
+         * Wraps the given list, which must not be modified afterwards.
+         *
+         * @param list the list of segments, must not contain null
+         */
+        private Segments(List<Segment> list) {
+            this.list = list;
+            int length = 0;
+            for (Segment segment : list) {
+                length += segment.getLength();
+            }
+            totalLength = length;
+        }
+
+        /**
+         * Static factory method.
+         *
+         * @param segments the segments in pattern order, must not contain null
+         * @return a new {@code Segments} instance
+         * @throws NullPointerException if any segment is null
+         */
+        public static Segments of(Segment... segments) {
+            for (Segment segment : segments) {
+                requireNonNull(segment, "segment must not be null");
+            }
+            return new Segments(new ArrayList<>(Arrays.asList(segments)));
+        }
+
+        /**
+         * Returns the number of segments.
+         *
+         * @return the number of segments
+         */
+        public int size() {
+            return list.size();
+        }
+
+        /**
+         * Returns whether there are no segments.
+         *
+         * @return {@code true} if there are no segments
+         */
+        public boolean isEmpty() {
+            return list.isEmpty();
+        }
+
+        /**
+         * Returns the segment at the given index.
+         *
+         * @param index the index of the segment
+         * @return the segment
+         * @throws IndexOutOfBoundsException if the index is out of range
+         */
+        public Segment get(int index) {
+            return list.get(index);
+        }
+
+        /**
+         * Returns the segments as an unmodifiable list.
+         *
+         * @return the unmodifiable list of segments
+         */
+        public List<Segment> asList() {
+            return unmodifiableList(list);
+        }
+
+        /**
+         * Returns the combined length of all segments, e.g. 20 for {@code "4!n4!n12!c"}.
+         *
+         * @return the total length, 0 if there are no segments
+         */
+        public int totalLength() {
+            return totalLength;
+        }
+
+        /**
+         * Checks whether at least one segment has the given character type.
+         *
+         * @param charType the character type to look for
+         * @return {@code true} if any segment has the given character type
+         */
+        public boolean containsType(IbanCharType charType) {
+            for (Segment segment : list) {
+                if (segment.getCharType() == charType) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Checks whether all segments satisfy the given predicate.
+         *
+         * @param predicate the condition to evaluate for each segment, must not be null
+         * @return {@code true} if all segments match the predicate, also if there are no segments
+         * @throws NullPointerException if {@code predicate} is null
+         */
+        public boolean allMatch(Predicate<Segment> predicate) {
+            requireNonNull(predicate, "predicate must not be null");
+            for (Segment segment : list) {
+                if (!predicate.test(segment)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Merges all consecutive segments of the same character type by adding up their lengths.
+         * This is a form of Run-Length Encoding (RLE).
+         *
+         * @return the merged segments, this instance if there was nothing to merge
+         */
+        public Segments aggregate() {
+            if (list.size() < 2) {
+                return this;
+            }
+
+            List<Segment> aggregated = new ArrayList<>();
+            Segment current = list.get(0);
+            for (int i = 1; i < list.size(); i++) {
+                Segment next = list.get(i);
+                if (next.getCharType() == current.getCharType()) {
+                    current = current.addLength(next.getLength());
+                } else {
+                    aggregated.add(current);
+                    current = next;
+                }
+            }
+            aggregated.add(current);
+
+            return aggregated.size() == list.size() ? this : new Segments(aggregated);
+        }
+
+        /**
+         * Returns the index ranges of all segments of the given character type.
+         * <p>
+         * Each range is a pair of begin (inclusive) and end (exclusive) index. The indices
+         * count from {@code offset}, which is the position of the first segment.
+         *
+         * @param charType the character type of the segments to return ranges for
+         * @param offset   the index of the first segment
+         * @return the begin and end index pairs, empty if no segment has the given type
+         */
+        public int[] ranges(IbanCharType charType, int offset) {
+            int[] ranges = new int[list.size() * 2];
+            int count = 0;
+            int begin = offset;
+            for (Segment segment : list) {
+                int end = begin + segment.getLength();
+                if (segment.getCharType() == charType) {
+                    ranges[count++] = begin;
+                    ranges[count++] = end;
+                }
+                begin = end;
+            }
+            return Arrays.copyOf(ranges, count);
+        }
+
+        /**
+         * Converts the segments into a Java regular expression, one character class with a
+         * fixed-length quantifier per segment.
+         *
+         * @return the regular expression (e.g. "[A-Z]{4}[A-Z0-9]{16}"), empty if there are no segments
+         */
+        public String toRegex() {
+            StringBuilder regex = new StringBuilder();
+            for (Segment segment : list) {
+                regex.append(segment.getCharType().getRegexPattern());
+                if (segment.getLength() > 1) {
+                    regex.append('{').append(segment.getLength()).append('}');
+                }
+            }
+            return regex.toString();
+        }
+
+        /**
+         * Returns an iterator over the segments in pattern order.
+         *
+         * @return an iterator that does not support removal
+         */
+        @Override
+        public Iterator<Segment> iterator() {
+            return asList().iterator();
+        }
+
+        /**
+         * Compares these segments to the specified object.
+         *
+         * @param o the object to compare with
+         * @return {@code true} if the object contains equal segments in the same order
+         */
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            } else if (!(o instanceof Segments)) {
+                return false;
+            }
+            return list.equals(((Segments) o).list);
+        }
+
+        /**
+         * Computes the hash code of these segments.
+         *
+         * @return the hash code value
+         */
+        @Override
+        public int hashCode() {
+            return list.hashCode();
+        }
+
+        /**
+         * Returns a string representation of these segments, e.g.
+         * {@code "Segments[Segment[charType=ALPHABETIC, length=4]]"}.
+         *
+         * @return the class name followed by the list of segments
+         */
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + list;
+        }
+    }
 }

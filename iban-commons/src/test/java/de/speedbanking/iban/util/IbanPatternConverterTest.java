@@ -9,10 +9,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
+import de.speedbanking.iban.util.IbanPatternConverter.Segments;
 import de.speedbanking.test.TestUtil;
 
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +20,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -100,22 +99,22 @@ final class IbanPatternConverterTest {
             .isEqualTo(expected);
     }
 
-    @DisplayName("parseSegments: repeated calls with the same pattern return the cached, identical list instance")
+    @DisplayName("parseSegments: repeated calls with the same pattern return the cached, identical instance")
     @Test
     void parseSegments_calledTwiceWithSamePattern_returnsSameCachedInstance() {
-        List<Segment> first = IbanPatternConverter.parseSegments("4!a16!c");
-        List<Segment> second = IbanPatternConverter.parseSegments("4!a16!c");
+        Segments first = IbanPatternConverter.parseSegments("4!a16!c");
+        Segments second = IbanPatternConverter.parseSegments("4!a16!c");
 
         assertThat(second)
-            .as("same pattern notation should yield the cached, identical list instance")
+            .as("same pattern notation should yield the cached, identical instance")
             .isSameAs(first);
     }
 
     @DisplayName("parseSegments: different pattern notations are cached independently")
     @Test
     void parseSegments_differentPatterns_areCachedIndependently() {
-        List<Segment> a = IbanPatternConverter.parseSegments("4!a16!c");
-        List<Segment> b = IbanPatternConverter.parseSegments("30!n");
+        Segments a = IbanPatternConverter.parseSegments("4!a16!c");
+        Segments b = IbanPatternConverter.parseSegments("30!n");
 
         assertThat(a)
             .isNotSameAs(b)
@@ -123,74 +122,128 @@ final class IbanPatternConverterTest {
         assertThat(b).containsExactly(Segment.of(NUMERIC, 30));
     }
 
-    @DisplayName("parseSegments: returned list is unmodifiable")
     @Test
-    void parseSegments_returnedList_isUnmodifiable() {
-        List<Segment> segments = IbanPatternConverter.parseSegments("4!a16!c");
+    void asList_parsedSegments_isUnmodifiable() {
+        List<Segment> segments = IbanPatternConverter.parseSegments("4!a16!c").asList();
         Segment extraSegment = Segment.of(NUMERIC, 1);
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
             .isThrownBy(() -> segments.add(extraSegment));
     }
 
-    @DisplayName("Should merge consecutive segments of the same type")
     @Test
-    void aggregateSegments_givenConsecutiveSegmentsSameType_shouldMergeThem() {
-        // 1. Case: Null or Empty input
-        assertThat(IbanPatternConverter.aggregateSegments(null)).isEmpty();
-        assertThat(IbanPatternConverter.aggregateSegments(emptyList())).isEmpty();
+    void aggregate_noSegments_returnsSameInstance() {
+        Segments empty = Segments.of();
 
-        // 2. Case: No aggregation needed (alternating types)
-        List<Segment> listA = Arrays.asList(
-            Segment.of(ALPHABETIC, 2),
-            Segment.of(NUMERIC, 3),
-            Segment.of(ALPHABETIC, 4)
-        );
-        assertThat(IbanPatternConverter.aggregateSegments(listA)).isEqualTo(listA);
-
-        // 3. Case: Full aggregation
-        List<Segment> listB = Arrays.asList(
-            Segment.of(ALPHABETIC, 2),
-            Segment.of(ALPHABETIC, 3),
-            Segment.of(ALPHABETIC, 4)
-        );
-        List<Segment> expectedB = singletonList(
-            Segment.of(ALPHABETIC, 9)
-        );
-        assertThat(IbanPatternConverter.aggregateSegments(listB)).isEqualTo(expectedB);
-
-        // 4. Case: Partial aggregation (start, middle, end)
-        List<Segment> listC = Arrays.asList(
-            Segment.of(ALPHABETIC, 1),
-            Segment.of(ALPHABETIC, 1),
-            Segment.of(NUMERIC, 1),
-            Segment.of(NUMERIC, 2),
-            Segment.of(ALPHABETIC, 3),
-            Segment.of(ALPHABETIC, 4)
-        );
-        List<Segment> expectedC = Arrays.asList(
-            Segment.of(ALPHABETIC, 2),
-            Segment.of(NUMERIC, 3),
-            Segment.of(ALPHABETIC, 7)
-        );
-        assertThat(IbanPatternConverter.aggregateSegments(listC)).isEqualTo(expectedC);
+        assertThat(empty.aggregate()).isSameAs(empty);
     }
 
-    @DisplayName("buildRegex should correctly concatenate segment patterns")
-    @Test
-    void buildRegex_givenSegmentList_shouldConcatenatePatterns() {
-        assertThat(IbanPatternConverter.buildRegex(null)).isNull();
-        assertThat(IbanPatternConverter.buildRegex(emptyList())).isNull();
+    @DisplayName("aggregate merges consecutive segments of the same type")
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
+    @CsvSource(delimiter = '|', value = {
+        "2!a3!n4!a          | 2!a3!n4!a",
+        "2!a3!a4!a          | 9!a",
+        "1!a1!a1!n2!n3!a4!a | 2!a3!n7!a",
+    })
+    void aggregate_consecutiveSameType_mergesThem(String pattern, String expectedPattern) {
+        assertThat(IbanPatternConverter.parseSegments(pattern).aggregate())
+            .isEqualTo(IbanPatternConverter.parseSegments(expectedPattern));
+    }
 
-        List<Segment> segments = Arrays.asList(
+    @DisplayName("Segments.ranges returns begin and end index pairs of all segments of one type")
+    @ParameterizedTest(name = "[{index}] {0}, {1}, offset {2} -> {3}")
+    @CsvSource(delimiter = '|', value = {
+        "4!a2!n3!a | ALPHABETIC   | 0 | 0,4,6,9",
+        "4!a2!n3!a | NUMERIC      | 4 | 8,10",
+        "4!a2!n3!a | ALPHANUMERIC | 4 | ''",
+        "16!c      | ALPHANUMERIC | 4 | 4,20",
+    })
+    void ranges_charTypeAndOffset_returnsIndexPairs(String pattern, IbanCharType charType, int offset, String expected) {
+        int[] expectedRanges = expected.isEmpty()
+            ? new int[0]
+            : Arrays.stream(expected.split(",")).mapToInt(Integer::parseInt).toArray();
+
+        assertThat(IbanPatternConverter.parseSegments(pattern).ranges(charType, offset)).containsExactly(expectedRanges);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} contains {1}: {2}")
+    @CsvSource(delimiter = '|', value = {
+        "4!a6!n    | NUMERIC      | true",
+        "4!a6!n    | ALPHANUMERIC | false",
+        "8!n2!e8!n | SPACE        | true",
+    })
+    void containsType_charType_returnsWhetherAnySegmentHasIt(String pattern, IbanCharType charType, boolean expected) {
+        assertThat(IbanPatternConverter.parseSegments(pattern).containsType(charType)).isEqualTo(expected);
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
+    @CsvSource(delimiter = '|', value = {
+        "4!n4!n12!c | 20",
+        "30!n       | 30",
+    })
+    void totalLength_pattern_returnsSumOfSegmentLengths(String pattern, int expected) {
+        assertThat(IbanPatternConverter.parseSegments(pattern).totalLength()).isEqualTo(expected);
+        assertThat(IbanPatternConverter.calculateTotalLength(pattern)).isEqualTo(expected);
+    }
+
+    @Test
+    void totalLength_noSegments_returnsZero() {
+        assertThat(Segments.of().totalLength()).isZero();
+    }
+
+    @Test
+    void allMatch_predicate_returnsWhetherAllSegmentsMatch() {
+        Segments segments = Segments.of(Segment.of(NUMERIC, 4), Segment.of(NUMERIC, 2));
+
+        assertThat(segments.allMatch(Segment::isNumeric)).isTrue();
+        assertThat(Segments.of(Segment.of(NUMERIC, 4), Segment.of(ALPHABETIC, 4)).allMatch(Segment::isNumeric)).isFalse();
+        assertThat(Segments.of().allMatch(Segment::isNumeric)).isTrue();
+        assertThatNullPointerException()
+            .isThrownBy(() -> segments.allMatch(null))
+            .withMessage("predicate must not be null");
+    }
+
+    @Test
+    void of_nullSegment_throwsNullPointerException() {
+        Segment segment = Segment.of(NUMERIC, 4);
+
+        assertThatNullPointerException()
+            .isThrownBy(() -> Segments.of(segment, null))
+            .withMessage("segment must not be null");
+    }
+
+    @Test
+    void iterator_parsedSegments_doesNotSupportRemoval() {
+        Iterator<Segment> iterator = IbanPatternConverter.parseSegments("4!a16!c").iterator();
+        iterator.next();
+
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+            .isThrownBy(iterator::remove);
+    }
+
+    @Test
+    void segments_equalsHashCodeAndToString_dependOnSegments() {
+        Segments segments = Segments.of(Segment.of(ALPHABETIC, 4), Segment.of(NUMERIC, 6));
+
+        assertThat(segments)
+            .isEqualTo(IbanPatternConverter.parseSegments("4!a6!n"))
+            .hasSameHashCodeAs(IbanPatternConverter.parseSegments("4!a6!n"))
+            .isNotEqualTo(IbanPatternConverter.parseSegments("4!a6!c"))
+            .hasToString("Segments[Segment[charType=ALPHABETIC, length=4], Segment[charType=NUMERIC, length=6]]");
+        assertThat(segments.size()).isEqualTo(2);
+        assertThat(segments.get(1)).isEqualTo(Segment.of(NUMERIC, 6));
+    }
+
+    @Test
+    void toRegex_segments_concatenatesCharacterClasses() {
+        Segments segments = Segments.of(
             Segment.of(ALPHABETIC, 4),
             Segment.of(ALPHANUMERIC, 16),
             Segment.of(ALPHABETIC, 1)
         );
 
-        String expected = "[A-Z]{4}[0-9A-Z]{16}[A-Z]";
-
-        assertThat(IbanPatternConverter.buildRegex(segments)).isEqualTo(expected);
+        assertThat(segments.toRegex()).isEqualTo("[A-Z]{4}[0-9A-Z]{16}[A-Z]");
+        assertThat(Segments.of().toRegex()).isEmpty();
     }
 
     @DisplayName("Segment creation should validate parameters")
@@ -238,48 +291,6 @@ final class IbanPatternConverterTest {
         assertThat(Segment.of(ALPHABETIC, 4).toPatternNotation()).isEqualTo("4!a");
         assertThat(Segment.of(NUMERIC, 10).toPatternNotation()).isEqualTo("10!n");
         assertThat(Segment.of(ALPHANUMERIC, 16).toPatternNotation()).isEqualTo("16!c");
-    }
-
-    @DisplayName("IbanPatternConverter.isAllNumeric should correctly identify all-numeric lists")
-    @Test
-    void isAllNumeric_shouldIdentifyNumericLists() {
-        Segment num1 = Segment.of(NUMERIC, 4);
-        Segment num2 = Segment.of(NUMERIC, 2);
-        Segment alpha = Segment.of(ALPHABETIC, 4);
-
-        assertThat(IbanPatternConverter.isAllNumeric(emptyList())).isTrue();
-        assertThat(IbanPatternConverter.isAllNumeric(Arrays.asList(num1, num2))).isTrue();
-        assertThat(IbanPatternConverter.isAllNumeric(Arrays.asList(num1, alpha))).isFalse();
-
-        assertThatNullPointerException()
-            .isThrownBy(() -> IbanPatternConverter.isAllNumeric(null))
-            .withMessage("segments must not be null");
-    }
-
-    @DisplayName("IbanPatternConverter.allMatch should validate inputs and evaluate predicate")
-    @Test
-    void allMatch_shouldValidateInputsAndEvaluate() {
-        Segment num1 = Segment.of(NUMERIC, 4);
-
-        assertThatNullPointerException()
-            .isThrownBy(() -> IbanPatternConverter.allMatch(null, Segment::isNumeric))
-            .withMessage("segments must not be null");
-
-        assertThatNullPointerException()
-            .isThrownBy(() -> IbanPatternConverter.allMatch(singletonList(num1), null))
-            .withMessage("predicate must not be null");
-
-        assertThat(IbanPatternConverter.allMatch(emptyList(), Segment::isNumeric)).isTrue();
-    }
-
-    @DisplayName("IbanPatternConverter.calculateTotalLength should sum lengths or handle nulls")
-    @Test
-    void calculateTotalLength_shouldSumLengthsCorrectly() {
-        assertThat(IbanPatternConverter.calculateTotalLength((Iterable<Segment>) null)).isZero();
-        assertThat(IbanPatternConverter.calculateTotalLength(emptyList())).isZero();
-
-        List<Segment> listWithNull = Arrays.asList(Segment.of(NUMERIC, 4), null, Segment.of(ALPHABETIC, 6));
-        assertThat(IbanPatternConverter.calculateTotalLength(listWithNull)).isEqualTo(10);
     }
 
     @DisplayName("Segment toString() should return expected format")

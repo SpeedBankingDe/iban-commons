@@ -21,8 +21,7 @@ import de.speedbanking.iban.IbanRegistry.StructureData;
 import de.speedbanking.iban.util.IbanCharType;
 import de.speedbanking.iban.util.IbanPatternConverter;
 import de.speedbanking.iban.util.IbanPatternConverter.Segment;
-
-import java.util.List;
+import de.speedbanking.iban.util.IbanPatternConverter.Segments;
 
 /**
  * Immutable pairing of a component's type, character pattern and position within the IBAN.
@@ -164,15 +163,15 @@ final class IbanComponent {
          *
          * @param segments the parsed pattern segments, must not be null
          */
-        PositionTypes(List<Segment> segments) {
-            types = new IbanCharType[IbanPatternConverter.calculateTotalLength(segments)];
+        PositionTypes(Segments segments) {
+            types = new IbanCharType[segments.totalLength()];
             int pos = 0;
             for (Segment segment : segments) {
                 for (int i = 0; i < segment.getLength(); i++) {
                     types[pos++] = segment.getCharType();
                 }
             }
-            zeroPaddable = IbanPatternConverter.allMatch(segments, Segment::isNumericOrAlphanumeric);
+            zeroPaddable = segments.allMatch(Segment::isNumericOrAlphanumeric);
         }
 
         /**

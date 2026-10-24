@@ -15,17 +15,18 @@
  */
 package de.speedbanking.iban;
 
+import static de.speedbanking.iban.util.IbanCharType.ALPHABETIC;
+import static de.speedbanking.iban.util.IbanCharType.ALPHANUMERIC;
+import static de.speedbanking.iban.util.IbanCharType.NUMERIC;
+import static de.speedbanking.iban.util.IbanCharType.SPACE;
 import static de.speedbanking.util.CharUtil.isAllDigitOrUpperCase;
 import static de.speedbanking.util.CharUtil.isAllDigits;
 import static de.speedbanking.util.CharUtil.isAllUpperCase;
 import static de.speedbanking.util.CharUtil.toCharArray;
 
 import de.speedbanking.iban.util.IbanPatternConverter;
-import de.speedbanking.iban.util.IbanPatternConverter.Segment;
+import de.speedbanking.iban.util.IbanPatternConverter.Segments;
 import de.speedbanking.util.CharUtil;
-
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Validates the BBAN structure of the IBANs of one country.
@@ -95,39 +96,16 @@ final class CountryValidator {
     CountryValidator(IbanRegistry countryData, String bbanPattern) {
         this.countryData = countryData;
 
-        List<Segment> segments = IbanPatternConverter.aggregateSegments(
-            IbanPatternConverter.parseSegments(bbanPattern));
-
-        int[] digits = new int[segments.size() * 2];
-        int digitCount = 0;
-        int[] upperCase = new int[segments.size() * 2];
-        int upperCaseCount = 0;
-
-        int begin = IbanRegistry.INDEX_BBAN;
-        for (Segment segment : segments) {
-            int end = begin + segment.getLength();
-            switch (segment.getCharType()) {
-                case NUMERIC:
-                    digits[digitCount++] = begin;
-                    digits[digitCount++] = end;
-                    break;
-                case ALPHABETIC:
-                    upperCase[upperCaseCount++] = begin;
-                    upperCase[upperCaseCount++] = end;
-                    break;
-                case ALPHANUMERIC:
-                    break;
-                default:
-                    throw new IllegalArgumentException(String.format("Unsupported segment %s in BBAN pattern %s of %s",
-                        segment.toPatternNotation(), bbanPattern, countryData.getCountryCode()));
-            }
-            begin = end;
+        Segments segments = IbanPatternConverter.parseSegments(bbanPattern).aggregate();
+        if (segments.containsType(SPACE)) {
+            throw new IllegalArgumentException(String.format("Unsupported space segment in BBAN pattern %s of %s",
+                bbanPattern, countryData.getCountryCode()));
         }
 
-        digitRanges = Arrays.copyOf(digits, digitCount);
-        upperCaseRanges = Arrays.copyOf(upperCase, upperCaseCount);
-        digitOrUpperCaseRanges = segments.size() == 1 && segments.get(0).isAlphanumeric()
-            ? new int[] {IbanRegistry.INDEX_BBAN, begin}
+        digitRanges = segments.ranges(NUMERIC, IbanRegistry.INDEX_BBAN);
+        upperCaseRanges = segments.ranges(ALPHABETIC, IbanRegistry.INDEX_BBAN);
+        digitOrUpperCaseRanges = segments.size() == 1
+            ? segments.ranges(ALPHANUMERIC, IbanRegistry.INDEX_BBAN)
             : NO_RANGES;
 
         ncdCalculator = countryData.hasNationalCheckDigit()

@@ -91,7 +91,7 @@ final class CountryValidatorTest {
     void constructor_spaceSegment_throwsIllegalArgumentException() {
         assertThatThrownBy(() -> new CountryValidator(IbanRegistry.DE, "8!n2!e8!n"))
             .isExactlyInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Unsupported segment 2!e in BBAN pattern 8!n2!e8!n of DE");
+            .hasMessage("Unsupported space segment in BBAN pattern 8!n2!e8!n of DE");
     }
 
     static Stream<IbanRegistry> ncdCountries() {
