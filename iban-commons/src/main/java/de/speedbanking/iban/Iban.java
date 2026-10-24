@@ -783,6 +783,12 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         private volatile String accountNumber;
         private volatile String nationalCheckDigit;
         private volatile String formattedString;
+
+        /**
+         * Creates an empty holder, package-private so javac needs no synthetic access class.
+         */
+        Parts() {
+        }
     }
 
     /**

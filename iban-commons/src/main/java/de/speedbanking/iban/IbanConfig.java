@@ -80,7 +80,13 @@ public final class IbanConfig {
     private final boolean                       allowSpace;
     private final boolean                       allowLowercase;
 
-    private IbanConfig(final Builder builder) {
+    /**
+     * Creates a configuration from the given builder. Package-private so that
+     * javac needs no synthetic access class.
+     *
+     * @param builder the builder holding the settings
+     */
+    IbanConfig(Builder builder) {
         this.validateNcd    = builder.validateNcd;
         this.calculateNcd   = builder.calculateNcd;
         this.allowSpace     = builder.allowSpace;
@@ -244,7 +250,10 @@ public final class IbanConfig {
         private boolean allowSpace;
         private boolean allowLowercase;
 
-        private Builder() {
+        /**
+         * Creates a builder, package-private so javac needs no synthetic access class.
+         */
+        Builder() {
         }
 
         /**
@@ -308,7 +317,13 @@ public final class IbanConfig {
         private final IbanConfig config;
         private final boolean    frozen;
 
-        private State(final IbanConfig config, final boolean frozen) {
+        /**
+         * Creates a state, package-private so javac needs no synthetic access class.
+         *
+         * @param config the active configuration
+         * @param frozen whether the configuration is frozen
+         */
+        State(IbanConfig config, boolean frozen) {
             this.config = config;
             this.frozen = frozen;
         }

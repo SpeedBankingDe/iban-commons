@@ -387,7 +387,7 @@ public final class IbanPatternConverter {
          *
          * @param list the list of segments, must not contain null
          */
-        private Segments(List<Segment> list) {
+        Segments(List<Segment> list) {
             this.list = list;
             int length = 0;
             for (Segment segment : list) {

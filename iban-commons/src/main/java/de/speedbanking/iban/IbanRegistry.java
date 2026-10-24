@@ -3591,7 +3591,10 @@ public enum IbanRegistry {
 
             private final Map<IbanComponentType, IbanComponent> components = new EnumMap<>(IbanComponentType.class);
 
-            private Builder() {
+            /**
+             * Creates a builder, package-private so javac needs no synthetic access class.
+             */
+            Builder() {
             }
 
             Builder withBbanPattern(String bbanPattern) {
