@@ -346,13 +346,14 @@
                             <index>false</index>
                             <manifest>
                                 <addClasspath>false</addClasspath>
-                                <addDefaultEntries>true</addDefaultEntries>
+                                <addDefaultEntries>false</addDefaultEntries>
                                 <addDefaultImplementationEntries>true</addDefaultImplementationEntries>  <!-- Implementation-Title/Version/Vendor -->
                                 <addDefaultSpecificationEntries>false</addDefaultSpecificationEntries>
                                 <addBuildEnvironmentEntries>false</addBuildEnvironmentEntries>  <!-- Build-Jdk, Build-Os, Build-Tool vary by machine, so leave them out -->
                             </manifest>
 
                             <manifestEntries>
+                                <Build-Jdk-Spec>${java.specification.version}</Build-Jdk-Spec>
                                 <Build-Time>${project.build.outputTimestamp}</Build-Time>
                                 <Project-Java-Version>${releaseJavaVersion}</Project-Java-Version>
                                 <Project-Url>${project.url}</Project-Url>
