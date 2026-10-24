@@ -340,6 +340,9 @@
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${dep.plugin.jar.version}</version>
                     <configuration>
+                        <excludes>
+                            <exclude>**/package-info.class</exclude>  <!-- no package annotations, only Javadoc -->
+                        </excludes>
                         <archive>
                             <addMavenDescriptor>false</addMavenDescriptor>
                             <compress>true</compress>
