@@ -1,0 +1,61 @@
+name: Release
+
+# creates the GitHub release when a release tag is pushed (git push --follow-tags after
+# mvn release:prepare). The artifacts themselves are deployed to Maven Central locally by
+# mvn release:perform, so this workflow neither builds nor uploads anything.
+on:
+    push:
+        tags:
+        - 'iban-commons-*'
+
+permissions:
+    contents: read
+
+jobs:
+
+    release:
+        if: ${{ github.repository == 'SpeedBankingDe/iban-commons' }}
+        runs-on: ubuntu-latest
+        permissions:
+            # needed to create the GitHub release
+            contents: write
+        steps:
+        -   uses: actions/checkout@v7
+
+        -   name: Extract version from tag
+            id: version
+            run: |
+                VERSION="${GITHUB_REF_NAME#iban-commons-}"
+                echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+                # release candidates such as 1.8.12-RC1 are described in the section of their base version
+                echo "base=${VERSION%%-*}" >> "$GITHUB_OUTPUT"
+
+        -   name: Extract release notes from README
+            run: |
+                {
+                    echo "Release artifacts are available at Maven Central."
+                    echo
+                    awk -v heading="## 🆕 What's New in ${{ steps.version.outputs.base }}" '
+                        $0 == heading { found = 1; next }
+                        found && (/^-----/ || /^## /) { exit }
+                        found { print }
+                    ' README.md \
+                    | sed "s|](#|](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/README.md#|g"
+                } > release-notes.md
+                if [ "$(wc -l < release-notes.md)" -le 2 ]; then
+                    echo "::error::README.md has no section \"What's New in ${{ steps.version.outputs.base }}\""
+                    exit 1
+                fi
+
+        -   name: Create GitHub release as draft
+            # a draft, so the release only becomes visible once the deployment has been
+            # published in the Central Portal
+            run: |
+                gh release create "$GITHUB_REF_NAME" \
+                    --draft \
+                    --verify-tag \
+                    --title "Release v${{ steps.version.outputs.version }}" \
+                    --notes-file release-notes.md \
+                    ${{ contains(steps.version.outputs.version, '-RC') && '--prerelease' || '' }}
+            env:
+                GH_TOKEN: ${{ github.token }}

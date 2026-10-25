@@ -1,6 +1,7 @@
 name: Dependency Report
 
 on:
+    # weekly on Monday morning
     schedule:
     -   cron: '0 6 * * 1'
     workflow_dispatch: {}

@@ -1,4 +1,4 @@
-name: SonarCloud analysis with JDK 21 on Ubuntu
+name: SonarCloud
 
 on:
     push:
@@ -42,6 +42,7 @@ jobs:
                 distribution: temurin
                 cache: maven
 
+        # the scanner downloads its analyzers on every run unless they are cached
         -   name: Cache SonarQube packages
             uses: actions/cache@v6
             with:
@@ -49,6 +50,8 @@ jobs:
                 key: ${{ runner.os }}-sonar
                 restore-keys: ${{ runner.os }}-sonar
 
+        # the scanner plugin is called by its full coordinates with a fixed version, so the
+        # project pom does not need to declare it
         -   name: Build with Maven/JDK 21, test with SonarCloud
             env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

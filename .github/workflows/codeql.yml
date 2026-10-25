@@ -7,10 +7,13 @@ on:
     pull_request:
         branches:
         - master
+    # weekly run on Monday morning, so newly released CodeQL queries are applied
+    # even when nothing is pushed
     schedule:
     -   cron: '30 3 * * 1'
     workflow_dispatch: {}
 
+# cancel superseded runs on the same branch/PR to save CI minutes.
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -31,6 +34,7 @@ jobs:
         permissions:
             actions: read
             contents: read
+            # needed to upload the results to the code scanning alerts of the repository
             security-events: write
 
         steps:
