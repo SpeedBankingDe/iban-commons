@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.speedbanking.iban.util;
+package de.speedbanking.util;
 
 import static java.util.Objects.requireNonNull;
-
-import de.speedbanking.util.ValidationError;
 
 import java.util.Locale;
 import java.util.Objects;

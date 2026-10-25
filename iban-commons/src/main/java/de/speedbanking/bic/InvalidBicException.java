@@ -15,7 +15,7 @@
  */
 package de.speedbanking.bic;
 
-import de.speedbanking.iban.util.InvalidBaseException;
+import de.speedbanking.util.InvalidBaseException;
 
 /**
  * Exception thrown when a string fails BIC validation in the strict {@link Bic#of(CharSequence)} method.

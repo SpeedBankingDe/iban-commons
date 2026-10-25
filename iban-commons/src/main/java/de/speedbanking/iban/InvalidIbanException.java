@@ -15,7 +15,7 @@
  */
 package de.speedbanking.iban;
 
-import de.speedbanking.iban.util.InvalidBaseException;
+import de.speedbanking.util.InvalidBaseException;
 
 /**
  * Exception thrown when a string fails IBAN validation in the strict {@code Iban.of()} method.
