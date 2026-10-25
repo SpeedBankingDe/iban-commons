@@ -38,7 +38,9 @@ jobs:
                     awk -v heading="## 🆕 What's New in ${{ steps.version.outputs.base }}" '
                         $0 == heading { found = 1; next }
                         found && (/^-----/ || /^## /) { exit }
-                        found { print }
+                        # skip blank lines between the heading and the first line of text
+                        found && !started && /^$/ { next }
+                        found { started = 1; print }
                     ' README.md \
                     | sed "s|](#|](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/README.md#|g"
                 } > release-notes.md
