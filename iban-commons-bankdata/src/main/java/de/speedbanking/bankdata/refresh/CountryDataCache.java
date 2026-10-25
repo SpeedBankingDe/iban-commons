@@ -502,13 +502,17 @@ public final class CountryDataCache {
      * future loader without its own dedup), so it is handled defensively: the first occurrence
      * wins, matching every loader's own dedup convention, and the collision is logged rather than
      * silently dropping a record with zero diagnostic trail.
+     * <p>
+     * Equal field values of the records are shared via {@link BankDataDeduplicator}.
      *
      * @param records the parsed records, in encounter order
      * @return an immutable map of {@link BankData#getKey()} to {@link BankData}
      */
     private static Map<String, BankData> toMap(List<BankData> records) {
         Map<String, BankData> map = new LinkedHashMap<>(Math.max(16, records.size() * 2));
-        for (BankData entry : records) {
+        BankDataDeduplicator deduplicator = new BankDataDeduplicator();
+        for (BankData parsed : records) {
+            BankData entry = deduplicator.deduplicate(parsed);
             BankData previous = map.putIfAbsent(entry.getKey(), entry);
             if (previous != null) {
                 LOGGER.warn("Duplicate bank data key {0} for country {1}: keeping {2}, discarding {3}",
