@@ -30,7 +30,6 @@ import de.speedbanking.iban.IbanComponent.IbanComponentType;
 import de.speedbanking.iban.IbanComponent.PositionTypes;
 import de.speedbanking.iban.util.IbanCharType;
 import de.speedbanking.util.CharUtil;
-import de.speedbanking.util.IndexRange;
 import de.speedbanking.util.Mod97;
 
 import java.util.Arrays;
@@ -109,7 +108,7 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     /**
      * Validates that {@code actual} is either the {@code expectedBase} country entry or a derived country based on it.
      * <p>
-     * Intended as a guard for builder subclasses whose custom BBAN component (pattern and {@link IndexRange})
+     * Intended as a guard for builder subclasses whose custom BBAN component (pattern and position)
      * is hardcoded for a single base country and therefore cannot honor an arbitrary {@link IbanRegistry}
      * argument; such a guard turns an accidental mis-wiring into an immediate, clear failure instead of
      * silently producing an invalid IBAN.

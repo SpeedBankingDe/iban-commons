@@ -15,8 +15,6 @@
  */
 package de.speedbanking.iban;
 
-import de.speedbanking.util.IndexRange;
-
 /**
  * Strategy interface for country-specific <strong>National Check Digit (NCD)</strong>
  * computation and verification within an IBAN.
@@ -66,7 +64,7 @@ interface NationalCheckDigitCalculator {
     /**
      * Validates the National Check Digit already present in the given IBAN.
      * <p>
-     * Implementations use the NCD {@link IndexRange} of their country and compare the
+     * Implementations use the NCD {@link IbanComponent} of their country and compare the
      * value already present in {@code iban} against the value computed by
      * {@link #calculateNationalCheckDigit(char[])}.
      *

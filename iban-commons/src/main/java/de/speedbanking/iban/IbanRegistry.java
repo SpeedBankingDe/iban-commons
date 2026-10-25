@@ -3635,8 +3635,7 @@ public enum IbanRegistry {
 
             /**
              * Stores a structural component, deriving its end index from {@code beginIndex} plus the
-             * length encoded in {@code pattern} (e.g. {@code ("4!n", 4)} becomes the same
-             * {@code IndexRange.of(4, 8)} that used to be passed in explicitly).
+             * length encoded in {@code pattern} (e.g. {@code ("4!n", 4)} covers indices 4 to 8).
              */
             private Builder withComponent(IbanComponentType type, String pattern, int beginIndex) {
                 requireNonNull(pattern, "pattern must not be null");

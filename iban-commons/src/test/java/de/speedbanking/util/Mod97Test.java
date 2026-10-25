@@ -15,6 +15,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.nio.CharBuffer;
+
 /**
  * Unit tests for {@link Mod97}.
  */
@@ -312,8 +314,7 @@ final class Mod97Test {
     @Test
     void calculateRange_sameResultForCharArrayAndCharSequence() {
         char[] data = "DE123456789".toCharArray();
-        CharArrayWrapper wrapper = new CharArrayWrapper(data);
-        assertThat(Mod97.calculateRange(wrapper, 2, 5))
+        assertThat(Mod97.calculateRange(CharBuffer.wrap(data), 2, 5))
             .isEqualTo(Mod97.calculateRange(data, 2, 5));
     }
 
