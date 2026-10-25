@@ -15,12 +15,15 @@
  */
 package de.speedbanking.iban;
 
+import static de.speedbanking.util.Country.*;
+
 import static java.util.Objects.requireNonNull;
 
+import de.speedbanking.util.Country;
 import de.speedbanking.util.Mod97;
 import de.speedbanking.util.UtilityClasses;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -119,8 +122,8 @@ final class NationalCheckDigitCalculators {
         16, 10, 22, 25, 24, 23             // 'U' - 'Z'
     };
 
-    /** Calculator factories by base country code. */
-    private static final Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> FACTORIES = createFactories();
+    /** Calculator factories by base country. */
+    private static final Map<Country, Function<IbanRegistry, NationalCheckDigitCalculator>> FACTORIES = createFactories();
 
     /** Not instantiable. */
     private NationalCheckDigitCalculators() {
@@ -136,9 +139,10 @@ final class NationalCheckDigitCalculators {
      *
      * @since 1.8.13
      */
+    @SuppressWarnings("PMD.UnnecessaryFullyQualifiedName") // Country.fromCode reads clearer than fromCode
     static NationalCheckDigitCalculator forCountry(IbanRegistry countryData) {
         IbanRegistry baseCountry = countryData.getBaseCountry();
-        Function<IbanRegistry, NationalCheckDigitCalculator> factory = FACTORIES.get(baseCountry.getCountryCode());
+        Function<IbanRegistry, NationalCheckDigitCalculator> factory = FACTORIES.get(Country.fromCode(baseCountry.getCountryCode()));
         if (factory == null) {
             throw new IllegalArgumentException(String.format("No national check digit algorithm for %s", baseCountry.getCountryCode()));
         }
@@ -148,53 +152,54 @@ final class NationalCheckDigitCalculators {
     /**
      * Maps each base country with an NCD to the factory of its algorithm.
      *
-     * @return the factories by base country code
+     * @return the factories by base country
      */
-    private static Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> createFactories() {
-        Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> factories = new HashMap<>();
-        register(factories, "AL", NationalCheckDigitCalculators::al, "AL");
-        register(factories, "AO", NationalCheckDigitCalculators::ao, "AO");
-        register(factories, "BE", NationalCheckDigitCalculators::be, "BE");
-        register(factories, "EE", NationalCheckDigitCalculators::ee, "EE");
-        register(factories, "ES", NationalCheckDigitCalculators::es, "ES");
-        register(factories, "FI", NationalCheckDigitCalculators::fi, "FI");
-        register(factories, "HU", NationalCheckDigitCalculators::hu, "HU");
-        register(factories, "NO", NationalCheckDigitCalculators::no, "NO");
-        register(factories, "IT", NationalCheckDigitCalculators::it, "IT", "SM");
-        register(factories, "FR", NationalCheckDigitCalculators::fr, "FR", "DJ", "MC", "TN",
-            "BF", "BJ", "CF", "CM", "GQ", "KM", "SN"); // West-African CFA franc zone
+    private static Map<Country, Function<IbanRegistry, NationalCheckDigitCalculator>> createFactories() {
+        Map<Country, Function<IbanRegistry, NationalCheckDigitCalculator>> factories = new EnumMap<>(Country.class);
+        register(factories, NationalCheckDigitCalculators::al, AL);
+        register(factories, NationalCheckDigitCalculators::ao, AO);
+        register(factories, NationalCheckDigitCalculators::be, BE);
+        register(factories, NationalCheckDigitCalculators::ee, EE);
+        register(factories, NationalCheckDigitCalculators::es, ES);
+        register(factories, NationalCheckDigitCalculators::fi, FI);
+        register(factories, NationalCheckDigitCalculators::hu, HU);
+        register(factories, NationalCheckDigitCalculators::no, NO);
+        register(factories, NationalCheckDigitCalculators::it, IT, SM);
+        register(factories, NationalCheckDigitCalculators::fr, FR, DJ, MC, TN,
+            BF, BJ, CF, CM, GQ, KM, SN); // West-African CFA franc zone
         register(factories, Mod97RemainderOneNcdCalculator::new,
-            "BA", "ME", "MK", "MZ", "PT", "RS", "SI", "TL", "XK");
+            BA, ME, MK, MZ, PT, RS, SI, TL, XK);
         register(factories, NoOpNcdCalculator::new,
-            "CG", "CI", "FO", "GW", "MG", "ML", "MR", "NE", "SE", "TD", "TR");
+            CG, CI, FO, GW, MG, ML, MR, NE, SE, TD, TR);
         return factories;
     }
 
     /**
-     * Registers the given factory for all given country codes.
+     * Registers the given factory for all given countries.
      *
-     * @param factories    the map to add to
-     * @param factory      the calculator factory
-     * @param countryCodes the base country codes using the algorithm
+     * @param factories the map to add to
+     * @param factory   the calculator factory
+     * @param countries the base countries using the algorithm
      */
-    private static void register(Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> factories,
-        Function<IbanRegistry, NationalCheckDigitCalculator> factory, String... countryCodes) {
-        for (String countryCode : countryCodes) {
-            factories.put(countryCode, factory);
+    private static void register(Map<Country, Function<IbanRegistry, NationalCheckDigitCalculator>> factories,
+        Function<IbanRegistry, NationalCheckDigitCalculator> factory, Country... countries) {
+        for (Country country : countries) {
+            factories.put(country, factory);
         }
     }
 
     /**
-     * Registers the given algorithm for all given country codes.
+     * Registers the given algorithm for all given countries. The algorithm is named after the
+     * first country, the one defining it.
      *
-     * @param factories    the map to add to
-     * @param name         the algorithm name, i.e. the country defining it
-     * @param algorithm    the algorithm
-     * @param countryCodes the base country codes using the algorithm
+     * @param factories the map to add to
+     * @param algorithm the algorithm
+     * @param countries the base countries using the algorithm, the defining one first
      */
-    private static void register(Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> factories,
-        String name, BiFunction<NcdCalculatorBase, char[], char[]> algorithm, String... countryCodes) {
-        register(factories, countryData -> new AlgorithmNcdCalculator(countryData, name, algorithm), countryCodes);
+    private static void register(Map<Country, Function<IbanRegistry, NationalCheckDigitCalculator>> factories,
+        BiFunction<NcdCalculatorBase, char[], char[]> algorithm, Country... countries) {
+        String name = countries[0].getCode();
+        register(factories, countryData -> new AlgorithmNcdCalculator(countryData, name, algorithm), countries);
     }
 
     /**
