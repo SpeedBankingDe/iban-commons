@@ -46,17 +46,6 @@ public class InvalidBicException extends InvalidBaseException {
     }
 
     /**
-     * Constructs a new exception with the specified validation failure reason and erroneous input.
-     *
-     * @param reason the specific {@code BicValidationError} that occurred, must not be {@code null}
-     * @param input  the BIC input string that caused the error, may be {@code null};
-     *               blank values are normalized to {@code null}
-     */
-    InvalidBicException(BicValidationError reason, CharSequence input) {
-        super(reason, input, null);
-    }
-
-    /**
      * Static factory method to create an {@code InvalidBicException} with the specified reason.
      *
      * @param reason the specific {@code BicValidationError} that occurred, must not be {@code null}

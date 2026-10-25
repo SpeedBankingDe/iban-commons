@@ -181,4 +181,19 @@ final class BicValidatorTest {
         assertThat(new String(result, 0, customSeq.length())).isEqualTo("ABCDEFGH");
     }
 
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @NullAndEmptySource
+    @ValueSource(strings = {
+        "DEUTDEF",   // too short
+        "DEUTDEFF5", // invalid 9-char length
+        "deutDEFF",  // lowercase bank code
+        "DEUTdeFF",  // lowercase country code
+        "DEUTDdFF",  // lowercase second country code letter
+        "DEUTXXFF",  // unassigned country code
+        "DEUTDE_F",  // illegal character in location code
+    })
+    void isValid_invalidBic_returnsFalse(String bic) {
+        assertThat(BicValidator.isValid(bic)).isFalse();
+        assertThat(BicValidator.isValid((CharSequence) bic)).isFalse();
+    }
 }

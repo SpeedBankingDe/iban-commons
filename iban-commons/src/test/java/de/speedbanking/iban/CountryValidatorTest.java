@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import de.speedbanking.iban.NationalCheckDigitCalculators.NoOpNcdCalculator;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -94,36 +93,63 @@ final class CountryValidatorTest {
             .hasMessage("Unsupported space segment in BBAN pattern 8!n2!e8!n of DE");
     }
 
-    static Stream<IbanRegistry> ncdCountries() {
+    static Stream<IbanRegistry> ncdCountriesWithAlgorithm() {
         return IbanRegistry.ALL_COUNTRIES.stream()
-            .filter(IbanRegistry::hasNationalCheckDigit);
+            .filter(IbanRegistry::hasNationalCheckDigit)
+            .filter(countryData -> !hasNoOpNcdCalculator(countryData));
+    }
+
+    static Stream<IbanRegistry> ncdCountriesWithoutAlgorithm() {
+        return IbanRegistry.ALL_COUNTRIES.stream()
+            .filter(IbanRegistry::hasNationalCheckDigit)
+            .filter(CountryValidatorTest::hasNoOpNcdCalculator);
     }
 
     @ParameterizedTest(name = "[{index}] {0}")
-    @MethodSource("ncdCountries")
+    @MethodSource("ncdCountriesWithAlgorithm")
     void validateIban_invalidNcd_returnsFalse(IbanRegistry countryData) {
-        CountryValidator validator = IbanValidator.getCountryValidator(countryData);
-        assertThat(validator.getNcdCalculator())
-            .as("NCD calculator of %s", countryData)
-            .isNotNull();
-        Assumptions.assumeFalse(validator.getNcdCalculator() instanceof NoOpNcdCalculator);
-
-        char[] badNcdIban = countryData.getIbanExample().toCharArray();
-        IbanComponent ncdComponent = countryData.getNationalCheckDigitComponent();
-        for (int idx = ncdComponent.getBeginIndex(); idx < ncdComponent.getEndIndex(); idx++) {
-            char c = badNcdIban[idx];
-            if (Character.isDigit(c)) {
-                badNcdIban[idx] = c == '0' ? '1' : '0';
-            } else {
-                badNcdIban[idx] = c == 'Z' ? 'A' : (char) (c + 1);
-            }
-        }
-
         IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
+        char[] badNcdIban = withAlteredNcd(countryData);
 
-        assertThat(validator.validateIban(badNcdIban))
+        assertThat(IbanValidator.getCountryValidator(countryData).validateIban(badNcdIban))
             .as("Validation should fail for %s using IBAN with invalid NCD '%s'", countryData, new String(badNcdIban))
             .isFalse();
+    }
+
+    // the SWIFT IBAN Registry defines an NCD position for these countries, but no algorithm
+    @ParameterizedTest(name = "[{index}] {0}")
+    @MethodSource("ncdCountriesWithoutAlgorithm")
+    void validateIban_alteredNcdWithoutAlgorithm_returnsTrue(IbanRegistry countryData) {
+        IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
+        char[] alteredNcdIban = withAlteredNcd(countryData);
+
+        assertThat(IbanValidator.getCountryValidator(countryData).validateIban(alteredNcdIban))
+            .as("Validation should succeed for %s using IBAN with altered NCD '%s'", countryData, new String(alteredNcdIban))
+            .isTrue();
+    }
+
+    /**
+     * Returns whether the country has an NCD position but no algorithm to check it.
+     */
+    private static boolean hasNoOpNcdCalculator(IbanRegistry countryData) {
+        return IbanValidator.getCountryValidator(countryData).getNcdCalculator() instanceof NoOpNcdCalculator;
+    }
+
+    /**
+     * Returns the country's example IBAN with every NCD character replaced by another one of the same kind.
+     */
+    private static char[] withAlteredNcd(IbanRegistry countryData) {
+        char[] iban = countryData.getIbanExample().toCharArray();
+        IbanComponent ncdComponent = countryData.getNationalCheckDigitComponent();
+        for (int idx = ncdComponent.getBeginIndex(); idx < ncdComponent.getEndIndex(); idx++) {
+            char c = iban[idx];
+            if (Character.isDigit(c)) {
+                iban[idx] = c == '0' ? '1' : '0';
+            } else {
+                iban[idx] = c == 'Z' ? 'A' : (char) (c + 1);
+            }
+        }
+        return iban;
     }
 
     @Test

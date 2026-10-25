@@ -76,4 +76,20 @@ final class NationalCheckDigitCalculatorsTest {
             .hasMessage("No national check digit algorithm for DE");
     }
 
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> {1}")
+    @CsvSource(delimiter = '|', value = {
+        "0 | 0",
+        "9 | 9",
+        "A | 1",
+        "I | 9",
+        "J | 1",
+        "R | 9",
+        "S | 2",
+        "Z | 9",
+        "a | 0",
+        "- | 0",
+    })
+    void getFrenchRIBValue_character_returnsRibValue(char ch, int expected) {
+        assertThat(NationalCheckDigitCalculators.getFrenchRIBValue(ch)).isEqualTo(expected);
+    }
 }

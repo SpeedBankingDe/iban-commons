@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.nio.CharBuffer;
 import java.util.Locale;
 
 /**
@@ -465,4 +466,69 @@ final class IbanValidatorTest {
             .isEqualTo(IbanValidator.INVALID_MOD97);
     }
 
+    @ParameterizedTest(name = "[{index}] ''{0}'' allowSpace={1} allowLower={2} -> {3}")
+    @CsvSource(delimiter = '|', value = {
+        "de91 1000 0000 0123 4567 89 | true  | true  | 22",
+        "DE91 1000                   | false | true  | ILLEGAL_CHARACTERS",
+        "DE91-1000                   | true  | false | ILLEGAL_CHARACTERS",
+        "DE91-1000                   | true  | true  | ILLEGAL_CHARACTERS",
+    })
+    void normalize_transformingPath_returnsExpected(String input, boolean allowSpace, boolean allowLower, String expected) {
+        assertNormalize(input, allowSpace, allowLower, expected);
+    }
+
+    @Test
+    void normalize_lowercaseBeyondMaxLength_returnsIncorrectLength() {
+        // the character that exceeds the maximum length is a lowercase letter
+        String input = tooLongInput(IbanRegistry.MAX_IBAN_LENGTH - 2) + 'a';
+
+        assertNormalize(input, false, true, "INCORRECT_LENGTH");
+    }
+
+    @ParameterizedTest(name = "[{index}] ''{0}'' -> {1}")
+    @CsvSource(delimiter = '|', value = {
+        "DE9110000000                        | INCORRECT_LENGTH",
+        "DE91100000000123456789012345678901X | INCORRECT_LENGTH",
+        "XX91100000000123456789              | INVALID_COUNTRY",
+        "DE911000000001234567                | INCORRECT_LENGTH_COUNTRY",
+        "DEX1100000000123456789              | INVALID_CHECK_DIGITS",
+        "DE9X100000000123456789              | INVALID_CHECK_DIGITS",
+        "DE91A00000000123456789              | INVALID_STRUCTURE",
+    })
+    void validateStructure_invalidIban_returnsError(String iban, IbanValidationError expected) {
+        assertThat(IbanValidator.validateStructure(iban.toCharArray())).isEqualTo(expected);
+    }
+
+    @Test
+    void validateStructure_validIban_returnsNull() {
+        assertThat(IbanValidator.validateStructure(VALID_NORM_DE.toCharArray())).isNull();
+    }
+
+    @Test
+    void clearThreadLocal_afterValidation_keepsValidationWorking() {
+        assertThat(IbanValidator.isValid(VALID_NORM_DE)).isTrue();
+
+        IbanValidator.clearThreadLocal();
+
+        assertThat(IbanValidator.isValid(VALID_NORM_DE)).isTrue();
+    }
+
+    /**
+     * Asserts that both normalize overloads return {@code expected}, either a length or the name
+     * of the validation error whose negated ordinal normalize returns.
+     */
+    @SuppressWarnings("EnumOrdinal") // mirrors how normalize encodes its errors
+    private static void assertNormalize(String input, boolean allowSpace, boolean allowLower, String expected) {
+        int expectedResult = Character.isDigit(expected.charAt(0))
+            ? Integer.parseInt(expected)
+            : -IbanValidationError.valueOf(expected).ordinal();
+        char[] output = new char[Math.max(input.length(), IbanRegistry.MAX_IBAN_LENGTH)];
+
+        assertThat(IbanValidator.normalize(input, input.length(), output, allowSpace, allowLower))
+            .as("String overload")
+            .isEqualTo(expectedResult);
+        assertThat(IbanValidator.normalize(CharBuffer.wrap(input), input.length(), output, allowSpace, allowLower))
+            .as("CharSequence overload")
+            .isEqualTo(expectedResult);
+    }
 }

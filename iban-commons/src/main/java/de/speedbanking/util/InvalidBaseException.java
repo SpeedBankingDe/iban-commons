@@ -87,16 +87,6 @@ public abstract class InvalidBaseException extends RuntimeException {
     }
 
     /**
-     * Constructs a new exception with the specified validation failure reason and the erroneous input.
-     *
-     * @param reason the specific {@code ValidationError} that occurred, must not be {@code null}
-     * @param input  the input string that caused the error, may be {@code null}
-     */
-    protected InvalidBaseException(ValidationError reason, CharSequence input) {
-        this(reason, input, null);
-    }
-
-    /**
      * Returns the specific reason for the validation failure.
      * <p>
      * Concrete subclasses should override this method with a covariant return
