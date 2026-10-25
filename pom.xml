@@ -29,12 +29,12 @@
         Parent POM for the IBAN Commons multi-module project. Provides shared dependency
         management, plugin configuration, and build conventions for all sub-modules.
     </description>
-    <url>https://www.speedbanking.de</url>
+    <url>https://github.com/${project.organization.name}/${project.dist.name}</url>
     <inceptionYear>2025</inceptionYear>
 
     <organization>
         <name>SpeedBankingDe</name>
-        <url>${project.url}</url>
+        <url>https://www.speedbanking.de</url>
     </organization>
 
     <licenses>
