@@ -36,7 +36,7 @@ final class NationalCheckDigitCalculatorsTest {
         assertThat(calculator.countryData).isSameAs(countryData.getBaseCountry());
         assertThat(calculator.ncdComponent).isEqualTo(countryData.getBaseCountry().getNationalCheckDigitComponent());
         assertThat(calculator).hasToString("%s[%s, NCD %s]",
-            calculator.getClass().getSimpleName(), countryData.getBaseCountry().getCountryCode(), calculator.ncdComponent);
+            calculator.name(), countryData.getBaseCountry().getCountryCode(), calculator.ncdComponent);
     }
 
     @ParameterizedTest(name = "[{index}] {0} -> {1}")
@@ -51,20 +51,20 @@ final class NationalCheckDigitCalculatorsTest {
         "SE | NoOpNcdCalculator",
     })
     void forCountry_sharedAlgorithm_returnsAlgorithmClass(IbanRegistry countryData, String algorithm) {
-        assertThat(NationalCheckDigitCalculators.forCountry(countryData).getClass().getSimpleName())
+        assertThat(((NcdCalculatorBase) NationalCheckDigitCalculators.forCountry(countryData)).name())
             .isEqualTo(algorithm);
     }
 
     @Test
     void constructor_countryWithoutNcd_throwsNullPointerException() {
-        assertThatThrownBy(() -> new NationalCheckDigitCalculators.FR(IbanRegistry.DE))
+        assertThatThrownBy(() -> new NationalCheckDigitCalculators.NoOpNcdCalculator(IbanRegistry.DE))
             .isExactlyInstanceOf(NullPointerException.class)
             .hasMessage("DE has no national check digit");
     }
 
     @Test
     void constructor_nullCountry_throwsNullPointerException() {
-        assertThatThrownBy(() -> new NationalCheckDigitCalculators.FR(null))
+        assertThatThrownBy(() -> new NationalCheckDigitCalculators.NoOpNcdCalculator(null))
             .isExactlyInstanceOf(NullPointerException.class)
             .hasMessage("countryData must not be null");
     }

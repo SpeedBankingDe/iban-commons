@@ -22,6 +22,7 @@ import de.speedbanking.util.UtilityClasses;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
@@ -33,14 +34,18 @@ import java.util.stream.IntStream;
  * Monaco, Tunisia and several West-African countries. The calculator for a country is
  * obtained via {@link #forCountry(IbanRegistry)}, which passes the country to the calculator's
  * constructor.
+ * <p>
+ * The country-specific algorithms are static methods named after the country defining them,
+ * e.g. {@link #fr(NcdCalculatorBase, char[])}, and run inside an {@link AlgorithmNcdCalculator}.
+ * Static methods instead of one class per algorithm keep the jar small.
  *
  * <h3>Class hierarchy</h3>
  * <pre>
  * NationalCheckDigitCalculator            (interface)
- * └── NcdCalculatorBase                   (abstract, holds countryData, default validate, mod97)
+ * └── NcdCalculatorBase                   (abstract, holds countryData, default validate)
+ *     ├── AlgorithmNcdCalculator          (delegates to al, ao, be, ee, es, fi, fr, ...)
  *     ├── NoOpNcdCalculator               (no NCD validation, passthrough)
- *     ├── Mod97RemainderOneNcdCalculator  (ISO 7064 MOD 97-10, remainder == 1)
- *     └── AL, AO, BE, EE, ES, FI, FR, ... (algorithms named after the country defining them)
+ *     └── Mod97RemainderOneNcdCalculator  (ISO 7064 MOD 97-10, remainder == 1)
  * </pre>
  *
  * @since 1.8.5
@@ -51,6 +56,68 @@ import java.util.stream.IntStream;
  */
 @SuppressWarnings("checkstyle:VisibilityModifier")
 final class NationalCheckDigitCalculators {
+
+    /** IBAN index at which the BBAN starts (always 4: country code + 2 check digits). */
+    private static final int BBAN_START               = IbanRegistry.INDEX_BBAN;
+
+    /** Modulus used by ISO 7064 MOD 97-10 algorithms. */
+    private static final int MODULO_BASE              = 97;
+
+    /**
+     * Magic constant for the MOD 97-10 NCD formula: {@code NCD = 98 − remainder}.
+     * Equals {@code MODULO_BASE + 1}.
+     */
+    private static final int CHECK_DIGIT_MAGIC_NUMBER = 98;
+
+    /** Cache for single digits '0' through '9' as arrays. */
+    private static final char[][] DIGIT_CACHE =
+        IntStream.range(0, 10)
+            .mapToObj(i -> new char[] {(char) ('0' + i)})
+            .toArray(char[][]::new);
+
+    /** Cache for two-digit character arrays "00" through "99". */
+    private static final char[][] TWO_DIGIT_CACHE =
+        IntStream.range(0, 100)
+            .mapToObj(i -> new char[] {
+                (char) ('0' + (i / 10)),
+                (char) ('0' + (i % 10))
+            })
+            .toArray(char[][]::new);
+
+    /** Cache for single uppercase letters 'A' through 'Z' as arrays. */
+    private static final char[][] LETTER_CACHE =
+        IntStream.range(0, 26)
+            .mapToObj(i -> new char[] {(char) ('A' + i)})
+            .toArray(char[][]::new);
+
+    /** Weights of the Albanian algorithm, see {@link #al(NcdCalculatorBase, char[])}. */
+    private static final int[] AL_WEIGHTS = {9, 7, 3, 1, 9, 7, 3};
+
+    /** Weights of the Estonian algorithm, see {@link #ee(NcdCalculatorBase, char[])}. */
+    private static final int[] EE_WEIGHTS = {7, 3, 1};
+
+    /** Weights of the Spanish algorithm, see {@link #es(NcdCalculatorBase, char[])}. */
+    private static final int[] ES_WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
+
+    /** Weights of the Finnish algorithm, see {@link #fi(NcdCalculatorBase, char[])}. */
+    private static final int[] FI_WEIGHTS = {2, 1};
+
+    /** Weights of the Hungarian algorithm, see {@link #hu(NcdCalculatorBase, char[])}. */
+    private static final int[] HU_WEIGHTS = {9, 7, 3, 1};
+
+    /** Weights of the Norwegian algorithm, see {@link #no(NcdCalculatorBase, char[])}. */
+    private static final int[] NO_WEIGHTS = {5, 4, 3, 2, 7, 6, 5, 4, 3, 2};
+
+    /**
+     * Lookup table of the Italian algorithm for characters at <em>odd</em> positions (1-based).
+     * Index 0-9 covers digits {@code '0'-'9'}; index 10-35 covers letters {@code 'A'-'Z'}.
+     */
+    private static final int[] IT_ODD_MAP = {
+        1, 0, 5, 7, 9, 13, 15, 17, 19, 21, // '0' - '9'
+        1, 0, 5, 7, 9, 13, 15, 17, 19, 21, // 'A' - 'J'
+        2, 4, 18, 20, 11, 3, 6, 8, 12, 14, // 'K' - 'T'
+        16, 10, 22, 25, 24, 23             // 'U' - 'Z'
+    };
 
     /** Calculator factories by base country code. */
     private static final Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> FACTORIES = createFactories();
@@ -85,16 +152,16 @@ final class NationalCheckDigitCalculators {
      */
     private static Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> createFactories() {
         Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> factories = new HashMap<>();
-        register(factories, AL::new, "AL");
-        register(factories, AO::new, "AO");
-        register(factories, BE::new, "BE");
-        register(factories, EE::new, "EE");
-        register(factories, ES::new, "ES");
-        register(factories, FI::new, "FI");
-        register(factories, HU::new, "HU");
-        register(factories, NO::new, "NO");
-        register(factories, IT::new, "IT", "SM");
-        register(factories, FR::new, "FR", "DJ", "MC", "TN",
+        register(factories, "AL", NationalCheckDigitCalculators::al, "AL");
+        register(factories, "AO", NationalCheckDigitCalculators::ao, "AO");
+        register(factories, "BE", NationalCheckDigitCalculators::be, "BE");
+        register(factories, "EE", NationalCheckDigitCalculators::ee, "EE");
+        register(factories, "ES", NationalCheckDigitCalculators::es, "ES");
+        register(factories, "FI", NationalCheckDigitCalculators::fi, "FI");
+        register(factories, "HU", NationalCheckDigitCalculators::hu, "HU");
+        register(factories, "NO", NationalCheckDigitCalculators::no, "NO");
+        register(factories, "IT", NationalCheckDigitCalculators::it, "IT", "SM");
+        register(factories, "FR", NationalCheckDigitCalculators::fr, "FR", "DJ", "MC", "TN",
             "BF", "BJ", "CF", "CM", "GQ", "KM", "SN"); // West-African CFA franc zone
         register(factories, Mod97RemainderOneNcdCalculator::new,
             "BA", "ME", "MK", "MZ", "PT", "RS", "SI", "TL", "XK");
@@ -118,38 +185,94 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit calculator for <strong>Albania (AL)</strong>.
+     * Registers the given algorithm for all given country codes.
+     *
+     * @param factories    the map to add to
+     * @param name         the algorithm name, i.e. the country defining it
+     * @param algorithm    the algorithm
+     * @param countryCodes the base country codes using the algorithm
+     */
+    private static void register(Map<String, Function<IbanRegistry, NationalCheckDigitCalculator>> factories,
+        String name, BiFunction<NcdCalculatorBase, char[], char[]> algorithm, String... countryCodes) {
+        register(factories, countryData -> new AlgorithmNcdCalculator(countryData, name, algorithm), countryCodes);
+    }
+
+    /**
+     * Returns a character array containing the ASCII digit for {@code value}.
+     * <p>
+     * This implementation uses a static cache to avoid allocations.
+     *
+     * @param value a non-negative integer in range [0, 9]
+     * @return a cached character array of length 1
+     * @throws ArrayIndexOutOfBoundsException if value is not in range [0, 9]
+     */
+    static char[] oneDigit(int value) {
+        return DIGIT_CACHE[value];
+    }
+
+    /**
+     * Returns a character array containing the two ASCII digit characters
+     * of {@code value}, zero-padded (e.g. {@code 7} → {@code "07"}).
+     * <p>
+     * This implementation uses a static cache to avoid allocations.
+     *
+     * @param value a non-negative integer in range [0, 99]
+     * @return a cached character array of length 2
+     * @throws ArrayIndexOutOfBoundsException if value is not in range [0, 99]
+     */
+    static char[] twoDigits(int value) {
+        return TWO_DIGIT_CACHE[value];
+    }
+
+    /**
+     * Returns a character array containing the uppercase ASCII letter
+     * corresponding to the given alphabetic index.
+     *
+     * @param index a value in range [0, 25] where 0 is 'A' and 25 is 'Z'
+     * @return a cached character array of length 1
+     * @throws ArrayIndexOutOfBoundsException if index is not in range [0, 25]
+     */
+    static char[] oneLetter(int index) {
+        return LETTER_CACHE[index];
+    }
+
+    /**
+     * Computes the ISO 7064 MOD 97-10 remainder for a sub-sequence of a character sequence.
+     * <p>
+     * Delegates to {@link Mod97#calculateRange(char[], int, int)}.
+     *
+     * @param data   the source character array
+     * @param offset start index (inclusive)
+     * @param length number of characters to process
+     * @return the MOD 97 remainder in range [0, 96]
+     */
+    static int mod97(char[] data, int offset, int length) {
+        return Mod97.calculateRange(data, offset, length);
+    }
+
+    /**
+     * National Check Digit algorithm for <strong>Albania (AL)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 7n bank/branch + 1n NCD + 16n account = 24 digits (IBAN length 28).
      * <p>
      * <strong>Algorithm:</strong>
      * Weighted MOD 10 applied to the 7-digit bank/branch prefix.
      * Weights: {@code {9, 7, 3, 1, 9, 7, 3}} (cyclic). Result: {@code (10 − sum % 10) % 10}.
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digit
      */
-    static final class AL extends NcdCalculatorBase {
-        private static final int[] WEIGHTS = {9, 7, 3, 1, 9, 7, 3};
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        AL(IbanRegistry countryData) {
-            super(countryData);
+    static char[] al(NcdCalculatorBase c, char[] iban) {
+        int s = 0;
+        for (int i = 0; i < AL_WEIGHTS.length; i++) {
+            s += (iban[BBAN_START + i] - '0') * AL_WEIGHTS[i];
         }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            int s = 0;
-            for (int i = 0; i < WEIGHTS.length; i++) {
-                s += (iban[BBAN_START + i] - '0') * WEIGHTS[i];
-            }
-            return oneDigit((10 - s % 10) % 10);
-        }
+        return oneDigit((10 - s % 10) % 10);
     }
 
     /**
-     * National Check Digit calculator for <strong>Angola (AO)</strong>.
+     * National Check Digit algorithm for <strong>Angola (AO)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 21n prefix + 2n NCD = 23 digits (IBAN length 25).
      * <p>
@@ -160,54 +283,41 @@ final class NationalCheckDigitCalculators {
      * <p>
      * To avoid unnecessary heap allocation, the masked BBAN is presented to
      * {@link Mod97#calculateRange(CharSequence, int, int)} as a virtual
-     * {@link CharSequence} view over the original IBAN — no intermediate {@code char[]}
+     * {@link CharSequence} view over the original IBAN - no intermediate {@code char[]}
      * is allocated.
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digits
      */
-    static final class AO extends NcdCalculatorBase {
+    static char[] ao(NcdCalculatorBase c, char[] iban) {
+        int prefixLen = c.ncdComponent.getBeginIndex() - BBAN_START;
+        int maskedLen = c.countryData.getIbanLength() - BBAN_START;
 
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        AO(IbanRegistry countryData) {
-            super(countryData);
-        }
+        // virtual CharSequence view: forwards the BBAN prefix as-is, and substitutes
+        // '0' for the two NCD positions - without copying any characters
+        int remainder = Mod97.calculateRange(new CharSequence() {
+            @Override
+            public int length() {
+                return maskedLen;
+            }
 
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            final int prefixLen = ncdComponent.getBeginIndex() - BBAN_START;
-            final int maskedLen = countryData.getIbanLength() - BBAN_START;
+            @Override
+            public char charAt(int index) {
+                return index < prefixLen ? iban[BBAN_START + index] : '0';
+            }
 
-            // virtual CharSequence view: forwards the BBAN prefix as-is, and substitutes
-            // '0' for the two NCD positions — without copying any characters
-            int remainder = Mod97.calculateRange(new CharSequence() {
-                @Override
-                public int length() {
-                    return maskedLen;
-                }
+            @Override
+            public CharSequence subSequence(int s, int e) {
+                throw new UnsupportedOperationException();
+            }
+        }, 0, maskedLen);
 
-                @Override
-                public char charAt(int index) {
-                    // delegate to the original IBAN for the prefix, mask NCD positions with '0'
-                    return index < prefixLen ? iban[BBAN_START + index] : '0';
-                }
-
-                @Override
-                public CharSequence subSequence(int s, int e) {
-                    throw new UnsupportedOperationException();
-                }
-            }, 0, maskedLen);
-
-            // remainder calculation (using the char[] overload of Mod97)
-            int ncd = remainder == 0 ? 0 : CHECK_DIGIT_MAGIC_NUMBER - remainder;
-
-            return twoDigits(ncd);
-        }
+        return twoDigits(remainder == 0 ? 0 : CHECK_DIGIT_MAGIC_NUMBER - remainder);
     }
 
     /**
-     * National Check Digit calculator for <strong>Belgium (BE)</strong>.
+     * National Check Digit algorithm for <strong>Belgium (BE)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 3n bank + 7n account + 2n NCD = 12 digits (IBAN length 16).
      * <p>
@@ -215,33 +325,18 @@ final class NationalCheckDigitCalculators {
      * MOD 97 applied to the 10-digit prefix (bank code + account number).
      * NCD = remainder, except remainder {@code 0} yields NCD = {@code 97}.
      * Result range: {@code 01–97}.
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digits
      */
-    static final class BE extends NcdCalculatorBase {
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        BE(IbanRegistry countryData) {
-            super(countryData);
-        }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START; // 10 digits for BE
-
-            int remainder = mod97(iban, BBAN_START, lengthToProcess);
-
-            // per Belgian standard: remainder 0 maps to 97, not 00
-            int ncd = (remainder == 0) ? 97 : remainder;
-
-            return twoDigits(ncd);
-        }
+    static char[] be(NcdCalculatorBase c, char[] iban) {
+        int remainder = mod97(iban, BBAN_START, c.ncdComponent.getBeginIndex() - BBAN_START);
+        return twoDigits(remainder == 0 ? 97 : remainder);
     }
 
     /**
-     * National Check Digit calculator for <strong>Estonia (EE)</strong>.
+     * National Check Digit algorithm for <strong>Estonia (EE)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 2n bank + 2n branch + 11n account + 1n NCD
      *  = 16 digits (IBAN length 20). Only the 15 digits before the NCD are used.
@@ -249,31 +344,21 @@ final class NationalCheckDigitCalculators {
      * <strong>Algorithm:</strong>
      * Weighted MOD 10 with weights {@code {7, 3, 1}} (cyclic, left-to-right) over the BBAN prefix.
      * Result: {@code (10 − sum % 10) % 10}.
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digit
      */
-    static final class EE extends NcdCalculatorBase {
-        private static final int[] WEIGHTS = {7, 3, 1};
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        EE(IbanRegistry countryData) {
-            super(countryData);
+    static char[] ee(NcdCalculatorBase c, char[] iban) {
+        int s = 0;
+        for (int i = BBAN_START; i < c.ncdComponent.getBeginIndex(); i++) {
+            s += (iban[i] - '0') * EE_WEIGHTS[(i - BBAN_START) % EE_WEIGHTS.length];
         }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            int s = 0;
-            for (int i = BBAN_START; i < ncdComponent.getBeginIndex(); i++) {
-                s += (iban[i] - '0') * WEIGHTS[(i - BBAN_START) % WEIGHTS.length];
-            }
-            return oneDigit((10 - s % 10) % 10);
-        }
+        return oneDigit((10 - s % 10) % 10);
     }
 
     /**
-     * National Check Digit calculator for <strong>Spain (ES)</strong>.
+     * National Check Digit algorithm for <strong>Spain (ES)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 4n bank + 4n branch + 2n DC + 10n account = 20 digits
      * (IBAN length 24).
@@ -290,70 +375,48 @@ final class NationalCheckDigitCalculators {
      * <p>
      * <strong>Algorithm:</strong>
      * Weighted MOD 11. Result = {@code 11 − (sum % 11)}, mapping 11 → 0 and 10 → 1.
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digits
      */
-    static final class ES extends NcdCalculatorBase {
-
-        private static final int[] WEIGHTS = {1, 2, 4, 8, 5, 10, 9, 7, 3, 6};
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        ES(IbanRegistry countryData) {
-            super(countryData);
-        }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            // DC[0]: bank (4) + branch (4), weight offset 2 simulates "00" prefix
-            int firstDigit   = calculateMod11Spanish(iban, BBAN_START, 8, 2);
-
-            // DC[1]: account number (10 digits) after the NCD field
-            int accountStart = ncdComponent.getEndIndex();
-            int secondDigit  = calculateMod11Spanish(iban, accountStart, 10, 0);
-
-            // the combination of both digits (0-9) results in a value from 00 to 99
-            final int ncdValue = firstDigit * 10 + secondDigit;
-
-            // return the pre-allocated CharSequence from cache
-            // (Assuming the interface or internal logic handles CharSequence)
-            return twoDigits(ncdValue);
-        }
-
-        /**
-         * Computes a single Spanish DC digit using weighted MOD 11.
-         * <p>
-         * Formula: {@code result = 11 − (sum % 11)}, with special cases
-         * {@code 11 → 0} and {@code 10 → 1}.
-         *
-         * @param iban         the IBAN character array
-         * @param offset       start index in the array
-         * @param length       number of digits to process
-         * @param weightOffset starting index into {@link #WEIGHTS}
-         * @return a single digit in range [0, 9]
-         */
-        private static int calculateMod11Spanish(final char[] iban, final int offset,
-                                                 final int length, final int weightOffset) {
-            int sum = 0;
-            for (int i = 0; i < length; i++) {
-                sum += (iban[offset + i] - '0') * WEIGHTS[weightOffset + i];
-            }
-
-            int remainder = 11 - (sum % 11);
-            if (remainder == 11) {
-                return 0;
-            } else if (remainder == 10) {
-                return 1;
-            } else {
-                return remainder;
-            }
-        }
-
+    static char[] es(NcdCalculatorBase c, char[] iban) {
+        // DC[0]: bank (4) + branch (4), weight offset 2 simulates "00" prefix
+        int firstDigit  = calculateMod11Spanish(iban, BBAN_START, 8, 2);
+        // DC[1]: account number (10 digits) after the NCD field
+        int secondDigit = calculateMod11Spanish(iban, c.ncdComponent.getEndIndex(), 10, 0);
+        return twoDigits(firstDigit * 10 + secondDigit);
     }
 
     /**
-     * National Check Digit calculator for <strong>Finland (FI)</strong> and
+     * Computes a single Spanish DC digit using weighted MOD 11.
+     * <p>
+     * Formula: {@code result = 11 − (sum % 11)}, with special cases
+     * {@code 11 → 0} and {@code 10 → 1}.
+     *
+     * @param iban         the IBAN character array
+     * @param offset       start index in the array
+     * @param length       number of digits to process
+     * @param weightOffset starting index into {@link #ES_WEIGHTS}
+     * @return a single digit in range [0, 9]
+     */
+    private static int calculateMod11Spanish(char[] iban, int offset, int length, int weightOffset) {
+        int sum = 0;
+        for (int i = 0; i < length; i++) {
+            sum += (iban[offset + i] - '0') * ES_WEIGHTS[weightOffset + i];
+        }
+        int remainder = 11 - (sum % 11);
+        if (remainder == 11) {
+            return 0;
+        } else if (remainder == 10) {
+            return 1;
+        } else {
+            return remainder;
+        }
+    }
+
+    /**
+     * National Check Digit algorithm for <strong>Finland (FI)</strong> and
      * <strong>Åland Islands (AX)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 6n bank + 7n account + 1n NCD = 14 digits
@@ -364,40 +427,26 @@ final class NationalCheckDigitCalculators {
      * Weights {@code {2, 1}} alternate from the rightmost digit leftward.
      * Products ≥ 10 are reduced by summing their digits.
      * NCD = {@code (10 − sum % 10) % 10}.
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digit
      */
-    static final class FI extends NcdCalculatorBase {
-
-        private static final int[] WEIGHTS = {2, 1};
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        FI(IbanRegistry countryData) {
-            super(countryData);
-        }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
-
-            int sum = 0;
-            for (int i = 0; i < lengthToProcess; i++) {
-                int digit   = iban[ncdComponent.getBeginIndex() - 1 - i] - '0';
-                int product = digit * WEIGHTS[i % WEIGHTS.length];
-                if (product >= 10) {
-                    product = (product / 10) + (product % 10);
-                }
-                sum += product;
+    static char[] fi(NcdCalculatorBase c, char[] iban) {
+        int ncdBegin = c.ncdComponent.getBeginIndex();
+        int sum = 0;
+        for (int i = 0; i < ncdBegin - BBAN_START; i++) {
+            int product = (iban[ncdBegin - 1 - i] - '0') * FI_WEIGHTS[i % FI_WEIGHTS.length];
+            if (product >= 10) {
+                product = (product / 10) + (product % 10);
             }
-
-            return oneDigit((10 - (sum % 10)) % 10);
+            sum += product;
         }
+        return oneDigit((10 - (sum % 10)) % 10);
     }
 
     /**
-     * National Check Digit calculator for <strong>France (FR)</strong> and all associated
+     * National Check Digit algorithm for <strong>France (FR)</strong> and all associated
      * territories.
      * <p>
      * Territories sharing this algorithm:
@@ -408,12 +457,12 @@ final class NationalCheckDigitCalculators {
      * and several West-African countries (BF, BJ, CF, CM, GQ, KM, SN).
      * Tunisia (TN) and Djibouti (DJ) use the same formula.
      * <p>
-     * <strong>RIB — Clé RIB (Relevé d'Identité Bancaire):</strong>
+     * <strong>RIB - Clé RIB (Relevé d'Identité Bancaire):</strong>
      * Two-digit checksum {@code 01–97} at the end of the BBAN.
      * <p>
      * <strong>Algorithm:</strong>
-     * MOD 97 with French-specific letter substitution (see {@link #getFrenchRIBValue}).
-     * NCD = {@code 97 − (prefix_remainder × 100 mod 97)}, with 0 mapped to 97.
+     * MOD 97 with French-specific letter substitution (see {@link #getFrenchRIBValue(char)}).
+     * NCD = {@code 97 − (prefix_remainder × 100 mod 97)}, always in range 01-97.
      * <p>
      * <strong>Letter mapping</strong> (differs from ISO 7064 A=10, B=11…):
      * <table>
@@ -429,80 +478,64 @@ final class NationalCheckDigitCalculators {
      *   <tr><td>8</td><td>H, Q, Y</td></tr>
      *   <tr><td>9</td><td>I, R, Z</td></tr>
      * </table>
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digits
      */
-    static final class FR extends NcdCalculatorBase {
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        FR(IbanRegistry countryData) {
-            super(countryData);
-        }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
-
-            int remainder = mod97French(iban, BBAN_START, lengthToProcess);
-
-            // Clé RIB formula: 97 − (remainder × 100 mod 97); 0 maps to 97
-            remainder = (remainder * 100) % MODULO_BASE;
-            int ncd = MODULO_BASE - remainder;
-
-            return twoDigits(ncd == 0 ? MODULO_BASE : ncd);
-        }
-
-        /**
-         * Computes MOD 97 using the French RIB letter-to-digit mapping.
-         * <p>
-         * Unlike {@link Mod97#calculateRange(CharSequence, int, int)} (ISO 7064, A=10…Z=35),
-         * each letter is mapped to a <em>single</em> digit 1–9 (see {@link #getFrenchRIBValue})
-         * and fed as one digit into the streaming accumulator.
-         *
-         * @param data   the character array
-         * @param offset start index (inclusive)
-         * @param length number of characters to process
-         * @return MOD 97 remainder in range [0, 96]
-         */
-        static int mod97French(final char[] data, final int offset, final int length) {
-            int remainder = 0;
-            for (int i = 0; i < length; i++) {
-                remainder = (remainder * 10 + getFrenchRIBValue(data[offset + i])) % MODULO_BASE;
-            }
-            return remainder;
-        }
-
-        /**
-         * Maps a character to its French RIB single-digit value (0–9).
-         * <p>
-         * Digits {@code '0'–'9'} map to themselves.
-         * Letters follow a cyclic 1–9 pattern that repeats across A–I, J–R, and S–Z
-         * (with S=2 rather than S=1, skipping 1 in the third group).
-         *
-         * @param ch the input character (digit or uppercase ASCII letter)
-         * @return the RIB value in range [0, 9]; 0 for unrecognised characters
-         */
-        static int getFrenchRIBValue(final char ch) {
-            if (ch >= '0' && ch <= '9') {
-                return ch - '0';
-            }
-            if (ch >= 'A' && ch <= 'Z') {
-                if (ch <= 'I') {
-                    return ch - 'A' + 1; // A=1 … I=9
-                }
-                if (ch <= 'R') {
-                    return ch - 'J' + 1; // J=1 … R=9
-                }
-                return ch - 'S' + 2;    // S=2 … Z=9 (skips 1)
-            }
-            return 0;
-        }
+    static char[] fr(NcdCalculatorBase c, char[] iban) {
+        int remainder = mod97French(iban, BBAN_START, c.ncdComponent.getBeginIndex() - BBAN_START);
+        return twoDigits(MODULO_BASE - (remainder * 100) % MODULO_BASE);
     }
 
     /**
-     * National Check Digit calculator for <strong>Hungary (HU)</strong>.
+     * Computes MOD 97 using the French RIB letter-to-digit mapping.
+     * <p>
+     * Unlike {@link Mod97#calculateRange(CharSequence, int, int)} (ISO 7064, A=10…Z=35),
+     * each letter is mapped to a <em>single</em> digit 1–9 (see {@link #getFrenchRIBValue(char)})
+     * and fed as one digit into the streaming accumulator.
+     *
+     * @param data   the character array
+     * @param offset start index (inclusive)
+     * @param length number of characters to process
+     * @return MOD 97 remainder in range [0, 96]
+     */
+    static int mod97French(char[] data, int offset, int length) {
+        int remainder = 0;
+        for (int i = 0; i < length; i++) {
+            remainder = (remainder * 10 + getFrenchRIBValue(data[offset + i])) % MODULO_BASE;
+        }
+        return remainder;
+    }
+
+    /**
+     * Maps a character to its French RIB single-digit value (0–9).
+     * <p>
+     * Digits {@code '0'–'9'} map to themselves.
+     * Letters follow a cyclic 1–9 pattern that repeats across A–I, J–R, and S–Z
+     * (with S=2 rather than S=1, skipping 1 in the third group).
+     *
+     * @param ch the input character (digit or uppercase ASCII letter)
+     * @return the RIB value in range [0, 9]; 0 for unrecognised characters
+     */
+    static int getFrenchRIBValue(char ch) {
+        if (ch >= '0' && ch <= '9') {
+            return ch - '0';
+        }
+        if (ch >= 'A' && ch <= 'Z') {
+            if (ch <= 'I') {
+                return ch - 'A' + 1; // A=1 ... I=9
+            }
+            if (ch <= 'R') {
+                return ch - 'J' + 1; // J=1 ... R=9
+            }
+            return ch - 'S' + 2;    // S=2 ... Z=9 (skips 1)
+        }
+        return 0;
+    }
+
+    /**
+     * National Check Digit algorithm for <strong>Hungary (HU)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 3n bank + 4n branch + 1n NCD1 + 15n account + 1n NCD2
      * = 24 digits (IBAN length 28). This implementation computes the <em>second</em> check digit
@@ -512,33 +545,22 @@ final class NationalCheckDigitCalculators {
      * Weighted MOD 10 with weights {@code {9, 7, 3, 1}} (cyclic). The NCD equals the ones digit
      * of the weighted sum, i.e., {@code sum % 10} (the NCD is chosen so that including it makes
      * the total sum a multiple of 10 using weight 1 for the NCD position).
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digit
      */
-    static final class HU extends NcdCalculatorBase {
-        private static final int[] WEIGHTS = {9, 7, 3, 1};
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        HU(IbanRegistry countryData) {
-            super(countryData);
+    static char[] hu(NcdCalculatorBase c, char[] iban) {
+        int accountStart = BBAN_START + 8; // after 3n bank + 4n branch + 1n NCD1
+        int s = 0;
+        for (int i = 0; i < 15; i++) {
+            s += (iban[accountStart + i] - '0') * HU_WEIGHTS[i % HU_WEIGHTS.length];
         }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            // NCD2 covers the 15-digit account number: IBAN indices 12–26
-            int accountStart = BBAN_START + 8; // after 3n bank + 4n branch + 1n NCD1
-            int s = 0;
-            for (int i = 0; i < 15; i++) {
-                s += (iban[accountStart + i] - '0') * WEIGHTS[i % WEIGHTS.length];
-            }
-            return oneDigit(s % 10);
-        }
+        return oneDigit(s % 10);
     }
 
     /**
-     * National Check Digit calculator for <strong>Italy (IT)</strong> and
+     * National Check Digit algorithm for <strong>Italy (IT)</strong> and
      * <strong>San Marino (SM)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 1a CIN + 5n bank + 5n branch + 12c account = 23 chars
@@ -553,57 +575,32 @@ final class NationalCheckDigitCalculators {
      * <ol>
      *   <li>Assign a numeric value to each character:
      *     <ul>
-     *       <li><em>Odd positions</em> (1st, 3rd, …): use {@link #ODD_MAP}.</li>
+     *       <li><em>Odd positions</em> (1st, 3rd, …): use {@link #IT_ODD_MAP}.</li>
      *       <li><em>Even positions</em> (2nd, 4th, …): digits map to 0–9, letters to 10–35.</li>
      *     </ul>
      *   </li>
      *   <li>Sum all values and take {@code sum % 26}.</li>
      *   <li>Convert result (0–25) to letter {@code 'A'–'Z'}.</li>
      * </ol>
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check character
      */
-    static final class IT extends NcdCalculatorBase {
-
-        /**
-         * Lookup table for characters at <em>odd</em> positions (1-based).
-         * Index 0–9 covers digits {@code '0'–'9'}; index 10–35 covers letters {@code 'A'–'Z'}.
-         */
-        private static final int[] ODD_MAP = {
-            1, 0, 5, 7, 9, 13, 15, 17, 19, 21, // '0' – '9'
-            1, 0, 5, 7, 9, 13, 15, 17, 19, 21, // 'A' – 'J'
-            2, 4, 18, 20, 11, 3, 6, 8, 12, 14, // 'K' – 'T'
-            16, 10, 22, 25, 24, 23             // 'U' – 'Z'
-        };
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        IT(IbanRegistry countryData) {
-            super(countryData);
+    static char[] it(NcdCalculatorBase c, char[] iban) {
+        int cinIndex = c.ncdComponent.getBeginIndex();
+        int bbanEnd  = c.countryData.getIbanLength();
+        int sum = 0;
+        for (int i = cinIndex + 1; i < bbanEnd; i++) {
+            char ch = iban[i];
+            int val = (ch <= '9') ? ch - '0' : ch - 'A' + 10;
+            sum += ((i - cinIndex - 1) % 2 == 0) ? IT_ODD_MAP[val] : val;
         }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            // CIN is at BBAN_START (index 4); algorithm covers indices 5 to end of BBAN
-            int cinIndex = ncdComponent.getBeginIndex();
-            int bbanEnd  = countryData.getIbanLength();
-
-            int sum = 0;
-            for (int i = cinIndex + 1; i < bbanEnd; i++) {
-                char ch  = iban[i];
-                int val  = (ch <= '9') ? ch - '0' : ch - 'A' + 10;
-                int pos  = i - (cinIndex + 1); // 0-based position after CIN
-
-                sum += (pos % 2 == 0) ? ODD_MAP[val] : val;
-            }
-
-            return oneLetter(sum % 26);
-        }
+        return oneLetter(sum % 26);
     }
 
     /**
-     * National Check Digit calculator for <strong>Norway (NO)</strong>.
+     * National Check Digit algorithm for <strong>Norway (NO)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 4n bank + 6n account + 1n NCD = 11 digits
      * (IBAN length 15).
@@ -612,43 +609,25 @@ final class NationalCheckDigitCalculators {
      * Weighted MOD 11 with weights {@code {5, 4, 3, 2, 7, 6, 5, 4, 3, 2}} applied to the
      * 10-digit prefix (bank + account). NCD = {@code remainder == 0 ? 0 : 11 − remainder}.
      * <p>
-     * <strong>Special case — result {@code 10}:</strong>
+     * <strong>Special case - result {@code 10}:</strong>
      * A computed result of {@code 10} means the account number is <em>not issuable</em> by
      * Norwegian banks (Bankenes Standardiseringskontor). In this case
-     * {@link #calculateNationalCheckDigit} returns the NCD value already present in the
-     * input IBAN unchanged (passthrough), so that {@link #validateNationalCheckDigit} will
+     * {@link NationalCheckDigitCalculator#calculateNationalCheckDigit(char[])} returns the NCD value already present in the
+     * input IBAN unchanged (passthrough), so that {@link NationalCheckDigitCalculator#validateNationalCheckDigit(char[])} will
      * always pass for such account numbers.
+     *
+     * @param c    the calculator of the country
+     * @param iban the normalized IBAN
+     * @return the check digit
      */
-    static final class NO extends NcdCalculatorBase {
-
-        private static final int[] WEIGHTS = {5, 4, 3, 2, 7, 6, 5, 4, 3, 2};
-
-        /**
-         * Creates the calculator for the given country.
-         *
-         * @param countryData the registry entry of a country using this algorithm
-         */
-        NO(IbanRegistry countryData) {
-            super(countryData);
+    static char[] no(NcdCalculatorBase c, char[] iban) {
+        int sum = 0;
+        for (int i = 0; i < c.ncdComponent.getBeginIndex() - BBAN_START; i++) {
+            sum += (iban[BBAN_START + i] - '0') * NO_WEIGHTS[i];
         }
-
-        @Override
-        public char[] calculateNationalCheckDigit(final char[] iban) {
-            int lengthToProcess = ncdComponent.getBeginIndex() - BBAN_START;
-
-            int sum = 0;
-            for (int i = 0; i < lengthToProcess; i++) {
-                sum += (iban[BBAN_START + i] - '0') * WEIGHTS[i];
-            }
-
-            int remainder = sum % 11;
-            int result    = (remainder == 0) ? 0 : (11 - remainder);
-
-            // result == 10: account number not issuable — return existing NCD as-is
-            return result == 10
-                ? ncdComponent.extractFrom(iban)
-                : oneDigit(result);
-        }
+        int remainder = sum % 11;
+        int result    = (remainder == 0) ? 0 : (11 - remainder);
+        return result == 10 ? c.ncdComponent.extractFrom(iban) : oneDigit(result);
     }
 
     /**
@@ -660,11 +639,7 @@ final class NationalCheckDigitCalculators {
      *       to the constructor.</li>
      *   <li>A default {@link #validateNationalCheckDigit} implementation that extracts
      *       the NCD from the IBAN and compares it to {@link #calculateNationalCheckDigit}.</li>
-     *   <li>Shared constants ({@link #BBAN_START}, {@link #MODULO_BASE},
-     *       {@link #CHECK_DIGIT_MAGIC_NUMBER}).</li>
-     *   <li>Shared factory methods ({@link #oneDigit(int)}, {@link #twoDigits(int)}).</li>
-     *   <li>Shared utility method {@link #mod97(char[], int, int)}.</li>
-     *   <li>A {@link #toString()} that includes the country code.</li>
+     *   <li>A {@link #toString()} that includes the algorithm name and the country code.</li>
      * </ul>
      * <p>
      * Subclasses must implement {@link #calculateNationalCheckDigit(char[])} and may
@@ -672,39 +647,6 @@ final class NationalCheckDigitCalculators {
      * structurally different validation is required (e.g., {@link Mod97RemainderOneNcdCalculator}).
      */
     abstract static class NcdCalculatorBase implements NationalCheckDigitCalculator {
-
-        /** IBAN index at which the BBAN starts (always 4: country code + 2 check digits). */
-        static final int   BBAN_START               = IbanRegistry.INDEX_BBAN;
-
-        /** Modulus used by ISO 7064 MOD 97-10 algorithms. */
-        static final int   MODULO_BASE              = 97;
-
-        /**
-         * Magic constant for the MOD 97-10 NCD formula: {@code NCD = 98 − remainder}.
-         * Equals {@code MODULO_BASE + 1}.
-         */
-        static final int   CHECK_DIGIT_MAGIC_NUMBER = 98;
-
-        /** Cache for single digits '0' through '9' as arrays. */
-        private static final char[][]       DIGIT_CACHE =
-            IntStream.range(0, 10)
-                .mapToObj(i -> new char[] {(char) ('0' + i)})
-                .toArray(char[][]::new);
-
-        /** Cache for two-digit character arrays "00" through "99". */
-        private static final char[][]       TWO_DIGIT_CACHE =
-            IntStream.range(0, 100)
-                .mapToObj(i -> new char[] {
-                    (char) ('0' + (i / 10)),
-                    (char) ('0' + (i % 10))
-                })
-                .toArray(char[][]::new);
-
-        /** Cache for single uppercase letters 'A' through 'Z' as arrays. */
-        private static final char[][] LETTER_CACHE =
-            IntStream.range(0, 26)
-                .mapToObj(i -> new char[] {(char) ('A' + i)})
-                .toArray(char[][]::new);
 
         /** Country-specific registry data, i.e. the enum entry in {@link IbanRegistry} passed at construction time. */
         final IbanRegistry            countryData;
@@ -757,56 +699,12 @@ final class NationalCheckDigitCalculators {
         }
 
         /**
-         * Returns a character array containing the ASCII digit for {@code value}.
-         * <p>
-         * This implementation uses a static cache to avoid allocations.
+         * Returns the name of the algorithm, by default the simple class name.
          *
-         * @param value a non-negative integer in range [0, 9]
-         * @return a cached character array of length 1
-         * @throws ArrayIndexOutOfBoundsException if value is not in range [0, 9]
+         * @return the algorithm name
          */
-        static char[] oneDigit(final int value) {
-            return DIGIT_CACHE[value];
-        }
-
-        /**
-         * Returns a character array containing the two ASCII digit characters
-         * of {@code value}, zero-padded (e.g. {@code 7} → {@code "07"}).
-         * <p>
-         * This implementation uses a static cache to avoid allocations.
-         *
-         * @param value a non-negative integer in range [0, 99]
-         * @return a cached character array of length 2
-         * @throws ArrayIndexOutOfBoundsException if value is not in range [0, 99]
-         */
-        static char[] twoDigits(final int value) {
-            return TWO_DIGIT_CACHE[value];
-        }
-
-        /**
-         * Returns a character array containing the uppercase ASCII letter
-         * corresponding to the given alphabetic index.
-         *
-         * @param index a value in range [0, 25] where 0 is 'A' and 25 is 'Z'
-         * @return a cached character array of length 1
-         * @throws ArrayIndexOutOfBoundsException if index is not in range [0, 25]
-         */
-        static char[] oneLetter(final int index) {
-            return LETTER_CACHE[index];
-        }
-
-        /**
-         * Computes the ISO 7064 MOD 97-10 remainder for a sub-sequence of a character sequence.
-         * <p>
-         * Delegates to {@link Mod97#calculateRange(char[], int, int)}.
-         *
-         * @param data   the source character array
-         * @param offset start index (inclusive)
-         * @param length number of characters to process
-         * @return the MOD 97 remainder in range [0, 96]
-         */
-        static int mod97(final char[] data, final int offset, final int length) {
-            return Mod97.calculateRange(data, offset, length);
+        String name() {
+            return getClass().getSimpleName();
         }
 
         /**
@@ -817,7 +715,39 @@ final class NationalCheckDigitCalculators {
          */
         @Override
         public final String toString() {
-            return String.format("%s[%s, NCD %s]", getClass().getSimpleName(), countryData.getCountryCode(), ncdComponent);
+            return String.format("%s[%s, NCD %s]", name(), countryData.getCountryCode(), ncdComponent);
+        }
+    }
+
+    /**
+     * Calculator delegating to one of the algorithms of the enclosing class.
+     */
+    static final class AlgorithmNcdCalculator extends NcdCalculatorBase {
+
+        private final String                                        name;
+        private final BiFunction<NcdCalculatorBase, char[], char[]> algorithm;
+
+        /**
+         * Creates the calculator for the given country.
+         *
+         * @param countryData the registry entry of a country using the algorithm
+         * @param name        the algorithm name
+         * @param algorithm   the algorithm
+         */
+        AlgorithmNcdCalculator(IbanRegistry countryData, String name, BiFunction<NcdCalculatorBase, char[], char[]> algorithm) {
+            super(countryData);
+            this.name = name;
+            this.algorithm = algorithm;
+        }
+
+        @Override
+        public char[] calculateNationalCheckDigit(char[] iban) {
+            return algorithm.apply(this, iban);
+        }
+
+        @Override
+        String name() {
+            return name;
         }
     }
 
