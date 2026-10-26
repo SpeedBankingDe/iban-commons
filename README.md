@@ -28,12 +28,13 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 |----------------------------|:--------------:|:---------:|:--------------:|:---------:|:---------:|
 | **Throughput (ops/s)**     | **10,883,875** | 7,322,453 |   6,065,384    | 2,089,403 | 1,980,023 |
 | **Memory (B/op)**          |      **0**     |    171    |      210       |    972    |    559    |
-| **Dependencies**           |        0       |     0     |       5        |     0     |     0     |
+| **Dependencies**           |        0       |     0     |       4        |     0     |     0     |
 | **Java Version**           |       8+       |    8+     |       8+       |    11+    |    8+     |
 | **Android (API 21+)**      |        ✅       |     ?     |       ?        |     ?     |     ✅     |
-| **Countries**              |       127      |    82     |      n/a       |    111    |    111    |
+| **Countries**              |       127      |    98     |      105       |    106    |    111    |
 
-> Throughput: rejection path (invalid IBANs) · JMH · OpenJDK 25.0.3 · Linux · single core · SerialGC · `-XX:-StackTraceInThrowable` · 2026-10-25
+> Throughput: rejection path (invalid IBANs) · JMH · OpenJDK 25.0.3 · Linux · single core · SerialGC · `-XX:-StackTraceInThrowable` · 2026-10-25<br>
+> Compared versions: jbanking 4.3.0 · Apache Commons Validator 1.11.0 · iban4j 3.2.14 · garvelink iban 1.17.0. Countries count every country code accepted, including territories using another country's format.
 
 -----
 
@@ -46,13 +47,13 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.12</version>
+    <version>1.8.13</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.12'
+implementation 'de.speedbanking:iban-commons:1.8.13'
 ```
 
 ### 2. Validate & Parse
