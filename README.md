@@ -30,7 +30,6 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 | **Memory (B/op)**          |      **0**     |    171    |      210       |    972    |    559    |
 | **Dependencies**           |        0       |     0     |       4        |     0     |     0     |
 | **Java Version**           |       8+       |    8+     |       8+       |    11+    |    8+     |
-| **Android (API 24+)**      |        ✅       |     ?     |       ?        |     ?     |     ✅     |
 | **Countries**              |       127      |    98     |      105       |    106    |    111    |
 
 > Throughput: rejection path (invalid IBANs) · JMH · OpenJDK 25.0.3 · Linux · single core · SerialGC · `-XX:-StackTraceInThrowable` · 2026-10-25<br>
