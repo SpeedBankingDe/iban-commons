@@ -133,6 +133,7 @@
         <check.pmd.ruleset>${project.rootDirectory}/build/pmd-rules.xml</check.pmd.ruleset>
 
         <!-- Plugin versions (alphabetically) -->
+        <dep.plugin.animal-sniffer.version>1.28</dep.plugin.animal-sniffer.version>
         <dep.plugin.central-publishing.version>0.12.0</dep.plugin.central-publishing.version>
         <dep.plugin.checkstyle.version>3.6.0</dep.plugin.checkstyle.version>
         <dep.plugin.compiler.version>3.16.0</dep.plugin.compiler.version>
@@ -155,6 +156,8 @@
         <dep.plugin.source.version>3.4.0</dep.plugin.source.version>
         <dep.plugin.surefire.version>3.5.6</dep.plugin.surefire.version> <!-- 3.6.0 runs no tests on the JDK 8 toolchain -->
         <dep.plugin.versions.version>2.23.0</dep.plugin.versions.version>
+
+        <dep.gummy-bears.version>0.16.0</dep.gummy-bears.version>
 
         <surefireArgLine /> <!-- placeholder; overridden by jacoco-prepare-agent -->
     </properties>
@@ -584,6 +587,34 @@
                                 <goal>enforce</goal>
                             </goals>
                             <phase>validate</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <!-- verifies that main classes only use APIs available on Android API 24 without
+                         core library desugaring
+                         https://www.mojohaus.org/animal-sniffer/animal-sniffer-maven-plugin/ -->
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <version>${dep.plugin.animal-sniffer.version}</version>
+                    <configuration>
+                        <signature>
+                            <groupId>com.toasttab.android</groupId>
+                            <artifactId>gummy-bears-api-24</artifactId>
+                            <version>${dep.gummy-bears.version}</version>
+                        </signature>
+                        <annotations>
+                            <annotation>de.speedbanking.iban.IgnoreAndroidRequirement</annotation>
+                        </annotations>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>android-api-check</id>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                            <phase>process-classes</phase>
                         </execution>
                     </executions>
                 </plugin>

@@ -42,8 +42,15 @@ public final class BicValidator {
      * <p>
      * The capacity is set to {@code BIC11_LENGTH}, the longest possible BIC.
      */
-    private static final ThreadLocal<char[]> VALIDATION_BUFFER = ThreadLocal
-        .withInitial(() -> new char[Bic.BIC11_LENGTH]);
+    // an anonymous subclass, since ThreadLocal.withInitial needs Android API 26;
+    // <> with an anonymous class needs -source 9+
+    @SuppressWarnings("PMD.UseDiamondOperator")
+    private static final ThreadLocal<char[]> VALIDATION_BUFFER = new ThreadLocal<char[]>() {
+        @Override
+        protected char[] initialValue() {
+            return new char[Bic.BIC11_LENGTH];
+        }
+    };
 
     /**
      * Private constructor to prevent instantiation of this utility class.

@@ -346,7 +346,8 @@ final class IbanRegistryTest {
         assertThat(de.getMetaData())
             .isNotNull()
             .returns(de.getIbanExample(), MetaData::getIbanExample)
-            .returns(de.getLastUpdate(), MetaData::getLastUpdate)
+            .returns(de.getLastUpdateYear(), MetaData::getLastUpdateYear)
+            .returns(de.getLastUpdateMonth(), MetaData::getLastUpdateMonth)
             .returns(de.isSepa(), MetaData::isSepa);
 
         assertThat(de.getContactData())
@@ -491,12 +492,12 @@ final class IbanRegistryTest {
     @DisplayName("Should cover all getters of MetaData")
     @Test
     void metaData_getters_shouldReturnConfiguredValues() {
-        YearMonth now = YearMonth.now(ZoneId.systemDefault());
-        MetaData metaData = MetaData.of(true, "DE89370400440532013000", now);
+        MetaData metaData = MetaData.of(true, "DE89370400440532013000", 2026, 10);
 
         assertThat(metaData.isSepa()).isTrue();
         assertThat(metaData.getIbanExample()).isEqualTo("DE89370400440532013000");
-        assertThat(metaData.getLastUpdate()).isEqualTo(now);
+        assertThat(metaData.getLastUpdateYear()).isEqualTo(2026);
+        assertThat(metaData.getLastUpdateMonth()).isEqualTo(10);
     }
 
     @DisplayName("Should throw exception when required BBAN pattern is missing")

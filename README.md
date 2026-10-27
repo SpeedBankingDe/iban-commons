@@ -16,7 +16,7 @@
 **[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [📚 Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
 
 `iban-commons` is a Java IBAN validation library and BIC validator for Java 8+, providing fast and reliable parsing, validation, and formatting of International Bank Account Numbers (IBAN) and Business Identifier Codes (BIC/SWIFT codes).
-Designed for high-performance enterprise applications, it covers 127 countries, is Android-compatible (API 21+), and has zero compile or runtime dependencies outside the Java Standard Library.
+Designed for high-performance enterprise applications, it covers 127 countries, is Android-compatible (API 24+, or 21+ with core library desugaring), and has zero compile or runtime dependencies outside the Java Standard Library.
 
 An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module is available for verifying German domestic account number ("Kontonummer") check digits against a Bankleitzahl (BLZ) — standalone and independent of `iban-commons`.
 
@@ -30,7 +30,7 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 | **Memory (B/op)**          |      **0**     |    171    |      210       |    972    |    559    |
 | **Dependencies**           |        0       |     0     |       4        |     0     |     0     |
 | **Java Version**           |       8+       |    8+     |       8+       |    11+    |    8+     |
-| **Android (API 21+)**      |        ✅       |     ?     |       ?        |     ?     |     ✅     |
+| **Android (API 24+)**      |        ✅       |     ?     |       ?        |     ?     |     ✅     |
 | **Countries**              |       127      |    98     |      105       |    106    |    111    |
 
 > Throughput: rejection path (invalid IBANs) · JMH · OpenJDK 25.0.3 · Linux · single core · SerialGC · `-XX:-StackTraceInThrowable` · 2026-10-25<br>
@@ -621,7 +621,12 @@ It covers all public classes and methods including `Iban`, `Bic`, `IbanRegistry`
 <details>
 <summary>Can I use this library on Android?</summary>
 
-Yes. `iban-commons` is Android-compatible from API level 21 (Android 5.0) onwards.
+Yes. `iban-commons` runs on Android from API level 24 (Android 7.0) onwards, which the build
+verifies against the Android API signatures. On API levels 21 to 23 it needs
+[core library desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)
+enabled in the app, since it uses `java.util.Optional`, `java.util.stream` and `java.util.function`.
+The only exception is `IbanRegistry.getLastUpdate()`, which returns a `java.time.YearMonth` and
+therefore needs API level 26; `getLastUpdateYear()` and `getLastUpdateMonth()` work on all levels.
 </details>
 
 <details>

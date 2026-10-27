@@ -117,8 +117,15 @@ public final class IbanValidator {
      * <p>
      * The capacity is set to {@code MAX_IBAN_LENGTH}, the longest possible unformatted IBAN.
      */
-    private static final ThreadLocal<char[]> VALIDATION_BUFFER = ThreadLocal
-        .withInitial(() -> new char[MAX_IBAN_LENGTH]);
+    // an anonymous subclass, since ThreadLocal.withInitial needs Android API 26;
+    // <> with an anonymous class needs -source 9+
+    @SuppressWarnings("PMD.UseDiamondOperator")
+    private static final ThreadLocal<char[]> VALIDATION_BUFFER = new ThreadLocal<char[]>() {
+        @Override
+        protected char[] initialValue() {
+            return new char[MAX_IBAN_LENGTH];
+        }
+    };
 
     /**
      * Private constructor to prevent instantiation of this utility class.

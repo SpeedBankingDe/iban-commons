@@ -62,9 +62,15 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * does not keep this library's class loader alive; this is why the buffers are not kept in
      * a map keyed by {@link IbanRegistry}. Being bounded per thread, they are never removed.
      */
-    @SuppressWarnings("java:S5164") // small, bounded per-thread buffers of JDK types only, see above
-    private static final ThreadLocal<char[][]> BUILD_BUFFERS = ThreadLocal
-        .withInitial(() -> new char[IbanRegistry.values().length][]);
+    // an anonymous subclass, since ThreadLocal.withInitial needs Android API 26;
+    // <> with an anonymous class needs -source 9+
+    @SuppressWarnings({"java:S5164", "PMD.UseDiamondOperator"}) // small, bounded per-thread buffers of JDK types only, see above
+    private static final ThreadLocal<char[][]> BUILD_BUFFERS = new ThreadLocal<char[][]>() {
+        @Override
+        protected char[][] initialValue() {
+            return new char[IbanRegistry.values().length][];
+        }
+    };
 
     /** The registry entry defining this builder's country structure, never {@code null}. */
     private final IbanRegistry countryData;
