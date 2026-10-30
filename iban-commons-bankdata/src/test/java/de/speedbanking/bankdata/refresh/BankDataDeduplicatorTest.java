@@ -12,7 +12,7 @@ final class BankDataDeduplicatorTest {
 
     @Test
     void deduplicate_record_returnsEqualRecord() {
-        BankData data = record("10010010", "PBNKDEFFXXX", "10559", "24");
+        BankData data = bankData("10010010", "PBNKDEFFXXX", "10559", "24");
 
         assertThat(new BankDataDeduplicator().deduplicate(data)).isEqualTo(data);
     }
@@ -20,8 +20,8 @@ final class BankDataDeduplicatorTest {
     @Test
     void deduplicate_equalValues_sharesInstances() {
         BankDataDeduplicator deduplicator = new BankDataDeduplicator();
-        BankData first = deduplicator.deduplicate(record("10010010", "PBNKDEFFXXX", "10559", "24"));
-        BankData second = deduplicator.deduplicate(record("10010020", "PBNKDEFFXXX", "10559", "24"));
+        BankData first = deduplicator.deduplicate(bankData("10010010", "PBNKDEFFXXX", "10559", "24"));
+        BankData second = deduplicator.deduplicate(bankData("10010020", "PBNKDEFFXXX", "10559", "24"));
 
         assertThat(second.getBankCode()).isNotSameAs(first.getBankCode());
         assertThat(second.getBankName()).isSameAs(first.getBankName());
@@ -45,7 +45,7 @@ final class BankDataDeduplicatorTest {
     /**
      * Creates a record whose string values are fresh instances, as a parser would produce them.
      */
-    private static BankData record(String bankCode, String bic, String postalCode, String checkDigitMethod) {
+    private static BankData bankData(String bankCode, String bic, String postalCode, String checkDigitMethod) {
         return BankData.builder(copy("DE"), copy(bankCode), copy("Postbank Ndl der Deutsche Bank"), copy("v1"))
             .bic(Bic.of(copy(bic)))
             .postalCode(copy(postalCode))

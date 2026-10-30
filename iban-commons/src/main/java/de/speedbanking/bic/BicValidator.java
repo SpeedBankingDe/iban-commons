@@ -42,8 +42,8 @@ public final class BicValidator {
      * <p>
      * The capacity is set to {@code BIC11_LENGTH}, the longest possible BIC.
      */
-    // an anonymous subclass, since ThreadLocal.withInitial needs Android API 26;
-    // <> with an anonymous class needs -source 9+
+    // an anonymous subclass, since ThreadLocal.withInitial needs Android API 26,
+    // without the diamond operator, which anonymous classes only support from Java 9
     @SuppressWarnings({"java:S5164", "PMD.UseDiamondOperator"}) // small per-thread buffer of a JDK type only, cannot pin the class loader
     private static final ThreadLocal<char[]> VALIDATION_BUFFER = new ThreadLocal<char[]>() {
         @Override

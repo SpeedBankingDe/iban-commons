@@ -184,9 +184,10 @@ final class CountryValidatorTest {
     @Test
     void calculateNationalCheckDigit_countryWithoutNcd_throwsIllegalStateException() {
         CountryValidator validator = IbanValidator.getCountryValidator(IbanRegistry.DE);
+        char[] iban = IbanRegistry.DE.getIbanExample().toCharArray();
 
         assertThat(validator.getNcdCalculator()).isNull();
-        assertThatThrownBy(() -> validator.calculateNationalCheckDigit(IbanRegistry.DE.getIbanExample().toCharArray()))
+        assertThatThrownBy(() -> validator.calculateNationalCheckDigit(iban))
             .isExactlyInstanceOf(IllegalStateException.class)
             .hasMessage("DE has no national check digit");
     }

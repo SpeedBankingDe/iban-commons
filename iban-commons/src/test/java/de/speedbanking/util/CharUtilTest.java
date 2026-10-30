@@ -67,7 +67,7 @@ final class CharUtilTest {
             .withMessage("Input cannot be null");
 
         // invalid index ranges check (for increased coverage)
-        char[] arr = new char[] {'1', '2'};
+        char[] arr = {'1', '2'};
         assertThatIndexOutOfBoundsException()
             .isThrownBy(() -> CharUtil.isAllDigits(arr, -1, 1))
             .withMessage("Invalid range (-1, 1) specified, valid range (0, 2)");
@@ -138,7 +138,7 @@ final class CharUtilTest {
             .withMessage("Input cannot be null");
 
         // Invalid index ranges check (for increased coverage)
-        char[] arr = new char[] {'A', 'B'};
+        char[] arr = {'A', 'B'};
         assertThatIndexOutOfBoundsException()
             .isThrownBy(() -> CharUtil.isAllUpperCase(arr, -1, 1))
             .withMessage("Invalid range (-1, 1) specified, valid range (0, 2)");
@@ -179,7 +179,7 @@ final class CharUtilTest {
         assertThat(CharUtil.isAllDigitOrUpperCase(arr1, 0, 5)).isFalse();
         assertThat(CharUtil.isAllDigitOrUpperCase(String.valueOf(arr1, 0, 5))).isFalse();
         // invalid at start
-        char[] arr2 = new char[] {'@', 'A'};
+        char[] arr2 = {'@', 'A'};
         assertThat(CharUtil.isAllDigitOrUpperCase(arr2, 0, 2)).isFalse();
         assertThat(CharUtil.isAllDigitOrUpperCase(String.valueOf(arr2, 0, 2))).isFalse();
     }
@@ -191,7 +191,7 @@ final class CharUtilTest {
             .isThrownBy(() -> CharUtil.isAllDigitOrUpperCase((char[]) null, 0, 1))
             .withMessage("Input cannot be null");
 
-        char[] arr = new char[] {'1', 'A'};
+        char[] arr = {'1', 'A'};
         assertThatIndexOutOfBoundsException()
             .isThrownBy(() -> CharUtil.isAllDigitOrUpperCase(arr, -1, 1))
             .withMessage("Invalid range (-1, 1) specified, valid range (0, 2)");
