@@ -44,7 +44,7 @@ public final class BicValidator {
      */
     // an anonymous subclass, since ThreadLocal.withInitial needs Android API 26;
     // <> with an anonymous class needs -source 9+
-    @SuppressWarnings("PMD.UseDiamondOperator")
+    @SuppressWarnings({"java:S5164", "PMD.UseDiamondOperator"}) // small per-thread buffer of a JDK type only, cannot pin the class loader
     private static final ThreadLocal<char[]> VALIDATION_BUFFER = new ThreadLocal<char[]>() {
         @Override
         protected char[] initialValue() {
