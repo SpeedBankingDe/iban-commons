@@ -403,6 +403,13 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 
 -----
 
+## 🆕 What's New in 1.8.14
+
+### Android API 24
+The core module runs on Android from API level 24 (Android 7.0) without core library desugaring. Up to 1.8.13 it needed API level 26, since it used `ThreadLocal.withInitial` and created `java.time.YearMonth` values when `IbanRegistry` was initialized. The build now checks the core classes against the Android API 24 signatures. Only `IbanRegistry.getLastUpdate()`, which returns a `YearMonth`, still needs API level 26; `getLastUpdateYear()` and `getLastUpdateMonth()` work on all levels.
+
+-----
+
 ## 🆕 What's New in 1.8.13
 
 ### 42% Smaller Jar
