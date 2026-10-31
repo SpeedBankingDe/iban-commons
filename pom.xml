@@ -129,7 +129,7 @@
         <!-- Path relative to each sub-module; both modules share the same ruleset location -->
         <check.checkstyle.ruleset>${project.rootDirectory}/build/checkstyle-rules.xml</check.checkstyle.ruleset>
 
-        <dep.pmd.version>7.28.0</dep.pmd.version>
+        <dep.pmd.version>7.29.0</dep.pmd.version>
         <check.pmd.ruleset>${project.rootDirectory}/build/pmd-rules.xml</check.pmd.ruleset>
 
         <!-- Plugin versions (alphabetically) -->
@@ -138,14 +138,14 @@
         <dep.plugin.checkstyle.version>3.6.0</dep.plugin.checkstyle.version>
         <dep.plugin.compiler.version>3.16.0</dep.plugin.compiler.version>
         <dep.plugin.cyclonedx.version>2.9.3</dep.plugin.cyclonedx.version>
-        <dep.plugin.enforcer.version>3.6.3</dep.plugin.enforcer.version>
-        <dep.plugin.figlet.version>1.1.0</dep.plugin.figlet.version>
+        <dep.plugin.enforcer.version>3.7.0</dep.plugin.enforcer.version>
+        <dep.plugin.figlet.version>1.2.0</dep.plugin.figlet.version>
         <dep.plugin.resources.version>3.5.0</dep.plugin.resources.version>
-        <dep.plugin.error-prone.version>2.50.0</dep.plugin.error-prone.version>
+        <dep.plugin.error-prone.version>2.51.0</dep.plugin.error-prone.version>
         <dep.plugin.error-prone-support.version>0.26.0</dep.plugin.error-prone-support.version>
         <dep.plugin.exec.version>3.6.4</dep.plugin.exec.version>
         <dep.plugin.gpg.version>3.2.8</dep.plugin.gpg.version>
-        <dep.plugin.jacoco.version>0.8.15</dep.plugin.jacoco.version>
+        <dep.plugin.jacoco.version>0.8.16</dep.plugin.jacoco.version>
         <dep.plugin.jar.version>3.5.1</dep.plugin.jar.version>
         <dep.plugin.javadoc.version>3.12.0</dep.plugin.javadoc.version>
         <dep.plugin.license.version>5.1.2</dep.plugin.license.version>
@@ -154,7 +154,7 @@
         <dep.plugin.release.version>3.3.1</dep.plugin.release.version>
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version> <!-- see https://github.com/Ekryd/sortpom/releases -->
         <dep.plugin.source.version>3.4.0</dep.plugin.source.version>
-        <dep.plugin.surefire.version>3.5.6</dep.plugin.surefire.version> <!-- 3.6.0 runs no tests on the JDK 8 toolchain -->
+        <dep.plugin.surefire.version>3.6.1</dep.plugin.surefire.version>
         <dep.plugin.versions.version>2.23.0</dep.plugin.versions.version>
 
         <dep.gummy-bears.version>0.16.0</dep.gummy-bears.version>
