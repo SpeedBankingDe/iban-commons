@@ -46,13 +46,13 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 <dependency>
     <groupId>de.speedbanking</groupId>
     <artifactId>iban-commons</artifactId>
-    <version>1.8.13</version>
+    <version>1.8.14</version>
 </dependency>
 ```
 
 **Gradle:**
 ```gradle
-implementation 'de.speedbanking:iban-commons:1.8.13'
+implementation 'de.speedbanking:iban-commons:1.8.14'
 ```
 
 ### 2. Validate & Parse
