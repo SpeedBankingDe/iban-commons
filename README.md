@@ -628,11 +628,15 @@ It covers all public classes and methods including `Iban`, `Bic`, `IbanRegistry`
 <summary>Can I use this library on Android?</summary>
 
 Yes. `iban-commons` runs on Android from API level 24 (Android 7.0) onwards, which the build
-verifies against the Android API signatures. On API levels 21 to 23 it needs
+verifies against the Android API signatures. The only exception is `IbanRegistry.getLastUpdate()`,
+which returns a `java.time.YearMonth` and therefore needs API level 26; `getLastUpdateYear()` and
+`getLastUpdateMonth()` work on all levels.
+
+On API levels 21 to 23 it needs
 [core library desugaring](https://developer.android.com/studio/write/java8-support#library-desugaring)
 enabled in the app, since it uses `java.util.Optional`, `java.util.stream` and `java.util.function`.
-The only exception is `IbanRegistry.getLastUpdate()`, which returns a `java.time.YearMonth` and
-therefore needs API level 26; `getLastUpdateYear()` and `getLastUpdateMonth()` work on all levels.
+With desugaring, `getLastUpdate()` works as well. This was checked for 1.8.14 against the API 21
+signatures including the desugared library, but unlike API 24 it is not part of the build.
 </details>
 
 <details>

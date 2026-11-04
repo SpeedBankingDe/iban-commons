@@ -72,11 +72,12 @@ The attack surface from transitive dependencies is therefore zero.
 
 ### Android Compatibility Notes
 
-`java.util.Optional` (API 24+) and `java.time.YearMonth` (API 26+) are used
-internally. Null-returning alternatives (`tryParseOrNull()`, `getLastUpdateYear()`,
-`getLastUpdateMonth()`) are provided for Android projects that cannot enable
-core library desugaring. These carry the same validation guarantees as their
-`Optional`-returning counterparts.
+The core module runs on Android from API level 24, which the build verifies
+against the Android API signatures. The only exception is
+`IbanRegistry.getLastUpdate()`, which returns a `java.time.YearMonth` (API 26+);
+`getLastUpdateYear()` and `getLastUpdateMonth()` return the same information on
+all levels. API levels 21 to 23 need core library desugaring, see the Android
+section of the README.
 
 ## Out of Scope
 

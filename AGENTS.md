@@ -7,7 +7,7 @@ description: A zero-dependency Java toolkit for IBAN/BIC validation, formatting,
 
 ## Project Overview
 
-**IBAN Commons** is an ultra-fast, allocation-free, zero-dependency Java toolkit for **IBAN** (ISO 13616) and **BIC/SWIFT** (ISO 9362) validation, parsing, and formatting. Supports 127 countries, Java 8+, Android-compatible (API 21+).
+**IBAN Commons** is an ultra-fast, allocation-free, zero-dependency Java toolkit for **IBAN** (ISO 13616) and **BIC/SWIFT** (ISO 9362) validation, parsing, and formatting. Supports 127 countries, Java 8+, Android-compatible (API 24+, or 21+ with core library desugaring).
 
 ### Key Features
 
