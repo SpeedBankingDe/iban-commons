@@ -155,7 +155,7 @@
         <dep.plugin.sortpom.version>4.0.0</dep.plugin.sortpom.version> <!-- see https://github.com/Ekryd/sortpom/releases -->
         <dep.plugin.source.version>3.4.0</dep.plugin.source.version>
         <dep.plugin.surefire.version>3.6.1</dep.plugin.surefire.version>
-        <dep.plugin.versions.version>2.25.1</dep.plugin.versions.version>
+        <dep.plugin.versions.version>2.25.2</dep.plugin.versions.version>
 
         <dep.gummy-bears.version>0.16.0</dep.gummy-bears.version>
 
