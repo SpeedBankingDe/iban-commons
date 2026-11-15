@@ -58,6 +58,9 @@ public final class BankDataLoaderCz extends AbstractCountryBankDataLoader<BankDa
     private static final char   FIELD_SEPARATOR    = ';';
     private static final int    HEADER_ROW_COUNT   = 1;
 
+    /**
+     * Columns of the CNB bank code list, by zero-based position.
+     */
     public enum Column implements ColumnDefinition {
 
         BANK_CODE(0),
@@ -78,6 +81,9 @@ public final class BankDataLoaderCz extends AbstractCountryBankDataLoader<BankDa
 
     }
 
+    /**
+     * Creates a loader for the default remote source {@link #DEFAULT_SOURCE_URI}.
+     */
     public BankDataLoaderCz() {
         super(Column.class, DEFAULT_SOURCE_URI);
     }

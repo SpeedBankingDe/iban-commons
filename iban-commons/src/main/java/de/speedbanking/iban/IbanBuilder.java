@@ -486,6 +486,7 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * to call {@code super.appendToString(sb)} first.
      *
      * @param builder the builder to append field representations to, must not be null
+     * @return the given builder, for chaining
      */
     protected StringBuilder appendToString(StringBuilder builder) {
         return builder;

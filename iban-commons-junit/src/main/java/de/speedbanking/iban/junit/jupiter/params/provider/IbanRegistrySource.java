@@ -180,6 +180,7 @@ public @interface IbanRegistrySource {
     // Nested enums
     // -------------------------------------------------------------------------
 
+    /** Restricts the source to base or derived countries. */
     enum CountryType {
         /** Include only base countries. */
         BASE,
@@ -189,6 +190,7 @@ public @interface IbanRegistrySource {
         ANY
     }
 
+    /** Restricts the source by SEPA membership. */
     enum Sepa {
         /** Include only SEPA members. */
         YES,
@@ -198,6 +200,7 @@ public @interface IbanRegistrySource {
         ANY
     }
 
+    /** Defines how several active attribute filters are combined. */
     enum FilterMode {
         /**
          * An entry must satisfy <em>all</em> active attribute filters (AND semantics).

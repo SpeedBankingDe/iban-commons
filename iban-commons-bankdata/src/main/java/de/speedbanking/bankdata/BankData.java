@@ -101,6 +101,15 @@ public final class BankData implements Serializable {
         this(countryCode, bankCode, null, bic, bankName, postalCode, city, sourceVersion);
     }
 
+    /**
+     * Creates a new immutable bank data record without branch code and address.
+     *
+     * @param countryCode   the ISO 3166-1 alpha-2 country code; must not be {@code null}
+     * @param bankCode      the country-specific bank code (e.g. BLZ); must not be {@code null}
+     * @param bic           the BIC of the institution, or {@code null} if the source does not provide one
+     * @param bankName      the institution's name; must not be {@code null}
+     * @param sourceVersion an identifier for the data source's version/vintage; must not be {@code null}
+     */
     public BankData(String countryCode, String bankCode, Bic bic, String bankName, String sourceVersion) {
         this(countryCode, bankCode, null, bic, bankName, null, null, sourceVersion);
     }
