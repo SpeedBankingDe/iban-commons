@@ -24,9 +24,9 @@
     </module>
     <module name="RegexpMultiline">
         <property name="format"
-                  value="@(?:Parameterized)?Test(?:\s*\(.*?\))?\s+(?:@[a-zA-Z]+(?:\s*\(.*?\))?\s+)*@DisplayName" />
+                  value="@(?:Parameterized)?Test(?:\s*\(.*?\))?\s+(?:@[a-zA-Z]+(?:\s*\(.*?\))?\s+)*@DisplayName"/>
         <property name="message"
-                  value="Annotation order violation: @DisplayName must come BEFORE @Test/@ParameterizedTest" />
+                  value="Annotation order violation: @DisplayName must come BEFORE @Test/@ParameterizedTest"/>
     </module>
     <module name="RegexpSingleline">
         <property name="format" value="\s+$"/>
@@ -54,7 +54,7 @@
             <property name="format" value="^(ex[a-zA-Z0-9]*)|([a-z][a-zA-Z0-9]+Exception|ignored)$"/>
         </module>
         <module name="ConstantName"/>
-        <!--module name="DeclarationOrder" /-->
+        <!-- module name="DeclarationOrder"/ -->
         <module name="EmptyBlock"/>
         <module name="EmptyForInitializerPad"/>
         <module name="EmptyForIteratorPad"/>
@@ -77,7 +77,7 @@
             <property name="sortStaticImportsAlphabetically" value="true"/>
         </module>
         <module name="InnerAssignment"/>
-        <!--module name="InnerTypeLast" /-->
+        <!-- module name="InnerTypeLast"/ -->
         <module name="InterfaceIsType"/>
         <module name="InvalidJavadocPosition"/>
         <module name="JavadocBlockTagLocation"/>
@@ -99,7 +99,7 @@
             <property name="format" value="(^[a-z][a-zA-Z0-9]*$)|(^[ijk]$)"/>
         </module>
         <module name="MemberName">
-            <property name="format" value="^[a-z][a-zA-Z0-9]*$" />
+            <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
         </module>
         <module name="MethodLength">
             <property name="max" value="100"/>
@@ -157,7 +157,7 @@
         <module name="SuperClone"/>
         <module name="SuperFinalize"/>
         <module name="SuppressWarningsHolder"/>
-        <!--module name="TodoComment" /-->
+        <!-- module name="TodoComment"/ -->
         <module name="TypecastParenPad"/>
         <module name="TypeName"/>
         <!--module name="TypeName">
