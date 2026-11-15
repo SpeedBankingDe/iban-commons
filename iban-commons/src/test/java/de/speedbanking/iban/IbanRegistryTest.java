@@ -81,12 +81,12 @@ final class IbanRegistryTest {
     @DisplayName("Should have correct length and derived IBAN pattern string")
     @ParameterizedTest(name = "[{index}]: {0}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
-            "DE | 22 | 8!n10!n       | DE", // Germany: 18 chars
-            "FR | 27 | 5!n5!n11!c2!n | FR", // France: 23 chars
-            "NO | 15 | 4!n6!n1!n     | NO", // Norway: shortest IBAN
-            "MT | 31 | 4!a5!n18!c    | MT", // Malta: longest IBAN
-            "AX | 18 | 3!n11!n       | FI", // Åland Islands: base country Finland
-            "GP | 27 | 5!n5!n11!c2!n | FR"  // Guadeloupe: base country France"
+        "DE | 22 | 8!n10!n       | DE", // Germany: 18 chars
+        "FR | 27 | 5!n5!n11!c2!n | FR", // France: 23 chars
+        "NO | 15 | 4!n6!n1!n     | NO", // Norway: shortest IBAN
+        "MT | 31 | 4!a5!n18!c    | MT", // Malta: longest IBAN
+        "AX | 18 | 3!n11!n       | FI", // Åland Islands: base country Finland
+        "GP | 27 | 5!n5!n11!c2!n | FR"  // Guadeloupe: base country France"
     })
     void checkIbanProperties_shouldMatchExpectedValues(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
         IbanRegistry entry = IbanRegistry.getByCode(code);

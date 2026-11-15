@@ -314,7 +314,7 @@ public final class BankDataConfig {
             if (current.frozen) {
                 throw new IllegalStateException(
                     BankDataConfig.class.getSimpleName() + " is already in use and cannot be changed - "
-                  + "call configure() before the first get() invocation");
+                    + "call configure() before the first get() invocation");
             }
             return new State(config, false);
         }).config;

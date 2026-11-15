@@ -68,7 +68,7 @@ public class IbanConstraintValidator implements ConstraintValidator<ValidIban, C
             // annotation forbids spaces even though the global config would otherwise accept them
             ctx.disableDefaultConstraintViolation();
             ctx.buildConstraintViolationWithTemplate(IbanValidationError.ILLEGAL_CHARACTERS.getText())
-               .addConstraintViolation();
+                .addConstraintViolation();
             return false;
         }
 
@@ -84,7 +84,7 @@ public class IbanConstraintValidator implements ConstraintValidator<ValidIban, C
         } catch (InvalidIbanException ex) {
             ctx.disableDefaultConstraintViolation();
             ctx.buildConstraintViolationWithTemplate(ex.getReason().getText())
-               .addConstraintViolation();
+                .addConstraintViolation();
             return false;
         }
     }

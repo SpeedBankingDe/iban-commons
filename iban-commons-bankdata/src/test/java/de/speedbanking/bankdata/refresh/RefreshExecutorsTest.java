@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,10 +21,7 @@ final class RefreshExecutorsTest {
 
     @Test
     void get_returnsSameSharedInstanceEveryTime() {
-        ExecutorService first = RefreshExecutors.get();
-        ExecutorService second = RefreshExecutors.get();
-
-        assertThat(first).isSameAs(second);
+        assertThat(RefreshExecutors.get()).isSameAs(RefreshExecutors.get());
     }
 
     @Test
@@ -48,9 +44,8 @@ final class RefreshExecutorsTest {
         int countryCount = BankDataRegistry.getSupportedCountryCodes().size();
         int expectedPoolSize = Math.max(2, Math.min(8, countryCount));
 
-        ThreadPoolExecutor executor = (ThreadPoolExecutor) RefreshExecutors.get();
-
-        assertThat(executor.getCorePoolSize()).isEqualTo(expectedPoolSize);
+        assertThat(RefreshExecutors.get()).isInstanceOfSatisfying(ThreadPoolExecutor.class,
+            executor -> assertThat(executor.getCorePoolSize()).isEqualTo(expectedPoolSize));
     }
 
     @Test

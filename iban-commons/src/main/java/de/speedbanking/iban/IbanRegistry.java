@@ -3433,8 +3433,7 @@ public enum IbanRegistry {
 
         structureData.streamComponentsByPosition()
             .filter(c -> c.getType() != IbanComponentType.BBAN)
-            .forEach(
-            c -> joiner.add(c.getType().getLabel() + ": " + formatComponentPosition(c)));
+            .forEach(c -> joiner.add(c.getType().getLabel() + ": " + formatComponentPosition(c)));
 
         return joiner
             .add("IBAN Example: " + getIbanExample())

@@ -134,7 +134,7 @@ final class RandomIbanSourceTest {
             .allSatisfy(arg -> {
                 String iban = (String) arg.get()[0];
                 assertThat(Iban.of(iban).isSepa()).isTrue();
-        });
+            });
     }
 
     @Test
@@ -150,7 +150,7 @@ final class RandomIbanSourceTest {
             .allSatisfy(arg -> {
                 String iban = (String) arg.get()[0];
                 assertThat(Iban.of(iban).isSepa()).isFalse();
-        });
+            });
     }
 
     @Test

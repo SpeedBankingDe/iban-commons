@@ -152,17 +152,17 @@ public final class BundledDataRefreshTool {
 
     static void printUsage(PrintStream out) {
         out.printf("Usage: %s [COUNTRY_CODE...]%n", BundledDataRefreshTool.class.getSimpleName())
-           .printf("%n")
-           .printf("Regenerates the bundled bank data CSV fallback files under%n")
-           .printf("'%s' from each country's live upstream source.%n", BUNDLED_RESOURCE_DIR)
-           .printf("%n")
-           .printf("With no arguments, refreshes all supported countries: %s%n", BankDataRegistry.getSupportedCountryCodes())
-           .printf("With one or more ISO 3166-1 alpha-2 country codes, refreshes only those countries.%n")
-           .printf("%n")
-           .printf("Must be run with iban-commons-bankdata/ as the working directory:%n")
-           .printf("  cd iban-commons-bankdata%n")
-           .printf("  mvn test-compile exec:java@refresh-bundled-bankdata%n")
-           .printf("  mvn test-compile exec:java@refresh-bundled-bankdata -Dexec.args=\"DE AT\"%n");
+            .printf("%n")
+            .printf("Regenerates the bundled bank data CSV fallback files under%n")
+            .printf("'%s' from each country's live upstream source.%n", BUNDLED_RESOURCE_DIR)
+            .printf("%n")
+            .printf("With no arguments, refreshes all supported countries: %s%n", BankDataRegistry.getSupportedCountryCodes())
+            .printf("With one or more ISO 3166-1 alpha-2 country codes, refreshes only those countries.%n")
+            .printf("%n")
+            .printf("Must be run with iban-commons-bankdata/ as the working directory:%n")
+            .printf("  cd iban-commons-bankdata%n")
+            .printf("  mvn test-compile exec:java@refresh-bundled-bankdata%n")
+            .printf("  mvn test-compile exec:java@refresh-bundled-bankdata -Dexec.args=\"DE AT\"%n");
     }
 
     /**

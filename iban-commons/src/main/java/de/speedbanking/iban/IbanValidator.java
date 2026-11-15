@@ -446,7 +446,7 @@ public final class IbanValidator {
         }
 
         if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
-         || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
+            || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
             return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS, countryData);
         }
 
@@ -567,7 +567,7 @@ public final class IbanValidator {
         }
 
         if (isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT1])
-         || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
+            || isNotDigit(normIban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
             return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECK_DIGITS, countryData);
         }
 

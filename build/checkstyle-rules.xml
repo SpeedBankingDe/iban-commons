@@ -50,10 +50,14 @@
     <module name="TreeWalker">
         <module name="ArrayTypeStyle"/>
         <module name="AvoidNestedBlocks"/>
+        <!-- module name="AvoidStarImport"/ -->
         <module name="CatchParameterName">
             <property name="format" value="^(ex[a-zA-Z0-9]*)|([a-z][a-zA-Z0-9]+Exception|ignored)$"/>
         </module>
         <module name="ConstantName"/>
+        <!-- module name="CyclomaticComplexity">
+            <property name="switchBlockAsSingleDecisionPoint" value="true"/>
+        </module -->
         <!-- module name="DeclarationOrder"/ -->
         <module name="EmptyBlock"/>
         <module name="EmptyForInitializerPad"/>
@@ -75,6 +79,14 @@
             <property name="separatedStaticGroups" value="true"/>
             <property name="staticGroups" value="/^(?:de\.speedbanking)\..+/,/^(?!(?:jakarta|javaf?x?)\.).+/,jakarta,java,javafx,javax"/>
             <property name="sortStaticImportsAlphabetically" value="true"/>
+        </module>
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="4"/>
+            <property name="throwsIndent" value="4"/>
+            <property name="arrayInitIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="4"/>
         </module>
         <module name="InnerAssignment"/>
         <!-- module name="InnerTypeLast"/ -->
@@ -121,6 +133,11 @@
         <module name="MissingOverride"/>
         <module name="MissingSwitchDefault"/>
         <module name="ModifierOrder"/>
+        <!-- MultipleStringLiterals disabled: extracting constants only to avoid duplicate
+             literals rarely improves readability -->
+        <!-- module name="MultipleStringLiterals">
+            <property name="allowedDuplicates" value="3"/>
+        </module -->
         <module name="MutableException"/>
         <module name="NeedBraces"/>
         <module name="NoClone"/>
@@ -128,10 +145,12 @@
         <module name="NonEmptyAtclauseDescription"/>
         <module name="NoWhitespaceAfter"/>
         <module name="NoWhitespaceBefore"/>
+        <!-- module name="NPathComplexity"/ -->
         <module name="OneStatementPerLine"/>
         <module name="OneTopLevelClass"/>
         <module name="OperatorWrap"/>
         <module name="OuterTypeFilename"/>
+        <!-- module name="OverloadMethodsDeclarationOrder"/ -->
         <module name="PackageName">
             <property name="format" value="^[a-z]+(?:\.[a-z0-9]+)*$"/>
         </module>
@@ -160,16 +179,6 @@
         <!-- module name="TodoComment"/ -->
         <module name="TypecastParenPad"/>
         <module name="TypeName"/>
-        <!--module name="TypeName">
-            <property name="format" value="^([A-Z][a-zA-Z0-9]+IF|I[A-Z][a-zA-Z0-9]+)$"/>
-            <property name="tokens" value="INTERFACE_DEF"/>
-            <message key="name.invalidPattern" value="Interface name ''{0}'' must match pattern ''{1}''."/>
-        </module-->
-        <module name="TypeName">
-            <property name="format" value="^[A-Z][a-zA-Z0-9]+$"/>
-            <property name="tokens" value="CLASS_DEF"/>
-            <message key="name.invalidPattern" value="Class name ''{0}'' must match pattern ''{1}''."/>
-        </module>
         <module name="UnusedImports"/>
         <module name="UpperEll"/>
         <module name="VariableDeclarationUsageDistance">
