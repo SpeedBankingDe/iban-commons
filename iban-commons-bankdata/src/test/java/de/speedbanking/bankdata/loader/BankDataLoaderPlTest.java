@@ -135,20 +135,20 @@ final class BankDataLoaderPlTest {
 
         assertThat(records).extracting(BankData::getKey).containsExactlyInAnyOrder("1010000", "1010002", "1440003");
 
-        BankData headOffice = records.stream().filter(r -> r.getKey().equals("1010000")).findFirst().orElseThrow(AssertionError::new);
+        BankData headOffice = records.stream().filter(r -> "1010000".equals(r.getKey())).findFirst().orElseThrow(AssertionError::new);
         assertThat(headOffice.getBankName()).isEqualTo("Musterbank Centrala");
         assertThat(headOffice.getPostalCode()).isEqualTo("00-001");
         assertThat(headOffice.getCity()).isEqualTo("Warszawa");
         assertThat((Object) headOffice.getBic()).hasToString("MSTRPLPWXXX");
 
-        BankData branch = records.stream().filter(r -> r.getKey().equals("1010002")).findFirst().orElseThrow(AssertionError::new);
+        BankData branch = records.stream().filter(r -> "1010002".equals(r.getKey())).findFirst().orElseThrow(AssertionError::new);
         assertThat(branch.getBankCode()).isEqualTo("101");
         assertThat(branch.getBranchCode()).isEqualTo("0002");
         assertThat((Object) branch.getBic()).isNull();
 
         // institution number (102) differs from the settlement-derived bank code (144), the same
         // "absorbed a legacy settlement prefix" case as parse_bankCodeAndBranchCode... above
-        BankData legacyPrefix = records.stream().filter(r -> r.getKey().equals("1440003")).findFirst().orElseThrow(AssertionError::new);
+        BankData legacyPrefix = records.stream().filter(r -> "1440003".equals(r.getKey())).findFirst().orElseThrow(AssertionError::new);
         assertThat(legacyPrefix.getBankCode()).isEqualTo("144");
     }
 

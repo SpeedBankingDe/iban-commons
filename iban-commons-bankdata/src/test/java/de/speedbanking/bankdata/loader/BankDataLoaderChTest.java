@@ -111,7 +111,7 @@ final class BankDataLoaderChTest {
         assertThat(postfinance.getPostalCode()).isEqualTo("3030");
         assertThat(postfinance.getCity()).isEqualTo("Bern");
 
-        assertThat(records).allMatch(r -> r.getSourceVersion().equals("test-version"));
+        assertThat(records).allMatch(r -> "test-version".equals(r.getSourceVersion()));
     }
 
     private static BankData findByBankCode(List<BankData> records, String bankCode) {

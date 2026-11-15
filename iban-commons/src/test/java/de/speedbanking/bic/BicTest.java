@@ -420,7 +420,7 @@ final class BicTest {
         assertThatIndexOutOfBoundsException().isThrownBy(() -> bic.subSequence(-1, 2))
             .withMessage("Start index should be >= 0 (was: -1) and end index (exclusive) <= 11 (was: 2)");
 
-        assertThatIndexOutOfBoundsException().isThrownBy(() -> bic.subSequence(0, bic.toString().length() + 1))
+        assertThatIndexOutOfBoundsException().isThrownBy(() -> bic.subSequence(0, bic.length() + 1))
             .withMessage("Start index should be >= 0 (was: 0) and end index (exclusive) <= 11 (was: 12)");
 
         assertThatIndexOutOfBoundsException().isThrownBy(() -> bic.subSequence(5, 4))

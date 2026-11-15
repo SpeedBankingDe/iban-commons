@@ -65,7 +65,7 @@ import java.util.stream.Stream;
  *
  * @since 1.8.0
  */
-@SuppressWarnings("ImmutableEnumChecker")
+@SuppressWarnings({"ImmutableEnumChecker", "PMD.NonSerializableClass"}) // enum constants serialize by name only
 public enum IbanRegistry {
 
     // --- BGN: Enum Constants (generated from Swift IBAN Registry) ---

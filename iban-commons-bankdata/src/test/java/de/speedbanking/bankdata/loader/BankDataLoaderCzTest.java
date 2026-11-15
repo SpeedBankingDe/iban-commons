@@ -35,10 +35,10 @@ final class BankDataLoaderCzTest {
         assertThat(records).hasSize(3);
         assertThat(records).extracting(BankData::getBankCode).containsExactly("0100", "0300", "2700");
 
-        BankData withoutBic = records.stream().filter(r -> r.getBankCode().equals("2700")).findFirst().orElseThrow(AssertionError::new);
+        BankData withoutBic = records.stream().filter(r -> "2700".equals(r.getBankCode())).findFirst().orElseThrow(AssertionError::new);
         assertThat((Object) withoutBic.getBic()).isNull();
 
-        BankData withBic = records.stream().filter(r -> r.getBankCode().equals("0100")).findFirst().orElseThrow(AssertionError::new);
+        BankData withBic = records.stream().filter(r -> "0100".equals(r.getBankCode())).findFirst().orElseThrow(AssertionError::new);
         assertThat((Object) withBic.getBic()).hasToString("KOMBCZPPXXX");
         assertThat(withBic.getBankName()).isEqualTo("Musterbanka Praha a.s.");
         assertThat((Object) withBic.getPostalCode()).isNull();

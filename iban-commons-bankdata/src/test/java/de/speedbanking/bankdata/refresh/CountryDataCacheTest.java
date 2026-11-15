@@ -413,6 +413,7 @@ final class CountryDataCacheTest {
             }
 
             @Override
+            @SuppressWarnings("PMD.AvoidThrowingNullPointerException") // simulates a programming error in a loader
             public List<BankData> parse(InputStream rawSource, String sourceVersion) {
                 throw new NullPointerException("simulated bug in loader.parse()");
             }

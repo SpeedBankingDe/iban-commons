@@ -37,10 +37,10 @@ final class BankDataLoaderAtTest {
         assertThat(records).hasSize(3);
         assertThat(records).extracting(BankData::getBankCode).containsExactly("12000", "18170", "34923");
 
-        BankData withoutBic = records.stream().filter(r -> r.getBankCode().equals("18170")).findFirst().orElseThrow(AssertionError::new);
+        BankData withoutBic = records.stream().filter(r -> "18170".equals(r.getBankCode())).findFirst().orElseThrow(AssertionError::new);
         assertThat((Object) withoutBic.getBic()).isNull();
 
-        BankData headOffice = records.stream().filter(r -> r.getBankCode().equals("12000")).findFirst().orElseThrow(AssertionError::new);
+        BankData headOffice = records.stream().filter(r -> "12000".equals(r.getBankCode())).findFirst().orElseThrow(AssertionError::new);
         assertThat(headOffice.getBankName()).isEqualTo("UniCredit Bank Austria AG");
         assertThat((Object) headOffice.getBic())
             .isNotNull()

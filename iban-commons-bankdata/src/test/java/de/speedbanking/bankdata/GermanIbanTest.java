@@ -164,6 +164,7 @@ final class GermanIbanTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.EqualsNull") // equals(null) is what is being tested
     void equals_sameInstanceNullOtherTypeOrOtherIban_comparesByIban() {
         GermanIban iban = GermanIban.of("DE89370400440532013000");
 

@@ -118,6 +118,7 @@ final class BankDataTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.EqualsNull") // equals(null) is what is being tested
     void equals_null_notEqual() {
         BankData a = new BankData("DE", "10000000", null, "Bundesbank", "10117", "Berlin", "v1");
 

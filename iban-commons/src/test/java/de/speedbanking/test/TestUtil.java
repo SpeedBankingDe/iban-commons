@@ -206,20 +206,8 @@ public final class TestUtil {
             throw new IllegalArgumentException(
                 "Cannot locate TC_BLOCKDATA block with STREAM_VERSION=1L in the serialized stream");
         }
-        // payloadStart: the byte immediately after TC_BLOCKDATA + block_length_byte
-        int payloadStart = blockHeaderPos + 2;
 
-        // 4. Determine the length of the original payload so the stream trailer is preserved.
-        //    Layout written by Memento.writeObject():
-        //      [8 bytes]  version long
-        //      [2 bytes]  UTF-8 string length prefix (big-endian short)
-        //      [n bytes]  UTF-8 string content
-        int originalUtfLen = ((templateBytes[payloadStart + 8] & 0xFF) << 8)
-                           |  (templateBytes[payloadStart + 9] & 0xFF);
-        int originalPayloadLen = 8 + 2 + originalUtfLen;
-        int trailerStart      = payloadStart + originalPayloadLen;
-
-        // 5. Patch the TC_BLOCKDATA length byte to reflect the new payload size.
+        // 4. Patch the TC_BLOCKDATA length byte to reflect the new payload size.
         //    ObjectInputStream uses this byte to know how many bytes belong to the block;
         //    if it is stale the stream is read incorrectly (EOFException or silent corruption).
         //    TC_BLOCKDATA supports block lengths up to 255; Memento payloads are well below that.
@@ -228,6 +216,19 @@ public final class TestUtil {
             throw new IllegalArgumentException(
                 "New Memento payload exceeds TC_BLOCKDATA capacity (255 bytes): " + newBlockLen);
         }
+
+        // payloadStart: the byte immediately after TC_BLOCKDATA + block_length_byte
+        int payloadStart = blockHeaderPos + 2;
+
+        // 5. Determine the length of the original payload so the stream trailer is preserved.
+        //    Layout written by Memento.writeObject():
+        //      [8 bytes]  version long
+        //      [2 bytes]  UTF-8 string length prefix (big-endian short)
+        //      [n bytes]  UTF-8 string content
+        int originalUtfLen = ((templateBytes[payloadStart + 8] & 0xFF) << 8)
+                           |  (templateBytes[payloadStart + 9] & 0xFF);
+        int originalPayloadLen = 8 + 2 + originalUtfLen;
+        int trailerStart      = payloadStart + originalPayloadLen;
 
         // 6. Splice: header (with patched block-length byte) | new payload | original trailer
         byte[] result = new byte[payloadStart + newPayload.length + templateBytes.length - trailerStart];
@@ -329,7 +330,7 @@ public final class TestUtil {
     public static <T> Constructor<T> assertConstructorIsPrivate(Class<T> clazz) {
         assertThat(clazz).isNotNull();
 
-        Constructor<T> constructor = null;
+        Constructor<T> constructor;
         try {
             constructor = clazz.getDeclaredConstructor();
         } catch (NoSuchMethodException | SecurityException ex) {

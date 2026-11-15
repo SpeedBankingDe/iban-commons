@@ -63,7 +63,7 @@ final class BundledBankDataSmokeTest {
             records = BankDataFormat.read(in, UTF_8, "DE", "smoke-test");
         }
 
-        assertThat(records).anyMatch(r -> r.getBankCode().equals("37040044"));
+        assertThat(records).anyMatch(r -> "37040044".equals(r.getBankCode()));
     }
 
 }

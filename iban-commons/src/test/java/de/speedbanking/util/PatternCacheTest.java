@@ -1,5 +1,7 @@
 package de.speedbanking.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import static java.util.regex.Pattern.CASE_INSENSITIVE;
 import static java.util.regex.Pattern.MULTILINE;
 
@@ -312,6 +314,7 @@ final class PatternCacheTest extends Assertions {
     }
 
     @Test
+    @SuppressWarnings("PMD.EqualsNull") // equals(null) is what is being tested
     void cacheKey_equalsAndHashCodeAndToString() {
         // given
         Object key1 = new CacheKey("abc", CASE_INSENSITIVE);
@@ -321,7 +324,7 @@ final class PatternCacheTest extends Assertions {
 
         // then: equals reflexive and null / class checks
         assertEquals(key1, key1);
-        assertNotEquals(null, key1);
+        assertThat(key1.equals(null)).isFalse();
         assertNotEquals("some string", key1);
 
         // then: equals equality / inequality checks
