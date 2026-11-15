@@ -7,10 +7,6 @@
     <property name="fileExtensions" value="java, properties, xml"/>
     <property name="tabWidth" value="4"/>
 
-    <!-- Excludes all 'module-info.java' files -->
-    <module name="BeforeExecutionExclusionFileFilter">
-        <property name="fileNamePattern" value="module\-info\.java$"/>
-    </module>
     <module name="FileTabCharacter"/>
     <module name="LineLength">
         <property name="fileExtensions" value="java"/>
@@ -18,12 +14,6 @@
         <property name="ignorePattern" value="@version|@see|@todo|TODO"/>
     </module>
     <module name="NewlineAtEndOfFile"/>
-    <module name="RegexpSingleline">
-        <property name="format" value="\s+$"/>
-        <property name="minimum" value="0"/>
-        <property name="maximum" value="0"/>
-        <property name="message" value="Line has trailing spaces."/>
-    </module>
     <module name="RegexpMultiline">
         <property name="format" value="(?s:(\r\n|\r).*)"/>
         <property name="message" value="Line has CRLF or CR line ending."/>
@@ -38,13 +28,24 @@
         <property name="message"
                   value="Annotation order violation: @DisplayName must come BEFORE @Test/@ParameterizedTest" />
     </module>
+    <module name="RegexpSingleline">
+        <property name="format" value="\s+$"/>
+        <property name="minimum" value="0"/>
+        <property name="maximum" value="0"/>
+        <property name="message" value="Line has trailing spaces."/>
+    </module>
+    <module name="Translation"/>
+    <module name="UniqueProperties"/>
+
+    <!-- Excludes all 'module-info.java' files -->
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="module\-info\.java$"/>
+    </module>
     <module name="SuppressionSingleFilter">
         <property name="checks" value="JavadocMethod|MissingJavadocMethod|MissingJavadocType"/>
         <property name="files" value="[\\/]src[\\/]test[\\/]"/>
     </module>
     <module name="SuppressWarningsFilter"/>
-    <module name="Translation"/>
-    <module name="UniqueProperties"/>
 
     <module name="TreeWalker">
         <module name="ArrayTypeStyle"/>
@@ -60,8 +61,8 @@
         <module name="EmptyStatement"/>
         <module name="EqualsAvoidNull"/>
         <module name="EqualsHashCode"/>
-        <module name="GenericWhitespace"/>
         <module name="FinalClass"/>
+        <module name="GenericWhitespace"/>
         <!-- module name="HiddenField"/ -->
         <module name="HideUtilityClassConstructor"/>
         <module name="IllegalImport"/>
@@ -90,17 +91,6 @@
             <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
         </module>
         <module name="JavadocMissingLeadingAsterisk"/>
-        <!-- public API needs Javadoc, tests are exempt (see SuppressionSingleFilter) -->
-        <module name="MissingJavadocMethod">
-            <property name="scope" value="protected"/>
-            <property name="minLineCount" value="-1"/>
-            <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF, COMPACT_CTOR_DEF"/>
-        </module>
-        <module name="MissingJavadocPackage"/>
-        <module name="MissingJavadocType">
-            <property name="scope" value="protected"/>
-        </module>
-        <module name="NonEmptyAtclauseDescription"/>
         <module name="LeftCurly"/>
         <module name="LocalFinalVariableName">
             <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
@@ -118,6 +108,16 @@
         <module name="MethodName"/>
         <module name="MethodParamPad"/>
         <module name="MissingDeprecated"/>
+        <!-- public API needs Javadoc, tests are exempt (see SuppressionSingleFilter) -->
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="protected"/>
+            <property name="minLineCount" value="-1"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF, COMPACT_CTOR_DEF"/>
+        </module>
+        <module name="MissingJavadocPackage"/>
+        <module name="MissingJavadocType">
+            <property name="scope" value="protected"/>
+        </module>
         <module name="MissingOverride"/>
         <module name="MissingSwitchDefault"/>
         <module name="ModifierOrder"/>
@@ -125,6 +125,7 @@
         <module name="NeedBraces"/>
         <module name="NoClone"/>
         <module name="NoFinalizer"/>
+        <module name="NonEmptyAtclauseDescription"/>
         <module name="NoWhitespaceAfter"/>
         <module name="NoWhitespaceBefore"/>
         <module name="OneStatementPerLine"/>
@@ -144,6 +145,10 @@
         <module name="ParenPad"/>
         <module name="RedundantImport"/>
         <module name="RedundantModifier"/>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="\s+$"/>
+            <property name="message" value="Line has trailing whitespace."/>
+        </module>
         <module name="RightCurly"/>
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
@@ -152,8 +157,8 @@
         <module name="SuperClone"/>
         <module name="SuperFinalize"/>
         <module name="SuppressWarningsHolder"/>
-        <module name="SuppressWithNearbyCommentFilter"/>
         <!--module name="TodoComment" /-->
+        <module name="TypecastParenPad"/>
         <module name="TypeName"/>
         <!--module name="TypeName">
             <property name="format" value="^([A-Z][a-zA-Z0-9]+IF|I[A-Z][a-zA-Z0-9]+)$"/>
@@ -165,7 +170,6 @@
             <property name="tokens" value="CLASS_DEF"/>
             <message key="name.invalidPattern" value="Class name ''{0}'' must match pattern ''{1}''."/>
         </module>
-        <module name="TypecastParenPad"/>
         <module name="UnusedImports"/>
         <module name="UpperEll"/>
         <module name="VariableDeclarationUsageDistance">
@@ -181,11 +185,7 @@
             <property name="allowEmptyTypes" value="true"/>
         </module>
 
-        <module name="RegexpSinglelineJava">
-            <property name="format" value="\s+$"/>
-            <property name="message" value="Line has trailing whitespace."/>
-        </module>
-
+        <module name="SuppressWithNearbyCommentFilter"/>
     </module>
 
 </module>
