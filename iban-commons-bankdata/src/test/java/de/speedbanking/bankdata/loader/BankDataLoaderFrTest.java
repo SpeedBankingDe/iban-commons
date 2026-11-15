@@ -95,12 +95,12 @@ final class BankDataLoaderFrTest {
         List<BankData> records = loader.parse(in, "test-version");
 
         assertThat(records).extracting(BankData::getBankCode).containsExactlyInAnyOrder("30004", "30003");
-        BankData bnp = records.stream().filter(r -> r.getBankCode().equals("30004")).findFirst().get();
+        BankData bnp = records.stream().filter(r -> "30004".equals(r.getBankCode())).findFirst().get();
         assertThat(bnp.getBankName()).isEqualTo("BNP Paribas");
         assertThat((Object) bnp.getBic()).hasToString("BNPAFRPPXXX");
         assertThat(bnp.getPostalCode()).isEqualTo("75009");
         assertThat(bnp.getCity()).isEqualTo("Paris");
-        assertThat(records).allMatch(r -> r.getSourceVersion().equals("test-version"));
+        assertThat(records).allMatch(r -> "test-version".equals(r.getSourceVersion()));
     }
 
     @Test

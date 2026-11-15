@@ -72,12 +72,11 @@ public abstract class InvalidBaseException extends RuntimeException {
      * @param cs the character sequence to check, may be {@code null}
      * @return {@code true} if the character sequence is {@code null}, empty, or whitespace-only
      */
-    @SuppressWarnings("InnerAssignment")
     private static boolean isBlank(CharSequence cs) {
-        int strLen;
-        if (cs == null || (strLen = cs.length()) == 0) {
+        if (cs == null) {
             return true;
         }
+        int strLen = cs.length();
         for (int i = 0; i < strLen; i++) {
             if (!Character.isWhitespace(cs.charAt(i))) {
                 return false;

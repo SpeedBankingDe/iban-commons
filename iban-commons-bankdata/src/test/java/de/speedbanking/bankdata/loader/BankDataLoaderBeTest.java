@@ -51,10 +51,10 @@ final class BankDataLoaderBeTest {
         BankData dutchFallback = records.get(1);
         assertThat(dutchFallback.getBankName()).isEqualTo("Musterbank Gent NV"); // no English name: falls back to Dutch
 
-        BankData frenchOnly = records.stream().filter(r -> r.getBankCode().equals("171")).findFirst().orElseThrow(AssertionError::new);
+        BankData frenchOnly = records.stream().filter(r -> "171".equals(r.getBankCode())).findFirst().orElseThrow(AssertionError::new);
         assertThat(frenchOnly.getBankName()).isEqualTo("Banque CPH"); // Dutch and English both blank: falls back to French
 
-        BankData unassigned = records.stream().filter(r -> r.getBankCode().equals("999")).findFirst().orElseThrow(AssertionError::new);
+        BankData unassigned = records.stream().filter(r -> "999".equals(r.getBankCode())).findFirst().orElseThrow(AssertionError::new);
         assertThat((Object) unassigned.getBic()).isNull(); // "VRIJ" placeholder for an unassigned code is not a valid BIC
     }
 

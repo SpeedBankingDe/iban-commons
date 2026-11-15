@@ -197,7 +197,7 @@ final class BankDataLoaderDeTest {
         assertThat(withUmlaut.checkDigitMethod()).contains("A4");
         assertThat(findByBankCode(records, "20000000").checkDigitMethod()).isEmpty();
 
-        assertThat(records).allMatch(r -> r.getSourceVersion().equals("test-version"));
+        assertThat(records).allMatch(r -> "test-version".equals(r.getSourceVersion()));
     }
 
     private static BankData findByBankCode(List<BankData> records, String bankCode) {

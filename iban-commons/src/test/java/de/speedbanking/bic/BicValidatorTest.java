@@ -151,26 +151,26 @@ final class BicValidatorTest {
     void copyToBuffer_shouldUseSequentialLoop_whenSourceIsGenericCharSequence() {
         // using a custom CharSequence implementation to force execution of the fallback loop
         CharSequence customSeq = new CharSequence() {
-            private final String data = "ABCDEFGH";
+            private static final String DATA = "ABCDEFGH";
 
             @Override
             public int length() {
-                return data.length();
+                return DATA.length();
             }
 
             @Override
             public char charAt(int index) {
-                return data.charAt(index);
+                return DATA.charAt(index);
             }
 
             @Override
             public CharSequence subSequence(int start, int end) {
-                return data.subSequence(start, end);
+                return DATA.subSequence(start, end);
             }
 
             @Override
             public String toString() {
-                return data;
+                return DATA;
             }
         };
         char[] target = new char[11];
