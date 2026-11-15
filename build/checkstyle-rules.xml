@@ -38,6 +38,10 @@
         <property name="message"
                   value="Annotation order violation: @DisplayName must come BEFORE @Test/@ParameterizedTest" />
     </module>
+    <module name="SuppressionSingleFilter">
+        <property name="checks" value="JavadocMethod|MissingJavadocMethod|MissingJavadocType"/>
+        <property name="files" value="[\\/]src[\\/]test[\\/]"/>
+    </module>
     <module name="SuppressWarningsFilter"/>
     <module name="Translation"/>
     <module name="UniqueProperties"/>
@@ -74,8 +78,29 @@
         <module name="InnerAssignment"/>
         <!--module name="InnerTypeLast" /-->
         <module name="InterfaceIsType"/>
-        <module name="JavadocMissingLeadingAsterisk"/>
+        <module name="InvalidJavadocPosition"/>
+        <module name="JavadocBlockTagLocation"/>
         <module name="JavadocContentLocation"/>
+        <module name="JavadocMethod">
+            <property name="accessModifiers" value="public, protected"/>
+            <property name="allowMissingParamTags" value="false"/>
+            <property name="allowMissingReturnTag" value="false"/>
+            <property name="validateThrows" value="false"/>
+            <!-- annotation elements describe themselves, no @return needed -->
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, COMPACT_CTOR_DEF"/>
+        </module>
+        <module name="JavadocMissingLeadingAsterisk"/>
+        <!-- public API needs Javadoc, tests are exempt (see SuppressionSingleFilter) -->
+        <module name="MissingJavadocMethod">
+            <property name="scope" value="protected"/>
+            <property name="minLineCount" value="-1"/>
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF, ANNOTATION_FIELD_DEF, COMPACT_CTOR_DEF"/>
+        </module>
+        <module name="MissingJavadocPackage"/>
+        <module name="MissingJavadocType">
+            <property name="scope" value="protected"/>
+        </module>
+        <module name="NonEmptyAtclauseDescription"/>
         <module name="LeftCurly"/>
         <module name="LocalFinalVariableName">
             <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>

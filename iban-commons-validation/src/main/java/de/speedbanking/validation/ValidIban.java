@@ -81,6 +81,11 @@ public @interface ValidIban {
     @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE, TYPE_USE })
     @Retention(RUNTIME)
     @interface List {
+        /**
+         * The {@link ValidIban} constraints to apply.
+         *
+         * @return the constraints
+         */
         ValidIban[] value();
     }
 

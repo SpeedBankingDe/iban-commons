@@ -30,6 +30,9 @@ public final class BankDataLoaderFr extends AbstractBankDataLoaderEcb {
     /** Default remote source URI: the ECB's list-of-financial-institutions landing page. */
     public static final URI DEFAULT_SOURCE_URI = BankDataLoaderDefaults.sourceUri("FR");
 
+    /**
+     * Creates a loader for the default remote source {@link #DEFAULT_SOURCE_URI}.
+     */
     public BankDataLoaderFr() {
         super(DEFAULT_SOURCE_URI);
     }

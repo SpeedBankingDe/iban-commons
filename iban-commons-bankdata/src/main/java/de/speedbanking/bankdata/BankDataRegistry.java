@@ -98,6 +98,12 @@ public final class BankDataRegistry {
         return null;
     }
 
+    /**
+     * Returns the loader registered for the given country.
+     *
+     * @param countryCode the ISO 3166-1 alpha-2 country code
+     * @return the loader, or an empty {@link Optional} if the country is not supported
+     */
     public static Optional<CountryBankDataLoader> getLoader(String countryCode) {
         return Optional.ofNullable(LOADERS.get(countryCode));
     }

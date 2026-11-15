@@ -70,6 +70,11 @@ public @interface ValidBic {
     @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE, TYPE_USE })
     @Retention(RUNTIME)
     @interface List {
+        /**
+         * The {@link ValidBic} constraints to apply.
+         *
+         * @return the constraints
+         */
         ValidBic[] value();
     }
 

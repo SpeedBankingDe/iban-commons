@@ -90,6 +90,9 @@ public final class BankDataLoaderPl extends AbstractCountryBankDataLoader<BankDa
 
     }
 
+    /**
+     * Creates a loader for the default remote source {@link #DEFAULT_SOURCE_URI}.
+     */
     public BankDataLoaderPl() {
         super(Column.class, DEFAULT_SOURCE_URI);
     }

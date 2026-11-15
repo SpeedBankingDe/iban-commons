@@ -126,6 +126,7 @@ public @interface RandomIbanSource {
      */
     Sepa sepa() default Sepa.ANY;
 
+    /** Restricts the generated IBANs by SEPA membership. */
     enum Sepa {
         /** Include only SEPA members. */
         YES,
