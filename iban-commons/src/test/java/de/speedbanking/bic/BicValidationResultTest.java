@@ -15,7 +15,7 @@ final class BicValidationResultTest {
 
     @DisplayName("Should correctly create a valid result")
     @Test
-    void valid_shouldStoreBic_whenBicIsValid() {
+    void valid_validBic_storesBic() {
         BicValidationResult result = BicValidationResult.valid(validBic);
 
         assertThat(result.isValid()).isTrue();
@@ -25,7 +25,7 @@ final class BicValidationResultTest {
 
     @DisplayName("Should correctly create an invalid result")
     @Test
-    void invalid_shouldStoreErrorDetails_whenReasonIsProvided() {
+    void invalid_reason_storesErrorDetails() {
         BicValidationError testReason = BicValidationError.EMPTY;
 
         BicValidationResult result = BicValidationResult.invalid(testReason);
@@ -37,7 +37,7 @@ final class BicValidationResultTest {
 
     @DisplayName("toString() should be correctly formatted for a valid result")
     @Test
-    void toString_shouldContainBic_whenResultIsValid() {
+    void toString_validResult_containsBic() {
         BicValidationResult result = BicValidationResult.valid(validBic);
         String expected = BicValidationResult.class.getSimpleName() + "[valid: " + validBic + "]";
 
@@ -46,7 +46,7 @@ final class BicValidationResultTest {
 
     @DisplayName("toString() should be correctly formatted for an invalid result")
     @Test
-    void toString_shouldContainError_whenResultIsInvalid() {
+    void toString_invalidResult_containsError() {
         BicValidationResult result = BicValidationResult.invalid(BicValidationError.INVALID_COUNTRY);
         String expected = BicValidationResult.class.getSimpleName() + "[invalid: BIC has invalid country code]";
 

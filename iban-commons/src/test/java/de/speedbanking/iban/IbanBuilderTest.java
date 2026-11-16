@@ -397,7 +397,7 @@ final class IbanBuilderTest {
 
     @DisplayName("fixCheckDigits: throws InvalidIbanException when input is null")
     @Test
-    void fixCheckDigits_shouldThrowException_whenInputIsNull() {
+    void fixCheckDigits_null_throwsException() {
         assertThatInvalidIbanException()
             .isThrownBy(() -> IbanBuilder.fixCheckDigits(null))
             .withNoCause()
@@ -411,7 +411,7 @@ final class IbanBuilderTest {
         "GL00", // too short
         "GL006471123456789012345678901234567890" // too long
     })
-    void fixCheckDigits_shouldThrowException_whenLengthIsOutOfBounds(String invalidIban) {
+    void fixCheckDigits_lengthOutOfBounds_throwsException(String invalidIban) {
         assertThatInvalidIbanException()
             .isThrownBy(() -> IbanBuilder.fixCheckDigits(invalidIban.toCharArray()))
             .withNoCause()

@@ -22,7 +22,7 @@ final class InvalidIbanExceptionTest {
     @DisplayName("of(reason) should store reason and derive message from reason text")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanValidationError.class)
-    void of_shouldInitializeCorrectly(IbanValidationError reason) {
+    void of_reasonOnly_initializesFields(IbanValidationError reason) {
         InvalidIbanException exception = InvalidIbanException.of(reason);
 
         assertThat(exception)
@@ -43,7 +43,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("of(reason) should yield no input")
     @Test
-    void of_shouldHaveNoInputWhenNotSupplied() {
+    void of_noInput_hasNoInput() {
         InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.EMPTY);
 
         assertThat(exception.getInput())
@@ -53,7 +53,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("of(reason, input) should store both reason and input")
     @Test
-    void of_shouldStoreReasonAndInput() {
+    void of_reasonAndInput_storesBoth() {
         IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
 
@@ -73,7 +73,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("of(reason, input, countryCode) should store reason, input, and upper-cased countryCode")
     @Test
-    void of_shouldStoreReasonInputAndCountryCode() {
+    void of_reasonInputAndCountryCode_storesAll() {
         IbanValidationError reason = IbanValidationError.INVALID_BANK_CODE;
         String input = "DE00123456789012345678";
         String countryCode = "de";
@@ -98,7 +98,7 @@ final class InvalidIbanExceptionTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"   "})
-    void of_shouldNormalizeNullOrBlankCountryCodeToNull(String countryCode) {
+    void of_nullOrBlankCountryCode_normalizesToNull(String countryCode) {
         InvalidIbanException exception = InvalidIbanException.of(IbanValidationError.EMPTY, "DE00123", countryCode);
 
         assertThat(exception.getCountryCode()).isNull();
@@ -106,7 +106,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("of(null) should throw NullPointerException")
     @Test
-    void of_shouldThrowOnNullReason() {
+    void of_nullReason_throwsException() {
         assertThatExceptionOfType(NullPointerException.class)
             .isThrownBy(() -> InvalidIbanException.of(null))
             .withMessage("reason required");
@@ -114,7 +114,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("of(null, input) should throw NullPointerException")
     @Test
-    void of_shouldThrowOnNullReasonWithInput() {
+    void of_nullReasonWithInput_throwsException() {
         assertThatExceptionOfType(NullPointerException.class)
             .isThrownBy(() -> InvalidIbanException.of(null, "DE00123456789012345678"))
             .withMessage("reason required");
@@ -122,7 +122,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("equals() should be true for same reason, input, and countryCode")
     @Test
-    void equals_shouldBeTrueForSameReasonInputAndCountryCode() {
+    void equals_sameReasonInputAndCountryCode_returnsTrue() {
         IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
         String countryCode = "DE";
@@ -137,7 +137,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("equals() should be false when countryCode differs")
     @Test
-    void equals_shouldBeFalseWhenCountryCodeDiffers() {
+    void equals_differentCountryCode_returnsFalse() {
         IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
 
@@ -149,7 +149,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("equals() should be false when input differs")
     @Test
-    void equals_shouldBeFalseWhenInputDiffers() {
+    void equals_differentInput_returnsFalse() {
         IbanValidationError reason = IbanValidationError.EMPTY;
 
         InvalidIbanException withInput = InvalidIbanException.of(reason, "DE00123456789012345678");
@@ -160,7 +160,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("equals() should be false for different reasons")
     @Test
-    void equals_shouldBeFalseForDifferentReasons() {
+    void equals_differentReason_returnsFalse() {
         IbanValidationError[] errors = IbanValidationError.values();
         org.junit.jupiter.api.Assumptions.assumeTrue(errors.length >= 2,
             "Need at least two IbanValidationError values for this test");
@@ -174,14 +174,14 @@ final class InvalidIbanExceptionTest {
     @DisplayName("equals() should be reflexive")
     @Test
     @SuppressWarnings("SelfAssertion")
-    void equals_shouldBeReflexive() {
+    void equals_sameInstance_returnsTrue() {
         InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.EMPTY);
         assertThat(ex).isEqualTo(ex);
     }
 
     @DisplayName("equals() should return false for null and other types")
     @Test
-    void equals_shouldReturnFalseForNullAndOtherTypes() {
+    void equals_nullOrOtherType_returnsFalse() {
         InvalidIbanException ex = InvalidIbanException.of(IbanValidationError.EMPTY);
         assertThat(ex)
             .isNotNull()
@@ -190,7 +190,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("toString() should include class name, reason, countryCode, and input")
     @Test
-    void toString_shouldContainAllParts() {
+    void toString_allPartsPresent_containsAllParts() {
         IbanValidationError reason = IbanValidationError.EMPTY;
         String input = "DE00123456789012345678";
         String countryCode = "DE";
@@ -203,7 +203,7 @@ final class InvalidIbanExceptionTest {
 
     @DisplayName("toString() without countryCode and input")
     @Test
-    void toString_shouldHandleAbsentCountryCodeAndInput() {
+    void toString_reasonOnly_omitsCountryCode() {
         IbanValidationError reason = IbanValidationError.EMPTY;
 
         String result = InvalidIbanException.of(reason).toString();

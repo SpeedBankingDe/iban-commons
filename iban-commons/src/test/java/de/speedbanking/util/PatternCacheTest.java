@@ -235,7 +235,7 @@ final class PatternCacheTest extends Assertions {
     }
 
     @Test
-    void contains_withFlags_returnsTrueOnlyWhenFlagsMatch() {
+    void contains_withFlags_returnsTrueOnlyForMatchingFlags() {
         // given
         patternCache.getPattern("test", CASE_INSENSITIVE);
 

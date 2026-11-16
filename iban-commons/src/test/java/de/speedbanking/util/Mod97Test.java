@@ -56,7 +56,7 @@ final class Mod97Test {
     }
 
     @Test
-    void privateConstructor_shouldThrowException() {
+    void privateConstructor_invoked_throwsException() {
         TestUtil.assertConstructorIsPrivate(Mod97.class);
     }
 

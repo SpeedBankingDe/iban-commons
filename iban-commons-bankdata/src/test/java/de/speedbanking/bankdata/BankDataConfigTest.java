@@ -86,7 +86,7 @@ final class BankDataConfigTest {
     }
 
     @Test
-    void networkDisabled_defaultsToFalseWhenNothingSet() {
+    void networkDisabled_nothingSet_defaultsToFalse() {
         BankDataConfig config = BankDataConfig.builder().build();
 
         assertThat(config.isNetworkDisabled()).isFalse();

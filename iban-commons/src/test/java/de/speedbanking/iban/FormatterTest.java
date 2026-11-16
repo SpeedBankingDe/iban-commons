@@ -23,7 +23,7 @@ final class FormatterTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_shouldThrowException() {
+    void privateConstructor_invoked_throwsException() {
         TestUtil.assertConstructorIsPrivate(Formatter.class);
     }
 
@@ -34,7 +34,7 @@ final class FormatterTest {
         "CH9300762011623852957           | CH93 0076 2011 6238 5295 7",
         "MT31MALT01100000000000000000123 | MT31 MALT 0110 0000 0000 0000 0000 123"
     })
-    void format_default_shouldInsertCorrectSpaces(String normalizedIban, String expected) {
+    void format_defaultGroupSize_insertsSpaces(String normalizedIban, String expected) {
         String actual = Formatter.format(normalizedIban);
         assertThat(actual).isEqualTo(expected);
     }
@@ -43,7 +43,7 @@ final class FormatterTest {
     @ParameterizedTest(name = "Input: ''{0}'' -> Expected: ''null''")
     @NullAndEmptySource
     @ValueSource(strings = {" ", "  "}) // whitespace strings
-    void format_default_shouldHandleNullEmptyAndBlank(String input) {
+    void format_nullEmptyOrBlank_returnsNull(String input) {
         assertThat(Formatter.format(input)).isNull();
     }
 
@@ -57,14 +57,14 @@ final class FormatterTest {
         // Test with leading/trailing spaces
         "' MT84 MALT 0110 0001 2345 MTLC AST0 01S ' | MT84 MALT 0110 0001 2345 MTLC AST0 01S"
     })
-    void format_default_reformattedIbanShouldEqual(String input, String expected) {
+    void format_alreadyFormattedIban_returnsSameFormat(String input, String expected) {
         assertThat(Formatter.format(input)).isEqualTo(expected);
     }
 
     @DisplayName("Format simple string to kill infinite loop mutation (i--)")
     @Test
     @Timeout(value = 50, unit = TimeUnit.MILLISECONDS)
-    void format_shouldKillMutationInfiniteLoop() {
+    void format_shortString_terminates() {
         String iban = "12345678901234567890"; // 20 chars
         String expected = "1234 5678 9012 3456 7890";
 
@@ -74,7 +74,7 @@ final class FormatterTest {
     @DisplayName("Format a very long string to kill mutation for Buffer initialization")
     @Test
     @Timeout(value = 50, unit = TimeUnit.MILLISECONDS)
-    void format_shouldKillMutationBufferInit() {
+    void format_veryLongString_formatsAll() {
         String longInput = "12345678901234567890123456789012345678901234567890"; // 50 chars
         String expected = "12345 67890 12345 67890 12345 67890 12345 67890 12345 67890";
 
@@ -84,7 +84,7 @@ final class FormatterTest {
     @DisplayName("Formatter should correctly count characters and group them when group size is changed")
     @Test
     @Timeout(value = 50, unit = TimeUnit.MILLISECONDS)
-    void format_shouldKillOutCountDecrementMutation() {
+    void format_customGroupSize_countsCharacters() {
         // 12345 67890 12345 67890
         String input = "12345678901234567890";
         int groupSize = 5;
@@ -109,7 +109,7 @@ final class FormatterTest {
         // 2-char groups
         "MZ59000301080016367102371     | 2  | MZ 59 00 03 01 08 00 16 36 71 02 37 1"
     })
-    void format_custom_shouldUseSpecifiedGroupSize(String normalizedIban, int groupSize, String expected) {
+    void format_customGroupSize_usesGroupSize(String normalizedIban, int groupSize, String expected) {
         assertThat(Formatter.format(normalizedIban, groupSize)).isEqualTo(expected);
     }
 
@@ -119,7 +119,7 @@ final class FormatterTest {
         "NO9386011117947 | 15", // groupSize == length (15)
         "NO9386011117947 | 16"  // groupSize > Length (15)
     })
-    void format_custom_groupSizeGreaterOrEqualLength_shouldNotAddSpaces(String iban, int groupSize) {
+    void format_groupSizeNotLessThanLength_addsNoSpaces(String iban, int groupSize) {
         String actual = Formatter.format(iban, groupSize);
         assertThat(actual).isEqualTo(iban);
     }
@@ -127,7 +127,7 @@ final class FormatterTest {
     @DisplayName("Custom format should throw IllegalArgumentException on non-positive groupSize (0 or negative)")
     @ParameterizedTest(name = "Group size: {0}")
     @ValueSource(ints = {0, -1, -100})
-    void format_custom_shouldThrowOnNonPositiveGroupSize(int invalidGroupSize) {
+    void format_nonPositiveGroupSize_throwsException(int invalidGroupSize) {
         String iban = "DE911000";
         assertThatIllegalArgumentException()
             .isThrownBy(() -> Formatter.format(iban, invalidGroupSize))
