@@ -17,20 +17,20 @@ import java.util.List;
 
 /**
  * Smoke test guarding the bundled classpath "Urladung" fallback resources: verifies that
- * {@code /bankdata/{DE,AT,CZ,BE,PL}.csv} are present, start with the expected CSV header,
- * non-empty, and parse without error, so a release can never accidentally ship a broken or missing
- * offline fallback data set.
+ * {@code /bankdata/{CC}.csv} are present, start with the expected CSV header, non-empty, and parse
+ * without error, so a release can never accidentally ship a broken or missing offline fallback data
+ * set.
  * <p>
- * {@code CH} and {@code NL} are deliberately excluded here: their upstream sources' terms of use
- * are restrictive about redistribution, so this module does not bundle an offline snapshot for
- * them pending clarification (see the module README's "Data licensing" section); both loaders
- * still work normally via a live download, just without the zero-network fallback.
+ * {@code CH} and {@code LI} are deliberately excluded here: SIX Interbank Clearing's terms of use
+ * do not allow redistribution, so this module does not bundle an offline snapshot for them (see the
+ * module README's "Data licensing" section); both loaders still work normally via a live download,
+ * just without the zero-network fallback.
  */
 @SuppressWarnings("checkstyle:MethodName")
 final class BundledBankDataSmokeTest {
 
     @ParameterizedTest
-    @ValueSource(strings = {"DE", "AT", "CZ", "BE", "PL"})
+    @ValueSource(strings = {"DE", "AT", "CZ", "BE", "PL", "NL", "ES", "FR", "GR", "PT"})
     void bundledCsvFile_existsAndParsesToNonEmptyRecords(String countryCode) throws Exception {
         List<BankData> records;
         try (InputStream in = getClass().getResourceAsStream("/bankdata/" + countryCode + ".csv")) {
@@ -45,7 +45,7 @@ final class BundledBankDataSmokeTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"DE", "AT", "CZ", "BE", "PL"})
+    @ValueSource(strings = {"DE", "AT", "CZ", "BE", "PL", "NL", "ES", "FR", "GR", "PT"})
     void bundledCsvFile_startsWithExpectedHeader(String countryCode) throws Exception {
         String firstLine;
         try (InputStream in = getClass().getResourceAsStream("/bankdata/" + countryCode + ".csv");

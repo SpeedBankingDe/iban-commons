@@ -53,7 +53,7 @@ final class BankDataLoaderChTest {
 
         assertThatThrownBy(() -> loader.parse(in, "test-version"))
             .isInstanceOf(BankDataParseException.class)
-            .hasMessageContaining("Malformed Swiss Bank Master row");
+            .hasMessageContaining("Malformed SIX Bank Master row");
     }
 
     @Test
@@ -68,7 +68,7 @@ final class BankDataLoaderChTest {
 
         assertThatThrownBy(() -> loader.parse(in, "test-version"))
             .isInstanceOf(BankDataParseException.class)
-            .hasMessageContaining("Malformed Swiss Bank Master IID");
+            .hasMessageContaining("Malformed SIX Bank Master IID");
     }
 
     @Test
@@ -88,14 +88,14 @@ final class BankDataLoaderChTest {
     }
 
     @Test
-    void parse_sampleFile_skipsHeaderConcatenatedAndBiclessRows_padsIidAndPopulatesPostalCodeAndCity() throws Exception {
+    void parse_sampleFile_skipsHeaderConcatenatedAndLiechtensteinRows_padsIidAndPopulatesPostalCodeAndCity() throws Exception {
         List<BankData> records;
         try (InputStream in = getClass().getResourceAsStream("/bankdata/raw/CH-sample.txt")) {
             records = loader.parse(in, "test-version");
         }
 
-        // the header row (with its extra trailing timestamp token), the BIC-less row (781), and the
-        // concatenated/merged row (750) are all excluded
+        // the header row (with its extra trailing timestamp token) and the concatenated/merged row
+        // (750) are excluded, as is the Liechtenstein row (8810), which BankDataLoaderLi covers
         assertThat(records).extracting(BankData::getBankCode)
             .containsExactlyInAnyOrder("00700", "00760", "00781");
 

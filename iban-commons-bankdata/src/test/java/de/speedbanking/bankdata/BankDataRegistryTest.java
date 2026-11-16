@@ -17,7 +17,7 @@ final class BankDataRegistryTest {
 
     @Test
     void supportedCountryCodes_containsShippedCountries() {
-        assertThat(BankDataRegistry.getSupportedCountryCodes()).containsExactlyInAnyOrder("DE", "AT", "CH", "CZ", "BE", "PL", "NL", "ES", "FR");
+        assertThat(BankDataRegistry.getSupportedCountryCodes()).containsExactlyInAnyOrder("DE", "AT", "CH", "LI", "CZ", "BE", "PL", "NL", "ES", "FR", "GR", "PT");
     }
 
     @Test
