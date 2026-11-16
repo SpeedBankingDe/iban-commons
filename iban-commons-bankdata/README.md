@@ -202,7 +202,7 @@ Every source this module downloads from publishes its own terms of use, separate
 For `CH`, `BankDataLookup` still works exactly the same way, it just cannot answer a lookup with zero network access on first use the way the other eight countries can (see [How data is loaded](#how-data-is-loaded)); once a live download has succeeded once, the local cache file takes over and offline lookups work from then on, same as any other country.
 
 **This assessment is the result of reading each source's publicly posted terms, not legal advice.**
-If your use of this module is licensing-sensitive, verify the current terms yourself. Written permission has been requested from SIX Interbank Clearing to bundle their data the same way the other sources already are; this section will be updated (and the snapshot added) if and when that permission is granted. If you represent SIX and can help move that along, please open an issue.
+If your use of this module is licensing-sensitive, verify the current terms yourself. Written permission to bundle their data the same way the other sources already are was requested from SIX Interbank Clearing in September 2026, without a reply so far. If you represent SIX and can help move that along, please open an issue.
 
 ## Notable implementation choices
 
