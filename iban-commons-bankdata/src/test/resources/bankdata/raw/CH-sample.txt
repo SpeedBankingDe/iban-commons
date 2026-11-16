@@ -3,3 +3,4 @@ IID/QR-IID;Valid on;Concatenation;New IID/QR-IID;SIC IID;Headquarters;IID type;Q
 781;2026-09-15;N;;078108;781;1;;Musterbank ohne BIC;Rue du Rhone;2;1201;Geneve;CH;;Y;Y;Y;Y;Y;N
 750;2026-09-15;Y;700;075008;750;1;;Alte Bank AG;Alte Strasse;3;3000;Bern;CH;OLDACHBBXXX;Y;Y;Y;Y;Y;N
 760;2026-09-15;N;;076008;760;1;;Musterpostfinance;Postplatz;4;3030;Bern;CH;POFICHBEXXX;Y;Y;Y;Y;Y;N
+8810;2026-09-15;N;;088108;8810;1;;Musterbank Vaduz AG;Herrengasse;12;9490;Vaduz;LI;BLFLLI2XXXX;Y;Y;Y;Y;Y;N

@@ -64,8 +64,8 @@ import java.util.Set;
  * Passing {@code -h} or {@code --help} prints usage instead of refreshing anything.
  * <p>
  * A country whose loader's {@link CountryBankDataLoader#allowsBundledSnapshot()} returns
- * {@code false} (currently only {@code CH}, see the README's "Data licensing" section) is always
- * skipped, printed to {@code System.out} as such, and never written to disk - whether it was
+ * {@code false} (currently {@code CH} and {@code LI}, see the README's "Data licensing" section)
+ * is always skipped, printed to {@code System.out} as such, and never written to disk - whether it was
  * selected implicitly (no arguments) or named explicitly on the command line. There is no way to
  * override this from the command line; the only way to bundle such a country is to change what
  * {@link CountryBankDataLoader#allowsBundledSnapshot()} returns once permission is obtained.

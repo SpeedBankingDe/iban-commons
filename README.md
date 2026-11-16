@@ -20,7 +20,7 @@ Designed for high-performance enterprise applications, it covers 127 countries, 
 
 An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module is available for verifying German domestic account number ("Kontonummer") check digits against a Bankleitzahl (BLZ) — standalone and independent of `iban-commons`.
 
-An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolves the BIC and bank name behind an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL, NL, ES, FR), with a bundled offline fallback dataset and lazy background refresh.
+An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolves the BIC and bank name behind an IBAN or a country-specific bank code (DE, AT, CH, LI, CZ, BE, PL, NL, ES, FR, GR, PT), with a bundled offline fallback dataset and lazy background refresh.
 
 ## Why IBAN Commons?
 
@@ -296,10 +296,10 @@ examples, and full method coverage details.
 ### Bank Data Lookup (`iban-commons-bankdata`)
 
 An optional module resolving the BIC and bank name of the institution behind an IBAN or a raw
-country-specific bank code (German BLZ, Austrian Bankleitzahl, Swiss BC-Nummer, Czech kod banky,
-Belgian bank code, Polish numer rozliczeniowy, Dutch bank identifier, Spanish codigo de entidad,
-French code banque), self-hosted and open-source. Country coverage: **DE, AT, CH, CZ, BE, PL, NL,
-ES, FR**. For German IBANs, `GermanIban` additionally checks the account number against the check
+country-specific bank code (German BLZ, Austrian Bankleitzahl, Swiss and Liechtenstein IID, Czech
+kod banky, Belgian bank code, Polish numer rozliczeniowy, Dutch bank identifier, Spanish codigo de
+entidad, French code banque, Greek bank code, Portuguese codigo de banco), self-hosted and
+open-source. Country coverage: **DE, AT, CH, LI, CZ, BE, PL, NL, ES, FR, GR, PT**. For German IBANs, `GermanIban` additionally checks the account number against the check
 digit method the Bundesbank publishes for the bank.
 
 Ships a bundled offline fallback dataset per country so lookups work immediately without
