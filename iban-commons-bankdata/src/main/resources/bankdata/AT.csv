@@ -201,7 +201,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 32118;;RLNWATWWBAD;Raiffeisenbank Region Baden eGen;2500;Baden bei Wien;;
 32123;;RLNWATWW123;Raiffeisenbank Eggenburg eGen;3730;Eggenburg;;
 32127;;RLNWATWWWTH;Raiffeisenbank im Thayatal eGen;3830;Waidhofen an der Thaya;;
-32145;;RLNWATWWLAA;Raiffeisenbank Laa-Ernstbrunn eGen;2136;Laa a.d. Thaya;;
+32145;;RLNWATWWLAA;Raiffeisenbank Laa - Ernstbrunn eGen;2136;Laa a.d. Thaya;;
 32195;;RLNWATWWASP;Raiffeisenbank Region Wiener Alpen eGen;2870;Aspang;;
 32198;;RLNWATWWSTO;Raiffeisenbank Stockerau-Hollabrunn eGen;2020;Hollabrunn;;
 32227;;RLNWATWWZDF;Raiffeisenbank Weinviertel Nordost eGen;2225;Zistersdorf;;
@@ -212,6 +212,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 32278;;RLNWATWW278;Raiffeisenkasse Haidershofen eGen;4431;Haidershofen;;
 32286;;RLNWATW1286;Raiffeisenkasse Heiligeneich eGen;3452;Heiligeneich;;
 32291;;RLNWATW1002;Raiffeisenbank Wagram-Schmidatal eGen;3462;Absdorf;;
+32300;;RLNWATWWXXX;RAIFFEISENLANDESBANK NIEDERÖSTERREICH-WIEN AG;1020;Wien;;
 32322;;RLNWATWWSTO;Raiffeisenbank Stockerau-Hollabrunn eGen;2020;Hollabrunn;;
 32356;;RLNWATWWOBG;Raiffeisenbank Region St. Pölten eGen;3100;St. Pölten;;
 32367;;RLNWATW1880;Raiffeisenbank Tulln-Klosterneuburg eGen;3430;Tulln;;
@@ -219,7 +220,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 32374;;RLNWATWWASP;Raiffeisenbank Region Wiener Alpen eGen;2870;Aspang;;
 32395;;RLNWATWWKOR;Raiffeisenbank Korneuburg-Kreuzenstein eGen;2100;Korneuburg;;
 32397;;RLNWATWWKRE;Raiffeisenbank Krems eGen;3500;Krems an der Donau;;
-32413;;RLNWATWWLAA;Raiffeisenbank Laa-Ernstbrunn eGen;2136;Laa a.d. Thaya;;
+32413;;RLNWATWWLAA;Raiffeisenbank Laa - Ernstbrunn eGen;2136;Laa a.d. Thaya;;
 32414;;RLNWATWWPRB;Raiffeisenbank Wienerwald eGen;3021;Pressbaum;;
 32415;;RLNWATWWOWS;Raiffeisenbank Oberes Waldviertel eGen;3943;Schrems;;
 32426;;RLNWATWW426;Raiffeisenbank Langenlois eGen;3550;Langenlois;;
@@ -622,13 +623,13 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 37435;;RVVGAT2B435;Raiffeisenbank Vorderbregenzerwald eGen;6952;Hittisau;;
 37438;;RANMAT21XXX;RAIFFEISENBANK HOHENEMS eGen;6845;Hohenems;;
 37439;;RVVGAT2B431;Raiffeisenbank Bodensee-Leiblachtal eGen;6971;Hard (Vbg.);;
-37445;;RVVGAT2B474;Raiffeisenbank Weissachtal eGen;6934;Sulzberg (Vbg.);;
+37445;;RVVGAT2B435;Raiffeisenbank Vorderbregenzerwald eGen;6952;Hittisau;;
 37449;;RVVGAT2B449;Raiffeisenbank Lech am Arlberg eGen;6764;Lech;;
 37453;;RVVGAT2B420;Raiffeisenbank Im Rheintal eGen;6850;Dornbirn;;
 37458;;RVVGAT2B458;RAIFFEISENBANK im Walgau eGen;6710;Nenzing;;
 37461;;RVVGAT2B422;Raiffeisenbank Montfort eGen;6830;Rankweil;;
 37468;;RVVGAT2B468;Raiffeisenbank Bludenz-Montafon eGen;6700;Bludenz;;
-37474;;RVVGAT2B474;Raiffeisenbank Weissachtal eGen;6934;Sulzberg (Vbg.);;
+37474;;RVVGAT2B435;Raiffeisenbank Vorderbregenzerwald eGen;6952;Hittisau;;
 37475;;RVVGAT2B475;Raiffeisenbank Vorderland eGen;6832;Sulz;;
 37482;;RVVGAT2B482;Raiffeisenbank am Hofsteig eGen;6922;Wolfurt;;
 38000;;RZSTAT2GXXX;Raiffeisen-Landesbank Steiermark AG;8010;Graz;;
@@ -733,8 +734,8 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 39267;;RZKTAT2K267;Raiffeisen-Bezirksbank Spittal/Drau, registrierte Genossenschaft mit beschränkter Haftung;9800;Spittal an der Drau;;
 39271;;RZKTAT2K546;Raiffeisenbank Völkermarkt-Bleiburg-Brückl eGen;9100;Völkermarkt;;
 39272;;RZKTAT2K546;Raiffeisenbank Völkermarkt-Bleiburg-Brückl eGen;9100;Völkermarkt;;
-39288;;RZKTAT2K288;Raiffeisenbank Eberndorf registrierte Genossenschaft mit beschränkter Haftung;9141;Eberndorf;;
-39292;;RZKTAT2K292;Raiffeisenbank Unteres Lavanttal eGen;9473;Lavamünd;;
+39288;;RZKTAT2K481;Raiffeisenbank Koralpe-Klopeiner See eG;9433;St. Andrä im Lavanttal;;
+39292;;RZKTAT2K481;Raiffeisenbank Koralpe-Klopeiner See eG;9433;St. Andrä im Lavanttal;;
 39305;;RZKTAT2K496;Raiffeisenbank Region Villach eG;9500;Villach;;
 39320;;RZKTAT2K320;Raiffeisenbank Grafenstein-Magdalensberg und Umgebung, registrierte Genossenschaft mit beschränkter Haftung;9131;Grafenstein;;
 39322;;RZKTAT2K561;Raiffeisenbank Großglockner-Weissensee eG;9841;Winklern im Mölltal;;
@@ -757,10 +758,10 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 39457;;RZKTAT2K457;Raiffeisenbank Nockberge eGen;9545;Radenthein;;
 39461;;RZKTAT2K457;Raiffeisenbank Nockberge eGen;9545;Radenthein;;
 39464;;RZKTAT2K464;Raiffeisenbank Lieser-Maltatal eG;9863;Rennweg;;
-39465;;RZKTAT2K481;Raiffeisenbank Mittleres Lavanttal eGen;9433;St. Andrä im Lavanttal;;
+39465;;RZKTAT2K481;Raiffeisenbank Koralpe-Klopeiner See eG;9433;St. Andrä im Lavanttal;;
 39475;;RZKTAT2K475;Raiffeisenbank Mittelkärnten eG;9300;St. Veit an der Glan;;
 39479;;RZKTAT2K479;Raiffeisenbank Millstättersee eG;9871;Seeboden;;
-39481;;RZKTAT2K481;Raiffeisenbank Mittleres Lavanttal eGen;9433;St. Andrä im Lavanttal;;
+39481;;RZKTAT2K481;Raiffeisenbank Koralpe-Klopeiner See eG;9433;St. Andrä im Lavanttal;;
 39483;;RZKTAT2K496;Raiffeisenbank Region Villach eG;9500;Villach;;
 39487;;RZKTAT2K487;Raiffeisenbank Rosental, registrierte Genossenschaft mit beschränkter Haftung;9181;Feistritz im Rosental;;
 39491;;RZKTAT2K491;Raiffeisenbank Oberes Lavanttal - St. Paul eG;9470;St. Paul im Lavanttal;;
@@ -856,6 +857,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 76040;;VIAUATW1XXX;card complete Service Bank AG;1020;Wien;;
 76520;;COPRATWWXXX;Liechtensteinische Landesbank (Österreich) AG;1010;Wien;;
 94646;;BIPGATW3XXX;Bitpanda Payments GmbH;1020;Wien;;
+94656;;HOLVATW2XXX;Holvi Payment Services Oy Zweigniederlassung Österreich;1080;Wien;;
 1000;;BUNDATWWXXX;Republik Österreich;1010;Wien;;
 12002;;BKAUATWWXXX;UniCredit Bank Austria AG;1020;Wien;;
 12004;;BKAUATWWXXX;UniCredit Bank Austria AG;1020;Wien;;
@@ -867,7 +869,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 19931;;CENBATWWRDB;Raiffeisen Digital Bank AG;1030;Wien;;
 31111;;RZBAATWWVAM;Raiffeisen Bank International AG;1030;Wien;;
 31112;;RZBAATWWREC;Raiffeisen Bank International AG;1030;Wien;;
-32600;;RLNWATWWXXX;RAIFFEISENLANDESBANK NIEDERÖSTERREICH-WIEN AG;1020;Wien;;
+32600;;RLNWATWW600;RAIFFEISENLANDESBANK NIEDERÖSTERREICH-WIEN AG;1020;Wien;;
 34923;;RZOOAT2LXXX;Raiffeisenlandesbank Oberösterreich Aktiengesellschaft;4020;Linz;;
 34950;;RZOOAT2LXXX;Raiffeisenlandesbank Oberösterreich Aktiengesellschaft;4020;Linz;;
 34955;;RZOOAT2LXXX;Raiffeisenlandesbank Oberösterreich Aktiengesellschaft;4020;Linz;;

@@ -807,7 +807,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 114;0111;BREXPLPWOLS;mBank Spółka Akcyjna;10-450;Olsztyn;;
 114;0112;BREXPLPWPOZ;mBank Spółka Akcyjna;60-829;Poznań;;
 114;0113;BREXPLPWSZC;mBank Spółka Akcyjna;70-653;Szczecin;;
-114;0114;BREXPLPWWRO;mBank Spółka Akcyjna;50-043;Wrocław;;
+114;0114;BREXPLPWWRO;mBank Spółka Akcyjna;53-673;Wrocław;;
 114;0115;BREXPLPWGDY;mBank Spółka Akcyjna;81-310;Gdynia;;
 114;0116;BREXPLPWXXX;mBank Spółka Akcyjna;90-063;Łódź;;
 114;0117;BREXPLPWRYB;mBank Spółka Akcyjna;44-200;Rybnik;;
@@ -902,7 +902,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0121;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;42-217;Częstochowa;;
 124;0122;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;82-300;Elbląg;;
 124;0123;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;81-319;Gdynia;;
-124;0124;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;80-288;Gdańsk;;
+124;0124;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;81-704;Sopot;;
 124;0125;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;80-244;Gdańsk;;
 124;0126;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;80-894;Gdańsk;;
 124;0127;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;80-391;Gdańsk;;
@@ -1120,7 +1120,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0343;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;95-030;Rzgów;;
 124;0344;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;93-004;Łódź;;
 124;0345;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;95-080;Tuszyn;;
-124;0346;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-079;Wrocław;;
+124;0346;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-381;Wrocław;;
 124;0347;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;09-100;Płońsk;;
 124;0348;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;05-100;Nowy Dwór Mazowiecki;;
 124;0349;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;85-069;Bydgoszcz;;
@@ -1175,8 +1175,8 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0398;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;72-320;Trzebiatów;;
 124;0399;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;86-300;Grudziądz;;
 124;0400;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;87-100;Toruń;;
-124;0401;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-079;Wrocław;;
-124;0402;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-079;Wrocław;;
+124;0401;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-381;Wrocław;;
+124;0402;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-381;Wrocław;;
 124;0403;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;65-032;Zielona Góra;;
 124;0408;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;71-410;Szczecin;;
 124;0409;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;71-410;Szczecin;;
@@ -1190,7 +1190,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0417;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;32-600;Oświęcim;;
 124;0418;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;32-660;Chełmek;;
 124;0419;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;34-100;Wadowice;;
-124;0420;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;34-120;Andrychów;;
+124;0420;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;32-650;Kęty;;
 124;0421;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;34-130;Kalwaria Zebrzydowska;;
 124;0422;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;40-202;Katowice;;
 124;0423;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;32-500;Chrzanów;;
@@ -1227,7 +1227,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0457;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;30-201;Kraków;;
 124;0458;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;31-926;Kraków;;
 124;0459;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;31-610;Kraków;;
-124;0460;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;31-939;Kraków;;
+124;0460;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;31-586;Kraków;;
 124;0461;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;31-926;Kraków;;
 124;0462;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;31-926;Kraków;;
 124;0463;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;31-610;Kraków;;
@@ -1285,7 +1285,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0518;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;39-300;Mielec;;
 124;0519;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;33-100;Tarnów;;
 124;0520;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;32-700;Bochnia;;
-124;0521;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;15-950;Białystok;;
+124;0521;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;15-375;Białystok;;
 124;0522;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;16-100;Sokółka;;
 124;0523;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;15-092;Białystok;;
 124;0524;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;16-100;Sokółka;;
@@ -1305,7 +1305,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0538;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;84-200;Wejherowo;;
 124;0539;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;81-391;Gdynia;;
 124;0540;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;80-864;Gdańsk;;
-124;0541;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;81-874;Sopot;;
+124;0541;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;81-704;Sopot;;
 124;0542;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;83-050;Kolbudy;;
 124;0543;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;80-288;Gdańsk;;
 124;0544;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;80-309;Gdańsk;;
@@ -1327,7 +1327,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0560;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;11-200;Bartoszyce;;
 124;0561;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;11-040;Dobre Miasto;;
 124;0562;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;07-300;Ostrów Mazowiecka;;
-124;0563;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;07-200;Wyszków;;
+124;0563;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;07-202;Wyszków;;
 124;0564;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;09-400;Płock;;
 124;0565;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;09-400;Płock;;
 124;0566;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;05-600;Grójec;;
@@ -1437,9 +1437,9 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0671;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;57-300;Kłodzko;;
 124;0672;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-083;Wrocław;;
 124;0673;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;52-314;Wrocław;;
-124;0674;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-079;Wrocław;;
+124;0674;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-381;Wrocław;;
 124;0675;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-123;Wrocław;;
-124;0676;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-079;Wrocław;;
+124;0676;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-381;Wrocław;;
 124;0677;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;59-220;Legnica;;
 124;0678;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-302;Wrocław;;
 124;0679;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;54-203;Wrocław;;
@@ -1447,7 +1447,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 124;0681;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-106;Wrocław;;
 124;0682;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;54-203;Wrocław;;
 124;0683;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;50-302;Wrocław;;
-124;0684;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;65-213;Zielona Góra;;
+124;0684;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;65-427;Zielona Góra;;
 124;0685;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;68-100;Żagań;;
 124;0686;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;66-620;Gubin;;
 124;0687;PKOPPLPWXXX;Bank Polska Kasa Opieki Spółka Akcyjna;62-100;Wągrowiec;;
@@ -1985,7 +1985,6 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 636;0001;;SPEEDY AG spółka z ograniczoną odpowiedzialnością;00-844;Warszawa;;
 700;3000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa ENERGIA;26-900;Kozienice;;
 701;4000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa w Kostrzynie nad Odrą;66-470;Kostrzyn nad Odrą;;
-703;7000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa Ziemi Rybnickiej;44-230;Czerwionka-Leszczyny;;
 703;9000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa Boże Dary;40-749;Katowice;;
 704;8000;;Spółdzielcza Kasa Oszczędnościowo-Kredytowa Boże Dary;41-711;Ruda Śląska;;
 704;2000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa im. Unii Lubelskiej w Lublinie;20-706;Lublin;;
@@ -1998,6 +1997,7 @@ bankCode;branchCode;bic;bankName;postalCode;city;flags;checkDigitMethod
 706;5000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa im. Franciszka Stefczyka;81-472;Gdynia;;
 707;9000;SKOKPLPWXXX;Krakowska Spółdzielcza Kasa Oszczędnościowo-Kredytowa w Krakowie;30-969;Kraków;;
 700;5001;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa ?Szopienice? w Katowicach;47-330;Zdzieszowice;;
+703;7000;;Spółdzielcza Kasa Oszczędnościowo-Kredytowa ?Szopienice? w Katowicach;44-230;Czerwionka-Leszczyny;;
 708;9000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa ?Szopienice? w Katowicach;40-374;Katowice;;
 709;9000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa Świdnik;21-040;Świdnik;;
 718;9000;SKOKPLPWXXX;Spółdzielcza Kasa Oszczędnościowo-Kredytowa Świdnik;22-400;Zamość;;
