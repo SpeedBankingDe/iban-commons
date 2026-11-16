@@ -187,7 +187,7 @@ final class BankDataLookupTest {
 
     @Test
     void supportedCountryCodes_delegatesToRegistry() {
-        assertThat(BankDataLookup.getSupportedCountryCodes()).containsExactlyInAnyOrder("DE", "AT", "CH", "CZ", "BE", "PL", "NL", "ES", "FR");
+        assertThat(BankDataLookup.getSupportedCountryCodes()).containsExactlyInAnyOrder("DE", "AT", "CH", "LI", "CZ", "BE", "PL", "NL", "ES", "FR", "GR", "PT");
     }
 
     @Test

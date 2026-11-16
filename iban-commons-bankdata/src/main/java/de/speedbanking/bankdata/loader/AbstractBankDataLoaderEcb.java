@@ -37,9 +37,9 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
- * Shared base for {@link BankDataLoaderEs} and {@link BankDataLoaderFr}, both of which read the
- * European Central Bank's monthly "list of financial institutions" ({@code fi_mrr_csv}), rather
- * than a national source.
+ * Shared base for {@link BankDataLoaderEs}, {@link BankDataLoaderFr}, {@link BankDataLoaderGr} and
+ * {@link BankDataLoaderPt}, all of which read the European Central Bank's monthly "list of
+ * financial institutions" ({@code fi_mrr_csv}), rather than a national source.
  * <p>
  * That file lists every euro-area credit institution the ECB tracks for minimum-reserve
  * requirements, tab-separated, one row per institution, with a stable 14-column layout:
@@ -48,15 +48,16 @@ import java.util.regex.Pattern;
  * HEAD_COUNTRY_OF_REGISTRATION  HEAD_NAME  HEAD_RIAD_CODE  RESERVE  EXEMPT
  * </pre>
  * {@code RIAD_CODE} is the ECB's own registration identifier, a 2-letter country prefix followed
- * by digits, and for most countries in the file bears no relation at all to that country's actual
- * IBAN bank code (verified against a live download: for Germany, {@code DE00001} is Deutsche
- * Bank's RIAD_CODE, but its real BLZ is {@code 50070010}). For Spain and France specifically,
- * however, the national central bank appears to have reused its existing bank-code register as
- * the RIAD numbering, so the digits after the country prefix are verified to equal the real
- * national bank code (checked against known codes: {@code ES0049} is Banco Santander's actual
+ * by a national identifier, and for most countries in the file bears no relation at all to that
+ * country's actual IBAN bank code (verified against a live download: for Germany, {@code DE00001}
+ * is Deutsche Bank's RIAD_CODE, but its real BLZ is {@code 50070010}). For Spain and France
+ * specifically, however, the national central bank appears to have reused its existing bank-code
+ * register as the RIAD numbering, so the digits after the country prefix are verified to equal the
+ * real national bank code (checked against known codes: {@code ES0049} is Banco Santander's actual
  * {@code código de entidad} {@code 0049}; {@code FR30004} is BNP Paribas's actual {@code code
- * banque} {@code 30004}). This is why this source is only used for {@code ES} and {@code FR} and
- * not offered as a generic fallback for every country the file happens to list.
+ * banque} {@code 30004}). Greece and Portugal do the same with small deviations, handled by
+ * {@link #toBankCode(String)} in their loaders. This is why this source is only used for these
+ * four countries and not offered as a generic fallback for every country the file happens to list.
  * <p>
  * The file is published as UTF-16 (with a byte-order mark) despite the {@code .csv} extension -
  * checked against a live download - so {@link #getRemoteSourceCharset()} returns generic
@@ -153,7 +154,10 @@ abstract class AbstractBankDataLoaderEcb extends AbstractCountryBankDataLoader<A
             // RIAD_CODE from another country) - do not silently derive a wrong bank code from it
             return null;
         }
-        String bankCode = riadCode.substring(country.length());
+        String bankCode = toBankCode(riadCode.substring(country.length()));
+        if (bankCode == null) {
+            return null;
+        }
 
         String bicRaw = getColumns().getOrEmpty(Column.BIC, fields);
         Bic bic = Bic.tryParse(bicRaw).orElse(null);
@@ -162,6 +166,17 @@ abstract class AbstractBankDataLoaderEcb extends AbstractCountryBankDataLoader<A
         String city = getColumns().getOrNull(Column.CITY, fields);
 
         return new BankData(getCountryCode(), bankCode, bic, bankName, postalCode, city, sourceVersion);
+    }
+
+    /**
+     * Maps the part of a {@code RIAD_CODE} after the country prefix to the national bank code.
+     * The default returns it unchanged, a subclass overrides this where the two differ in format.
+     *
+     * @param riadSuffix the {@code RIAD_CODE} without its country prefix, never empty
+     * @return the bank code, or {@code null} to skip the row because it carries no usable bank code
+     */
+    protected String toBankCode(String riadSuffix) {
+        return riadSuffix;
     }
 
 }
