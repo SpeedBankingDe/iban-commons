@@ -78,7 +78,7 @@ final class IbanTest {
         "GB33 BUKB 2020 1555 5555 55",              // United Kingdom
         "NL91 ABNA 0417 1643 00"                    // Netherlands
     })
-    void of_shouldReturnIban_whenIbanIsValid(String ibanInput) {
+    void of_validIban_returnsIban(String ibanInput) {
         String ibanInputNorm = ibanInput.replace(" ", "");
 
         assertThatCode(
@@ -123,7 +123,7 @@ final class IbanTest {
 
     @DisplayName("isValid: should validate maximum length (33 chars) IBANs when space or lowercase is allowed")
     @Test
-    void isValid_shouldValidateMaxLengthIban_withSpacesOrLowercase() {
+    void isValid_maxLengthIbanWithSpacesOrLowercase_returnsTrue() {
         String maxLengthIbanSpaced = "RU03 0445 2522 5408 1781 0538 0913 1041 9";
         String maxLengthIbanLower = "ru0304452522540817810538091310419";
 
@@ -167,7 +167,7 @@ final class IbanTest {
         "GP464Q85KW3RR7JWATF3TGAZ6JNI  | INVALID_COUNTRY          |         | IBAN has invalid country code",
         "DE91100000000123456780        | INVALID_CHECKSUM         | DE      | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
-    void of_shouldThrowException_whenIbanIsInvalid(String ibanInput,
+    void of_invalidIban_throwsException(String ibanInput,
                                                    IbanValidationError expectedValidationError,
                                                    String expectedCountry,
                                                    String expectedMessage) {
@@ -219,7 +219,7 @@ final class IbanTest {
     @DisplayName("Base/derived registry relationship")
     @ParameterizedTest(name = "[{index}] {0} - base/derived relationship")
     @EnumSource(value = IbanRegistry.class, names = {"FI", "FR", "GB"})
-    void registry_shouldBeConsistent_whenBaseAndDerivedRelationshipIsChecked(IbanRegistry countryData) {
+    void registry_baseToDerived_isConsistent(IbanRegistry countryData) {
         assertThat(countryData.getBaseCountry()).isNotNull().isSameAs(countryData);
         assertThat(countryData.isBaseCountry()).isTrue();
 
@@ -236,7 +236,7 @@ final class IbanTest {
     @DisplayName("Example IBAN should match the generated regex from BBAN pattern")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideBaseCountries")
-    void exampleIban_shouldMatchGeneratedRegex_whenRegistryIsProcessed(IbanRegistry countryData) {
+    void exampleIban_allRegistryEntries_matchesGeneratedRegex(IbanRegistry countryData) {
         String bbanRegex = IbanPatternConverter.convertToRegex(countryData.getBbanPattern());
 
         Pattern ibanPattern = Pattern.compile('^' + countryData.getCountryCode() + IbanPatternConverter.convertToRegex("2!n") + bbanRegex + '$');
@@ -249,7 +249,7 @@ final class IbanTest {
     @DisplayName("Example IBAN string variants should be valid")
     @ParameterizedTest(name = "[{index}] {0}")
     @MethodSource("provideBaseCountries")
-    void exampleIbanStringVariants_shouldBeValid(IbanRegistry countryData) {
+    void exampleIban_stringVariants_areValid(IbanRegistry countryData) {
         String ibanStr = countryData.getIbanExample();
         assertThatIbanIsValid(ibanStr);
         Iban iban = Iban.of(ibanStr);
@@ -280,7 +280,7 @@ final class IbanTest {
     @DisplayName("Derived/base registry relationship")
     @ParameterizedTest(name = "[{index}] {0} - derived/base relationship")
     @MethodSource("provideDerivedCountries")
-    void registry_shouldBeConsistent_whenDerivedAndBaseRelationshipIsChecked(IbanRegistry countryData) {
+    void registry_derivedToBase_isConsistent(IbanRegistry countryData) {
         assertThat(countryData.getBaseCountry()).isNotNull();
         assertThat(countryData.getBaseCountry().isBaseCountry()).isTrue();
         assertThat(countryData.isBaseCountry()).isFalse();
@@ -417,7 +417,7 @@ final class IbanTest {
         "YE15CBYE0001018861234567891234    | 30 | x | YE | 🇾🇪 | 15 | CBYE0001018861234567891234    | CBYE      | 0001   | 018861234567891234      |    |  8",
     })
     @SuppressWarnings("checkstyle:ParameterNumber")
-    void of_shouldReturnIban_whenIbanIsValidForAllCountries(String ibanInput, int expectedIbanLength, @ConvertWith(BooleanConverter.class) boolean expectedBaseCountry,
+    void of_validIbanForAllCountries_returnsIban(String ibanInput, int expectedIbanLength, @ConvertWith(BooleanConverter.class) boolean expectedBaseCountry,
             String expectedCountryCode, String expectedCountryFlag,
             String expectedCheckDigits, String expectedBban, String expectedBankCode, String expectedBranchCode,
             String expectedAccountNumber, String expectedNcd, Integer expectedIbanPlusLen) {
@@ -514,7 +514,7 @@ final class IbanTest {
     @DisplayName("Invalid IBAN rejected — all countries")
     @ParameterizedTest
     @EnumSource(IbanRegistry.class)
-    void of_shouldThrowException_whenIbanIsInvalidForAllCountries(IbanRegistry countryData) {
+    void of_invalidIbanForAllCountries_throwsException(IbanRegistry countryData) {
         String countryCode = countryData.isBaseCountry() ? countryData.getCountryCode() : countryData.getBaseCountry().getCountryCode();
         String ibanStr1 = countryCode + "00" + "999999999999999999999999999999".substring(0, countryData.getBbanLength());
         String ibanStr2 = countryCode + "00" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX".substring(0, countryData.getBbanLength());
@@ -560,7 +560,7 @@ final class IbanTest {
         "FR1420041010050500013M02606",
         "NL91ABNA0417164300"
     })
-    void validate_shouldCompleteWithoutException_whenIbanIsValid(String ibanInput) {
+    void validate_validIban_completesWithoutException(String ibanInput) {
         assertThatNoException()
             .as("validate('%s') must not throw for a valid IBAN", ibanInput)
             .isThrownBy(() -> Iban.validate(ibanInput));
@@ -585,7 +585,7 @@ final class IbanTest {
         "DE123                  | INCORRECT_LENGTH    |         | IBAN has incorrect length",
         "DE91100000000123456780 | INVALID_CHECKSUM    | DE      | IBAN violates ISO 7064 Mod 97-10 checksum check"
     })
-    void validate_shouldThrowException_whenIbanIsInvalid(
+    void validate_invalidIban_throwsException(
             String ibanInput, IbanValidationError expectedValidationError, String expectedCountry, String expectedMessage) {
         InvalidIbanException ibanException = assertThatInvalidIbanException()
             .isThrownBy(() -> Iban.validate(ibanInput))
@@ -617,7 +617,7 @@ final class IbanTest {
         "XX12345678901234567890",
         "DE123"
     })
-    void validate_shouldThrowSameExceptionAsOf_whenIbanIsInvalid(String ibanInput) {
+    void validate_invalidIban_throwsSameExceptionAsOf(String ibanInput) {
         InvalidIbanException fromOf = null;
         try {
             Iban.of(ibanInput);
@@ -649,7 +649,7 @@ final class IbanTest {
     @DisplayName("equals() and hashCode() contract")
     @Test
     @SuppressWarnings("AssertJNullnessAssertion")
-    void equalsAndHashCode_shouldBeConsistent_whenIbansAreSimilar() {
+    void equalsAndHashCode_similarIbans_areConsistent() {
         String ibanStr1 = "DE89370400440532013000";
         String ibanStr2 = "DE89370400440532013000";
         String ibanStr3 = "DE62370400440532013001";
@@ -698,7 +698,7 @@ final class IbanTest {
         "FR1420041010050500013M02606 | DE89370400440532013000      | 1  ", // FR > DE (alphabetical)
         "DE89370400440532013000      | FR1420041010050500013M02606 | -1 "  // DE < FR
     })
-    void compareTo_shouldFollowLexicographicalOrder_whenIbansAreCompared(String iban1Input, String iban2Input, int expectedSign) {
+    void compareTo_ibans_followsLexicographicalOrder(String iban1Input, String iban2Input, int expectedSign) {
         Iban iban1 = Iban.of(iban1Input);
         Iban iban2 = Iban.of(iban2Input);
 
@@ -725,7 +725,7 @@ final class IbanTest {
         "2  | 8",
         "21 | 0"
     })
-    void charAt_shouldReturnChar_whenIndexIsValid(int index, char expectedChar) {
+    void charAt_validIndex_returnsChar(int index, char expectedChar) {
         String ibanStr = "DE89370400440532013000"; // Length 22
         Iban iban = Iban.of(ibanStr);
 
@@ -757,7 +757,7 @@ final class IbanTest {
         "4 | 22 | 370400440532013000",    // BBAN
         "0 | 22 | DE89370400440532013000" // Full IBAN
     })
-    void subSequence_shouldReturnSubstring_whenRangeIsValid(int start, int end, String expectedString) {
+    void subSequence_validRange_returnsSubstring(int start, int end, String expectedString) {
         String ibanStr = "DE89370400440532013000"; // length 22
         Iban iban = Iban.of(ibanStr);
 
@@ -807,7 +807,7 @@ final class IbanTest {
         "NL91ABNA0417164300",
         "PL61109010140000071219812874"
     })
-    void serialization_shouldPreserveState_whenIbanIsValid(String ibanInput) throws IOException, ClassNotFoundException {
+    void serialization_validIban_preservesState(String ibanInput) throws IOException, ClassNotFoundException {
         Iban original = Iban.of(ibanInput);
         Iban iban = original;
 
@@ -839,7 +839,7 @@ final class IbanTest {
      */
     @DisplayName("Serialized form uses Memento proxy class")
     @Test
-    void serialization_shouldUseMementoProxy_whenIbanIsSerialized() throws IOException {
+    void serialization_validIban_usesMementoProxy() throws IOException {
         Iban iban = Iban.of("DE89370400440532013000");
         final Iban iban1 = iban;
         byte[] bytes = TestUtil.serialize(iban1);
@@ -864,7 +864,7 @@ final class IbanTest {
      */
     @DisplayName("Direct deserialization bypassing Memento is rejected")
     @Test
-    void deserialization_shouldThrowException_whenDirectIbanIsInStream() throws IOException {
+    void deserialization_directIbanInStream_throwsException() throws IOException {
         // Obtain a valid Iban serialized form (which uses Memento)
         Iban iban = Iban.of("DE89370400440532013000");
         final Iban iban1 = iban;
@@ -895,7 +895,7 @@ final class IbanTest {
      */
     @DisplayName("Deserialized instance is distinct but equal")
     @Test
-    void deserialization_shouldCreateNewInstance_whenIbanIsValid() throws IOException, ClassNotFoundException {
+    void deserialization_validIban_createsNewInstance() throws IOException, ClassNotFoundException {
         Iban original = Iban.of("NL91ABNA0417164300");
         final Iban iban = original;
         Iban restored = TestUtil.deserialize(TestUtil.serialize(iban));
@@ -919,7 +919,7 @@ final class IbanTest {
         "ES9121000418450200051332      | true", // Spain - SEPA
         "PS92PALS000000000400123456702 | false" // Palestine - non-SEPA
     })
-    void serialization_shouldPreserveSepaFlag_whenIbanIsSepa(String ibanInput, boolean expectedSepa)
+    void serialization_sepaIban_preservesSepaFlag(String ibanInput, boolean expectedSepa)
             throws IOException, ClassNotFoundException {
         Iban original = Iban.of(ibanInput.trim());
         final Iban iban = original;
@@ -943,7 +943,7 @@ final class IbanTest {
      */
     @DisplayName("Memento.readResolve() rejects invalid IBAN payload")
     @Test
-    void memento_shouldRejectReadResolve_whenIbanIsInvalid() throws IOException {
+    void mementoReadResolve_invalidIban_throwsException() throws IOException {
         byte[] corruptStream = TestUtil.buildMementoStream(Iban.of("DE89370400440532013000"), "NOT_AN_IBAN");
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
@@ -963,7 +963,7 @@ final class IbanTest {
      */
     @DisplayName("Memento.readObject() rejects unknown stream version")
     @Test
-    void memento_shouldRejectReadObject_whenVersionIsInvalid() throws IOException {
+    void mementoReadObject_invalidVersion_throwsException() throws IOException {
         byte[] corruptStream = TestUtil.buildMementoStream(Iban.of("DE89370400440532013000"), 99L, "DE89370400440532013000");
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
@@ -984,7 +984,7 @@ final class IbanTest {
      */
     @DisplayName("readObjectNoData() must throw InvalidObjectException")
     @Test
-    void readObjectNoData_shouldThrowException_whenInvokedDirectly() throws Exception {
+    void readObjectNoData_invokedDirectly_throwsException() throws Exception {
         Iban iban = Iban.of("DE89370400440532013000");
 
         Throwable cause = TestUtil.invokeSerializationGuard(iban, "readObjectNoData", new Class<?>[0]);
@@ -1005,7 +1005,7 @@ final class IbanTest {
      */
     @DisplayName("readObject() must throw InvalidObjectException when invoked directly")
     @Test
-    void readObject_shouldThrowException_whenInvokedDirectly() throws Exception {
+    void readObject_invokedDirectly_throwsException() throws Exception {
         Iban iban = Iban.of("DE89370400440532013000");
 
         Throwable cause = TestUtil.invokeSerializationGuard(iban, "readObject",
@@ -1069,7 +1069,7 @@ final class IbanTest {
         "TR330006100519786457841326       | TRY",  // Türkiye
         "PK36SCBL0000001123456702         | PKR",  // Pakistan
     })
-    void getCurrency_shouldReturnCorrectCurrency_whenIbanIsKnown(String ibanInput, String expectedCurrency) {
+    void getCurrency_knownIban_returnsCurrency(String ibanInput, String expectedCurrency) {
         Iban iban = Iban.of(ibanInput.trim());
 
         assertThat(iban.getCurrency())
@@ -1093,7 +1093,7 @@ final class IbanTest {
     @DisplayName("getCurrencyCode() is consistent with getCurrency().getAlphaCode() — all countries")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
-    void getCurrencyCode_shouldBeConsistentWithGetCurrency_whenAllCountriesAreChecked(IbanRegistry countryData) {
+    void getCurrencyCode_allCountries_consistentWithGetCurrency(IbanRegistry countryData) {
         Iban iban = Iban.of(countryData.getIbanExample());
 
         de.speedbanking.util.Currency currency = iban.getCurrency();
@@ -1118,7 +1118,7 @@ final class IbanTest {
     @DisplayName("getCurrency() is non-null for all IbanRegistry entries")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
-    void getCurrency_shouldNeverBeNull_whenAllCountriesAreChecked(IbanRegistry countryData) {
+    void getCurrency_allCountries_isNeverNull(IbanRegistry countryData) {
         Iban iban = Iban.of(countryData.getIbanExample());
 
         assertThat(iban.getCurrency())

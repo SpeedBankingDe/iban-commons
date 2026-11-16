@@ -32,7 +32,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should return the correct registry entry for a valid code")
     @Test
-    void getByCode_shouldReturnCorrectEntry() {
+    void getByCode_validCode_returnsEntry() {
         IbanRegistry de = IbanRegistry.getByCode("DE");
 
         assertThat(de)
@@ -46,7 +46,7 @@ final class IbanRegistryTest {
     @ParameterizedTest(name = "[{index}]: {0}")
     @ValueSource(strings = {"XX", "xx"})
     @NullAndEmptySource
-    void getByCode_shouldReturnNullForInvalidCode(String code) {
+    void getByCode_invalidCode_returnsNull(String code) {
         assertThat(IbanRegistry.getByCode(code))
             .as("'%s' should not exist", code)
             .isNull();
@@ -54,7 +54,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should handle case-sensitive lookup correctly (enum names are upper-case)")
     @Test
-    void getByCode_shouldBeCaseSensitive() {
+    void getByCode_lowercaseCode_returnsNull() {
         assertThat(IbanRegistry.getByCode("de"))
             .as("Lookup should be case-sensitive and fail for 'de'")
             .isNull();
@@ -66,7 +66,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should return a non-empty list of SEPA countries")
     @Test
-    void getSepaCountries_shouldReturnList() {
+    void getSepaCountries_registry_returnsOnlySepaCountries() {
         java.util.List<IbanRegistry> sepaCountries = IbanRegistry.getSepaCountries();
 
         assertThat(sepaCountries)
@@ -88,7 +88,7 @@ final class IbanRegistryTest {
         "AX | 18 | 3!n11!n       | FI", // Åland Islands: base country Finland
         "GP | 27 | 5!n5!n11!c2!n | FR"  // Guadeloupe: base country France"
     })
-    void checkIbanProperties_shouldMatchExpectedValues(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
+    void registryEntry_variousCountries_matchesExpectedValues(String code, int expectedLength, String expectedPattern, IbanRegistry expectedBaseCountry) {
         IbanRegistry entry = IbanRegistry.getByCode(code);
 
         assertThat(entry)
@@ -106,7 +106,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Germany (DE) should not have a separate branch code")
     @Test
-    void checkIbanDe_shouldHaveCorrectStructure() {
+    void registryEntry_de_hasCorrectStructure() {
         IbanRegistry registryDe = IbanRegistry.getByCode("DE");
 
         assertThat(registryDe)
@@ -157,7 +157,7 @@ final class IbanRegistryTest {
 
     @DisplayName("France (FR) should have a branch code")
     @Test
-    void checkIbanFr_shouldHaveCorrectStructure() {
+    void registryEntry_fr_hasCorrectStructure() {
         IbanRegistry registryFr = IbanRegistry.FR;
 
         assertThat(registryFr)
@@ -209,7 +209,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Italy (IT) should have correct structure")
     @Test
-    void checkIbanIt_shouldHaveCorrectStructure() {
+    void registryEntry_it_hasCorrectStructure() {
         IbanRegistry registryIt = IbanRegistry.IT;
 
         assertThat(registryIt)
@@ -236,7 +236,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Non-SEPA country should return false for isSepa")
     @Test
-    void checkIbanNonSepaCountry_shouldReturnFalse() {
+    void isSepa_nonSepaCountry_returnsFalse() {
         assertThat(IbanRegistry.getByCode("PS"))
             .as("PS (Palestine) entry should exist")
             .isNotNull()
@@ -246,7 +246,7 @@ final class IbanRegistryTest {
 
     @DisplayName("toString() should contain essential data for DE")
     @Test
-    void toString_shouldBeDetailedForDE() {
+    void toString_de_isDetailed() {
         String expected = "IbanRegistry[DE (Germany), "
             + "SEPA country: Yes, "
             + "IBAN len: 22, "
@@ -261,7 +261,7 @@ final class IbanRegistryTest {
 
     @DisplayName("getBaseEntryByCode should return the entry only for base countries, null for derived or unknown codes")
     @Test
-    void getBaseEntryByCode_shouldReturnEntryOnlyForBaseCountries() {
+    void getBaseEntryByCode_variousCodes_returnsEntryOnlyForBaseCountries() {
         assertThat(IbanRegistry.getBaseEntryByCode('F', 'R'))
             .as("FR is a base country")
             .isSameAs(IbanRegistry.FR);
@@ -277,7 +277,7 @@ final class IbanRegistryTest {
 
     @DisplayName("isBaseCountry/isDerivedCountry should reflect the base/derived hierarchy")
     @Test
-    void isBaseCountry_and_isDerivedCountry_shouldReflectHierarchy() {
+    void isBaseCountryAndIsDerivedCountry_registry_reflectHierarchy() {
         assertThat(IbanRegistry.FR)
             .returns(true, IbanRegistry::isBaseCountry)
             .returns(false, IbanRegistry::isDerivedCountry);
@@ -290,7 +290,7 @@ final class IbanRegistryTest {
 
     @DisplayName("getDerivedCountries should list derived entries for a base country, and be empty otherwise")
     @Test
-    void getDerivedCountries_shouldListDerivedEntriesForBaseCountry() {
+    void getDerivedCountries_baseCountry_listsDerivedEntries() {
         assertThat(IbanRegistry.FR.getDerivedCountries())
             .as("France has several overseas territories sharing its IBAN structure")
             .isNotEmpty()
@@ -304,7 +304,7 @@ final class IbanRegistryTest {
 
     @DisplayName("getIbanRegex should match a valid IBAN and reject an invalid one")
     @Test
-    void getIbanRegex_shouldMatchValidIbanAndRejectInvalid() {
+    void getIbanRegex_validAndInvalidIban_matchesOnlyValid() {
         assertThat(IbanRegistry.DE.getIbanRegex().matcher("DE89370400440532013000").matches())
             .as("regex should match DE's own example IBAN")
             .isTrue();
@@ -316,14 +316,14 @@ final class IbanRegistryTest {
 
     @DisplayName("getBranchCodeLength should return 0 when absent, and the actual length when present")
     @Test
-    void getBranchCodeLength_shouldReturnZeroWhenAbsent() {
+    void getBranchCodeLength_noBranchCode_returnsZero() {
         assertThat(IbanRegistry.DE.getBranchCodeLength()).isZero();
         assertThat(IbanRegistry.FR.getBranchCodeLength()).isEqualTo(5);
     }
 
     @DisplayName("National Check Digit should be present for AL and absent for DE")
     @Test
-    void nationalCheckDigit_shouldBePresentForAlAndAbsentForDe() {
+    void nationalCheckDigit_alAndDe_presentOnlyForAl() {
         assertThat(IbanRegistry.AL.hasNationalCheckDigit()).isTrue();
         assertThat(IbanRegistry.AL.getNationalCheckDigitPattern()).isEqualTo("1!n");
         assertThat(IbanRegistry.AL.getNationalCheckDigitComponent())
@@ -338,7 +338,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Package-private internals (StructureData, MetaData, ContactData, builder factory) should be accessible and consistent")
     @Test
-    void internalAccessors_shouldReturnConsistentValues() {
+    void internalAccessors_registry_returnConsistentValues() {
         IbanRegistry de = IbanRegistry.DE;
 
         assertThat(de.getStructureData()).isNotNull();
@@ -405,7 +405,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should verify ContactData properties and immutability")
     @Test
-    void contactData_shouldBeInitializedCorrectly() {
+    void contactData_constructor_initializesFields() {
         IbanRegistry.ContactData contact = IbanRegistry.ContactData.of("Swift", "Standards", "Street", "City", "Email", "Tel");
 
         assertThat(contact)
@@ -421,7 +421,7 @@ final class IbanRegistryTest {
     @DisplayName("Should satisfy equals and hashCode for ContactData")
     @Test
     @SuppressWarnings("SelfAssertion")
-    void contactData_shouldSatisfyEqualsHashCode() {
+    void contactData_equalsAndHashCode_areConsistent() {
         IbanRegistry.ContactData contact1 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
         IbanRegistry.ContactData contact2 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
         IbanRegistry.ContactData contactDiff = IbanRegistry.ContactData.of("Other", "Dept", "Street", "City", "Mail", "Tel");
@@ -437,7 +437,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should cover all equality branches for ContactData")
     @Test
-    void contactData_shouldCoverEqualsBranchCoverage() {
+    void contactData_equals_coversAllBranches() {
         IbanRegistry.ContactData base = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
 
         // test for each field being different to trigger 'false' result for each && branch
@@ -456,7 +456,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should return correct toString for ContactData")
     @Test
-    void contactData_shouldReturnCorrectToString() {
+    void contactData_toString_returnsExpectedString() {
         IbanRegistry.ContactData contact = IbanRegistry.ContactData.of("Org", "Dept", null, null, null, null);
 
         // checking the pattern: getClass().getSimpleName() + [fields]
@@ -467,7 +467,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should correctly evaluate isEmpty for ContactData")
     @Test
-    void contactData_isEmpty_shouldReturnExpectedResult() {
+    void contactData_isEmpty_returnsExpectedResult() {
         // null reference
         assertThat(IbanRegistry.ContactData.isEmpty(null)).isTrue();
 
@@ -491,7 +491,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should cover all getters of MetaData")
     @Test
-    void metaData_getters_shouldReturnConfiguredValues() {
+    void metaData_getters_returnConfiguredValues() {
         MetaData metaData = MetaData.of(true, "DE89370400440532013000", 2026, 10);
 
         assertThat(metaData.isSepa()).isTrue();
@@ -502,7 +502,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should throw exception when required BBAN pattern is missing")
     @Test
-    void build_shouldThrowExceptionWhenBbanPatternIsMissing() {
+    void build_missingBbanPattern_throwsException() {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withAccountNumber("16!n", 4);
 
@@ -513,7 +513,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should throw exception when required bank code is missing")
     @Test
-    void build_shouldThrowExceptionWhenBankCodeIsMissing() {
+    void build_missingBankCode_throwsException() {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withBbanPattern("16!n")
             .withAccountNumber("16!n", 4);
@@ -525,7 +525,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should throw exception when required account number is missing")
     @Test
-    void build_shouldThrowExceptionWhenAccountNumberIsMissing() {
+    void build_missingAccountNumber_throwsException() {
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withBbanPattern("4!n")
             .withBankCode("4!n", 4);
@@ -538,7 +538,7 @@ final class IbanRegistryTest {
     @DisplayName("Validate IBAN length limits (15-34)")
     @ParameterizedTest(name = "[{index}]: {0}")
     @ValueSource(ints = {14, 34})
-    void build_shouldThrowExceptionWhenBbanpatternLengthViolatesIsoLimits(int invalidIbanLength) {
+    void build_bbanPatternLengthViolatesIsoLimits_throwsException(int invalidIbanLength) {
         int invalidBbanLength = invalidIbanLength - MIN_IBAN_BASE_LENGTH;
         IbanRegistry.StructureData.Builder builder = IbanRegistry.StructureData.builder()
             .withBbanPattern(invalidBbanLength + "!n")

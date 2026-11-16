@@ -35,7 +35,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should cover all factory entry points — happy paths")
     @Test
-    void entryPoints_ShouldSucceed_WhenValidInputIsProvided() {
+    void entryPoints_validInput_succeed() {
         assertThatBic(VALID_BIC8_MARKDEFF)
             .isBic8()
             .hasBankCode("MARK");
@@ -49,13 +49,13 @@ final class BicAssertionsTest {
 
     @DisplayName("assertThatBic(null) should return an assert whose isNull() succeeds")
     @Test
-    void assertThatBic_ShouldHandleNull_WhenNullIsProvided() {
+    void assertThatBic_null_handlesNull() {
         assertThatBic(null).isNull();
     }
 
     @DisplayName("assertThatBic should wrap InvalidBicException in AssertionError for an invalid BIC")
     @Test
-    void assertThatBic_ShouldThrowAssertionError_WhenBicIsInvalid() {
+    void assertThatBic_invalidBic_throwsAssertionError() {
         assertThatThrownBy(() -> assertThatBic("TOOLONG_BIC_VALUE"))
             .isInstanceOf(AssertionError.class)
             .hasCauseInstanceOf(InvalidBicException.class);
@@ -63,14 +63,14 @@ final class BicAssertionsTest {
 
     @DisplayName("BicAssertions can be instantiated via its inherited public constructor")
     @Test
-    void bicAssertions_Constructor_ShouldBeReachable() {
+    void bicAssertions_constructor_isReachable() {
         BicAssertions instance = new BicAssertions();
         assertThat(instance).isNotNull();
     }
 
     @DisplayName("Should verify BIC-8 / BIC-11 type and length")
     @Test
-    void typeAssertions_ShouldVerifyBicKind_WhenChecked() {
+    void typeAssertions_bic8AndBic11_verifyKind() {
         Bic bic8  = Bic.of(VALID_BIC8_MARKDEFF);
         Bic bic11 = Bic.of(VALID_BIC11_MARKDEFF500);
 
@@ -86,7 +86,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isBic8 should fail with message when BIC is BIC-11")
     @Test
-    void isBic8_ShouldFail_WhenBicIs11() {
+    void isBic8_bic11_fails() {
         assertThatThrownBy(() -> assertThat(Bic.of(VALID_BIC11_MARKDEFF500)).isBic8())
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected BIC to be BIC-8 (length %d) but was BIC-11 (length %d)", Bic.BIC8_LENGTH, Bic.BIC11_LENGTH);
@@ -94,7 +94,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isNotBic8 should fail with message when BIC is BIC-8")
     @Test
-    void isNotBic8_ShouldFail_WhenBicIs8() {
+    void isNotBic8_bic8_fails() {
         assertThatThrownBy(() -> assertThat(Bic.of(VALID_BIC8_MARKDEFF)).isNotBic8())
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected BIC to be BIC-11 (length %d) but was BIC-8 (length %d)", Bic.BIC11_LENGTH, Bic.BIC8_LENGTH);
@@ -102,7 +102,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isNotBic11 should fail with message when BIC is BIC-11")
     @Test
-    void isNotBic11_ShouldFail_WhenBicIs11() {
+    void isNotBic11_bic11_fails() {
         assertThatThrownBy(() -> assertThat(Bic.of(VALID_BIC11_MARKDEFF500)).isNotBic11())
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected BIC to be BIC-8 (length %d) but was BIC-11 (length %d)", Bic.BIC8_LENGTH, Bic.BIC11_LENGTH);
@@ -110,7 +110,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should verify all metadata properties for a BIC-8")
     @Test
-    void metadataAssertions_ShouldVerifyProperties_WhenBicIsParsed() {
+    void metadataAssertions_parsedBic_verifyProperties() {
         assertThatBic(VALID_BIC8_MARKDEFF)
             .hasToString(VALID_BIC8_MARKDEFF)
             .hasBic8(VALID_BIC8_MARKDEFF)
@@ -130,7 +130,7 @@ final class BicAssertionsTest {
 
     @DisplayName("hasToString should fail with message on mismatch")
     @Test
-    void hasToString_ShouldFail_WhenValueDoesNotMatch() {
+    void hasToString_mismatch_fails() {
         assertThatThrownBy(() -> assertThatBic(VALID_BIC8_MARKDEFF).hasToString("WRONGBIC"))
             .isInstanceOf(AssertionError.class)
             .hasMessage("Expected BIC toString() to be 'WRONGBIC' but was '%s'", VALID_BIC8_MARKDEFF);
@@ -138,7 +138,7 @@ final class BicAssertionsTest {
 
     @DisplayName("hasBic8 should fail with message on mismatch")
     @Test
-    void hasBic8_ShouldFail_WhenValueDoesNotMatch() {
+    void hasBic8_mismatch_fails() {
         String bic = VALID_BIC8_MARKDEFF;
         assertThatThrownBy(() -> assertThatBic(bic).hasBic8("WRONGBIC"))
             .isInstanceOf(AssertionError.class)
@@ -147,7 +147,7 @@ final class BicAssertionsTest {
 
     @DisplayName("hasBic11 should fail with message on mismatch")
     @Test
-    void hasBic11_ShouldFail_WhenValueDoesNotMatch() {
+    void hasBic11_mismatch_fails() {
         String bic = VALID_BIC8_MARKDEFF;
         assertThatThrownBy(() -> assertThatBic(bic).hasBic11("WRONGBICXXX"))
             .isInstanceOf(AssertionError.class)
@@ -156,7 +156,7 @@ final class BicAssertionsTest {
 
     @DisplayName("hasCountryName should fail with message on mismatch")
     @Test
-    void hasCountryName_ShouldFail_WhenValueDoesNotMatch() {
+    void hasCountryName_mismatch_fails() {
         String bic = VALID_BIC8_MARKDEFF;
         assertThatThrownBy(() -> assertThatBic(bic).hasCountryName("France"))
             .isInstanceOf(AssertionError.class)
@@ -165,7 +165,7 @@ final class BicAssertionsTest {
 
     @DisplayName("hasCountryFlag should fail with message on mismatch")
     @Test
-    void hasCountryFlag_ShouldFail_WhenValueDoesNotMatch() {
+    void hasCountryFlag_mismatch_fails() {
         String bic = VALID_BIC8_MARKDEFF;
         assertThatThrownBy(() -> assertThatBic(bic).hasCountryFlag("🇫🇷"))
             .isInstanceOf(AssertionError.class)
@@ -174,7 +174,7 @@ final class BicAssertionsTest {
 
     @DisplayName("hasCurrency should fail with message on mismatch")
     @Test
-    void hasCurrency_ShouldFail_WhenValueDoesNotMatch() {
+    void hasCurrency_mismatch_fails() {
         Bic bic = Bic.of(VALID_BIC8_MARKDEFF); // Germany -> EUR
         assertThatThrownBy(() -> assertThat(bic).hasCurrency(Currency.GBP))
             .isInstanceOf(AssertionError.class)
@@ -183,7 +183,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should verify all comparison assertions for ordered BICs")
     @Test
-    void comparisonAssertions_ShouldWork_WhenBicsAreCompared() {
+    void comparisonAssertions_bics_work() {
         Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);   // MARK... — lexicographically greater
         Bic bicB = Bic.of(OTHER_BIC_DEUTDEFFXXX); // DEUT...
 
@@ -201,7 +201,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isLessThan should fail with message when actual is not strictly less")
     @Test
-    void isLessThan_ShouldFail_WhenActualIsGreaterOrEqual() {
+    void isLessThan_actualGreaterOrEqual_fails() {
         Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);
         Bic bicB = Bic.of(OTHER_BIC_DEUTDEFFXXX);
         assertThatThrownBy(() -> assertThat(bicA).isLessThan(bicB))
@@ -211,7 +211,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isLessThan should throw NullPointerException when 'other' is null")
     @Test
-    void isLessThan_ShouldThrowNpe_WhenOtherIsNull() {
+    void isLessThan_null_throwsNpe() {
         assertThatThrownBy(() -> assertThat(Bic.of(VALID_BIC8_MARKDEFF)).isLessThan(null))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("The BIC to compare against must not be null");
@@ -219,7 +219,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isLessThanOrEqualTo should fail with message when actual is strictly greater")
     @Test
-    void isLessThanOrEqualTo_ShouldFail_WhenActualIsGreater() {
+    void isLessThanOrEqualTo_actualGreater_fails() {
         Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);
         Bic bicB = Bic.of(OTHER_BIC_DEUTDEFFXXX);
         assertThatThrownBy(() -> assertThat(bicA).isLessThanOrEqualTo(bicB))
@@ -229,7 +229,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isLessThanOrEqualTo should throw NullPointerException when 'other' is null")
     @Test
-    void isLessThanOrEqualTo_ShouldThrowNpe_WhenOtherIsNull() {
+    void isLessThanOrEqualTo_null_throwsNpe() {
         assertThatThrownBy(() -> assertThat(Bic.of(VALID_BIC8_MARKDEFF)).isLessThanOrEqualTo(null))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("The BIC to compare against must not be null");
@@ -237,7 +237,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isGreaterThan should fail with message when actual is not strictly greater")
     @Test
-    void isGreaterThan_ShouldFail_WhenActualIsLessOrEqual() {
+    void isGreaterThan_actualLessOrEqual_fails() {
         Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);
         Bic bicB = Bic.of(OTHER_BIC_DEUTDEFFXXX);
         assertThatThrownBy(() -> assertThat(bicB).isGreaterThan(bicA))
@@ -247,7 +247,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isGreaterThan should throw NullPointerException when 'other' is null")
     @Test
-    void isGreaterThan_ShouldThrowNpe_WhenOtherIsNull() {
+    void isGreaterThan_null_throwsNpe() {
         assertThatThrownBy(() -> assertThatBic(VALID_BIC8_MARKDEFF).isGreaterThan(null))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("The BIC to compare against must not be null");
@@ -255,7 +255,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isGreaterThanOrEqualTo should fail with message when actual is strictly less")
     @Test
-    void isGreaterThanOrEqualTo_ShouldFail_WhenActualIsLess() {
+    void isGreaterThanOrEqualTo_actualLess_fails() {
         Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);
         Bic bicB = Bic.of(OTHER_BIC_DEUTDEFFXXX);
         assertThatThrownBy(() -> assertThat(bicB).isGreaterThanOrEqualTo(bicA))
@@ -265,7 +265,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isGreaterThanOrEqualTo should throw NullPointerException when 'other' is null")
     @Test
-    void isGreaterThanOrEqualTo_ShouldThrowNpe_WhenOtherIsNull() {
+    void isGreaterThanOrEqualTo_null_throwsNpe() {
         assertThatThrownBy(() -> assertThatBic(VALID_BIC8_MARKDEFF).isGreaterThanOrEqualTo(null))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("The BIC to compare against must not be null");
@@ -278,7 +278,7 @@ final class BicAssertionsTest {
      */
     @DisplayName("isEqualByCompareTo should fail with message including compareTo result")
     @Test
-    void isEqualByCompareTo_ShouldFail_WhenBicsAreNotEqual() {
+    void isEqualByCompareTo_differentBics_fails() {
         Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);
         Bic bicB = Bic.of(OTHER_BIC_DEUTDEFFXXX);
         assertThatThrownBy(() -> assertThat(bicA).isEqualByCompareTo(bicB))
@@ -288,7 +288,7 @@ final class BicAssertionsTest {
 
     @DisplayName("isEqualByCompareTo should throw NullPointerException when 'other' is null")
     @Test
-    void isEqualByCompareTo_ShouldThrowNpe_WhenOtherIsNull() {
+    void isEqualByCompareTo_null_throwsNpe() {
         assertThatThrownBy(() -> assertThatBic(VALID_BIC8_MARKDEFF).isEqualByCompareTo(null))
             .isInstanceOf(NullPointerException.class)
             .hasMessage("The BIC to compare against must not be null");
@@ -296,7 +296,7 @@ final class BicAssertionsTest {
 
     @DisplayName("matches(Pattern) should handle null skip, passing match, and failing match")
     @Test
-    void matches_ShouldCoverAllBranches() {
+    void matches_predicates_coversAllBranches() {
         Bic bic = Bic.of(VALID_BIC8_MARKDEFF);
 
         // null guard: bicPattern != null evaluates to false -> no failWithMessage
@@ -315,14 +315,14 @@ final class BicAssertionsTest {
 
     @DisplayName("isBic8EqualTo and isBic11NormalizedEqualTo should delegate to their canonical counterparts")
     @Test
-    void backwardCompatAliases_ShouldDelegateToNewMethods() {
+    void backwardCompatAliases_invoked_delegateToNewMethods() {
         assertThat(Bic.of(VALID_BIC8_MARKDEFF)).isBic8EqualTo(VALID_BIC8_MARKDEFF);
         assertThat(Bic.of(VALID_BIC11_MARKDEFF500)).isBic11NormalizedEqualTo(VALID_BIC11_MARKDEFF500);
     }
 
     @DisplayName("Should support SoftAssertions via 'using' proxy without collecting errors")
     @Test
-    void softAssertions_ShouldSucceed_WhenUsingProxy() {
+    void softAssertions_proxy_succeed() {
         SoftAssertions softly = new SoftAssertions();
         Bic bic = Bic.of(VALID_BIC11_MARKDEFF500);
 
@@ -335,7 +335,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Failure messages should contain expected and actual values")
     @Test
-    void failureMessages_ShouldBeCorrect_WhenAssertionsFail() {
+    void failureMessages_failingAssertions_areCorrect() {
         Bic bic = Bic.of(VALID_BIC8_MARKDEFF);
         BicAssert bicAssert = assertThat(bic);
 
@@ -354,7 +354,7 @@ final class BicAssertionsTest {
         "MARKDEFF500 | true",
         "TOO_SHORT   | false"
     })
-    void validity_ShouldBeReflected_WhenInputIsChecked(String input, boolean expected) {
+    void validity_variousInputs_isReflected(String input, boolean expected) {
         if (expected) {
             assertThatBicIsValid(input);
         } else {
@@ -364,7 +364,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should verify each BIC component and their failure messages")
     @Test
-    void componentAssertions_ShouldVerifyEachPart() {
+    void componentAssertions_parsedBic_verifyEachPart() {
         String bic = VALID_BIC11_MARKDEFF500;
 
         assertThatBic(bic)
@@ -385,7 +385,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should verify currency and country metadata with failure cases")
     @Test
-    void metadataAssertions_ShouldHandleCurrencyAndFlags() {
+    void metadataAssertions_currencyAndFlags_areHandled() {
         String bic = VALID_BIC8_MARKDEFF;
 
         assertThatBic(bic)
@@ -400,7 +400,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should handle branch code presence and absence with failure message")
     @Test
-    void branchCodeAssertions_ShouldHandlePresenceAndAbsence() {
+    void branchCodeAssertions_presenceAndAbsence_areHandled() {
         Bic bic8  = Bic.of(VALID_BIC8_MARKDEFF);
         Bic bic11 = Bic.of("MARKDEFFXXX");
 
@@ -414,7 +414,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should verify BIC length with failure message on mismatch")
     @Test
-    void lengthAssertions_ShouldVerifyExactLength() {
+    void lengthAssertions_bic8AndBic11_verifyExactLength() {
         String bic = VALID_BIC8_MARKDEFF;
 
         assertThatBic(bic)
@@ -429,7 +429,7 @@ final class BicAssertionsTest {
 
     @DisplayName("Should handle null, empty, and valid inputs in assertThatBicIsValid")
     @Test
-    void factoryPoints_ShouldHandleEdgeCases() {
+    void factoryPoints_edgeCases_areHandled() {
         assertThatBicIsNotValid(null);
         assertThatBicIsNotValid("");
         assertThatBicIsValid("MARKDEFF");

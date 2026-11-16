@@ -24,7 +24,7 @@ final class BicValidatorTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_shouldThrowException_whenInstantiated() {
+    void privateConstructor_invoked_throwsException() {
         TestUtil.assertConstructorIsPrivate(BicValidator.class);
     }
 
@@ -39,7 +39,7 @@ final class BicValidatorTest {
     })
     @DisplayName("isValid: should return true for valid BICs via String and CharSequence paths")
     @SuppressWarnings("UnnecessaryStringBuilder")
-    void isValid_shouldReturnTrue_forValidBic(String validBic) {
+    void isValid_validBic_returnsTrue(String validBic) {
         assertThat(BicValidator.isValid(validBic)).isTrue();
         assertThat(BicValidator.isValid((CharSequence) validBic)).isTrue();
         assertThat(BicValidator.isValid(new StringBuilder(validBic))).isTrue();
@@ -49,7 +49,7 @@ final class BicValidatorTest {
     @DisplayName("validate: should return false and appropriate error for null or empty input")
     @ParameterizedTest
     @NullAndEmptySource
-    void validate_shouldReturnError_whenInputIsNullOrEmpty(String input) {
+    void validate_nullOrEmpty_returnsError(String input) {
         BicValidationResult result = BicValidator.validate(input);
         assertThat(result.isValid()).isFalse();
         assertThat(result.error).isIn(EMPTY, INCORRECT_LENGTH);
@@ -64,7 +64,7 @@ final class BicValidatorTest {
         "BCCIL",        // too short
         "BCCILULLXXXX"  // too long
     })
-    void validate_shouldReturnIncorrectLength_whenLengthIsInvalid(String invalidLengthBic) {
+    void validate_invalidLength_returnsIncorrectLength(String invalidLengthBic) {
         BicValidationResult result = BicValidator.validate(invalidLengthBic);
         assertThat(result.isValid()).isFalse();
         assertThat(result.error).isEqualTo(INCORRECT_LENGTH);
@@ -79,7 +79,7 @@ final class BicValidatorTest {
         "DNBNXX23 | INVALID_COUNTRY",
         "AIBKIE2! | ILLEGAL_CHARACTERS"
     })
-    void validate_shouldReturnSpecificError_whenStructureIsInvalid(String invalidBic, String expectedErrorStr) {
+    void validate_invalidStructure_returnsSpecificError(String invalidBic, String expectedErrorStr) {
         BicValidationError expectedError = BicValidationError.valueOf(expectedErrorStr);
         BicValidationResult result = BicValidator.validate(invalidBic);
 
@@ -89,7 +89,7 @@ final class BicValidatorTest {
 
     @DisplayName("validate: should return valid result without error for flawless BIC")
     @Test
-    void validate_shouldReturnValidResult_whenBicIsFlawless() {
+    void validate_validBic_returnsValidResult() {
         String bic = "NBPLPLPWXXX";
         BicValidationResult result = BicValidator.validate(bic);
 
@@ -100,7 +100,7 @@ final class BicValidatorTest {
 
     @DisplayName("copyToBuffer: should handle generic CharSequence fallback correctly")
     @Test
-    void copyToBuffer_shouldFallbackToSequentialLoop_whenTypeIsGenericCharSequence() {
+    void copyToBuffer_genericCharSequence_fallsBackToSequentialLoop() {
         String sourceStr = "DEUTDED1";
         CharSequence genericSeq = CharBuffer.wrap(sourceStr);
         char[] target = new char[Bic.BIC11_LENGTH];
@@ -117,7 +117,7 @@ final class BicValidatorTest {
         "LEHMUS33X  | 9",
         "BARYGB2LXX | 10"
     })
-    void validate_shouldRejectSpecificInvalidLengths(String bic, int length) {
+    void validate_specificInvalidLengths_returnsIncorrectLength(String bic, int length) {
         BicValidationResult result = BicValidator.validate(bic);
 
         assertThat(result.isValid()).isFalse();
@@ -126,7 +126,7 @@ final class BicValidatorTest {
 
     @DisplayName("copyToBuffer: should cover precise array bounds for String source")
     @Test
-    void copyToBuffer_shouldCopyCorrectly_whenSourceIsString() {
+    void copyToBuffer_string_copiesCorrectly() {
         String sourceStr = "BARYGB2L";
         char[] target = new char[Bic.BIC8_LENGTH];
 
@@ -137,7 +137,7 @@ final class BicValidatorTest {
 
     @DisplayName("copyToBuffer: should use fast path when source is a String")
     @Test
-    void copyToBuffer_shouldUseFastPath_whenSourceIsString() {
+    void copyToBuffer_string_usesFastPath() {
         String source = "WDABDE21XXX";
         char[] target = new char[11];
 
@@ -148,7 +148,7 @@ final class BicValidatorTest {
 
     @DisplayName("copyToBuffer: should use sequential loop when source is a generic CharSequence")
     @Test
-    void copyToBuffer_shouldUseSequentialLoop_whenSourceIsGenericCharSequence() {
+    void copyToBuffer_genericCharSequence_usesSequentialLoop() {
         // using a custom CharSequence implementation to force execution of the fallback loop
         CharSequence customSeq = new CharSequence() {
             private static final String DATA = "ABCDEFGH";

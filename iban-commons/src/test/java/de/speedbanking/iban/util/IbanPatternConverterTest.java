@@ -41,7 +41,7 @@ final class IbanPatternConverterTest {
         "4!a10!a      ; [A-Z]{14}",                  // only two segments of the same type
         "2!c1!a2!a3!n ; [0-9A-Z]{2}[A-Z]{3}[0-9]{3}" // all three types and aggregation
     })
-    void convertToRegex_givenValidPattern_shouldReturnCorrectRegex(String input, String expected) {
+    void convertToRegex_validPattern_returnsRegex(String input, String expected) {
         String patternInput = (input == null) ? "" : input;
         String actual = IbanPatternConverter.convertToRegex(patternInput);
 
@@ -53,7 +53,7 @@ final class IbanPatternConverterTest {
     @DisplayName("Unsupported character type should throw IllegalArgumentException")
     @ParameterizedTest(name = "Type: {0}")
     @ValueSource(strings = {"x", "A", "!", "1", "@"})
-    void convertToRegex_givenUnsupportedCharacterType_shouldThrowException(String invalidType) {
+    void convertToRegex_unsupportedCharacterType_throwsException(String invalidType) {
         String input = "4!" + invalidType;
         assertThatIllegalArgumentException()
             .isThrownBy(() -> IbanPatternConverter.convertToRegex(input))
@@ -75,7 +75,7 @@ final class IbanPatternConverterTest {
         "''                     | Pattern notation must not be empty",
         "'  '                   | Pattern contains illegal leading/trailing whitespace"
     })
-    void convertToRegex_givenInvalidFormat_shouldThrowException(String input, String expectedErrorSegment) {
+    void convertToRegex_invalidFormat_throwsException(String input, String expectedErrorSegment) {
         assertThatIllegalArgumentException()
             .isThrownBy(() -> IbanPatternConverter.convertToRegex(input))
             .withMessage(expectedErrorSegment);
@@ -93,7 +93,7 @@ final class IbanPatternConverterTest {
         "'  '     | false", // whitespace
         "4!x      | false"  // invalid type
     })
-    void isValid_givenVariousInputs_shouldReturnExpectedBoolean(String input, boolean expected) {
+    void isValid_variousInputs_returnsExpectedBoolean(String input, boolean expected) {
         assertThat(IbanPatternConverter.isValid(input))
             .as("isValid failed for input: '%s'", input)
             .isEqualTo(expected);
@@ -248,7 +248,7 @@ final class IbanPatternConverterTest {
 
     @DisplayName("Segment creation should validate parameters")
     @Test
-    void segment_construction_shouldValidateInputs() {
+    void segment_invalidInputs_throwsException() {
         assertThatNullPointerException()
             .isThrownBy(() -> new Segment(null, 5))
             .withMessage("charType must not be null");
@@ -264,7 +264,7 @@ final class IbanPatternConverterTest {
 
     @DisplayName("Segment boolean type inspectors should return correct values")
     @Test
-    void segment_typeInspectors_shouldReturnCorrectBooleans() {
+    void segment_typeInspectors_returnExpectedBooleans() {
         Segment num = Segment.of(NUMERIC, 4);
         Segment alpha = Segment.of(ALPHABETIC, 4);
         Segment alphaNum = Segment.of(ALPHANUMERIC, 4);
@@ -287,7 +287,7 @@ final class IbanPatternConverterTest {
 
     @DisplayName("Segment toPatternNotation should return valid IBAN pattern string")
     @Test
-    void toPatternNotation_shouldReturnFormattedPattern() {
+    void toPatternNotation_segments_returnsFormattedPattern() {
         assertThat(Segment.of(ALPHABETIC, 4).toPatternNotation()).isEqualTo("4!a");
         assertThat(Segment.of(NUMERIC, 10).toPatternNotation()).isEqualTo("10!n");
         assertThat(Segment.of(ALPHANUMERIC, 16).toPatternNotation()).isEqualTo("16!c");
@@ -295,14 +295,14 @@ final class IbanPatternConverterTest {
 
     @DisplayName("Segment toString() should return expected format")
     @Test
-    void toString_givenSegment_shouldReturnExpectedFormat() {
+    void toString_segment_returnsExpectedFormat() {
         Segment segment = Segment.of(ALPHABETIC, 10);
         assertThat(segment).hasToString("Segment[charType=ALPHABETIC, length=10]");
     }
 
     @DisplayName("Segment addLength should handle non-positive addition")
     @Test
-    void addLength_givenNonPositiveValue_shouldReturnSameInstance() {
+    void addLength_nonPositiveValue_returnsSameInstance() {
         Segment segment5 = Segment.of(ALPHABETIC, 5);
 
         Segment resultSegment0 = segment5.addLength(0);
@@ -319,7 +319,7 @@ final class IbanPatternConverterTest {
     @DisplayName("Segment equals and hashCode must be consistent")
     @Test
     @SuppressWarnings("SelfAssertion")
-    void equalsAndHashCode_givenVariousSegments_shouldBeConsistent() {
+    void equalsAndHashCode_variousSegments_areConsistent() {
         Segment segmentA = Segment.of(ALPHABETIC, 10);
         Segment segmentB = Segment.of(ALPHABETIC, 10);
         Segment segmentC = Segment.of(ALPHABETIC, 5);
@@ -346,7 +346,7 @@ final class IbanPatternConverterTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void constructor_shouldBePrivate() {
+    void constructor_utilityClass_isPrivate() {
         TestUtil.assertConstructorIsPrivate(IbanPatternConverter.class);
     }
 

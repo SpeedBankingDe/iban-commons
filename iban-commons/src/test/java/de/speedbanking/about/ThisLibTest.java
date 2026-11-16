@@ -101,7 +101,7 @@ final class ThisLibTest {
     }
 
     @Test
-    void buildInfo_fallbackAttributeNames_areUsedWhenPrimaryMissing() throws IOException {
+    void buildInfo_primaryAttributesMissing_usesFallbackNames() throws IOException {
         Manifest manifest = manifestOf(
             "Project-Name: iban-commons",
             "Project-Version: 1.8.11",

@@ -19,7 +19,7 @@ final class NationalCheckDigitCalculatorsTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void constructor_shouldBePrivate() {
+    void constructor_utilityClass_isPrivate() {
         TestUtil.assertConstructorIsPrivate(NationalCheckDigitCalculators.class);
     }
 

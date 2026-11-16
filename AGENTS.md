@@ -79,7 +79,6 @@ These are established, non-obvious conventions - follow them rather than default
   void resolveActualSourceUri_htmlWithoutMatchingLink_returnsEmpty() { ... }
   void parse_rowWithTooFewColumns_throwsBankDataParseException() { ... }
   ```
-  Some older tests in the `iban`/`bic`/`util` packages still use a verbose `method_shouldOutcome_whenCondition()` style — don't copy that pattern into new tests, prefer the compact form above.
 - **Prefer `@ParameterizedTest` with `@CsvSource`** over separate single-assertion test methods when covering several input/output combinations of the same behavior. Typical shape:
   ```java
   @ParameterizedTest(name = "[{index}] offset={0}, length={1} ({2})")

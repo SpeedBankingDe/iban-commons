@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 final class IbanTestDataGeneratorTest {
 
     @Test
-    void createTestDatatAllCountries_shouldNotThrow() {
+    void createTestData_allCountries_doesNotThrow() {
         assertThat(IbanTestDataGenerator.createTestDatatAllCountries()).hasSize(IbanRegistry.values().length);
     }
 

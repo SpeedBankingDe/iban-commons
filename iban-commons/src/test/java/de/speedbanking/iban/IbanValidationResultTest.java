@@ -16,7 +16,7 @@ final class IbanValidationResultTest {
 
     @DisplayName("Should correctly create a valid result")
     @Test
-    void valid_shouldStoreIbanAndCountryData_whenInputIsValid() {
+    void valid_validInput_storesIbanAndCountryData() {
         IbanValidationResult result = IbanValidationResult.valid(VALID_IBAN, VALID_COUNTRY);
 
         assertThat(result.isValid()).isTrue();
@@ -27,7 +27,7 @@ final class IbanValidationResultTest {
 
     @DisplayName("Should correctly create an invalid result")
     @Test
-    void invalid_shouldStoreError_whenReasonIsProvided() {
+    void invalid_reason_storesError() {
         IbanValidationError testReason = IbanValidationError.EMPTY;
 
         IbanValidationResult result = IbanValidationResult.invalid(testReason);
@@ -40,7 +40,7 @@ final class IbanValidationResultTest {
 
     @DisplayName("toString() should be correctly formatted for a valid result")
     @Test
-    void toString_shouldContainIban_whenResultIsValid() {
+    void toString_validResult_containsIban() {
         IbanValidationResult result = IbanValidationResult.valid(VALID_IBAN, VALID_COUNTRY);
         String expected = IbanValidationResult.class.getSimpleName() + "[valid: " + VALID_IBAN + "]";
 
@@ -49,7 +49,7 @@ final class IbanValidationResultTest {
 
     @DisplayName("toString() should be correctly formatted for an invalid result")
     @Test
-    void toString_shouldContainError_whenResultIsInvalid() {
+    void toString_invalidResult_containsError() {
         IbanValidationResult result = IbanValidationResult.invalid(IbanValidationError.INVALID_COUNTRY);
         String expected = IbanValidationResult.class.getSimpleName() + "[invalid: IBAN has invalid country code]";
 

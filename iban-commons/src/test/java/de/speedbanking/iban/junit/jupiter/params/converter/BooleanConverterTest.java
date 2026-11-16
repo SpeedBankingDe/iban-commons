@@ -19,7 +19,7 @@ final class BooleanConverterTest {
         "0    | false",
         "''   | false"
     })
-    void convert_givenVariousStrings_shouldReturnExpectedBoolean(
+    void convert_variousStrings_returnsExpectedBoolean(
             @ConvertWith(BooleanConverter.class) boolean input,
             boolean expected) {
 

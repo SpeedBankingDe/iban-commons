@@ -63,7 +63,7 @@ final class RandomIbanTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "NL", "AT", "CH", "PL", "IT", "ES", "SE"})
-    void of_shouldReturnValidIban_whenInvokedByCountryCode(String countryCode) {
+    void of_countryCode_returnsValidIban(String countryCode) {
         Iban iban = RandomIban.of(countryCode);
 
         assertThatIban(iban)
@@ -308,7 +308,7 @@ final class RandomIbanTest {
     }
 
     @RepeatedTest(100)
-    void invalidString_shouldAlwaysBeInvalid_whenInvokedWithoutArgs() {
+    void invalidString_noArgs_isAlwaysInvalid() {
         assertThat(IbanValidator.isValid(RandomIban.invalidString()))
             .as("RandomIban.invalidString() should never produce a valid IBAN")
             .isFalse();
@@ -316,7 +316,7 @@ final class RandomIbanTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {"DE", "GB", "FR", "NL", "AT", "CH", "PL", "IT", "ES", "SE"})
-    void invalidString_shouldReturnInvalidIban_whenInvokedByCountryCode(String countryCode) {
+    void invalidString_countryCode_returnsInvalidIban(String countryCode) {
         String invalid = RandomIban.invalidString(countryCode);
 
         assertThat(invalid)
@@ -330,7 +330,7 @@ final class RandomIbanTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(value = IbanRegistry.class, names = {"DE", "GB", "FR", "NL", "AT"})
-    void invalidString_shouldReturnInvalidIban_whenInvokedByRegistry(IbanRegistry country) {
+    void invalidString_registry_returnsInvalidIban(IbanRegistry country) {
         String invalid = RandomIban.invalidString(country);
 
         assertThat(invalid)
@@ -343,7 +343,7 @@ final class RandomIbanTest {
     }
 
     @Test
-    void invalidString_shouldReturnInvalidIban_whenCreatedFromValidIbanString() {
+    void invalidString_validIbanString_returnsInvalidIban() {
         String valid = RandomIban.any().toString();
         String invalid = RandomIban.invalidString(valid, ThreadLocalRandom.current());
 
@@ -357,7 +357,7 @@ final class RandomIbanTest {
     }
 
     @RepeatedTest(200)
-    void invalidString_shouldAlwaysBeInvalid_whenCreatedFromValidIbanString() {
+    void invalidString_validIbanString_isAlwaysInvalid() {
         String valid = RandomIban.any().toString();
         String invalid = RandomIban.invalidString(valid, ThreadLocalRandom.current());
 
@@ -368,7 +368,7 @@ final class RandomIbanTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
-    void invalidString_shouldReturnInvalidIban_forAllRegistryCountries(IbanRegistry country) {
+    void invalidString_allRegistryCountries_returnsInvalidIban(IbanRegistry country) {
         String invalid = RandomIban.invalidString(country);
 
         assertThat(invalid)

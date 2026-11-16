@@ -23,7 +23,7 @@ final class IbanPlusKeyTest {
 
     @DisplayName("Private constructor should throw UnsupportedOperationException")
     @Test
-    void privateConstructor_shouldThrowException_whenInstantiated() {
+    void privateConstructor_invoked_throwsException() {
         TestUtil.assertConstructorIsPrivate(IbanPlusKey.class);
     }
 
@@ -42,7 +42,7 @@ final class IbanPlusKeyTest {
         "PL61109010140000071219812874    | PL | 109      | 0101  |    |  7",
         "SC18SSCB11010000000000001497USD | SC | SSCB11   | 01    |    |  8"
     })
-    void of_shouldExtractCorrectKey_whenCountryIsSupported(
+    void of_supportedCountry_extractsKey(
                 String ibanInput, String countryCode,
                 String bankCode, String branchCode,
                 String expectedNcd, int expectedIbanPlusLen) {
@@ -69,7 +69,7 @@ final class IbanPlusKeyTest {
         "SC | SC18SSCB11010000000000001497USD | SSCB1101"    // alphanumeric routing
     })
     @DisplayName("Should extract correct IbanPlus lookup key for various country structures")
-    void of_shouldExtractCorrectKey_whenCountryStructureVaries(String country, String iban, String expected) {
+    void of_variousCountryStructures_extractsKey(String country, String iban, String expected) {
         assertThat(IbanPlusKey.of(iban))
             .as("IbanPlus key extraction for %s", country)
             .isNotNull()
@@ -80,7 +80,7 @@ final class IbanPlusKeyTest {
     @ParameterizedTest(name = "{index}: input=\"{0}\" should return null")
     @ValueSource(strings = {"INVALID", " ", "DE89", "123", "\n"})
     @NullAndEmptySource
-    void of_shouldReturnNull_whenInputIsInvalid(String invalidInput) {
+    void of_invalidInput_returnsNull(String invalidInput) {
         assertThat(IbanPlusKey.of(invalidInput))
             .as("Input '%s' should result in a null key", invalidInput)
             .isNull();
@@ -88,7 +88,7 @@ final class IbanPlusKeyTest {
 
     @DisplayName("Should return null for null IBAN")
     @Test
-    void of_shouldReturnNull_whenIbanIsNull() {
+    void of_null_returnsNull() {
         assertThat(IbanPlusKey.of((Iban) null))
             .as("Null Iban should result in a null key")
             .isNull();
@@ -96,7 +96,7 @@ final class IbanPlusKeyTest {
 
     @DisplayName("Should be thread-safe due to immutable strategy cache")
     @Test
-    void of_shouldBeThreadSafe_whenCacheIsImmutable() {
+    void of_immutableStrategyCache_isThreadSafe() {
         // the strategy cache is pre-calculated and read-only
         // test ensures the class can be loaded and used without side effects
         assertThat(IbanPlusKey.of("DE89370400440532013000")).isEqualTo("37040044");

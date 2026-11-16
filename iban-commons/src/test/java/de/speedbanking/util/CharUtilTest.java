@@ -18,13 +18,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 final class CharUtilTest {
 
     @Test
-    void privateConstructor_shouldThrowException_whenInstantiated() {
+    void privateConstructor_invoked_throwsException() {
         TestUtil.assertConstructorIsPrivate(CharUtil.class);
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should be a digit")
     @ValueSource(chars = {'0', '5', '9'})
-    void isDigit_shouldReturnTrue_whenCharIsDigit(char c) {
+    void isDigit_digit_returnsTrue(char c) {
         assertThat(CharUtil.isDigit(c)).isTrue();
         assertThat(CharUtil.isNotDigit(c)).isFalse();
         assertThat(CharUtil.isAllDigits(String.valueOf(c))).isTrue();
@@ -33,7 +33,7 @@ final class CharUtilTest {
 
     @ParameterizedTest(name = "Char ''{0}'' should not be a digit")
     @ValueSource(chars = {'A', 'a', '-', ' ', '/', ':', ':', '9' + 1})
-    void isDigit_shouldReturnFalse_whenCharIsNotDigit(char c) {
+    void isDigit_nonDigit_returnsFalse(char c) {
         assertThat(CharUtil.isDigit(c)).isFalse();
         assertThat(CharUtil.isNotDigit(c)).isTrue();
         assertThat(CharUtil.isAllDigits(String.valueOf(c))).isFalse();
@@ -50,7 +50,7 @@ final class CharUtilTest {
         "'12A4'  | 2 | 4 | false", // 'A', '4' (boundary/end)
         "'12A4'  | 2 | 3 | false"  // just 'A' (index 2 to 3 exclusive)
     })
-    void isAllDigits_shouldValidateCorrectly_whenRangeIsGiven(String input, int beginIndex, int endIndex, boolean expected) {
+    void isAllDigits_range_returnsExpectedResult(String input, int beginIndex, int endIndex, boolean expected) {
         char[] arr = input.toCharArray();
         boolean result = CharUtil.isAllDigits(arr, beginIndex, endIndex);
 
@@ -60,7 +60,7 @@ final class CharUtilTest {
     }
 
     @Test
-    void isAllDigits_shouldThrowException_whenInputIsInvalid() {
+    void isAllDigits_invalidInput_throwsException() {
         // null array check
         assertThatNullPointerException()
             .isThrownBy(() -> CharUtil.isAllDigits((char[]) null, 0, 1))
@@ -81,7 +81,7 @@ final class CharUtilTest {
 
     @ParameterizedTest(name = "Char ''{0}'' should be uppercase")
     @ValueSource(chars = {'A', 'M', 'Z'})
-    void isUpperCase_shouldReturnTrue_whenCharIsUpperCase(char c) {
+    void isUpperCase_upperCase_returnsTrue(char c) {
         assertThat(CharUtil.isUpperCase(c)).isTrue();
         assertThat(CharUtil.isNotUpperCase(c)).isFalse();
         assertThat(CharUtil.isAllUpperCase(String.valueOf(c))).isTrue();
@@ -93,7 +93,7 @@ final class CharUtilTest {
 
     @ParameterizedTest(name = "Char ''{0}'' should not be uppercase")
     @ValueSource(chars = {'a', '5', '!', '@', '[', '`', '{'})
-    void isUpperCase_shouldReturnFalse_whenCharIsNotUpperCase(char c) {
+    void isUpperCase_nonUpperCase_returnsFalse(char c) {
         assertThat(CharUtil.isUpperCase(c)).isFalse();
         assertThat(CharUtil.isNotUpperCase(c)).isTrue();
         assertThat(CharUtil.isAllUpperCase(String.valueOf(c))).isFalse();
@@ -102,20 +102,20 @@ final class CharUtilTest {
 
     @ParameterizedTest(name = "Char ''{0}'' should be lowercase")
     @ValueSource(chars = {'j', 'a', 'p', 'a', 'n'})
-    void isLowerCase_shouldReturnTrue_whenCharIsLowerCase(char c) {
+    void isLowerCase_lowerCase_returnsTrue(char c) {
         assertThat(CharUtil.isLowerCase(c)).isTrue();
         assertThat(CharUtil.isNotLowerCase(c)).isFalse();
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should not be uppercase")
     @ValueSource(chars = {'A', '5', '!', '@', '[', '`', '{'})
-    void isLowerCase_shouldReturnFalse_whenCharIsNotLowerCase(char c) {
+    void isLowerCase_nonLowerCase_returnsFalse(char c) {
         assertThat(CharUtil.isLowerCase(c)).isFalse();
         assertThat(CharUtil.isNotLowerCase(c)).isTrue();
     }
 
     @Test
-    void isAllUpperCase_shouldReturnTrue_whenRangeContainsOnlyUpperCase() {
+    void isAllUpperCase_onlyUpperCase_returnsTrue() {
         char[] arr = {'A', 'B', 'c', 'D', 'E'};
         assertThat(CharUtil.isAllUpperCase(new char[]{'A', 'B', 'C'}, 0, 3)).isTrue();
         assertThat(CharUtil.isAllUpperCase(arr, 0, 2)).isTrue(); // 'A', 'B'
@@ -123,7 +123,7 @@ final class CharUtilTest {
     }
 
     @Test
-    void isAllUpperCase_shouldReturnFalse_whenNonUpperCaseIsFound() {
+    void isAllUpperCase_nonUpperCase_returnsFalse() {
         char[] arr = {'A', '1', 'C', 'd'};
         assertThat(CharUtil.isAllUpperCase(arr, 0, 4)).isFalse(); // contains '1' and 'd'
         assertThat(CharUtil.isAllUpperCase(arr, 3, 4)).isFalse(); // contains 'd'
@@ -131,7 +131,7 @@ final class CharUtilTest {
     }
 
     @Test
-    void isAllUpperCase_shouldThrowException_whenInputIsInvalid() {
+    void isAllUpperCase_invalidInput_throwsException() {
         // null array check
         assertThatNullPointerException()
             .isThrownBy(() -> CharUtil.isAllUpperCase((char[]) null, 0, 1))
@@ -149,18 +149,18 @@ final class CharUtilTest {
 
     @ParameterizedTest(name = "Char ''{0}'' should be digit or uppercase")
     @ValueSource(chars = {'5', 'A', 'Z', '0', '9'})
-    void isDigitOrUpperCase_shouldReturnTrue_whenCharIsDigitOrUpperCase(char c) {
+    void isDigitOrUpperCase_digitOrUpperCase_returnsTrue(char c) {
         assertThat(CharUtil.isDigitOrUpperCase(c)).isTrue();
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should not be digit or uppercase")
     @ValueSource(chars = {'a', '!', ' ', '\0', ':', '@', '[', '`', '{'})
-    void isDigitOrUpperCase_shouldReturnFalse_whenCharIsNeitherDigitNorUpperCase(char c) {
+    void isDigitOrUpperCase_neither_returnsFalse(char c) {
         assertThat(CharUtil.isDigitOrUpperCase(c)).isFalse();
     }
 
     @Test
-    void isAllDigitOrUpperCase_shouldReturnTrue_whenRangeContainsOnlyValidChars() {
+    void isAllDigitOrUpperCase_onlyValidChars_returnsTrue() {
         char[] arr = {'1', 'A', '5', 'Z'};
         assertThat(CharUtil.isAllDigitOrUpperCase(arr, 0, arr.length)).isTrue();
         // sub-range
@@ -170,7 +170,7 @@ final class CharUtilTest {
     }
 
     @Test
-    void isAllDigitOrUpperCase_shouldReturnFalse_whenInvalidCharIsFound() {
+    void isAllDigitOrUpperCase_invalidChar_returnsFalse() {
         char[] arr1 = {'1', 'A', 'b', 'Z', '*'};
         // contains 'b' (lowercase)
         assertThat(CharUtil.isAllDigitOrUpperCase(arr1, 0, 4)).isFalse();
@@ -185,7 +185,7 @@ final class CharUtilTest {
     }
 
     @Test
-    void isAllDigitOrUpperCase_shouldThrowException_whenInputIsInvalid() {
+    void isAllDigitOrUpperCase_invalidInput_throwsException() {
         // Null array check
         assertThatNullPointerException()
             .isThrownBy(() -> CharUtil.isAllDigitOrUpperCase((char[]) null, 0, 1))
@@ -202,7 +202,7 @@ final class CharUtilTest {
 
     @Test
     @SuppressWarnings("UnnecessaryStringBuilder")
-    void toCharArray_shouldConvertEntireSequence_whenFullSequenceIsGiven() {
+    void toCharArray_fullSequence_convertsAll() {
         CharSequence cs = new StringBuilder("IBAN2026");
         char[] expected = {'I', 'B', 'A', 'N', '2', '0', '2', '6'};
 
@@ -213,7 +213,7 @@ final class CharUtilTest {
     }
 
     @Test
-    void toCharArray_shouldConvertPartialSequence_whenLengthIsGiven() {
+    void toCharArray_length_convertsPrefix() {
         String input = "DE8912345";
         char[] expected = {'D', 'E', '8', '9'};
 
@@ -221,14 +221,14 @@ final class CharUtilTest {
     }
 
     @Test
-    void toCharArray_shouldUseFullLength_whenLengthIsNegative() {
+    void toCharArray_negativeLength_usesFullLength() {
         String input = "TEST";
         assertThat(CharUtil.toCharArray(input, -1)).containsExactly('T', 'E', 'S', 'T');
         assertThat(CharUtil.toCharArray(input, -99)).containsExactly('T', 'E', 'S', 'T');
     }
 
     @Test
-    void toCharArray_shouldThrowException_whenInputIsNull() {
+    void toCharArray_null_throwsException() {
         assertThatNullPointerException()
             .isThrownBy(() -> CharUtil.toCharArray(null))
             .withMessage("Input cannot be null");
@@ -240,7 +240,7 @@ final class CharUtilTest {
 
     @Test
     @SuppressWarnings("UnnecessaryStringBuilder")
-    void toCharArray_shouldReturnEmptyArray_whenSequenceIsEmpty() {
+    void toCharArray_emptySequence_returnsEmptyArray() {
         assertThat(CharUtil.toCharArray("")).isEmpty();
         assertThat(CharUtil.toCharArray(new StringBuilder(), 0)).isEmpty();
     }
@@ -253,7 +253,7 @@ final class CharUtilTest {
         "AB*    | 0 | 3 | false",
         "' ABC' | 1 | 4 | true"
     })
-    void isAllDigitOrUpperCase_shouldValidateCorrectly_whenCharSequenceIsGiven(String input, int start, int end, boolean expected) {
+    void isAllDigitOrUpperCase_charSequence_returnsExpectedResult(String input, int start, int end, boolean expected) {
         assertThat(CharUtil.isAllDigitOrUpperCase(input.subSequence(start, end))).isEqualTo(expected);
     }
 

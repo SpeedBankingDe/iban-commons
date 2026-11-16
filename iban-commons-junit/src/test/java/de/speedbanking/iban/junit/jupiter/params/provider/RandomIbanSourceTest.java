@@ -22,13 +22,13 @@ final class RandomIbanSourceTest {
 
     @ParameterizedTest
     @RandomIbanSource(count = 5, value = {IbanRegistry.DE})
-    void provideArguments_shouldGenerateRequestedNumber_ofIbans(String iban) {
+    void provideArguments_count_generatesRequestedNumberOfIbans(String iban) {
         assertThat(iban).startsWith("DE")
                         .hasSizeBetween(15, 34);
     }
 
     @Test
-    void provideArguments_shouldThrowException_whenCountIsNegative() {
+    void provideArguments_negativeCount_throwsException() {
         RandomIbanSource mockAnnotation = createAnnotation(null, 0, 0, null, null, RandomIbanSource.Sepa.ANY);
         provider.accept(mockAnnotation);
 
@@ -38,7 +38,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void provideArguments_shouldThrowException_whenPercentageIsTooHigh() {
+    void provideArguments_percentageTooHigh_throwsException() {
         RandomIbanSource mockAnnotation = createAnnotation(null, 10, 101, null, null, RandomIbanSource.Sepa.ANY);
         provider.accept(mockAnnotation);
 
@@ -48,7 +48,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void provideArguments_shouldThrowException_whenPercentageIsNegative() {
+    void provideArguments_negativePercentage_throwsException() {
         RandomIbanSource mockAnnotation = createAnnotation(null, 10, -1, null, null, RandomIbanSource.Sepa.ANY);
         provider.accept(mockAnnotation);
 
@@ -58,7 +58,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void validateAndBuild_shouldThrowException_whenValueAndIncludeOverlap() {
+    void validateAndBuild_valueAndIncludeOverlap_throwsException() {
         RandomIbanSource mockAnnotation = createAnnotation(
             new IbanRegistry[] {IbanRegistry.DE}, 10, 0,
             new IbanRegistry[] {IbanRegistry.AT},
@@ -72,7 +72,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void validateAndBuild_shouldThrowException_whenPoolIsEmptyAfterFiltering() {
+    void validateAndBuild_emptyPoolAfterFiltering_throwsException() {
         // only DE included, but only non-SEPA
         RandomIbanSource mockAnnotation = createAnnotation(
             new IbanRegistry[] {IbanRegistry.DE}, 10, 0,
@@ -85,7 +85,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void validateAndBuild_shouldThrowException_whenIncludedCountryIsExcluded() {
+    void validateAndBuild_includedCountryExcluded_throwsException() {
         // base is AT and DE, but DE excluded
         RandomIbanSource mockAnnotation = createAnnotation(
             null, 10, 0,
@@ -100,7 +100,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void validateAndBuild_shouldExcludeConfiguredCountries_fromGeneratedIbans() {
+    void validateAndBuild_excludedCountries_omitsThem() {
         // excludeCountries actually removing entries from the pool - not just the
         // include/exclude-overlap error path exercised elsewhere in this class. A large
         // count against the ~127-entry full registry makes the odds of never drawing DE
@@ -121,7 +121,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void validateAndBuild_shouldFilterBySepa_whenSepaIsYes() {
+    void validateAndBuild_sepaYes_filtersBySepa() {
         // LC (Saint Lucia) is non-SEPA, DE is SEPA
         RandomIbanSource mockAnnotation = createAnnotation(
             new IbanRegistry[]{IbanRegistry.DE, IbanRegistry.LC}, 10, 0,
@@ -138,7 +138,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void validateAndBuild_shouldFilterBySepa_whenSepaIsNo() {
+    void validateAndBuild_sepaNo_filtersByNonSepa() {
         RandomIbanSource mockAnnotation = createAnnotation(
             new IbanRegistry[]{IbanRegistry.DE, IbanRegistry.LC}, 10, 0,
             null, null, RandomIbanSource.Sepa.NO);
@@ -154,7 +154,7 @@ final class RandomIbanSourceTest {
     }
 
     @Test
-    void provideArguments_shouldWork_whenSepaIsAny() {
+    void provideArguments_sepaAny_generatesIbans() {
         // Should not throw and provide both SEPA and non-SEPA if in registry
         RandomIbanSource mockAnnotation = createAnnotation(null, 5, 0, null, null, RandomIbanSource.Sepa.ANY);
         provider.accept(mockAnnotation);
@@ -164,7 +164,7 @@ final class RandomIbanSourceTest {
 
     @ParameterizedTest(name = "[{index}] {0}")
     @RandomIbanSource(value = {IbanRegistry.DE}, count = 10, invalidPercentage = 100)
-    void generateIban_shouldProduceCorruptedIban_whenPercentageIsHundred(String iban) {
+    void generateIban_percentageHundred_producesCorruptedIban(String iban) {
         // at 100%, every IBAN should fail validation
         assertThat(Iban.isValid(iban))
             .as("Validation should fail for iban '%s'", iban)

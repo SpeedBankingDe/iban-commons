@@ -209,7 +209,7 @@ final class CountryTest {
     @DisplayName("getCurrencyCode() returns a 3-letter uppercase alphabetic code when non-null")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @EnumSource(Country.class)
-    void getCurrencyCode_whenNonNull_matchesIso4217Format(Country c) {
+    void getCurrencyCode_nonNull_matchesIso4217Format(Country c) {
         Currency currency = c.getCurrency();
         if (currency != null) {
             assertThat(currency.getAlphaCode())

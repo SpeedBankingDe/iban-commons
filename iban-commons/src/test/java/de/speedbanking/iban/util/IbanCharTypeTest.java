@@ -21,7 +21,7 @@ final class IbanCharTypeTest {
         "ALPHANUMERIC | c | [0-9A-Z]",
         "SPACE        | e | [ ]"
     })
-    void getIbanCodeAndRegexPattern_givenEnumConstants_shouldMatchExpectedProperties(IbanCharType type, char expectedCode, String expectedRegex) {
+    void getIbanCodeAndRegexPattern_enumConstants_matchExpectedProperties(IbanCharType type, char expectedCode, String expectedRegex) {
         // fluent verification of enum properties
         assertThat(type.getIbanCode()).isEqualTo(expectedCode);
         assertThat(type.getRegexPattern()).isEqualTo(expectedRegex);
@@ -34,7 +34,7 @@ final class IbanCharTypeTest {
         "c | ALPHANUMERIC",
         "e | SPACE"
     })
-    void fromIbanCode_givenValidCode_shouldReturnMatchingEnumConstant(char code, IbanCharType expectedType) {
+    void fromIbanCode_validCode_returnsMatchingConstant(char code, IbanCharType expectedType) {
         IbanCharType actualType = IbanCharType.fromIbanCode(code);
 
         assertThat(actualType)
@@ -43,13 +43,13 @@ final class IbanCharTypeTest {
     }
 
     @Test
-    void fromIbanCode_givenInvalidOrUppercaseCode_shouldReturnNull() {
+    void fromIbanCode_invalidOrUppercaseCode_returnsNull() {
         assertThat(IbanCharType.fromIbanCode('x')).isNull();
         assertThat(IbanCharType.fromIbanCode('A')).isNull();
     }
 
     @Test
-    void getIbanCodes_givenExistingEnumConstants_shouldReturnAllDefinedCodes() {
+    void getIbanCodes_enumConstants_returnsAllDefinedCodes() {
         List<Character> codes = IbanCharType.getIbanCodes();
 
         assertThat(codes)
