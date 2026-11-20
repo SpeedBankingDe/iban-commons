@@ -141,8 +141,8 @@
         <dep.plugin.enforcer.version>3.7.0</dep.plugin.enforcer.version>
         <dep.plugin.figlet.version>1.2.0</dep.plugin.figlet.version>
         <dep.plugin.resources.version>3.5.0</dep.plugin.resources.version>
-        <dep.plugin.error-prone.version>2.51.0</dep.plugin.error-prone.version>
-        <dep.plugin.error-prone-support.version>0.26.0</dep.plugin.error-prone-support.version>
+        <dep.plugin.error-prone.version>2.53.0</dep.plugin.error-prone.version>
+        <dep.plugin.error-prone-support.version>0.30.0</dep.plugin.error-prone-support.version>
         <dep.plugin.exec.version>3.7.0</dep.plugin.exec.version>
         <dep.plugin.gpg.version>3.2.8</dep.plugin.gpg.version>
         <dep.plugin.jacoco.version>0.8.16</dep.plugin.jacoco.version>
