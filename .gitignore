@@ -11,6 +11,7 @@
 .checkstyle
 .idea/*
 !.idea/icon.svg
+!.idea/icon_dark.svg
 .~lock*
 *.kate-swp
 

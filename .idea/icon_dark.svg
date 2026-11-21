@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="32" height="32">
+    <g transform="translate(8 0) skewX(-14)">
+        <!-- C for commons -->
+        <path d="M49 13.5H25a11 11 0 0 0-11 11v15a11 11 0 0 0 11 11h24" fill="none" stroke="#e2e8f0" stroke-width="7"/>
+        <!-- i for IBAN -->
+        <rect x="30" y="29" width="6" height="15" rx="1" fill="#3b82f6"/>
+        <rect x="30" y="20" width="6" height="6"  rx="1" fill="#3b82f6"/>
+    </g>
+</svg>
