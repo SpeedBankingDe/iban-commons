@@ -13,13 +13,13 @@
  * <p>
  * Further supporting classes:
  * <ul>
- *   <li>{@link de.speedbanking.iban.IbanConfig} – immutable, initialize-once global configuration.</li>
- *   <li>{@link de.speedbanking.iban.Formatter} – formats a normalized IBAN into the standard
+ *   <li>{@link de.speedbanking.iban.IbanConfig} - immutable, initialize-once global configuration.</li>
+ *   <li>{@link de.speedbanking.iban.Formatter} - formats a normalized IBAN into the standard
  *       display form (space-separated groups).</li>
- *   <li>{@link de.speedbanking.iban.RandomIban} – generates syntactically valid IBANs for testing.</li>
- *   <li>{@link de.speedbanking.iban.IbanPlusKey} – derives lookup keys for the SWIFT IBAN Plus
+ *   <li>{@link de.speedbanking.iban.RandomIban} - generates syntactically valid IBANs for testing.</li>
+ *   <li>{@link de.speedbanking.iban.IbanPlusKey} - derives lookup keys for the SWIFT IBAN Plus
  *       service, supporting BIC derivation from an IBAN.</li>
- *   <li>{@link de.speedbanking.iban.InvalidIbanException} – thrown by the strict
+ *   <li>{@link de.speedbanking.iban.InvalidIbanException} - thrown by the strict
  *       {@link de.speedbanking.iban.Iban#of(CharSequence)} factory method on validation failure.</li>
  * </ul>
  *

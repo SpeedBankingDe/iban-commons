@@ -18,12 +18,12 @@ import java.util.stream.Stream;
  * <p>
  * Coverage map:
  * <ul>
- *   <li>{@link Currency#getAlphaCode()}    — {@code getAlphaCode_*}</li>
- *   <li>{@link Currency#getCurrencyName()} — {@code getCurrencyName_*}</li>
- *   <li>{@link Currency#getNumericCode()}  — {@code getNumericCode_*}</li>
- *   <li>{@link Currency#toString()}        — {@code toString_*}</li>
- *   <li>Enum mechanics                     — {@code enum_*}</li>
- *   <li>Invariants                         — {@code invariant_*}</li>
+ *   <li>{@link Currency#getAlphaCode()}    - {@code getAlphaCode_*}</li>
+ *   <li>{@link Currency#getCurrencyName()} - {@code getCurrencyName_*}</li>
+ *   <li>{@link Currency#getNumericCode()}  - {@code getNumericCode_*}</li>
+ *   <li>{@link Currency#toString()}        - {@code toString_*}</li>
+ *   <li>Enum mechanics                     - {@code enum_*}</li>
+ *   <li>Invariants                         - {@code invariant_*}</li>
  * </ul>
  */
 @SuppressWarnings({"checkstyle:MethodName", "PMD.LinguisticNaming"})
@@ -58,7 +58,7 @@ final class CurrencyTest {
     }
 
     @DisplayName("getCurrencyName() returns the correct English name")
-    @ParameterizedTest(name = "[{index}] {0} → ''{1}''")
+    @ParameterizedTest(name = "[{index}] {0} -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
         "EUR | Euro",
         "USD | US Dollar",
@@ -90,7 +90,7 @@ final class CurrencyTest {
     }
 
     @DisplayName("getNumericCode() returns the correct ISO 4217 numeric code")
-    @ParameterizedTest(name = "[{index}] {0} → {1}")
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
     @CsvSource(delimiter = '|', value = {
         // Major currencies
         "EUR | 978",
@@ -114,7 +114,7 @@ final class CurrencyTest {
         "RON | 946",
         "ISK | 352",
         "RSD | 941",
-        // Small numeric codes (formerly leading zeros — now plain int)
+        // Small numeric codes (formerly leading zeros - now plain int)
         "ALL |   8",
         "AMD |  51",
         "ARS |  32",
@@ -174,7 +174,7 @@ final class CurrencyTest {
     }
 
     @DisplayName("toString() returns correct formatted string for selected constants")
-    @ParameterizedTest(name = "[{index}] {0} → ''{1}''")
+    @ParameterizedTest(name = "[{index}] {0} -> ''{1}''")
     @CsvSource(delimiter = '|', value = {
         "EUR | EUR (Euro)",
         "GBP | GBP (British Pound Sterling)",

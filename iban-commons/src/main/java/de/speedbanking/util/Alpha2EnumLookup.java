@@ -33,7 +33,7 @@ public final class Alpha2EnumLookup<E extends Enum<E>> {
     private static final int CODE_LEN      = 2;
 
     /**
-     * The number of letters in the English alphabet (A–Z), used as the radix
+     * The number of letters in the English alphabet (A-Z), used as the radix
      * for flat array indexing.
      */
     private static final int ALPHABET_SIZE = 26;

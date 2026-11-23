@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * national BBAN structure, and has a valid check digit calculated according to the
  * ISO 7064 Mod 97-10 algorithm.
  * <p>
- * <strong>Preferred API — fluent builder:</strong>
+ * <strong>Preferred API - fluent builder:</strong>
  * <pre>{@code
  * // any country, non-reproducible
  * Iban iban = RandomIban.builder().build();
@@ -57,7 +57,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Iban iban = RandomIban.ofSepa();
  * }</pre>
  * <p>
- * <strong>Invalid IBAN strings</strong> (strings only — not {@link Iban} objects, which are
+ * <strong>Invalid IBAN strings</strong> (strings only - not {@link Iban} objects, which are
  * always valid by definition) can be produced via:
  * <pre>{@code
  * String invalid = RandomIban.invalidString();
@@ -328,20 +328,20 @@ public final class RandomIban {
      * The method modifies the {@link StringBuilder} <em>in-place</em> and returns it.
      * Six strategies are applied with equal probability (1/6 each):
      * <ol>
-     *   <li><strong>Tamper check digit</strong> – one of the two check digits (position 3 or 4)
-     *       is incremented by 1 (wrapping: {@code '9'} → {@code '0'}) to trigger a Mod-97
+     *   <li><strong>Tamper check digit</strong> - one of the two check digits (position 3 or 4)
+     *       is incremented by 1 (wrapping: {@code '9'} -> {@code '0'}) to trigger a Mod-97
      *       checksum failure.</li>
-     *   <li><strong>Invalid country code</strong> – the first two characters are replaced with
+     *   <li><strong>Invalid country code</strong> - the first two characters are replaced with
      *       {@code "XY"}, a non-registered ISO 3166 Alpha-2 code.</li>
-     *   <li><strong>Mismatched ISO code</strong> – the first two characters are replaced with a
+     *   <li><strong>Mismatched ISO code</strong> - the first two characters are replaced with a
      *       valid but randomly chosen {@link Country} code that does not match the
      *       existing BBAN format.</li>
-     *   <li><strong>Structural violation in BBAN</strong> – a letter ({@code 'A'}) is injected
+     *   <li><strong>Structural violation in BBAN</strong> - a letter ({@code 'A'}) is injected
      *       at a random position within the BBAN section to break the expected character
      *       pattern.</li>
-     *   <li><strong>Transposition error</strong> – two adjacent characters are swapped,
+     *   <li><strong>Transposition error</strong> - two adjacent characters are swapped,
      *       simulating a classic human keying mistake.</li>
-     *   <li><strong>Illegal length</strong> – the string is truncated to below
+     *   <li><strong>Illegal length</strong> - the string is truncated to below
      *       {@link IbanRegistry#MIN_IBAN_BASE_LENGTH}, making it structurally invalid.</li>
      * </ol>
      *
@@ -440,7 +440,7 @@ public final class RandomIban {
         private boolean      sepaOnly    = false;
         private Random       random      = null; // null = ThreadLocalRandom at build time
 
-        /** Package-private — use {@link RandomIban#builder()}. */
+        /** Package-private - use {@link RandomIban#builder()}. */
         Builder() {}
 
         /**
@@ -502,7 +502,7 @@ public final class RandomIban {
          * <p>
          * The same seed always produces the same IBAN for the same country configuration,
          * <em>provided</em> neither {@link #random(Random)} nor {@link #seed(long)} is called
-         * again afterwards — the last call always wins.
+         * again afterwards - the last call always wins.
          *
          * @param seed the seed value
          * @return this builder

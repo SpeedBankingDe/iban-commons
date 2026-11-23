@@ -19,7 +19,7 @@ package de.speedbanking.iban;
  * An immutable container that holds the result of an IBAN validation attempt.
  * <p>
  * The object contains either the normalized IBAN and its country data (on success),
- * or an {@link IbanValidationError} (on failure) — never both, never neither.
+ * or an {@link IbanValidationError} (on failure) - never both, never neither.
  * <p>
  * Intentionally avoids {@link java.util.Optional} to keep the internal validation
  * path allocation-free on the failure side. Failure results without country context

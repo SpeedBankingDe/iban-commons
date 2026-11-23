@@ -111,7 +111,7 @@ final class Mod97Test {
 
     @Test
     void calculate_charSequence_illegalCharInHeader_returnsInvalidRemainder() {
-        // space at position 1 — header chars are processed in the second pass,
+        // space at position 1 - header chars are processed in the second pass,
         // so the BBAN needs to be clean for this to reach that code path
         assertThat(Mod97.calculate("D 91100000000123456789")).isEqualTo(Mod97.INVALID_REMAINDER);
     }
@@ -163,7 +163,7 @@ final class Mod97Test {
 
     @Test
     void calculate_charArrayWithLen_zeroLen_fallsBackToArrayLength() {
-        // inputLen <= 0 means "use array length" — handy for callers that
+        // inputLen <= 0 means "use array length" - handy for callers that
         // don't know the length up front
         char[] data = VALID_DE_IBAN.toCharArray();
         assertThat(Mod97.calculate(data, 0)).isEqualTo(Mod97.VALID_REMAINDER);
@@ -172,7 +172,7 @@ final class Mod97Test {
 
     @Test
     void calculate_charArrayWithLen_explicitLen_limitsProcessing() {
-        // the array is longer than inputLen — trailing chars must be ignored
+        // the array is longer than inputLen - trailing chars must be ignored
         char[] data = "GB29NWBK60161331926819GARBAGE".toCharArray();
         assertThat(Mod97.calculate(data, 22)).isEqualTo(Mod97.VALID_REMAINDER);
     }
@@ -191,7 +191,7 @@ final class Mod97Test {
 
     @Test
     void calculate_charArrayWithLen_allDigitHeader_isAccepted() {
-        // headers aren't always two letters — some synthetic NCD inputs are all-numeric
+        // headers aren't always two letters - some synthetic NCD inputs are all-numeric
         char[] data = "123456789012345678".toCharArray();
         assertThat(Mod97.calculate(data, data.length)).isBetween(0, 96);
     }
@@ -217,7 +217,7 @@ final class Mod97Test {
 
     @Test
     void calculateRange_charArray_illegalChar_returnsInvalidRemainder() {
-        // space is a realistic mistake — e.g. a formatted IBAN passed by accident
+        // space is a realistic mistake - e.g. a formatted IBAN passed by accident
         char[] data = "100 0".toCharArray();
         assertThat(Mod97.calculateRange(data, 0, data.length)).isEqualTo(Mod97.INVALID_REMAINDER);
     }
@@ -300,8 +300,8 @@ final class Mod97Test {
 
     @Test
     void calculateRange_charSequence_offset_limitsRange() {
-        // "45" from "12345" — deliberately short so we can compute the expected value by hand:
-        // 4 → total = 4; 5 → total = (4 * 10 + 5) % 97 = 45
+        // "45" from "12345" - deliberately short so we can compute the expected value by hand:
+        // 4 -> total = 4; 5 -> total = (4 * 10 + 5) % 97 = 45
         assertThat(Mod97.calculateRange("12345", 3, 2)).isEqualTo(45);
     }
 
@@ -366,12 +366,12 @@ final class Mod97Test {
     }
 
     // -------------------------------------------------------------------------
-    // isValid — impossible check digit range (00, 01, 99)
+    // isValid - impossible check digit range (00, 01, 99)
     //
     // checkDigit = 98 - (N mod 97), and N mod 97 is in [0, 96], so a genuinely
     // generated IBAN check digit always lies in [2, 98]. The BBANs below were
     // picked so the remainder still comes out to VALID_REMAINDER (1) for the
-    // impossible check digit — i.e. calculate() alone would wrongly call them
+    // impossible check digit - i.e. calculate() alone would wrongly call them
     // valid, which is exactly the bug isValid() must guard against.
     // -------------------------------------------------------------------------
 
@@ -396,7 +396,7 @@ final class Mod97Test {
 
     @Test
     void isValid_charSequence_nonDigitCheckDigit_returnsFalse() {
-        // check digits must be decimal digits — letters must not sneak past the range check
+        // check digits must be decimal digits - letters must not sneak past the range check
         assertThat(Mod97.isValid("GBAAHLFX11016111455365")).isFalse();
     }
 

@@ -93,7 +93,7 @@ public final class TestUtil {
      * Replaces the first occurrence of {@code oldName} with {@code newName} in a byte array,
      * adjusting the two-byte big-endian length prefix that precedes the class name in the
      * Java serialization stream format (see the Java Object Serialization Specification,
-     * section 6.2 — TC_CLASSDESC).
+     * section 6.2 - TC_CLASSDESC).
      * <p>
      * Used in tests to craft a manipulated stream where a proxy class descriptor
      * (e.g., {@code Foo$Memento}) is replaced by the target class ({@code Foo}),
@@ -111,7 +111,7 @@ public final class TestUtil {
 
         int pos = indexOf(stream, oldBytes);
         if (pos < 2) {
-            return stream; // not found or no room for length prefix — return unchanged
+            return stream; // not found or no room for length prefix - return unchanged
         }
 
         // The two bytes before the class name encode its UTF-8 length (big-endian short)
@@ -153,7 +153,7 @@ public final class TestUtil {
      * The custom {@code writeObject()} payload is framed by the JVM in a {@code TC_BLOCKDATA}
      * block ({@code 0x77 | length_byte | payload}). The method locates this block by searching
      * for {@code TC_BLOCKDATA} immediately followed by {@code STREAM_VERSION=1L} as an 8-byte
-     * big-endian long — rather than searching for the version bytes alone, which would
+     * big-endian long - rather than searching for the version bytes alone, which would
      * accidentally match the class descriptor's {@code serialVersionUID} field (also {@code 1L}).
      * <p>
      * Both the payload content and the {@code TC_BLOCKDATA} length byte are patched so the JVM
@@ -162,8 +162,8 @@ public final class TestUtil {
      * <p>
      * Used to drive:
      * <ul>
-     *   <li>The version-mismatch branch in {@code Memento.readObject()} — pass a version != 1L</li>
-     *   <li>The validation-failure branch in {@code Memento.readResolve()} — pass an invalid value</li>
+     *   <li>The version-mismatch branch in {@code Memento.readObject()} - pass a version != 1L</li>
+     *   <li>The validation-failure branch in {@code Memento.readResolve()} - pass an invalid value</li>
      * </ul>
      *
      * @param <T>           the type of the template object (must use the Memento pattern)
@@ -257,7 +257,7 @@ public final class TestUtil {
             if ((stream[i] & 0xFF) != 0x77) {
                 continue;
             }
-            // stream[i+1] is the block length byte — accept any value
+            // stream[i+1] is the block length byte - accept any value
             boolean match = true;
             for (int j = 0; match && j < versionLong.length; j++) {
                 match = stream[i + 2 + j] == versionLong[j];

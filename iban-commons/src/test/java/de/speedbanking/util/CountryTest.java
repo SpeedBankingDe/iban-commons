@@ -190,7 +190,7 @@ final class CountryTest {
             .isEqualTo(expectedCurrency);
     }
 
-    @DisplayName("getCurrencyCode() returns null for Antarctica (AQ) — the only currency-less entry")
+    @DisplayName("getCurrencyCode() returns null for Antarctica (AQ) - the only currency-less entry")
     @Test
     void getCurrencyCode_antarctica_returnsNull() {
         assertThat(Country.AQ.getCurrency()).isNull();
@@ -223,7 +223,7 @@ final class CountryTest {
     void getCurrencyCode_currencyCodeValuesAreInternallySelfConsistent() {
         // Verify that every constant that claims EUR is actually in a known EUR territory or Eurozone country,
         // and that no unexpected code has been accidentally assigned EUR.
-        // This is a smoke-test — it will catch copy-paste accidents between adjacent constants.
+        // This is a smoke-test - it will catch copy-paste accidents between adjacent constants.
         Set<String> eurCodes = new LinkedHashSet<>();
         for (Country c : Country.values()) {
             Currency cur = c.getCurrency();
@@ -426,7 +426,7 @@ final class CountryTest {
             .isNull();
     }
 
-    @DisplayName("fromCode() is case-sensitive — lowercase inputs return null")
+    @DisplayName("fromCode() is case-sensitive - lowercase inputs return null")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @ValueSource(strings = {"ni", "cu", "Ni", "cU"})
     void fromCode_lowercase_returnsNull(String code) {
@@ -571,7 +571,7 @@ final class CountryTest {
             .hasSize(2);
     }
 
-    @DisplayName("Every code consists of two uppercase ASCII letters (A–Z)")
+    @DisplayName("Every code consists of two uppercase ASCII letters (A-Z)")
     @ParameterizedTest(name = "[{index}] ''{0}''")
     @EnumSource(Country.class)
     void invariant_allCodes_areUpperCaseAsciiLetters(Country c) {
@@ -643,7 +643,7 @@ final class CountryTest {
     }
 
     @DisplayName("createFlagEmoji() converts assigned country codes to their flag emoji")
-    @ParameterizedTest(name = "[{index}] {0} → {1}")
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         "DE | 🇩🇪",
         "US | 🇺🇸",

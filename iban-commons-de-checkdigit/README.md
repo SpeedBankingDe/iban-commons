@@ -8,14 +8,14 @@
 </div>
 
 `iban-commons-de-checkdigit` implements the Deutsche Bundesbank's
-[*"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"*](https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320) —
-the catalogue of check digit algorithms (methods `00`–`99`, `A0`–`E4`) used to verify a German
+[*"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"*](https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320) -
+the catalogue of check digit algorithms (methods `00`-`99`, `A0`-`E4`) used to verify a German
 domestic account number ("Kontonummer") against a Bankleitzahl (BLZ). **All 144 assigned method
 codes** are implemented, see [Coverage](#coverage) below.
 
 This module is part of the [`iban-commons`](../README.md) project but is **deliberately standalone**:
 it has zero dependency on `iban-commons` (or anything else) and can be used entirely on its own by
-callers who only have a BLZ, a Kontonummer, and a method code — typically from legacy domestic
+callers who only have a BLZ, a Kontonummer, and a method code - typically from legacy domestic
 payment processing. It does not select a method; it only executes one you already know.
 
 -----
@@ -44,20 +44,20 @@ import de.speedbanking.checkdigit.de.GermanAccountCheckDigit;
 CheckDigitResult result = GermanAccountCheckDigit.verify("00", "10000000", "0532013000");
 
 if (result.isValid()) {
-    // check digit is internally consistent — or the method performs no verification at all
+    // check digit is internally consistent - or the method performs no verification at all
 } else {
     // check digit mismatch
 }
 ```
 
 > **Note:** A positive `isValid()` result means the check digit is internally consistent with the
-> method used — it does **not** confirm that the account actually exists at the bank. Some methods
+> method used - it does **not** confirm that the account actually exists at the bank. Some methods
 > perform no verification by design (e.g. `09`); use `result.isChecked()` to distinguish an actual
 > pass from a no-op.
 
 ## Where does the method code come from?
 
-The method code is bank-specific and this module does not look it up — it must be obtained from
+The method code is bank-specific and this module does not look it up - it must be obtained from
 elsewhere, most commonly the Bundesbank's public BLZ master-data file (each record lists the
 `Prüfzifferberechnungsmethode` for that Bankleitzahl). If you already resolve BLZ master data in
 your application, feed that method code straight into `GermanAccountCheckDigit.verify(...)`.
@@ -77,7 +77,7 @@ where the reference source itself is ambiguous.
 
 ## License
 
-This project is licensed under the **Apache License, Version 2.0** — see [`../LICENSE.txt`](../LICENSE.txt).
+This project is licensed under the **Apache License, Version 2.0** - see [`../LICENSE.txt`](../LICENSE.txt).
 
 -----
 

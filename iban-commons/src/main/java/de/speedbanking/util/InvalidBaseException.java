@@ -27,8 +27,8 @@ import java.util.Objects;
  * Concrete subclasses store a specific {@link ValidationError} enum constant as
  * the failure reason and override {@link #getReason()} with a covariant return
  * type to expose the concrete enum type to callers without casting.
- * All shared logic — input normalization, country code handling, {@code equals},
- * {@code hashCode}, and {@code toString} — is implemented here exactly once.
+ * All shared logic - input normalization, country code handling, {@code equals},
+ * {@code hashCode}, and {@code toString} - is implemented here exactly once.
  *
  * @since 1.8.5
  *

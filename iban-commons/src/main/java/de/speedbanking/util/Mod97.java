@@ -22,14 +22,14 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * This algorithm is used by the <strong>ISO 13616 IBAN standard</strong> and by
  * other financial identifiers such as the SEPA Creditor Identifier (CI).
- * The core computation replaces each uppercase letter {@code A–Z} with its two-digit
- * numeric equivalent ({@code A=10, B=11, …, Z=35}) and then computes the remainder
+ * The core computation replaces each uppercase letter {@code A-Z} with its two-digit
+ * numeric equivalent ({@code A=10, B=11, ..., Z=35}) and then computes the remainder
  * of the resulting integer modulo {@value #MODULUS}.
  *
  * <h2>IBAN-style calculation (with rearrangement)</h2>
  * {@link #calculate(CharSequence)} and {@link #calculate(char[])} implement
  * the <em>rearrangement step</em> mandated by ISO 13616: the four-character
- * header (country code + check digits at positions 0–3) is processed <em>last</em>,
+ * header (country code + check digits at positions 0-3) is processed <em>last</em>,
  * after the BBAN (positions 4 onwards).  A valid IBAN yields a remainder of exactly
  * {@link #VALID_REMAINDER} ({@value #VALID_REMAINDER}).
  *
@@ -41,8 +41,8 @@ import static java.util.Objects.requireNonNull;
  * <h2>Return value on invalid input</h2>
  * Both {@code calculate} variants return {@link #INVALID_REMAINDER}
  * ({@value #INVALID_REMAINDER}) when the input is {@code null} or contains a
- * character that is neither a digit {@code '0'–'9'} nor an uppercase letter
- * {@code 'A'–'Z'}.  Callers must treat this sentinel as a validation failure.
+ * character that is neither a digit {@code '0'-'9'} nor an uppercase letter
+ * {@code 'A'-'Z'}.  Callers must treat this sentinel as a validation failure.
  *
  * <h2>Usage examples</h2>
  * <pre>{@code
@@ -50,7 +50,7 @@ import static java.util.Objects.requireNonNull;
  * boolean valid = Mod97.isValid("DE91100000000123456789");
  *
  * // Compute the raw remainder for diagnostics
- * int remainder = Mod97.calculate("DE91100000000123456789"); // → 1
+ * int remainder = Mod97.calculate("DE91100000000123456789"); // -> 1
  *
  * // Calculate the remainder of a BBAN sub-sequence (e.g. for NCD computation)
  * char[] iban = "DE91100000000123456789".toCharArray();
@@ -109,7 +109,7 @@ public final class Mod97 {
      * By construction, {@code checkDigit = 98 - (N mod 97)} where {@code N mod 97}
      * lies in {@code [0, 96]}, so a correctly generated check digit always lies in
      * {@code [MIN_CHECK_DIGIT_VALUE, MAX_CHECK_DIGIT_VALUE]}. The values {@code 00}
-     * and {@code 01} can therefore never occur in a legitimately generated IBAN —
+     * and {@code 01} can therefore never occur in a legitimately generated IBAN -
      * a string carrying one of them can coincidentally still satisfy
      * {@link #VALID_REMAINDER} for its BBAN, which is why this range is checked
      * separately rather than relying on the remainder alone.
@@ -123,7 +123,7 @@ public final class Mod97 {
     public static final int  MAX_CHECK_DIGIT_VALUE = 98;
 
     /**
-     * Private constructor — utility class, not instantiable.
+     * Private constructor - utility class, not instantiable.
      * @throws UnsupportedOperationException always
      */
     private Mod97() {
@@ -140,7 +140,7 @@ public final class Mod97 {
      *
      * <p>Digits contribute one decimal place ({@code total * 10 + digit}).
      * Letters contribute two decimal places ({@code total * 100 + (c - 'A' + 10)}),
-     * mapping {@code A=10 … Z=35}.
+     * mapping {@code A=10 ... Z=35}.
      *
      * @param total running remainder before this character
      * @param c     the character to accumulate
@@ -191,8 +191,8 @@ public final class Mod97 {
      *
      * <p><b>Input requirements:</b>
      * <ul>
-     *   <li>Uppercase letters only ({@code A–Z})</li>
-     *   <li>Digits ({@code 0–9})</li>
+     *   <li>Uppercase letters only ({@code A-Z})</li>
+     *   <li>Digits ({@code 0-9})</li>
      *   <li>No whitespace or separators</li>
      * </ul>
      *
@@ -278,8 +278,8 @@ public final class Mod97 {
      *
      * <p><b>Input requirements:</b>
      * <ul>
-     *   <li>Uppercase letters only ({@code A–Z})</li>
-     *   <li>Digits ({@code 0–9})</li>
+     *   <li>Uppercase letters only ({@code A-Z})</li>
+     *   <li>Digits ({@code 0-9})</li>
      *   <li>No whitespace or separators</li>
      * </ul>
      *
@@ -328,7 +328,7 @@ public final class Mod97 {
      * Calculates the ISO 7064 Mod 97-10 remainder for a contiguous sub-range of a
      * character array, <em>without</em> any rearrangement step.
      * <p>
-     * Operates directly on the {@code char[]} — no wrapper allocation, no virtual dispatch.
+     * Operates directly on the {@code char[]} - no wrapper allocation, no virtual dispatch.
      * Semantically equivalent to {@link #calculateRange(CharSequence, int, int)} but
      * faster on paths where the data is already available as an array.
      *
@@ -431,7 +431,7 @@ public final class Mod97 {
      * <p>
      * This variant is optimized for use with shared or pooled buffers where only
      * a specific portion of the array contains the IBAN to be validated; {@code length}
-     * may therefore be less than {@code iban.length}, but never more — a {@code length}
+     * may therefore be less than {@code iban.length}, but never more - a {@code length}
      * exceeding the array's actual size is treated as invalid input rather than read
      * out of bounds.
      *

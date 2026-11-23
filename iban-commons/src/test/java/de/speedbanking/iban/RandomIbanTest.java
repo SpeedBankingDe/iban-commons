@@ -225,7 +225,7 @@ final class RandomIbanTest {
 
         RandomIban.sabotageIban(sb, rnd);
 
-        // length unchanged — fallback must not truncate
+        // length unchanged - fallback must not truncate
         assertThat(sb.length()).isLessThan(shortIban.length());
         // but the content must differ (check digit was incremented)
         assertThat(sb.toString()).isNotEqualTo(before);

@@ -60,10 +60,10 @@ public class BicAssertions extends Assertions {
      * <p>
      * <ul>
      *   <li>A {@code null} argument is forwarded as-is; only {@code isNull()} will succeed on the
-     *       returned assert — consistent with the AssertJ null-handling contract.
+     *       returned assert - consistent with the AssertJ null-handling contract.
      *   </li>
      *   <li>An invalid BIC string causes an {@link AssertionError} whose cause is the
-     *       {@link InvalidBicException} thrown by the parser — the error is surfaced before
+     *       {@link InvalidBicException} thrown by the parser - the error is surfaced before
      *       any assertion method is invoked, which is the standard behaviour for invalid inputs
      *       in custom AssertJ entry points.
      *   </li>
@@ -285,7 +285,7 @@ public class BicAssertions extends Assertions {
         }
 
         /**
-         * Alias for {@link #hasBic8(String)} — kept for backward compatibility.
+         * Alias for {@link #hasBic8(String)} - kept for backward compatibility.
          *
          * @param expectedBic8 the expected 8-character BIC string
          * @return this assertion object for method chaining
@@ -296,7 +296,7 @@ public class BicAssertions extends Assertions {
         }
 
         /**
-         * Alias for {@link #hasBic11(String)} — kept for backward compatibility.
+         * Alias for {@link #hasBic11(String)} - kept for backward compatibility.
          *
          * @param expectedBic11 the expected normalized 11-character BIC string
          * @return this assertion object for method chaining
@@ -322,7 +322,7 @@ public class BicAssertions extends Assertions {
         }
 
         /**
-         * Verifies that the actual BIC has the given Country Code (positions 5–6).
+         * Verifies that the actual BIC has the given Country Code (positions 5-6).
          *
          * @param expectedCountryCode the expected ISO 3166-1 Alpha-2 Country Code (e.g., {@code "DE"})
          * @return this assertion object for method chaining
@@ -401,7 +401,7 @@ public class BicAssertions extends Assertions {
         }
 
         /**
-         * Verifies that the actual BIC has the given Location Code (positions 7–8).
+         * Verifies that the actual BIC has the given Location Code (positions 7-8).
          *
          * @param expectedLocationCode the expected Location Code (2 alphanumeric characters)
          * @return this assertion object for method chaining
@@ -416,7 +416,7 @@ public class BicAssertions extends Assertions {
         }
 
         /**
-         * Verifies that the actual BIC has the given Branch Code (positions 9–11).
+         * Verifies that the actual BIC has the given Branch Code (positions 9-11).
          * <p>
          * Pass {@code null} to assert that the BIC is a BIC-8 (no branch code).
          *

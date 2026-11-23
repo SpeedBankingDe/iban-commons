@@ -186,7 +186,7 @@ final class BicTest {
 
     /**
      * Verifies that {@link Bic#validate(CharSequence)} and {@link Bic#of(CharSequence)} throw
-     * identical {@link InvalidBicException}s — same message and same {@code reason} field — so
+     * identical {@link InvalidBicException}s - same message and same {@code reason} field - so
      * callers that do not need the {@link Bic} instance pay no observational price for using
      * the allocation-free overload.
      */
@@ -428,7 +428,7 @@ final class BicTest {
     }
 
     @DisplayName("subSequence() should return correct substring when range crosses into branch code (BIC-11)")
-    @ParameterizedTest(name = "[{index}] subSequence({1},{2}) on ''{0}'' → ''{3}''")
+    @ParameterizedTest(name = "[{index}] subSequence({1},{2}) on ''{0}'' -> ''{3}''")
     @CsvSource(delimiter = '|', value = {
         "MARKDEFF500 | 6 | 11 | FF500",
         "MARKDEFF500 | 0 | 11 | MARKDEFF500",

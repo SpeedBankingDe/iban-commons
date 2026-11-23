@@ -27,7 +27,7 @@ import java.util.Optional;
 final class IbanCountrySourceTest {
 
     // =========================================================================
-    // Default (no filter) — all countries
+    // Default (no filter) - all countries
     // =========================================================================
 
     /** Total number of {@link IbanRegistry} constants. */
@@ -109,7 +109,7 @@ final class IbanCountrySourceTest {
     @Test
     void includeAndExclude_combined_yieldsCorrectSubset() {
         long count = countArguments(IbanCountrySourceIncludeDeAtChExcludeCh.class);
-        // DE, AT included; CH excluded → 2
+        // DE, AT included; CH excluded -> 2
         assertThat(count).isEqualTo(2);
     }
 
@@ -126,7 +126,7 @@ final class IbanCountrySourceTest {
     }
 
     // =========================================================================
-    // Argument content — countryCode and countryName values
+    // Argument content - countryCode and countryName values
     // =========================================================================
 
     @ParameterizedTest

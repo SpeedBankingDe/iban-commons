@@ -24,7 +24,7 @@ final class IbanRegistrySourceTest {
     private static final int TOTAL = IbanRegistry.values().length;
 
     // =========================================================================
-    // Default (no filter) — all entries
+    // Default (no filter) - all entries
     // =========================================================================
 
     @ParameterizedTest
@@ -42,7 +42,7 @@ final class IbanRegistrySourceTest {
     private @interface IbanRegistrySourceNoFilter {}
 
     // =========================================================================
-    // value() — explicit include list
+    // value() - explicit include list
     // =========================================================================
 
     @ParameterizedTest
@@ -202,12 +202,12 @@ final class IbanRegistrySourceTest {
     private @interface IbanRegistrySourceGbp {}
 
     // =========================================================================
-    // filterMode — AND vs. OR semantics
+    // filterMode - AND vs. OR semantics
     // =========================================================================
 
     /**
-     * AND (ALL): sepa=YES AND currency=EUR → intersection (Eurozone members only).
-     * OR  (ANY): sepa=YES OR  currency=EUR → union (SEPA members ∪ EUR countries).
+     * AND (ALL): sepa=YES AND currency=EUR -> intersection (Eurozone members only).
+     * OR  (ANY): sepa=YES OR  currency=EUR -> union (SEPA members ∪ EUR countries).
      * The union must be at least as large as either set.
      */
     @Test
@@ -241,7 +241,7 @@ final class IbanRegistrySourceTest {
 
     /**
      * {@code value} restricts the candidate set; the attribute filter is then applied to
-     * that restricted set. DE is SEPA, AE is not — only DE should survive.
+     * that restricted set. DE is SEPA, AE is not - only DE should survive.
      */
     @Test
     void value_combinedWithSepaFilter_yieldsIntersection() {
@@ -258,7 +258,7 @@ final class IbanRegistrySourceTest {
 
     @Test
     void value_andExclude_combined_yieldsCorrectSubset() {
-        // include DE, AT, CH; exclude CH → 2
+        // include DE, AT, CH; exclude CH -> 2
         assertThat(countArguments(IbanRegistrySourceDeAtChExcludeCh.class)).isEqualTo(2);
     }
 
@@ -267,7 +267,7 @@ final class IbanRegistrySourceTest {
     private @interface IbanRegistrySourceDeAtChExcludeCh {}
 
     // =========================================================================
-    // Empty result → IllegalStateException
+    // Empty result -> IllegalStateException
     // =========================================================================
 
     /**
@@ -276,7 +276,7 @@ final class IbanRegistrySourceTest {
      */
     @Test
     void emptyResult_throwsIllegalStateException() {
-        // DE is a SEPA country — sepa=NO with value={DE} can never match
+        // DE is a SEPA country - sepa=NO with value={DE} can never match
         assertThatIllegalStateException()
             .isThrownBy(() -> countArguments(IbanRegistrySourceDeSepaNo.class))
             .withMessageContaining("No IbanRegistry entries matched");

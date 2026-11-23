@@ -74,7 +74,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
     public static final int           BRANCH_CODE_START   = 8;
 
     /**
-     * The normalized BIC-8 string — the single source of truth for this instance.
+     * The normalized BIC-8 string - the single source of truth for this instance.
      * <p>
      * All other string representations and component extractions are derived from
      * this field on demand.
@@ -89,7 +89,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     private final String              bic11;
 
-    // lazily derived strings — transient so they are re-derived after deserialization
+    // lazily derived strings - transient so they are re-derived after deserialization
     private transient volatile String bankCode;
     private transient volatile String countryCode;
     private transient volatile String locationCode;
@@ -146,7 +146,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      * fails, and returning normally if it succeeds.
      * <p>
      * Unlike {@link #parse(CharSequence)}, this method does not allocate a {@code Bic} instance,
-     * making it the preferred choice when the validated value is not needed afterwards — for
+     * making it the preferred choice when the validated value is not needed afterwards - for
      * example in Bean Validation constraints or simple guard checks.
      *
      * @param bic the BIC character sequence
@@ -411,7 +411,7 @@ public final class Bic implements Serializable, CharSequence, Comparable<Bic> {
      */
     @Override
     public char charAt(int index) {
-        // delegate to bic8 for indices 0–7; for BIC-11 indices 8–10 read from bic11
+        // delegate to bic8 for indices 0-7; for BIC-11 indices 8-10 read from bic11
         if (index < 0 || index >= length()) {
             throw new IndexOutOfBoundsException(String
                 .format("Index should be between 0 (inclusive) and %d (exclusive), but was %d", length(), index));

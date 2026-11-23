@@ -18,7 +18,7 @@
 `iban-commons` is a Java IBAN validation library and BIC validator for Java 8+, providing fast and reliable parsing, validation, and formatting of International Bank Account Numbers (IBAN) and Business Identifier Codes (BIC/SWIFT codes).
 Designed for high-performance enterprise applications, it covers 127 countries, is Android-compatible (API 24+, or 21+ with core library desugaring), and has zero compile or runtime dependencies outside the Java Standard Library.
 
-An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module is available for verifying German domestic account number ("Kontonummer") check digits against a Bankleitzahl (BLZ) — standalone and independent of `iban-commons`.
+An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module is available for verifying German domestic account number ("Kontonummer") check digits against a Bankleitzahl (BLZ) - standalone and independent of `iban-commons`.
 
 An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolves the BIC and bank name behind an IBAN or a country-specific bank code (DE, AT, CH, LI, CZ, BE, PL, NL, ES, FR, GR, PT), with a bundled offline fallback dataset and lazy background refresh.
 
@@ -93,7 +93,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 * **High Performance**
 
-  Zero-allocation validation pipeline — `char[]`-based processing eliminates heap pressure throughout.
+  Zero-allocation validation pipeline - `char[]`-based processing eliminates heap pressure throughout.
   Validates **5,755,902 IBANs/s** on the accept path and **10,883,875 IBANs/s** on early rejection;
   allocation is exactly **0 B/op**, against 171 to 972 B/op for competing libraries.
 
@@ -112,7 +112,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 * **Comprehensive Coverage**
 
   Full support for IBAN and BIC validation per ISO 13616 and ISO 9362.
-  Covers **127 countries** including all from the SWIFT IBAN Registry — more than any comparable Java IBAN validation library.
+  Covers **127 countries** including all from the SWIFT IBAN Registry - more than any comparable Java IBAN validation library.
 
 * **Rich Metadata**
 
@@ -198,7 +198,7 @@ if (iban.isSepa()) {
 
 #### 4\. Random IBAN Generation
 
-Use `RandomIban` to generate syntactically correct, structurally valid IBANs with proper ISO 7064 Mod 97-10 check digits — ideal for testing, seeding demo data, or populating sandboxes.
+Use `RandomIban` to generate syntactically correct, structurally valid IBANs with proper ISO 7064 Mod 97-10 check digits - ideal for testing, seeding demo data, or populating sandboxes.
 
 **Any supported country (non-deterministic):**
 ```java
@@ -211,7 +211,7 @@ Iban sepaIban = RandomIban.ofSepa(); // random SEPA country
 
 **Reproducible generation with a seeded `Random`:**
 
-Pass a seeded `java.util.Random` to get deterministic output — the same seed always produces the same IBAN for the same country, which is useful for unit tests and snapshot tests.
+Pass a seeded `java.util.Random` to get deterministic output - the same seed always produces the same IBAN for the same country, which is useful for unit tests and snapshot tests.
 
 ```java
 import java.util.Random;
@@ -279,13 +279,13 @@ Bic.tryParse("INVALIDBIC").ifPresentOrElse(
 ### German Account Check Digit (`iban-commons-de-checkdigit`)
 
 An optional, standalone module implementing the Deutsche Bundesbank's
-[*"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"*](https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320) —
-all 144 assigned check digit methods (`00`–`99`, `A0`–`E4`) used to verify a German domestic
+[*"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"*](https://www.bundesbank.de/de/startseite/pruefzifferberechnungsmethoden-603320) -
+all 144 assigned check digit methods (`00`-`99`, `A0`-`E4`) used to verify a German domestic
 account number ("Kontonummer") against a Bankleitzahl (BLZ).
 
 It operates purely on BLZ + Kontonummer + method code and has **zero dependency on `iban-commons`**
-(or any other library), so it can be used on its own by callers who only have those three values —
-typically from legacy domestic payment processing — and have obtained the applicable method code from
+(or any other library), so it can be used on its own by callers who only have those three values -
+typically from legacy domestic payment processing - and have obtained the applicable method code from
 elsewhere, e.g. the Bundesbank's BLZ master-data file. This module does not select a method, only executes one.
 
 See the module's own **[README](iban-commons-de-checkdigit/README.md)** for installation, usage
@@ -392,7 +392,7 @@ Each invalid IBAN is derived from a valid one by applying one of six sabotage st
 
 ### Key Observations
 
-1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input — reaching **5,755,902 ops/s** on the accept path and **10,883,875 ops/s** on early rejection.
+1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input - reaching **5,755,902 ops/s** on the accept path and **10,883,875 ops/s** on early rejection.
 2. **Fast Rejection:** Invalid IBANs are rejected faster than valid ones because many fail length or country-code checks before the full Mod-97 computation is reached.
 3. **Zero Allocation:** Memory allocation is **0 B/op** on both paths. Competing libraries allocate 171 to 972 B/op.
 
@@ -461,7 +461,7 @@ The project now requires JDK 21 to build. The compiled artifacts remain binary-c
 `IbanRegistry` is now cross-checked against SWIFT IBAN Registry Release 103 (Sep 2026), up from Release 100. The only structural change: Brazil's bank identifier and account-type/control digits are now alphanumeric instead of numeric/alpha-only (`8!c...1!c1!c` instead of `8!n...1!a1!c`).
 
 ### Check Digit Range Enforcement
-A genuinely generated IBAN check digit is always in `[02, 98]` — `00`, `01`, and `99` can't occur. `Mod97.isValid()`, and everything built on it (`IbanValidator`, `IbanBuilder`), now rejects those three values outright instead of trusting the raw mod-97 remainder alone, which some BBANs could coincidentally still satisfy.
+A genuinely generated IBAN check digit is always in `[02, 98]` - `00`, `01`, and `99` can't occur. `Mod97.isValid()`, and everything built on it (`IbanValidator`, `IbanBuilder`), now rejects those three values outright instead of trusting the raw mod-97 remainder alone, which some BBANs could coincidentally still satisfy.
 
 ### Library Metadata on Direct JAR Execution
 Running the JAR directly (`java -jar iban-commons.jar`) now prints its title, version, vendor, and build info from the manifest, with a note that it's a library and not meant for CLI use, instead of exiting silently.
@@ -474,14 +474,14 @@ Line and mutation coverage (via pitest) were pushed further across `iban-commons
 ## 🆕 What's New in 1.8.10
 
 ### German Account Check Digit Module
-New standalone [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module implementing 122 of the Deutsche Bundesbank's "Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft" (methods `00`–`99`, `A0`–`D9`) for verifying a German domestic account number against a Bankleitzahl. Zero dependency on `iban-commons` itself.
+New standalone [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-commons-de-checkdigit) module implementing 122 of the Deutsche Bundesbank's "Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft" (methods `00`-`99`, `A0`-`D9`) for verifying a German domestic account number against a Bankleitzahl. Zero dependency on `iban-commons` itself.
 
 -----
 
 ## 🆕 What's New in 1.8.9
 
 ### IbanBuilder
-New `IbanBuilder` API (obtained via `IbanRegistry#builder()`) generates structurally valid, correctly checksummed IBANs from explicit or randomly filled components — useful for tests and fixtures.
+New `IbanBuilder` API (obtained via `IbanRegistry#builder()`) generates structurally valid, correctly checksummed IBANs from explicit or randomly filled components - useful for tests and fixtures.
 
 ### 7 New Countries
 Added CG (Congo-Brazzaville), CI (Côte d'Ivoire), GW (Guinea-Bissau), MG (Madagascar), ML (Mali), NE (Niger), and TD (Chad) to `IbanRegistry`, bringing total country coverage to 127.
@@ -490,7 +490,7 @@ Added CG (Congo-Brazzaville), CI (Côte d'Ivoire), GW (Guinea-Bissau), MG (Madag
 Added `PatternCache` (thread-safe compiled-`Pattern` cache) and `RegexSimplifier` (consolidates consecutive same-class regex blocks), plus new `IndexRange` offset methods and gap-range support in component string formatting.
 
 ### Internal Consolidation
-`CountryUtil` was merged into `Country` (including `createFlagEmoji`), and several country data entries were corrected (Bolivia name, Tonga continent, ZWL→ZWG rename, KGS typo).
+`CountryUtil` was merged into `Country` (including `createFlagEmoji`), and several country data entries were corrected (Bolivia name, Tonga continent, ZWL->ZWG rename, KGS typo).
 
 -----
 
@@ -510,13 +510,13 @@ Fine-tuned internal validation rules and alignment with Error Prone guidelines.
 ## 🆕 What's New in 1.8.7
 
 ### Zero Allocation on the Hot Path
-`IbanValidationResult` now caches one singleton per `IbanValidationError` constant at class-load time — failed validations no longer allocate on the rejection path.
+`IbanValidationResult` now caches one singleton per `IbanValidationError` constant at class-load time - failed validations no longer allocate on the rejection path.
 
 ### Cleaner validate() API
 New allocation-free `Iban.validate()` and `Bic.validate()` methods throw on invalid input without constructing an instance.
 
 ### Internal Refactoring & Correctness
-`Objects.hash()` replaced with the classic Bloch prime-accumulation pattern throughout — no vararg array, no autoboxing of primitives.
+`Objects.hash()` replaced with the classic Bloch prime-accumulation pattern throughout - no vararg array, no autoboxing of primitives.
 
 -----
 
@@ -536,7 +536,7 @@ JUnit 5 extensions (enhanced IBAN and BIC assertions, parameterized test support
 ## 🆕 What's New in 1.8.5
 
 ### Zero-Allocation Validation Pipeline
-The internal validation pipeline was migrated from `CharSequence` to `char[]` throughout — across all 80+ country validators, `NationalCheckDigitCalculator`, and `AbstractNcdCountryValidator`. This eliminates virtual dispatch on `charAt()` and reduces heap allocation to exactly 0 B/op.
+The internal validation pipeline was migrated from `CharSequence` to `char[]` throughout - across all 80+ country validators, `NationalCheckDigitCalculator`, and `AbstractNcdCountryValidator`. This eliminates virtual dispatch on `charAt()` and reduces heap allocation to exactly 0 B/op.
 
 > **Migration note (SPI implementors):** Custom `NationalCheckDigitCalculator` implementations must update their method signatures from `CharSequence` to `char[]`.
 
@@ -544,12 +544,12 @@ The internal validation pipeline was migrated from `CharSequence` to `char[]` th
 Previously internal classes are now part of the stable public API: `Bic`, `IbanRegistry`, `RandomBic`, and `Formatter`.
 
 ### Immutable `IbanConfig` via Freeze Pattern
-`IbanConfig` redesigned from a mutable enum to an immutable class. Configuration is set once and then locked — concurrent reads require no synchronization.
+`IbanConfig` redesigned from a mutable enum to an immutable class. Configuration is set once and then locked - concurrent reads require no synchronization.
 
 > **Migration note:** Update existing code to the new `IbanConfig.freeze()` approach.
 
 ### `RandomIban` Fluent Builder
-Overloaded `RandomIban.of(…)` factory methods replaced by a fluent builder:
+Overloaded `RandomIban.of(...)` factory methods replaced by a fluent builder:
 
 ```java
 Iban iban = RandomIban.builder().country("DE").random(new Random(42L)).build();
@@ -643,7 +643,7 @@ signatures including the desugared library, but unlike API 24 it is not part of 
 <details>
 <summary>Is the library thread-safe?</summary>
 
-Yes. Both `Iban` and `Bic` are immutable value objects — all fields are `final` and set in the constructor.
+Yes. Both `Iban` and `Bic` are immutable value objects - all fields are `final` and set in the constructor.
 They can be safely shared across threads without synchronization.
 The validation and registry classes are stateless and equally safe for concurrent use.
 </details>

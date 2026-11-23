@@ -37,7 +37,7 @@ iban-commons/
 ├── iban-commons/
 │   └── src/main/java/de/speedbanking/
 │       ├── iban/             # Iban, IbanBuilder, IbanRegistry, IbanValidator, NationalCheckDigitCalculators
-│       │   └── util/         # IbanPatternConverter (structure-notation → regex)
+│       │   └── util/         # IbanPatternConverter (structure-notation -> regex)
 │       ├── bic/              # Bic, BicValidator, RandomBic
 │       ├── util/             # CharUtil, Mod97, Country/Currency/Continent enums, UtilityClasses
 │       └── about/            # ThisLib (manifest-driven CLI metadata entry point)
@@ -63,18 +63,18 @@ These are established, non-obvious conventions - follow them rather than default
 - **Private-constructor guard for utility classes**: call `UtilityClasses.cannotInstantiate(getClass())` (in `de.speedbanking.util`, `iban-commons` core) instead of repeating the message. Exception: `iban-commons-de-checkdigit` has no dependency on `iban-commons`, so its one utility class (`GermanAccountCheckDigit`) inlines `String.format("Utility class %s cannot be instantiated", getClass().getSimpleName())` instead. Test-source utility classes also inline this (they don't pull in the main-source helper).
 - **No `final` on local variables or method parameters**.
 - **Tabular alignment of members** but not local variables.
-- **Exception/log messages use `String.format` with `%s`-style placeholders**, not string concatenation. Logger messages specifically (via the project's own minimal logging, e.g. `NaiveLogger` in `bankdata`) use `{0}`-style `MessageFormat` placeholders instead — the two message styles are not interchangeable, match whichever the surrounding class already uses.
-- **Static-import `java.nio.charset.StandardCharsets.UTF_8`/`UTF_16`** rather than qualifying `StandardCharsets.UTF_8` inline — this is enforced indirectly by error-prone's `StaticImport` check.
-- **Checkstyle import order** (`build/checkstyle-rules.xml`, `ImportOrder` module): groups are, in order — `de.speedbanking.*` statics, other statics (e.g. `org.assertj.*`), `jakarta`/`java`/`javafx`/`javax` statics; then the same grouping for regular imports. Each group is blank-line-separated and alphabetically sorted within itself. When adding a static import from `java.*`, it goes *after* non-`de.speedbanking`/non-`java` statics like `org.assertj`, not before.
-- **`package-info.java` carries no license header** — `license-maven-plugin` excludes `**/package-info.java`.
-- **No separate `package-info.java` in `src/test`** when the corresponding main package already has one — avoids a split-package duplicate `package-info.class` on the classpath.
+- **Exception/log messages use `String.format` with `%s`-style placeholders**, not string concatenation. Logger messages specifically (via the project's own minimal logging, e.g. `NaiveLogger` in `bankdata`) use `{0}`-style `MessageFormat` placeholders instead - the two message styles are not interchangeable, match whichever the surrounding class already uses.
+- **Static-import `java.nio.charset.StandardCharsets.UTF_8`/`UTF_16`** rather than qualifying `StandardCharsets.UTF_8` inline - this is enforced indirectly by error-prone's `StaticImport` check.
+- **Checkstyle import order** (`build/checkstyle-rules.xml`, `ImportOrder` module): groups are, in order - `de.speedbanking.*` statics, other statics (e.g. `org.assertj.*`), `jakarta`/`java`/`javafx`/`javax` statics; then the same grouping for regular imports. Each group is blank-line-separated and alphabetically sorted within itself. When adding a static import from `java.*`, it goes *after* non-`de.speedbanking`/non-`java` statics like `org.assertj`, not before.
+- **`package-info.java` carries no license header** - `license-maven-plugin` excludes `**/package-info.java`.
+- **No separate `package-info.java` in `src/test`** when the corresponding main package already has one - avoids a split-package duplicate `package-info.class` on the classpath.
 - **Logger field is named `LOGGER`** (not `log`/`logger`).
-- Avoid 'em dashes' and curly quotes in Javadoc, Markdown, and commit messages — this codebase's prose stays plain-ASCII punctuation.
+- Avoid 'em dashes' and curly quotes in Javadoc, Markdown, and commit messages - this codebase's prose stays plain-ASCII punctuation.
 
 ## Testing Conventions
 
 - **JUnit 5** throughout; AssertJ for assertions (`assertThat(...)`), not Hamcrest or JUnit's own assertions.
-- **Test method naming**: `methodUnderTest_condition_expectedOutcome()` — compact, no `should`/`when` filler words. Example:
+- **Test method naming**: `methodUnderTest_condition_expectedOutcome()` - compact, no `should`/`when` filler words. Example:
   ```java
   void resolveActualSourceUri_htmlWithoutMatchingLink_returnsEmpty() { ... }
   void parse_rowWithTooFewColumns_throwsBankDataParseException() { ... }
@@ -89,7 +89,7 @@ These are established, non-obvious conventions - follow them rather than default
   void constructor_invalidRange_throwsIndexOutOfBoundsException(int offset, int length, String reason) { ... }
   ```
   Add `@DisplayName` for the group when the parameterized intent isn't obvious from the method name alone.
-- **No `@Nested` test classes**, as a rule — keep test classes flat. (One pre-existing exception in `IbanComponentTest`; don't follow it as a model for new tests.)
+- **No `@Nested` test classes**, as a rule - keep test classes flat. (One pre-existing exception in `IbanComponentTest`; don't follow it as a model for new tests.)
 - Favor the project's own JUnit 5 source extensions (`@IbanCountrySource`, `@RandomIbanSource`, `@IbanRegistrySource` from `iban-commons-junit`) over hand-rolled `@MethodSource` providers when iterating over countries or random IBANs.
 
 ## Build & Test
@@ -100,7 +100,7 @@ mvn -pl iban-commons-bankdata -am clean verify # single module + its dependencie
 mvn -Dtest.jdk=8 clean verify                  # fork the tests onto a JDK 8 toolchain, as CI does
 ```
 
-Default goal is `clean verify` (see root `pom.xml`). Checkstyle and PMD run as part of `verify` and fail the build on violations — there is no separate lint step to remember.
+Default goal is `clean verify` (see root `pom.xml`). Checkstyle and PMD run as part of `verify` and fail the build on violations - there is no separate lint step to remember.
 
 - **Java**: compiled targeting Java 8 (`releaseJavaVersion`) for source compatibility, built with Java 21 (`buildJavaVersion`). CI also runs the tests on Java 8 via the `toolchain-tests` profile; `iban-commons-validation` keeps its tests on the build JDK, since Hibernate Validator 8 needs Java 11
 - **Git branch convention**: feature branches for non-trivial work; commit messages stay concise, present-tense, capability-first (describe what a squashed commit adds/does, not the bugs it fixed along the way)
@@ -115,7 +115,7 @@ git push --follow-tags
 mvn release:perform
 ```
 
-`pushChanges` is `false` in the plugin config, so the `git push --follow-tags` step is always explicit and manual. Release candidates use a `-RCn` version suffix (e.g. `1.8.12-RC1`) with the development version left as the current `-SNAPSHOT` (no bump) until the RC is validated; only the final release bumps to the next `-SNAPSHOT`. Deploys go through the `release` Maven profile (GPG-signs artifacts, publishes via the Central Publishing Portal) — Central deployments require a manual "publish" click at https://central.sonatype.com/publishing/deployments even after a successful `release:perform`.
+`pushChanges` is `false` in the plugin config, so the `git push --follow-tags` step is always explicit and manual. Release candidates use a `-RCn` version suffix (e.g. `1.8.12-RC1`) with the development version left as the current `-SNAPSHOT` (no bump) until the RC is validated; only the final release bumps to the next `-SNAPSHOT`. Deploys go through the `release` Maven profile (GPG-signs artifacts, publishes via the Central Publishing Portal) - Central deployments require a manual "publish" click at https://central.sonatype.com/publishing/deployments even after a successful `release:perform`.
 
 ## External Resources
 

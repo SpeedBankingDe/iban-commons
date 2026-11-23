@@ -44,7 +44,7 @@ final class RandomIbanSourceTest {
 
         assertThatThrownBy(() -> provider.provideArguments(null, null))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("invalidPercentage must be 0–100");
+            .hasMessageContaining("invalidPercentage must be 0-100");
     }
 
     @Test
@@ -54,7 +54,7 @@ final class RandomIbanSourceTest {
 
         assertThatThrownBy(() -> provider.provideArguments(null, null))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("invalidPercentage must be 0–100");
+            .hasMessageContaining("invalidPercentage must be 0-100");
     }
 
     @Test

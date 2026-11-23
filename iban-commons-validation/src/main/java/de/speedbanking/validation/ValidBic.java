@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
  * Validates that the annotated {@link CharSequence} is a syntactically valid BIC
  * (Business Identifier Code) according to ISO 9362.
  * <p>
- * {@code null} and empty values are considered valid — combine with {@code @NotNull} or
+ * {@code null} and empty values are considered valid - combine with {@code @NotNull} or
  * {@code @NotBlank} to reject them.
  * <p>
  * The constraint violation message is the English error text from

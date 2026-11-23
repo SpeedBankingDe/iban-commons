@@ -33,7 +33,7 @@ final class BicAssertionsTest {
     private static final String VALID_BIC11_MARKDEFF500 = "MARKDEFF500";
     private static final String OTHER_BIC_DEUTDEFFXXX   = "DEUTDEFFXXX";
 
-    @DisplayName("Should cover all factory entry points — happy paths")
+    @DisplayName("Should cover all factory entry points - happy paths")
     @Test
     void entryPoints_validInput_succeed() {
         assertThatBic(VALID_BIC8_MARKDEFF)
@@ -184,7 +184,7 @@ final class BicAssertionsTest {
     @DisplayName("Should verify all comparison assertions for ordered BICs")
     @Test
     void comparisonAssertions_bics_work() {
-        Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);   // MARK... — lexicographically greater
+        Bic bicA = Bic.of(VALID_BIC8_MARKDEFF);   // MARK... - lexicographically greater
         Bic bicB = Bic.of(OTHER_BIC_DEUTDEFFXXX); // DEUT...
 
         assertThat(bicB)

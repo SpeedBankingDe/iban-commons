@@ -21,10 +21,10 @@ package de.speedbanking.iban;
  *
  * <h3>Background</h3>
  * Several national IBAN formats embed a country-specific check digit (or check-digit pair)
- * inside the BBAN, in addition to the two ISO 7064 Mod 97-10 check digits at positions 3–4
+ * inside the BBAN, in addition to the two ISO 7064 Mod 97-10 check digits at positions 3-4
  * of the full IBAN. The position of this NCD is recorded in
  * {@link IbanRegistry#getNationalCheckDigitComponent()} and marked with
- * {@code withNationalCheckDigit(…)} in the registry builder.
+ * {@code withNationalCheckDigit(...)} in the registry builder.
  *
  * <h3>Usage</h3>
  * <ul>

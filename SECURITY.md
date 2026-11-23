@@ -15,7 +15,7 @@ Older versions do not receive backported patches.
 **Please do not report security vulnerabilities through public GitHub issues.**
 
 Report vulnerabilities privately via GitHub's built-in mechanism:
-**Security → Report a vulnerability** (in the repository's Security tab).
+**Security -> Report a vulnerability** (in the repository's Security tab).
 
 Alternatively, send an email to the maintainer address listed in `pom.xml`.
 Please include:
@@ -43,7 +43,7 @@ byte-stream injection attacks:
   validation pipeline (length, structure, ISO 7064 Mod 97-10 check digits).
 - **`readObject()`** and **`readObjectNoData()`** on `Iban` and `Bic` unconditionally
   throw `InvalidObjectException`, blocking any attempt to deserialize a raw instance
-  directly — even from a crafted byte stream.
+  directly - even from a crafted byte stream.
 - The `Memento` stream format includes an explicit **version `long`** written before
   the value string. A version mismatch causes `InvalidObjectException` during
   deserialization, enabling forward-compatible format evolution.

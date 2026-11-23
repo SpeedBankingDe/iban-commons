@@ -4,9 +4,9 @@
  * Implements the catalogue of check digit computation methods maintained by the
  * <strong>Deutsche Bundesbank</strong> under the title
  * <em>"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"</em>
- * (methods {@code 00}–{@code 99}, {@code A0}–{@code E4}). Each method verifies
+ * (methods {@code 00}-{@code 99}, {@code A0}-{@code E4}). Each method verifies
  * whether a check digit embedded in a 10-digit domestic account number is
- * internally consistent — <em>not</em> whether the account actually exists.
+ * internally consistent - <em>not</em> whether the account actually exists.
  * <p>
  * All 144 assigned method codes from the reference source are implemented, see the
  * "Coverage" section on {@link de.speedbanking.checkdigit.de.GermanCheckDigitMethod}.
@@ -14,7 +14,7 @@
  * This module is deliberately standalone and does not depend on {@code iban-commons}:
  * a caller supplies the Bankleitzahl (BLZ), the account number, and the method code
  * to use. The method code itself is bank-specific and must be obtained from elsewhere
- * (e.g. the Bundesbank BLZ master-data file) — this module only executes a given
+ * (e.g. the Bundesbank BLZ master-data file) - this module only executes a given
  * method, it does not select one.
  *
  * <h2>Key classes</h2>

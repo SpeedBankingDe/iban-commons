@@ -101,7 +101,7 @@ patch_file() {
     local desc="$2"
     shift 2
     if [[ ! -f "${file}" ]]; then
-        echo "  – ${desc} not found, skipping"
+        echo "  - ${desc} not found, skipping"
         return
     fi
     for pattern in "$@"; do

@@ -69,13 +69,13 @@ import java.util.stream.Stream;
  * // All SEPA base countries
  * @IbanRegistrySource(countryType = CountryType.BASE, sepa = Sepa.YES)
  *
- * // All Eurozone countries (EUR currency, SEPA member) — AND semantics (default)
+ * // All Eurozone countries (EUR currency, SEPA member) - AND semantics (default)
  * @IbanRegistrySource(sepa = Sepa.YES, currency = "EUR")
  *
- * // SEPA members OR EUR countries — OR semantics
+ * // SEPA members OR EUR countries - OR semantics
  * @IbanRegistrySource(sepa = Sepa.YES, currency = "EUR", filterMode = FilterMode.ANY)
  *
- * // All short IBANs (16–20 chars)
+ * // All short IBANs (16-20 chars)
  * @IbanRegistrySource(minIbanLength = 16, maxIbanLength = 20)
  *
  * // All EUR or GBP countries
@@ -104,7 +104,7 @@ public @interface IbanRegistrySource {
      * When combined with attribute filters ({@link #countryType()}, {@link #sepa()},
      * {@link #currency()}, {@link #minIbanLength()}, {@link #maxIbanLength()}), those filters
      * are applied to this restricted set. The combination mode is controlled by {@link #filterMode()}.
-     * An empty array (the default) means no restriction by country — all entries are candidates.
+     * An empty array (the default) means no restriction by country - all entries are candidates.
      */
     IbanRegistry[] value() default {};
 
@@ -249,7 +249,7 @@ public @interface IbanRegistrySource {
         @Override
         public Stream<? extends Arguments> provideArguments(ParameterDeclarations parameters, ExtensionContext context) {
 
-            // Step 1: build include / exclude sets — O(1) lookup via EnumSet
+            // Step 1: build include / exclude sets - O(1) lookup via EnumSet
             // No upfront name validation needed: the compiler already rejects unknown enum constants.
             Set<IbanRegistry> includeFilter = config.value().length > 0
                 ? EnumSet.copyOf(Arrays.asList(config.value()))
@@ -277,7 +277,7 @@ public @interface IbanRegistrySource {
                 .filter(e -> excludeFilter == null || !excludeFilter.contains(e))
                 .collect(toList());
 
-            // Step 5: safety check — an empty result means the filters excluded everything.
+            // Step 5: safety check - an empty result means the filters excluded everything.
             // All enum constants are valid by definition, so this can only happen when
             // the filter combination is too restrictive.
             if (result.isEmpty()) {
@@ -323,7 +323,7 @@ public @interface IbanRegistrySource {
                 predicates.add(e -> e.getIbanLength() <= max);
             }
 
-            // currency (ISO 4217) — resolved via Country enum
+            // currency (ISO 4217) - resolved via Country enum
             if (config.currency().length > 0) {
                 Set<String> currencyCodes = new LinkedHashSet<>(Arrays.asList(config.currency()));
                 predicates.add(e -> {

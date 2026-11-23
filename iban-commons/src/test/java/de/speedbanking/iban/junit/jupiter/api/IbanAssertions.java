@@ -31,10 +31,10 @@ public class IbanAssertions extends Assertions {
      * {@link Iban#of(CharSequence)}.
      * <ul>
      *   <li>A {@code null} argument is forwarded as-is; only {@code isNull()} will succeed on the
-     *       returned assert — consistent with the AssertJ null-handling contract.
+     *       returned assert - consistent with the AssertJ null-handling contract.
      *   </li>
      *   <li>An invalid IBAN string causes an {@link AssertionError} whose cause is the
-     *       {@link InvalidIbanException} thrown by the parser — the error is surfaced before
+     *       {@link InvalidIbanException} thrown by the parser - the error is surfaced before
      *       any assertion method is invoked, which is the standard behaviour for invalid inputs
      *       in custom AssertJ entry points.
      *   </li>
@@ -60,7 +60,7 @@ public class IbanAssertions extends Assertions {
      * Creates a new {@link IbanAssert} wrapping an already-parsed {@link Iban} instance.
      * <p>
      * Convenience overload of {@link #assertThat(Iban)} that allows a consistent
-     * {@code assertThatIban(…)} call style regardless of whether the caller holds a
+     * {@code assertThatIban(...)} call style regardless of whether the caller holds a
      * raw {@link CharSequence} or an already-parsed {@link Iban} object.
      *
      * @param actual the {@link Iban} instance to assert on, or {@code null}
@@ -77,7 +77,7 @@ public class IbanAssertions extends Assertions {
      * <em>without</em> parsing it into an {@link Iban} instance first.
      * <p>
      * Use this entry point when the string under test may be invalid and the assertion
-     * should check validity as part of the test — e.g. {@code assertThatIban("INVALID").isNotValid()}.
+     * should check validity as part of the test - e.g. {@code assertThatIban("INVALID").isNotValid()}.
      * <p>
      * Unlike {@link #assertThatIban(CharSequence)}, this method never throws an
      * {@link AssertionError} during construction; validity is evaluated lazily by the

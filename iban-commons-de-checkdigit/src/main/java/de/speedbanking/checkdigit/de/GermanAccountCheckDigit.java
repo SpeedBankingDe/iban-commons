@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNull;
  * Public entry point for verifying German domestic account number ("Kontonummer")
  * check digits.
  * <p>
- * This class only <em>executes</em> a check digit method — it does not determine which
+ * This class only <em>executes</em> a check digit method - it does not determine which
  * method applies to a given Bankleitzahl (BLZ). Callers must supply the method code
  * themselves, typically obtained by looking up the BLZ in the Bundesbank's
  * "Bankleitzahlendatei" (a separate concern, deliberately not part of this module).

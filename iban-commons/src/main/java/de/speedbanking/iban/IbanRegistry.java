@@ -2888,11 +2888,11 @@ public enum IbanRegistry {
 
     /**
      * Fixed-size lookup array covering all 676 possible two-letter combinations
-     * ({@code AA}–{@code ZZ}) of ISO 3166-1 Alpha-2 country codes.
+     * ({@code AA}-{@code ZZ}) of ISO 3166-1 Alpha-2 country codes.
      * <p>
      * Each slot is addressed directly via {@link #calcLookupIndex(char, char)};
      * slots with no registered country remain {@code null}.
-     * Most of the 676 slots are unused – this sparseness is intentional:
+     * Most of the 676 slots are unused - this sparseness is intentional:
      * it enables a direct array access with no hashing, no autoboxing,
      * and no {@link java.util.HashMap} overhead on every lookup call.
      */
@@ -3360,7 +3360,7 @@ public enum IbanRegistry {
      * Equivalent to {@code getLastUpdate().getMonthValue()} but avoids a dependency on
      * {@link java.time.YearMonth}, which requires API level 26 on Android.
      *
-     * @return the month of the last update (1–12),
+     * @return the month of the last update (1-12),
      *         or {@code 0} if the last-update date is unknown
      *
      * @since 1.8.3
@@ -3469,11 +3469,11 @@ public enum IbanRegistry {
      * The resulting index is mapped into a range of 0 to 675 (inclusive), representing
      * all possible 26 &times; 26 letter combinations.
      * <p>
-     * If either character is outside the 'A'–'Z' range, the method returns -1
+     * If either character is outside the 'A'-'Z' range, the method returns -1
      * to indicate an invalid input.
      *
-     * @param c1 the first character of the ISO country code (expected 'A'–'Z')
-     * @param c2 the second character of the ISO country code (expected 'A'–'Z')
+     * @param c1 the first character of the ISO country code (expected 'A'-'Z')
+     * @param c2 the second character of the ISO country code (expected 'A'-'Z')
      * @return a zero-based index in the range [0, 675], or -1 if input is invalid
      */
     private static int calcLookupIndex(char c1, char c2) {

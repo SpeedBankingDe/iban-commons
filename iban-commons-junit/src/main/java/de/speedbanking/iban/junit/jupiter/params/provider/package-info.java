@@ -6,13 +6,13 @@
  * {@link org.junit.jupiter.params.provider.ArgumentsSource} annotations:
  *
  * <ul>
- *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.IbanCountrySource} –
+ *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.IbanCountrySource} -
  *       supplies {@link de.speedbanking.iban.IbanRegistry} entries filtered by an
  *       explicit include/exclude country list.</li>
- *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.IbanRegistrySource} –
+ *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.IbanRegistrySource} -
  *       supplies all (or a filtered subset of) {@link de.speedbanking.iban.IbanRegistry}
  *       enum constants.</li>
- *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.RandomIbanSource} –
+ *   <li>{@link de.speedbanking.iban.junit.jupiter.params.provider.RandomIbanSource} -
  *       generates a configurable number of random IBAN strings, optionally including a
  *       percentage of deliberately invalid ones.</li>
  * </ul>

@@ -20,7 +20,7 @@ import org.junit.jupiter.params.provider.ValueSource;
  * class but are <strong>not</strong> a substitute for verification against real-world
  * BLZ/Kontonummer pairs from the Bundesbank reference source. "Invalid" vectors are
  * produced by incrementing (mod 10) the digit at the position the method under test
- * actually compares — for chained/fallback methods this is occasionally not enough to
+ * actually compares - for chained/fallback methods this is occasionally not enough to
  * guarantee overall invalidity if a later fallback branch happens to accept the mutated
  * number too; each such vector was confirmed by running this suite, not just derived
  * algebraically.

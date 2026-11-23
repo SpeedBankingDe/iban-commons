@@ -33,16 +33,16 @@ import java.util.stream.Stream;
  * Every validation call follows a strict fail-fast sequence that aborts at the
  * first error detected:
  * <ol>
- *   <li><strong>Normalization</strong> — raw input is stripped of spaces and/or
+ *   <li><strong>Normalization</strong> - raw input is stripped of spaces and/or
  *       converted to uppercase into a thread-local buffer (no heap allocation).</li>
- *   <li><strong>Length check</strong> — overall length against ISO 13616 bounds.</li>
- *   <li><strong>Country lookup</strong> — two-letter code resolved via
+ *   <li><strong>Length check</strong> - overall length against ISO 13616 bounds.</li>
+ *   <li><strong>Country lookup</strong> - two-letter code resolved via
  *       {@link IbanRegistry#getBaseEntryByCode(char, char)} using an O(1) array index.</li>
- *   <li><strong>Country length check</strong> — normalized length against the
+ *   <li><strong>Country length check</strong> - normalized length against the
  *       country-specific expected length.</li>
- *   <li><strong>BBAN structure check</strong> — country-specific digit/letter pattern
+ *   <li><strong>BBAN structure check</strong> - country-specific digit/letter pattern
  *       via {@link CountryValidator#validateIban(char[])}.</li>
- *   <li><strong>ISO 7064 Mod 97-10</strong> — check digit verification, performed last
+ *   <li><strong>ISO 7064 Mod 97-10</strong> - check digit verification, performed last
  *       as it is the most expensive step.</li>
  * </ol>
  *
@@ -165,7 +165,7 @@ public final class IbanValidator {
      * lowercase ASCII letters to uppercase. By writing directly into a pre-allocated
      * buffer, this method avoids heap allocations in the validation hot-path.
      * <p>
-     * Characters are read via {@code charAt()} — virtual dispatch whose cost depends on
+     * Characters are read via {@code charAt()} - virtual dispatch whose cost depends on
      * the concrete type at the callsite. Prefer the {@link String} overload
      * ({@link #normalize(String, int, char[], boolean, boolean)}) wherever possible.
      *
@@ -173,7 +173,7 @@ public final class IbanValidator {
      * @param inputLen   the number of characters to process from the input
      * @param output     the destination array; must hold at least {@code inputLen} characters
      * @param allowSpace if {@code true}, space characters are silently omitted from the output
-     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
+     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'-'z'} are converted to uppercase
      * @return the number of characters written to {@code output},
      *         {@value #INPUT_INCORRECT_LENGTH} if the input exceeds {@value #MAX_IBAN_LENGTH} or
      *         {@value #INPUT_ILLEGAL_CHARACTERS} if an illegal character was encountered
@@ -231,7 +231,7 @@ public final class IbanValidator {
      * @param inputLen   the number of characters to process from the input
      * @param output     the destination array; must hold at least {@code inputLen} characters
      * @param allowSpace if {@code true}, space characters are silently omitted from the output
-     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'–'z'} are converted to uppercase
+     * @param allowLower if {@code true}, lowercase ASCII {@code 'a'-'z'} are converted to uppercase
      * @return the number of characters written to {@code output},
      *         {@value #INPUT_INCORRECT_LENGTH} if the input exceeds {@value #MAX_IBAN_LENGTH} or
      *         {@value #INPUT_ILLEGAL_CHARACTERS} if an illegal character was encountered
@@ -247,7 +247,7 @@ public final class IbanValidator {
                 return INPUT_INCORRECT_LENGTH;
             }
 
-            // Fast path: one combined pass — validate and copy simultaneously.
+            // Fast path: one combined pass - validate and copy simultaneously.
             // The JIT inlines String.charAt() to direct char[] array access,
             // and early exit on the first invalid character avoids processing
             // the rest of the input (critical for invalid-IBAN throughput).
@@ -315,7 +315,7 @@ public final class IbanValidator {
             return false;
         }
 
-        // normalize to shared char[] once — all downstream calls use direct array access
+        // normalize to shared char[] once - all downstream calls use direct array access
         char[] normIban = VALIDATION_BUFFER.get();
 
         len = normalize(iban, len,
@@ -403,7 +403,7 @@ public final class IbanValidator {
      *
      * @param rawIban    the IBAN character sequence to validate, potentially containing spaces
      * @param allowSpace whether to allow spaces during validation
-     * @return an {@link IbanValidationResult} — never {@code null}
+     * @return an {@link IbanValidationResult} - never {@code null}
      * @since 1.8.5
      */
     static IbanValidationResult validate(CharSequence rawIban, boolean allowSpace) {
@@ -418,7 +418,7 @@ public final class IbanValidator {
 
         boolean allowLower = IbanConfig.isAllowLowercase();
 
-        // normalize to char[] once — all downstream calls use direct array access
+        // normalize to char[] once - all downstream calls use direct array access
         char[] normIban = VALIDATION_BUFFER.get();
 
         int normLen = normalize(rawIban, rawLen,
@@ -455,7 +455,7 @@ public final class IbanValidator {
             return IbanValidationResult.invalid(IbanValidationError.INVALID_STRUCTURE, countryData);
         }
 
-        // check Mod 97 (most expensive operation — performed last)
+        // check Mod 97 (most expensive operation - performed last)
         if (!Mod97.isValid(normIban, normLen)) {
             return IbanValidationResult.invalid(IbanValidationError.INVALID_CHECKSUM, countryData);
         }
@@ -509,7 +509,7 @@ public final class IbanValidator {
      * routing normalization through {@link #normalize(String, int, char[], boolean, boolean)}.
      *
      * @param rawIban the IBAN string to validate
-     * @return an {@link IbanValidationResult} — never {@code null}
+     * @return an {@link IbanValidationResult} - never {@code null}
      * @see #validate(CharSequence)
      * @since 1.8.5
      */
@@ -525,7 +525,7 @@ public final class IbanValidator {
      *
      * @param rawIban    the IBAN string to validate, potentially containing spaces
      * @param allowSpace whether to allow spaces during validation
-     * @return an {@link IbanValidationResult} — never {@code null}
+     * @return an {@link IbanValidationResult} - never {@code null}
      * @see #validate(CharSequence, boolean)
      * @since 1.8.5
      */
@@ -600,12 +600,12 @@ public final class IbanValidator {
      * Calculates the ISO 7064 Mod 97-10 remainder for a normalized IBAN {@link CharSequence},
      * applying the standard rearrangement step (BBAN first, then the 4-character header).
      * <p>
-     * Operates directly on the {@link CharSequence} — zero heap allocations for
+     * Operates directly on the {@link CharSequence} - zero heap allocations for
      * {@link String} and {@link StringBuilder} inputs.
      * Delegates to {@link Mod97#calculate(CharSequence)}.
      *
      * @param iban the normalized IBAN {@link CharSequence} (uppercase, no spaces)
-     * @return the remainder (0–96), or {@link #INVALID_MOD97} on invalid input
+     * @return the remainder (0-96), or {@link #INVALID_MOD97} on invalid input
      */
     public static int calculateMod97(final CharSequence iban) {
         if (iban == null) {

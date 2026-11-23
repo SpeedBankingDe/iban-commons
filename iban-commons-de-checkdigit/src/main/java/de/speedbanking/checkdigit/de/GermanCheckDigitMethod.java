@@ -26,12 +26,12 @@ import java.util.Map;
  * <em>"Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft"</em> catalogue.
  * <p>
  * Each constant corresponds to one two-character method code as published by the
- * Bundesbank (e.g. method {@code 00} → {@link #M00}). Which method applies to a given
+ * Bundesbank (e.g. method {@code 00} -> {@link #M00}). Which method applies to a given
  * account is determined by the account-holding bank's Bankleitzahl (BLZ) and is
- * <em>not</em> looked up here — see {@link GermanAccountCheckDigit}.
+ * <em>not</em> looked up here - see {@link GermanAccountCheckDigit}.
  * <p>
  * All algorithms operate on the 10-digit domestic account number ("Kontonummer"),
- * right-justified and zero-padded. The check digit position varies by method — most
+ * right-justified and zero-padded. The check digit position varies by method - most
  * commonly the last digit (index 9), but a number of methods (e.g. {@link #M13},
  * {@link #M17}, {@link #M23}) place it elsewhere within the number. A handful of
  * methods (e.g. {@link #M51} and {@link #M52})
@@ -61,10 +61,10 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 00}.
      * <p>
-     * Modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}} applied to digits 1–9 (index 0–8).
-     * Products greater than 9 are reduced to their cross sum ({@code product − 9}, valid
+     * Modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}} applied to digits 1-9 (index 0-8).
+     * Products greater than 9 are reduced to their cross sum ({@code product - 9}, valid
      * since the maximum product is {@code 2 × 9 = 18}). Check digit =
-     * {@code (10 − sum % 10) % 10}, compared against digit 10 (index 9).
+     * {@code (10 - sum % 10) % 10}, compared against digit 10 (index 9).
      */
     M00 {
         @Override
@@ -77,8 +77,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 01}.
      * <p>
-     * Modulus 10, weights {@code {1,7,3,1,7,3,1,7,3}} applied to digits 1–9, no cross sum.
-     * Check digit = {@code (10 − sum % 10) % 10}.
+     * Modulus 10, weights {@code {1,7,3,1,7,3,1,7,3}} applied to digits 1-9, no cross sum.
+     * Check digit = {@code (10 - sum % 10) % 10}.
      */
     M01 {
         @Override
@@ -91,9 +91,9 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 02}.
      * <p>
-     * Modulus 11, weights {@code {2,9,8,7,6,5,4,3,2}} applied to digits 1–9.
-     * Check digit = {@code (11 − sum % 11) % 11}; a computed value of {@code 10}
-     * can never match a single decimal digit and therefore always fails —
+     * Modulus 11, weights {@code {2,9,8,7,6,5,4,3,2}} applied to digits 1-9.
+     * Check digit = {@code (11 - sum % 11) % 11}; a computed value of {@code 10}
+     * can never match a single decimal digit and therefore always fails -
      * this is expected: the Bundesbank specification treats such account numbers
      * as not verifiable under this method.
      */
@@ -108,9 +108,9 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 03}.
      * <p>
-     * Modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}} applied to digits 1–9, no cross sum
+     * Modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}} applied to digits 1-9, no cross sum
      * (unlike {@link #M00}, which uses the same weights but reduces products via cross sum).
-     * Check digit = {@code (10 − sum % 10) % 10}.
+     * Check digit = {@code (10 - sum % 10) % 10}.
      */
     M03 {
         @Override
@@ -123,8 +123,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 04}.
      * <p>
-     * Modulus 11, weights {@code {4,3,2,7,6,5,4,3,2}} applied to digits 1–9.
-     * Check digit = {@code (11 − sum % 11) % 11}.
+     * Modulus 11, weights {@code {4,3,2,7,6,5,4,3,2}} applied to digits 1-9.
+     * Check digit = {@code (11 - sum % 11) % 11}.
      */
     M04 {
         @Override
@@ -137,8 +137,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 05}.
      * <p>
-     * Modulus 10, weights {@code {1,3,7,1,3,7,1,3,7}} applied to digits 1–9, no cross sum.
-     * Check digit = {@code (10 − sum % 10) % 10}.
+     * Modulus 10, weights {@code {1,3,7,1,3,7,1,3,7}} applied to digits 1-9, no cross sum.
+     * Check digit = {@code (10 - sum % 10) % 10}.
      */
     M05 {
         @Override
@@ -152,8 +152,8 @@ public enum GermanCheckDigitMethod {
      * Method {@code 06}.
      * <p>
      * Modulus 11, same weights as {@link #M04} ({@code {4,3,2,7,6,5,4,3,2}}), but with a
-     * different remainder-1 handling: {@code crc = 11 − sum % 11}, and <em>any</em> result
-     * greater than {@code 9} (i.e. {@code 10} or {@code 11}) collapses to {@code 0} — whereas
+     * different remainder-1 handling: {@code crc = 11 - sum % 11}, and <em>any</em> result
+     * greater than {@code 9} (i.e. {@code 10} or {@code 11}) collapses to {@code 0} - whereas
      * {@link #M04} only collapses {@code 11} to {@code 0} and leaves {@code 10} as a
      * (permanently non-matching) value.
      */
@@ -168,8 +168,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 07}.
      * <p>
-     * Modulus 11, weights {@code {10,9,8,7,6,5,4,3,2}} applied to digits 1–9.
-     * Check digit = {@code (11 − sum % 11) % 11}.
+     * Modulus 11, weights {@code {10,9,8,7,6,5,4,3,2}} applied to digits 1-9.
+     * Check digit = {@code (11 - sum % 11) % 11}.
      */
     M07 {
         @Override
@@ -199,7 +199,7 @@ public enum GermanCheckDigitMethod {
     },
 
     /**
-     * Method {@code 09} — "keine Prüfzifferberechnung" (no check digit method).
+     * Method {@code 09} - "keine Prüfzifferberechnung" (no check digit method).
      * <p>
      * Explicitly permitted by the Bundesbank specification for payment service providers
      * that do not use check-digit-secured account numbers. Always reports
@@ -216,7 +216,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code 10}.
      * <p>
      * Modulus 11, weights {@code {10,9,8,7,6,5,4,3,2}} (same as {@link #M07}), but with
-     * the "clamp above 9 to 0" remainder rule instead of the "11 → 0 only" rule.
+     * the "clamp above 9 to 0" remainder rule instead of the "11 -> 0 only" rule.
      */
     M10 {
         @Override
@@ -230,7 +230,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code 11}.
      * <p>
      * Same weights as {@link #M10}, but with a distinct remainder mapping:
-     * {@code 10 → 9}, {@code 11 → 0}, all other values unchanged.
+     * {@code 10 -> 9}, {@code 11 -> 0}, all other values unchanged.
      */
     M11 {
         @Override
@@ -253,7 +253,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code 13}.
      * <p>
      * Two-stage: first tries modulus 10 with weights {@code {1,2,1,2,1,2}} and cross sum
-     * over digits 2–7 (index 1–6), comparing at index 7. If that fails, retries the same
+     * over digits 2-7 (index 1-6), comparing at index 7. If that fails, retries the same
      * formula shifted two positions right (digits 4-9, index 3-8), comparing at index 9,
      * but only when digits 1-2 are {@code 00} (sub-account {@code 00} omitted).
      */
@@ -274,7 +274,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 14}.
      * <p>
-     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4–9 (index 3–8), "11 → 0"
+     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4-9 (index 3-8), "11 -> 0"
      * remainder rule, compared at index 9.
      */
     M14 {
@@ -288,7 +288,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 15}.
      * <p>
-     * Modulus 11, weights {@code {5,4,3,2}} over digits 6–9 (index 5–8), clamp-above-9 rule,
+     * Modulus 11, weights {@code {5,4,3,2}} over digits 6-9 (index 5-8), clamp-above-9 rule,
      * compared at index 9.
      */
     M15 {
@@ -302,9 +302,9 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 16}.
      * <p>
-     * Modulus 11, weights {@code {4,3,2,7,6,5,4,3,2}} (same as {@link #M04}), "11 → 0" rule.
+     * Modulus 11, weights {@code {4,3,2,7,6,5,4,3,2}} (same as {@link #M04}), "11 -> 0" rule.
      * If the raw remainder is {@code 10} (never directly matchable), the method instead
-     * accepts the account if digits 9 and 10 (index 8 and 9) are equal — a documented
+     * accepts the account if digits 9 and 10 (index 8 and 9) are equal - a documented
      * fallback rather than an outright rejection.
      */
     M16 {
@@ -325,11 +325,11 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 17}.
      * <p>
-     * Modulus 10, weights {@code {1,2,1,2,1,2}} with cross sum over digits 2–7 (index 1–6).
+     * Modulus 10, weights {@code {1,2,1,2,1,2}} with cross sum over digits 2-7 (index 1-6).
      * Unusually, the sum is decremented by one before taking the check digit, and the
      * modulus applied to the decremented sum is {@code 11}, not {@code 10}:
-     * {@code crc = (10 − (sum − 1) % 11) % 10}. Compared at index 7. This asymmetric
-     * modulus-10/11 mix is exactly as specified — not a transcription artifact.
+     * {@code crc = (10 - (sum - 1) % 11) % 10}. Compared at index 7. This asymmetric
+     * modulus-10/11 mix is exactly as specified - not a transcription artifact.
      */
     M17 {
         @Override
@@ -385,7 +385,7 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}}, with a cross sum applied twice: once
      * per product (as usual), and then <em>again</em>, recursively, to the total sum. Check
-     * digit = {@code 10 − recursiveCrossSum(sum)} (no further modulus reduction).
+     * digit = {@code 10 - recursiveCrossSum(sum)} (no further modulus reduction).
      */
     M21 {
         @Override
@@ -412,7 +412,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 23}.
      * <p>
-     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 1–6 (index 0–5), "11 → 0" rule,
+     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 1-6 (index 0-5), "11 -> 0" rule,
      * compared at index 6. If the raw remainder is {@code 10}, falls back to accepting the
      * account when digits 6 and 7 (index 5 and 6) are equal.
      */
@@ -435,7 +435,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code 24}.
      * <p>
      * Substitutes the leading digit(s) with zero for specific value ranges (digits
-     * {@code 3–6} zero out digit 1; digit {@code 9} zeroes digits 1–3), then locates the
+     * {@code 3-6} zero out digit 1; digit {@code 9} zeroes digits 1-3), then locates the
      * first non-zero digit and sums {@code ((weight × digit) + weight) % 11} across the
      * remaining digits up to index 8, cycling weights {@code {1,2,3}}. Check digit =
      * {@code sum % 10}, compared at index 9.
@@ -466,7 +466,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 25}.
      * <p>
-     * Modulus 11, weights {@code {9,8,7,6,5,4,3,2}} over digits 2–9 (index 1–8). If the raw
+     * Modulus 11, weights {@code {9,8,7,6,5,4,3,2}} over digits 2-9 (index 1-8). If the raw
      * remainder is {@code 10} and digit 2 (index 1) is less than {@code 8}, the account is
      * rejected outright (no fallback); otherwise the usual clamp-above-9 rule applies.
      */
@@ -505,10 +505,10 @@ public enum GermanCheckDigitMethod {
      * Method {@code 27}.
      * <p>
      * Digit-transformation method: if digit 1 (index 0) is zero, falls back to the
-     * {@link #M00} formula. Otherwise, each of digits 1–9 is looked up in one of four
+     * {@link #M00} formula. Otherwise, each of digits 1-9 is looked up in one of four
      * 10-entry substitution rows of {@link #TRANSFORM_TABLE} (row cycles as
-     * {@code (8 − i) % 4} for digit index {@code i}), the substituted values are summed,
-     * and the check digit is {@code (10 − sum % 10) % 10}, compared at index 9.
+     * {@code (8 - i) % 4} for digit index {@code i}), the substituted values are summed,
+     * and the check digit is {@code (10 - sum % 10) % 10}, compared at index 9.
      */
     M27 {
         @Override
@@ -527,7 +527,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 28}.
      * <p>
-     * Modulus 11, weights {@code {8,7,6,5,4,3,2}} over digits 1–7 (index 0–6), clamp-above-9
+     * Modulus 11, weights {@code {8,7,6,5,4,3,2}} over digits 1-7 (index 0-6), clamp-above-9
      * rule, compared at index 7.
      */
     M28 {
@@ -542,9 +542,9 @@ public enum GermanCheckDigitMethod {
      * Method {@code 29}.
      * <p>
      * Digit-transformation method, structurally similar to {@link #M27} but with a
-     * different traversal: digit {@code account[8 − i]} is looked up in
+     * different traversal: digit {@code account[8 - i]} is looked up in
      * {@link #TRANSFORM_TABLE} row {@code i & 3}, for {@code i} from {@code 0} to {@code 8}.
-     * Check digit = {@code (10 − sum % 10) % 10}, compared at index 9.
+     * Check digit = {@code (10 - sum % 10) % 10}, compared at index 9.
      */
     M29 {
         @Override
@@ -560,7 +560,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 30}.
      * <p>
-     * Modulus 10, weights {@code {2,0,0,0,0,1,2,1,2}} (positions 2–5 contribute nothing),
+     * Modulus 10, weights {@code {2,0,0,0,0,1,2,1,2}} (positions 2-5 contribute nothing),
      * no cross sum.
      */
     M30 {
@@ -588,7 +588,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 32}.
      * <p>
-     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4–9 (index 3–8), clamp-above-9
+     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4-9 (index 3-8), clamp-above-9
      * rule, compared at index 9.
      */
     M32 {
@@ -602,7 +602,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 33}.
      * <p>
-     * Modulus 11, weights {@code {6,5,4,3,2}} over digits 5–9 (index 4–8), clamp-above-9
+     * Modulus 11, weights {@code {6,5,4,3,2}} over digits 5-9 (index 4-8), clamp-above-9
      * rule, compared at index 9.
      */
     M33 {
@@ -616,7 +616,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 34}.
      * <p>
-     * Modulus 11, weights {@code {7,9,10,5,8,4,2}} over digits 1–7 (index 0–6),
+     * Modulus 11, weights {@code {7,9,10,5,8,4,2}} over digits 1-7 (index 0-6),
      * clamp-above-9 rule, compared at index 7.
      */
     M34 {
@@ -650,7 +650,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 36}.
      * <p>
-     * Modulus 11, weights {@code {5,8,4,2}} over digits 6–9 (index 5–8), clamp-above-9 rule.
+     * Modulus 11, weights {@code {5,8,4,2}} over digits 6-9 (index 5-8), clamp-above-9 rule.
      */
     M36 {
         @Override
@@ -663,7 +663,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 37}.
      * <p>
-     * Modulus 11, weights {@code {10,5,8,4,2}} over digits 5–9 (index 4–8), clamp-above-9
+     * Modulus 11, weights {@code {10,5,8,4,2}} over digits 5-9 (index 4-8), clamp-above-9
      * rule.
      */
     M37 {
@@ -677,7 +677,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 38}.
      * <p>
-     * Modulus 11, weights {@code {9,10,5,8,4,2}} over digits 4–9 (index 3–8),
+     * Modulus 11, weights {@code {9,10,5,8,4,2}} over digits 4-9 (index 3-8),
      * clamp-above-9 rule.
      */
     M38 {
@@ -691,8 +691,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 39}.
      * <p>
-     * Modulus 11, weights {@code {7,9,10,5,8,4,2}} (same as {@link #M34}) over digits 3–9
-     * (index 2–8), clamp-above-9 rule.
+     * Modulus 11, weights {@code {7,9,10,5,8,4,2}} (same as {@link #M34}) over digits 3-9
+     * (index 2-8), clamp-above-9 rule.
      */
     M39 {
         @Override
@@ -719,7 +719,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code 41}.
      * <p>
      * Modulus 10 with cross sum. If digit 4 (index 3) is {@code 9}, uses weights
-     * {@code {1,2,1,2,1,2}} over digits 4–9 (index 3–8); otherwise uses
+     * {@code {1,2,1,2,1,2}} over digits 4-9 (index 3-8); otherwise uses
      * {@link #M00}'s weights {@code {2,1,2,1,2,1,2,1,2}} over all 9 digits.
      */
     M41 {
@@ -735,7 +735,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 42}.
      * <p>
-     * Modulus 11, weights {@code {9,8,7,6,5,4,3,2}} over digits 2–9 (index 1–8),
+     * Modulus 11, weights {@code {9,8,7,6,5,4,3,2}} over digits 2-9 (index 1-8),
      * clamp-above-9 rule.
      */
     M42 {
@@ -776,7 +776,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 45}.
      * <p>
-     * Delegates: if digit 1 is {@code 0}, digit 5 is {@code 1}, or digits 1–2 form
+     * Delegates: if digit 1 is {@code 0}, digit 5 is {@code 1}, or digits 1-2 form
      * {@code 48}, no check is performed ({@link #M09}); otherwise applies {@link #M00}.
      */
     M45 {
@@ -793,7 +793,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 46}.
      * <p>
-     * Modulus 11, weights {@code {6,5,4,3,2}} over digits 3–7 (index 2–6), clamp-above-9
+     * Modulus 11, weights {@code {6,5,4,3,2}} over digits 3-7 (index 2-6), clamp-above-9
      * rule, compared at index 7.
      */
     M46 {
@@ -807,7 +807,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 47}.
      * <p>
-     * Modulus 11, weights {@code {6,5,4,3,2}} over digits 4–8 (index 3–7), clamp-above-9
+     * Modulus 11, weights {@code {6,5,4,3,2}} over digits 4-8 (index 3-7), clamp-above-9
      * rule, compared at index 8.
      */
     M47 {
@@ -821,7 +821,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 48}.
      * <p>
-     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 3–8 (index 2–7), clamp-above-9
+     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 3-8 (index 2-7), clamp-above-9
      * rule, compared at index 8.
      */
     M48 {
@@ -848,7 +848,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 50}.
      * <p>
-     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 1–6 (index 0–5), clamp-above-9
+     * Modulus 11, weights {@code {7,6,5,4,3,2}} over digits 1-6 (index 0-5), clamp-above-9
      * rule, compared at index 6. If that fails and digits 1-3 are zero (Unternummer 000 omitted),
      * the account number is shifted three digits to the left (digits 4-10 become digits 1-7,
      * padded with three trailing zeros) and the same formula is retried on the shifted number.
@@ -873,15 +873,15 @@ public enum GermanCheckDigitMethod {
      * Method {@code 51}.
      * <p>
      * For "Sachkonten" (digit 3 / index 2 equals {@code 9}): tries modulus 11 with weights
-     * {@code {8,7,6,5,4,3,2}} over digits 3–9 (index 2–8); if that fails, modulus 11 with
+     * {@code {8,7,6,5,4,3,2}} over digits 3-9 (index 2-8); if that fails, modulus 11 with
      * weights {@code {10,9,8,7,6,5,4,3,2}} over all 9 digits. Both use the clamp-above-9 rule.
      * <p>
      * Otherwise, tries four variants in order, all compared at index 9: (A) modulus 11,
-     * weights {@code {7,6,5,4,3,2}} over digits 4–9; (B) modulus 11, weights
-     * {@code {6,5,4,3,2}} over digits 5–9; (C) modulus 10 with cross sum, weights
-     * {@code {1,2,1,2,1,2}} over digits 4–9; (D) if digit 10 (index 9) is {@code >= 7}
+     * weights {@code {7,6,5,4,3,2}} over digits 4-9; (B) modulus 11, weights
+     * {@code {6,5,4,3,2}} over digits 5-9; (C) modulus 10 with cross sum, weights
+     * {@code {1,2,1,2,1,2}} over digits 4-9; (D) if digit 10 (index 9) is {@code >= 7}
      * the account is rejected outright, otherwise modulus 7 (weights as in B) over digits
-     * 5–9, check digit {@code (7 − sum % 7) % 7}.
+     * 5-9, check digit {@code (7 - sum % 7) % 7}.
      */
     M51 {
         @Override
@@ -984,10 +984,10 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 54}.
      * <p>
-     * Modulus 11, weights {@code {2,7,6,5,4,3,2}} over digits 3–9 (index 2–8); digits 1 and
+     * Modulus 11, weights {@code {2,7,6,5,4,3,2}} over digits 3-9 (index 2-8); digits 1 and
      * 2 are always {@code 4}, {@code 9} but are not weighted. The raw remainder
-     * ({@code 11 − sum % 11}, without clamping) is used directly as the expected check
-     * digit — a raw value of {@code 10} or {@code 11} therefore never matches, correctly
+     * ({@code 11 - sum % 11}, without clamping) is used directly as the expected check
+     * digit - a raw value of {@code 10} or {@code 11} therefore never matches, correctly
      * encoding the specification's "remainder 0 or 1 makes the account unverifiable" rule.
      */
     M54 {
@@ -1111,7 +1111,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code 58}.
      * <p>
      * Modulus 11, weights {@code {0,0,0,0,6,5,4,3,2}} (only the last 5 digits before the
-     * check digit contribute), "11 → 0" rule.
+     * check digit contribute), "11 -> 0" rule.
      */
     M58 {
         @Override
@@ -1140,8 +1140,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 60}.
      * <p>
-     * Modulus 10, weights {@code {2,1,2,1,2,1,2}} with cross sum, over digits 3–9
-     * (index 2–8).
+     * Modulus 10, weights {@code {2,1,2,1,2,1,2}} with cross sum, over digits 3-9
+     * (index 2-8).
      */
     M60 {
         @Override
@@ -1157,7 +1157,7 @@ public enum GermanCheckDigitMethod {
      * If digit 9 (index 8) is {@code 8}: modulus 10 with cross sum over all 10 digits,
      * weights {@code {2,1,2,1,2,1,2,0,1,2}} (position 8 zero-weighted), compared at index 7.
      * Otherwise: modulus 10 with cross sum, weights {@code {2,1,2,1,2,1,2}} over digits
-     * 1–7 (index 0–6), also compared at index 7.
+     * 1-7 (index 0-6), also compared at index 7.
      */
     M61 {
         @Override
@@ -1175,7 +1175,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 62}.
      * <p>
-     * Modulus 10, weights {@code {2,1,2,1,2}} with cross sum, over digits 3–7 (index 2–6),
+     * Modulus 10, weights {@code {2,1,2,1,2}} with cross sum, over digits 3-7 (index 2-6),
      * compared at index 7.
      */
     M62 {
@@ -1190,9 +1190,9 @@ public enum GermanCheckDigitMethod {
      * Method {@code 63}.
      * <p>
      * Rejects the account unless digit 1 (index 0) is {@code 0}. Then applies modulus 10
-     * with cross sum, weights {@code {1,2,1,2,1,2}}, over digits 2–7 (index 1–6), compared
-     * at index 7. If that fails and digits 2–3 (index 1–2) are both zero, retries the same
-     * weights over digits 4–9 (index 3–8), compared at index 9.
+     * with cross sum, weights {@code {1,2,1,2,1,2}}, over digits 2-7 (index 1-6), compared
+     * at index 7. If that fails and digits 2-3 (index 1-2) are both zero, retries the same
+     * weights over digits 4-9 (index 3-8), compared at index 9.
      */
     M63 {
         @Override
@@ -1216,7 +1216,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 64}.
      * <p>
-     * Modulus 11, weights {@code {9,10,5,8,4,2}} over digits 1–6 (index 0–5),
+     * Modulus 11, weights {@code {9,10,5,8,4,2}} over digits 1-6 (index 0-5),
      * clamp-above-9 rule, compared at index 6.
      */
     M64 {
@@ -1249,8 +1249,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 66}.
      * <p>
-     * Weights {@code {7,0,0,6,5,4,3,2}} over digits 2–9 (index 1–8), no complement — instead
-     * a direct remainder mapping: {@code 0 → 1}, {@code 1 → 0}, anything else {@code → 11 − remainder}.
+     * Weights {@code {7,0,0,6,5,4,3,2}} over digits 2-9 (index 1-8), no complement - instead
+     * a direct remainder mapping: {@code 0 -> 1}, {@code 1 -> 0}, anything else {@code -> 11 - remainder}.
      * Digit 1 must be {@code 0}; then digit 2 equal to {@code 9} is not checked ({@link #M09}).
      */
     M66 {
@@ -1280,8 +1280,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 67}.
      * <p>
-     * Modulus 10, weights {@code {2,1,2,1,2,1,2}} with cross sum, over digits 1–7
-     * (index 0–6), compared at index 7.
+     * Modulus 10, weights {@code {2,1,2,1,2,1,2}} with cross sum, over digits 1-7
+     * (index 0-6), compared at index 7.
      */
     M67 {
         @Override
@@ -1296,13 +1296,13 @@ public enum GermanCheckDigitMethod {
      * <p>
      * If digit 1 (index 0) is non-zero: requires digit 4 (index 3) to be {@code 9},
      * otherwise rejects; then modulus 10 with cross sum, weights {@code {1,2,1,2,1,2}},
-     * over digits 4–9 (index 3–8), compared at index 9.
+     * over digits 4-9 (index 3-8), compared at index 9.
      * <p>
      * If digit 1 is zero: no check is performed if digit 2 (index 1) is {@code 4}; the
      * account is rejected if it has fewer than 6 digits.
      * Otherwise tries modulus 10 with cross sum, weights {@code {1,2,1,2,1,2,1,2}} over
-     * digits 2–9 (index 1–8); if that fails, weights {@code {1,0,0,2,1,2,1,2}} over the
-     * same range — both compared at index 9.
+     * digits 2-9 (index 1-8); if that fails, weights {@code {1,0,0,2,1,2,1,2}} over the
+     * same range - both compared at index 9.
      */
     M68 {
         @Override
@@ -1342,13 +1342,13 @@ public enum GermanCheckDigitMethod {
      * {@code 7}, skips straight to the transformation-table step below.
      * <p>
      * Otherwise (or after skipping): first tries modulus 11, weights
-     * {@code {8,7,6,5,4,3,2}} over digits 1–7 (index 0–6), clamp-above-9 rule, compared at
+     * {@code {8,7,6,5,4,3,2}} over digits 1-7 (index 0-6), clamp-above-9 rule, compared at
      * index 7. If that succeeds, the account is accepted.
      * <p>
      * If not (or if skipped straight here): a digit-transformation check using
      * {@link #TRANSFORM_TABLE}, traversing digits 9 down to 1 (index 8 down to 0), row
-     * {@code (9 − i) % 4} for position {@code i} counted from 9 down to 1. Check digit =
-     * {@code (10 − sum % 10) % 10}, as in {@link #M29}, compared at index 9.
+     * {@code (9 - i) % 4} for position {@code i} counted from 9 down to 1. Check digit =
+     * {@code (10 - sum % 10) % 10}, as in {@link #M29}, compared at index 9.
      */
     M69 {
         @Override
@@ -1384,7 +1384,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code 70}.
      * <p>
      * If digit 4 (index 3) is {@code 5}, or digit 4 is {@code 6} and digit 5 (index 4) is
-     * {@code 9}: modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4–9 (index 3–8).
+     * {@code 9}: modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4-9 (index 3-8).
      * Otherwise: modulus 11, weights {@code {4,3,2,7,6,5,4,3,2}} over all 9 digits.
      * Both branches use the clamp-above-9 rule and compare at index 9.
      */
@@ -1474,7 +1474,7 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Variante 1: modulus 10, weights {@code {2,1,2,1,2,1,2,1,2}} with cross sum (same as
      * {@link #M00}). If that fails and the account number has 6 digits, retries with check
-     * digit {@code 5 − sum % 5} instead (the "Halbdekade" special case). If Variante 1 fails
+     * digit {@code 5 - sum % 5} instead (the "Halbdekade" special case). If Variante 1 fails
      * entirely, falls back to Variante 2: {@link #M04}.
      */
     M74 {
@@ -1695,8 +1695,8 @@ public enum GermanCheckDigitMethod {
      * If digit 3 (index 2) is {@code 9} (Sachkonten), delegates to {@link #M51}, which
      * applies its exception for exactly these account numbers; its result is final.
      * Otherwise tries three variants at index 9, weights
-     * {@code {6,5,4,3,2}} over digits 5–9 throughout: (A) modulus 11, clamp-above-9;
-     * (B) modulus 7, {@code (7 − sum % 7) % 7} (mapped >9 to 0, though the formula never
+     * {@code {6,5,4,3,2}} over digits 5-9 throughout: (A) modulus 11, clamp-above-9;
+     * (B) modulus 7, {@code (7 - sum % 7) % 7} (mapped >9 to 0, though the formula never
      * exceeds 6); (C) modulus 10, weights {@code {2,1,2,1,2}}, products added without cross sum
      * ("entsprechen dem Verfahren 06").
      */
@@ -1728,13 +1728,13 @@ public enum GermanCheckDigitMethod {
      * Method {@code 85}.
      * <p>
      * If digits 3 and 4 (index 2, 3) are both {@code 9}: modulus 11, weights
-     * {@code {8,7,6,5,4,3,2}} over digits 3–9, with the raw remainder left unmapped except
+     * {@code {8,7,6,5,4,3,2}} over digits 3-9, with the raw remainder left unmapped except
      * that {@code 11} collapses to {@code 0} (a value of {@code 10} is permanently
      * non-matching, unlike the usual clamp-above-9 rule).
      * <p>
-     * Otherwise, tries: (A) modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4–9,
-     * clamp-above-9; (B) {@link #M33}; (C) modulus 7 over digits 5–9,
-     * {@code (7 − sum % 7) % 7} — always returned if A and B both fail.
+     * Otherwise, tries: (A) modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4-9,
+     * clamp-above-9; (B) {@link #M33}; (C) modulus 7 over digits 5-9,
+     * {@code (7 - sum % 7) % 7} - always returned if A and B both fail.
      */
     M85 {
         @Override
@@ -1767,7 +1767,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 86}. Sachkonten exception (digit 3 / index 2 equals {@code 9})
      * delegates to {@link #M51}. Otherwise tries modulus 10 with cross sum, weights
-     * {@code {1,2,1,2,1,2}} over digits 4–9; if that fails, delegates to {@link #M32}.
+     * {@code {1,2,1,2,1,2}} over digits 4-9; if that fails, delegates to {@link #M32}.
      */
     M86 {
         @Override
@@ -1827,8 +1827,8 @@ public enum GermanCheckDigitMethod {
      * Method {@code 88}.
      * <p>
      * Modulus 11, clamp-above-9 rule, compared at index 9. Weights and offset depend on
-     * digit 3 (index 2): if {@code 9}, weights {@code {8,7,6,5,4,3,2}} over digits 3–9;
-     * otherwise weights {@code {7,6,5,4,3,2}} over digits 4–9.
+     * digit 3 (index 2): if {@code 9}, weights {@code {8,7,6,5,4,3,2}} over digits 3-9;
+     * otherwise weights {@code {7,6,5,4,3,2}} over digits 4-9.
      */
     M88 {
         @Override
@@ -1935,9 +1935,9 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Tries four weighted-sum variants in order, all modulus 11 with the clamp-above-9
      * rule, compared at index 6, stopping at the first match: (1) weights
-     * {@code {7,6,5,4,3,2}} over digits 1–6; (2) weights {@code {2,3,4,5,6,7}} over digits
-     * 1–6; (3) weights {@code {10,9,8,7,6,5,0,4,3,2}} over all 10 digits (position 6
-     * zero-weighted); (4) weights {@code {9,10,5,8,4,2}} over digits 1–6.
+     * {@code {7,6,5,4,3,2}} over digits 1-6; (2) weights {@code {2,3,4,5,6,7}} over digits
+     * 1-6; (3) weights {@code {10,9,8,7,6,5,0,4,3,2}} over all 10 digits (position 6
+     * zero-weighted); (4) weights {@code {9,10,5,8,4,2}} over digits 1-6.
      */
     M91 {
         @Override
@@ -1955,7 +1955,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 92}.
      * <p>
-     * Modulus 10, weights {@code {1,7,3,1,7,3}} over digits 4–9 (index 3–8), no cross sum.
+     * Modulus 10, weights {@code {1,7,3,1,7,3}} over digits 4-9 (index 3-8), no cross sum.
      */
     M92 {
         @Override
@@ -1969,12 +1969,12 @@ public enum GermanCheckDigitMethod {
      * Method {@code 93}.
      * <p>
      * The account number encodes a 5-digit Kundennummer in one of two positions: if
-     * digits 1–4 (index 0–3) are all {@code 0}, the Kundennummer occupies digits 5–9
-     * (index 4–8) and the check digit is at index 9; otherwise the Kundennummer occupies
-     * digits 1–5 (index 0–4) and the check digit is at index 5 (digits 7–10 hold an
+     * digits 1-4 (index 0-3) are all {@code 0}, the Kundennummer occupies digits 5-9
+     * (index 4-8) and the check digit is at index 9; otherwise the Kundennummer occupies
+     * digits 1-5 (index 0-4) and the check digit is at index 5 (digits 7-10 hold an
      * unchecked Unter-/Kontoartnummer). Modulus 11, weights {@code {6,5,4,3,2}} (same as
      * {@link #M33}), clamp-above-9 rule. If that fails, retries with modulus 7:
-     * {@code (7 − sum % 7) % 7}. Also used directly by {@link #A4}'s Variante 4.
+     * {@code (7 - sum % 7) % 7}. Also used directly by {@link #A4}'s Variante 4.
      */
     M93 {
         @Override
@@ -2064,7 +2064,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code 98}.
      * <p>
-     * Modulus 10, weights {@code {3,7,1,3,7,1,3}} over digits 3–9 (index 2–8), no cross sum.
+     * Modulus 10, weights {@code {3,7,1,3,7,1,3}} over digits 3-9 (index 2-8), no cross sum.
      * If that fails, delegates to {@link #M32}.
      */
     M98 {
@@ -2102,7 +2102,7 @@ public enum GermanCheckDigitMethod {
      * Method {@code A0}.
      * <p>
      * Account numbers with at most 3 digits are not checked.
-     * Otherwise: modulus 11, weights {@code {10,5,8,4,2}} over digits 5–9 (index 4–8),
+     * Otherwise: modulus 11, weights {@code {10,5,8,4,2}} over digits 5-9 (index 4-8),
      * clamp-above-9 rule.
      */
     A0 {
@@ -2155,16 +2155,16 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code A4}.
      * <p>
-     * If digits 3–4 (index 2–3) read {@code 99}, only Variante 3 and (if that fails)
+     * If digits 3-4 (index 2-3) read {@code 99}, only Variante 3 and (if that fails)
      * Variante 4 apply. All other account numbers are tried in order: Variante 1, then
      * (if that fails) Variante 2, then (if that also fails) Variante 4.
      * <ul>
-     *   <li>Variante 1: modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4–9
-     *       (index 3–8) — same formula as {@link #M32} — clamp-above-9 rule.</li>
+     *   <li>Variante 1: modulus 11, weights {@code {7,6,5,4,3,2}} over digits 4-9
+     *       (index 3-8) - same formula as {@link #M32} - clamp-above-9 rule.</li>
      *   <li>Variante 2: the same weighted sum as Variante 1, but modulus 7:
-     *       {@code (7 − sum % 7) % 7}.</li>
-     *   <li>Variante 3: modulus 11, weights {@code {6,5,4,3,2}} over digits 5–9
-     *       (index 4–8) — same formula as {@link #M33} — clamp-above-9 rule.</li>
+     *       {@code (7 - sum % 7) % 7}.</li>
+     *   <li>Variante 3: modulus 11, weights {@code {6,5,4,3,2}} over digits 5-9
+     *       (index 4-8) - same formula as {@link #M33} - clamp-above-9 rule.</li>
      *   <li>Variante 4: delegates to {@link #M93}.</li>
      * </ul>
      */
@@ -2225,7 +2225,7 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Sachkonten exception (digit 3 / index 2 equals {@code 9}) delegates to
      * {@link #M51}. Otherwise tries modulus 11, weights {@code {7,6,5,4,3,2}} over digits
-     * 4–9, clamp-above-9; if that fails, modulus 10 with cross sum, weights
+     * 4-9, clamp-above-9; if that fails, modulus 10 with cross sum, weights
      * {@code {1,2,1,2,1,2}} over the same range.
      */
     A8 {
@@ -2314,7 +2314,7 @@ public enum GermanCheckDigitMethod {
      * Delegates to {@link #M00} if digit 1 (index 0) is {@code 9}; otherwise delegates to
      * {@link #M07}. The reference source names "Methode 02" for the latter case, but the
      * weights it explicitly prints ({@code {10,9,8,7,6,5,4,3,2}}) match {@link #M07}, not
-     * {@link #M02} ({@code {2,9,8,7,6,5,4,3,2}}) — the explicit weights are followed here,
+     * {@link #M02} ({@code {2,9,8,7,6,5,4,3,2}}) - the explicit weights are followed here,
      * as {@link #B2} confirms elsewhere that a genuine "Methode 02" reference is always
      * paired with {@link #M02}'s own weights.
      */
@@ -2390,8 +2390,8 @@ public enum GermanCheckDigitMethod {
      * clamp-above-9 rule. If that fails, delegates to {@link #M29}. If that also fails,
      * the account is accepted with no further check ({@link CheckDigitResult#NOT_CHECKED})
      * when it falls into one of two documented ranges: {@code [5100000000, 5999999999]}
-     * (digits 1–2 {@code 51}–{@code 59}) or {@code [9010000000, 9109999999]} (digits 1–3
-     * {@code 901}–{@code 910}).
+     * (digits 1-2 {@code 51}-{@code 59}) or {@code [9010000000, 9109999999]} (digits 1-3
+     * {@code 901}-{@code 910}).
      */
     B8 {
         @Override
@@ -2417,15 +2417,15 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code B9}.
      * <p>
-     * If digits 1–2 (index 0–1) are zero and digit 3 (index 2) is positive: for each of
-     * digits 3–9 (index 2–8, weights {@code {1,2,3,1,2,3,1}} cyclic), accumulates
+     * If digits 1-2 (index 0-1) are zero and digit 3 (index 2) is positive: for each of
+     * digits 3-9 (index 2-8, weights {@code {1,2,3,1,2,3,1}} cyclic), accumulates
      * {@code (weight × digit + weight) % 11} into a running sum; check digit =
      * {@code sum % 10}. If that does not match, adds {@code 5} (wrapping at {@code 10}) and
      * compares again.
      * <p>
-     * If digits 1–3 are zero and digit 4 (index 3) is positive: modulus 11 (no complement,
+     * If digits 1-3 are zero and digit 4 (index 3) is positive: modulus 11 (no complement,
      * the raw remainder is the check digit directly), weights {@code {6,5,4,3,2,1}} over
-     * digits 4–9 (index 3–8). If that does not match, the same {@code +5} wrap-around retry
+     * digits 4-9 (index 3-8). If that does not match, the same {@code +5} wrap-around retry
      * applies.
      * <p>
      * Otherwise, with fewer than two or more than three leading zeros, the account is
@@ -2480,7 +2480,7 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Delegates to {@link #M17} unless digit 1 (index 0) is {@code 5}, in which case:
      * modulus 10 with cross sum, weights {@code {1,2,1,2,1,2,1,2,1}}, sum decremented by
-     * one, then {@code (10 − sum % 11) % 10} (the same asymmetric modulus-10/11 mix as
+     * one, then {@code (10 - sum % 11) % 10} (the same asymmetric modulus-10/11 mix as
      * {@link #M17}), compared at index 9.
      */
     C1 {
@@ -2531,7 +2531,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code C5}.
      * <p>
-     * A range-dispatching method: 6-digit account numbers in the range {@code 100000}–
+     * A range-dispatching method: 6-digit account numbers in the range {@code 100000}-
      * {@code 899999} use modulus 10 with cross sum, weights {@code {2,1,2,1,2}}, compared
      * at index 9; 9-digit account numbers in the analogous range use the same weights
      * compared at index 6. Leading digit {@code 1}, {@code 4}, {@code 5}, {@code 6} or
@@ -2579,8 +2579,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code C6}.
      * <p>
-     * Prepends a 7-digit constant — selected from {@link #C6_CONSTANTS} by digit 1
-     * (index 0) — to digits 2–9 (index 1–8), forming a synthetic 15-digit number. Applies
+     * Prepends a 7-digit constant - selected from {@link #C6_CONSTANTS} by digit 1
+     * (index 0) - to digits 2-9 (index 1-8), forming a synthetic 15-digit number. Applies
      * the {@link #M00} formula (modulus 10, weights {@code {2,1,...,2}}, cross sum) to
      * those 15 digits; the check digit remains at index 9 of the original account number.
      */
@@ -2594,7 +2594,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code C7}.
      * <p>
-     * <strong>Implemented with reservation</strong> — the Bundesbank specification calls
+     * <strong>Implemented with reservation</strong> - the Bundesbank specification calls
      * for "method 6, modified" here without documenting what the modification actually
      * is, a known open question flagged in the reference source. Since its own test suite
      * passes with the <em>unmodified</em> {@link #M06} formula, that is what is replicated
@@ -2636,8 +2636,8 @@ public enum GermanCheckDigitMethod {
     /**
      * Method {@code D0}.
      * <p>
-     * No check is performed ({@link CheckDigitResult#NOT_CHECKED}) if digits 1–2
-     * (index 0–1) are {@code 5}, {@code 7}. Otherwise: modulus 11, weights
+     * No check is performed ({@link CheckDigitResult#NOT_CHECKED}) if digits 1-2
+     * (index 0-1) are {@code 5}, {@code 7}. Otherwise: modulus 11, weights
      * {@code {3,9,8,7,6,5,4,3,2}} (same as {@link #M20}), clamp-above-9 rule.
      */
     D0 {
@@ -2656,9 +2656,9 @@ public enum GermanCheckDigitMethod {
      * <p>
      * Rejects if digit 1 (index 0) is {@code 8}. Otherwise builds a fixed 15-element
      * sequence: a constant prefix {@code {4,3,6,3,3,8}}, followed by digit 1 (index 0),
-     * followed by digits 2–9 (index 1–8); each element is multiplied by an alternating
-     * weight ({@code 2,1,2,1,…}, starting at {@code 2}), and the cross sum of each product
-     * is accumulated. Check digit = {@code (10 − sum % 10) % 10} (as in {@link #M00}),
+     * followed by digits 2-9 (index 1-8); each element is multiplied by an alternating
+     * weight ({@code 2,1,2,1,...}, starting at {@code 2}), and the cross sum of each product
+     * is accumulated. Check digit = {@code (10 - sum % 10) % 10} (as in {@link #M00}),
      * compared at index 9.
      */
     D1 {
@@ -2920,7 +2920,7 @@ public enum GermanCheckDigitMethod {
 
     /**
      * Shared digit-substitution table used by {@link #M27}, {@link #M29} and {@link #M69}.
-     * Each row is a 10-entry lookup (index 0–9) mapping an account digit to its
+     * Each row is a 10-entry lookup (index 0-9) mapping an account digit to its
      * transformed value.
      */
     private static final int[][] TRANSFORM_TABLE = {
@@ -2999,8 +2999,8 @@ public enum GermanCheckDigitMethod {
     private static final int ESER_TARGET_REMAINDER = 10;
 
     /**
-     * {@link #C6} prepends one of these 7-digit constants — selected by digit 1 (index 0)
-     * of the account number — to digits 2–9 before running the modulus-10 calculation.
+     * {@link #C6} prepends one of these 7-digit constants - selected by digit 1 (index 0)
+     * of the account number - to digits 2-9 before running the modulus-10 calculation.
      */
     private static final String[] C6_CONSTANTS = {
         "4451970", "4451981", "4451992", "4451993", "4344992",
@@ -3074,12 +3074,12 @@ public enum GermanCheckDigitMethod {
         return sum;
     }
 
-    /** {@code (10 - sum % 10) % 10} — the standard Modulus-10 check digit complement. */
+    /** {@code (10 - sum % 10) % 10} - the standard Modulus-10 check digit complement. */
     private static int mod10Complement(int sum) {
         return (MODULUS_10 - sum % MODULUS_10) % MODULUS_10;
     }
 
-    /** {@code (11 - sum % 11) % 11} — the standard Modulus-11 check digit complement ("11 -> 0" rule). */
+    /** {@code (11 - sum % 11) % 11} - the standard Modulus-11 check digit complement ("11 -> 0" rule). */
     private static int mod11Complement(int sum) {
         return (MODULUS_11 - sum % MODULUS_11) % MODULUS_11;
     }
@@ -3090,12 +3090,12 @@ public enum GermanCheckDigitMethod {
         return remainder > MAX_DIGIT ? 0 : remainder;
     }
 
-    /** {@code (7 - sum % 7) % 7} — the Modulus-7 check digit complement used by a small number of methods. */
+    /** {@code (7 - sum % 7) % 7} - the Modulus-7 check digit complement used by a small number of methods. */
     private static int mod7Complement(int sum) {
         return (MODULUS_7 - sum % MODULUS_7) % MODULUS_7;
     }
 
-    /** {@code (9 - sum % 9) % 9} — the Modulus-9 check digit complement used by {@link #M90}. */
+    /** {@code (9 - sum % 9) % 9} - the Modulus-9 check digit complement used by {@link #M90}. */
     private static int mod9Complement(int sum) {
         return (MODULUS_9 - sum % MODULUS_9) % MODULUS_9;
     }
@@ -3125,11 +3125,11 @@ public enum GermanCheckDigitMethod {
     /**
      * Shared calculation for {@link #M93}, also used directly by {@link #A4}'s Variante 4.
      * <p>
-     * If digits 1–4 (index 0–3) are all {@code 0}, the 5-digit Kundennummer occupies
-     * digits 5–9 (index 4–8) and the check digit is at index 9; otherwise the
-     * Kundennummer occupies digits 1–5 (index 0–4) and the check digit is at index 5.
+     * If digits 1-4 (index 0-3) are all {@code 0}, the 5-digit Kundennummer occupies
+     * digits 5-9 (index 4-8) and the check digit is at index 9; otherwise the
+     * Kundennummer occupies digits 1-5 (index 0-4) and the check digit is at index 5.
      * Modulus 11, weights {@code {6,5,4,3,2}} (same as {@link #M33}), clamp-above-9 rule;
-     * if that fails, retries with modulus 7: {@code (7 − sum % 7) % 7}.
+     * if that fails, retries with modulus 7: {@code (7 - sum % 7) % 7}.
      */
     private static CheckDigitResult calculateM93(char[] account) {
         boolean fallB = digitAt(account, 0) == 0 && digitAt(account, 1) == 0
@@ -3147,7 +3147,7 @@ public enum GermanCheckDigitMethod {
     /**
      * Shared calculation for {@link #C6}: builds a synthetic 15-digit number by
      * prepending a digit-1-dependent 7-digit constant (see {@link #C6_CONSTANTS}) to
-     * digits 2–9 (index 1–8) of the account, then applies the modulus-10 formula used by
+     * digits 2-9 (index 1-8) of the account, then applies the modulus-10 formula used by
      * {@link #M00} (weights {@code {2,1,...,2}}, cross sum) to those 15 digits.
      */
     private static CheckDigitResult calculateC6(char[] account) {

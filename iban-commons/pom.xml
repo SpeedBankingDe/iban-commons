@@ -23,7 +23,7 @@
         <groupId>de.speedbanking</groupId>
         <artifactId>iban-commons-parent</artifactId>
         <version>1.8.15-SNAPSHOT</version>
-        <!-- relativePath omitted → Maven resolves from local repo / reactor -->
+        <!-- relativePath omitted -> Maven resolves from local repo / reactor -->
     </parent>
 
     <artifactId>iban-commons</artifactId>

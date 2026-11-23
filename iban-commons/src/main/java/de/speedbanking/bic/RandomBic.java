@@ -30,8 +30,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * Every generated BIC satisfies all constraints enforced by {@link BicValidator}:
  * <ul>
  *   <li>Length of exactly 8 ({@link Bic#BIC8_LENGTH}) or 11 ({@link Bic#BIC11_LENGTH}) characters</li>
- *   <li>Only uppercase ASCII letters (A–Z) and digits (0–9)</li>
- *   <li>A valid, officially assigned ISO 3166-1 Alpha-2 country code at positions 5–6</li>
+ *   <li>Only uppercase ASCII letters (A-Z) and digits (0-9)</li>
+ *   <li>A valid, officially assigned ISO 3166-1 Alpha-2 country code at positions 5-6</li>
  * </ul>
  * <p>
  * <strong>BIC structure (ISO 9362):</strong>
@@ -62,7 +62,7 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class RandomBic {
 
-    /** Source characters for the Bank Code (positions 1–4): uppercase letters only. */
+    /** Source characters for the Bank Code (positions 1-4): uppercase letters only. */
     private static final String          LETTERS       = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /** Source characters for the Location Code and Branch Code: uppercase letters and digits. */
@@ -80,7 +80,7 @@ public final class RandomBic {
     }
 
     // -------------------------------------------------------------------------
-    // Public API — BIC-8 without explicit Random (uses ThreadLocalRandom)
+    // Public API - BIC-8 without explicit Random (uses ThreadLocalRandom)
     // -------------------------------------------------------------------------
 
     /**
@@ -110,7 +110,7 @@ public final class RandomBic {
     }
 
     // -------------------------------------------------------------------------
-    // Public API — BIC-8 with explicit Random (reproducible / seeded)
+    // Public API - BIC-8 with explicit Random (reproducible / seeded)
     // -------------------------------------------------------------------------
 
     /**
@@ -134,7 +134,7 @@ public final class RandomBic {
      * source of randomness.
      * <p>
      * Passing a seeded {@code Random} (e.g. {@code new Random(42L)}) makes generation
-     * fully reproducible — the same seed always produces the same BIC for the same country.
+     * fully reproducible - the same seed always produces the same BIC for the same country.
      * Parameter {@code random} defaults to {@link ThreadLocalRandom} unless provided.
      *
      * @param countryCode the two-letter ISO 3166-1 Alpha-2 country code (e.g., {@code "DE"}),
@@ -152,7 +152,7 @@ public final class RandomBic {
     }
 
     // -------------------------------------------------------------------------
-    // Public API — BIC-11 without explicit Random (uses ThreadLocalRandom)
+    // Public API - BIC-11 without explicit Random (uses ThreadLocalRandom)
     // -------------------------------------------------------------------------
 
     /**
@@ -182,7 +182,7 @@ public final class RandomBic {
     }
 
     // -------------------------------------------------------------------------
-    // Public API — BIC-11 with explicit Random (reproducible / seeded)
+    // Public API - BIC-11 with explicit Random (reproducible / seeded)
     // -------------------------------------------------------------------------
 
     /**
@@ -206,7 +206,7 @@ public final class RandomBic {
      * source of randomness.
      * <p>
      * Passing a seeded {@code Random} (e.g. {@code new Random(42L)}) makes generation
-     * fully reproducible — the same seed always produces the same BIC for the same country.
+     * fully reproducible - the same seed always produces the same BIC for the same country.
      * Parameter {@code random} defaults to {@link ThreadLocalRandom} unless provided.
      *
      * @param countryCode the two-letter ISO 3166-1 Alpha-2 country code (e.g., {@code "DE"}),
@@ -276,7 +276,7 @@ public final class RandomBic {
     }
 
     /**
-     * Generates a random Bank Code: 4 uppercase letters (A–Z).
+     * Generates a random Bank Code: 4 uppercase letters (A-Z).
      *
      * @param random the {@link Random} instance to use
      * @return a 4-character string containing only uppercase letters
@@ -286,7 +286,7 @@ public final class RandomBic {
     }
 
     /**
-     * Generates a random Location Code: 2 alphanumeric characters (A–Z, 0–9).
+     * Generates a random Location Code: 2 alphanumeric characters (A-Z, 0-9).
      *
      * @param random the {@link Random} instance to use
      * @return a 2-character alphanumeric string
@@ -296,7 +296,7 @@ public final class RandomBic {
     }
 
     /**
-     * Generates a random Branch Code: 3 alphanumeric characters (A–Z, 0–9).
+     * Generates a random Branch Code: 3 alphanumeric characters (A-Z, 0-9).
      *
      * @param random the {@link Random} instance to use
      * @return a 3-character alphanumeric string

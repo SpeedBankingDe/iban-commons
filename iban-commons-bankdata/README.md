@@ -235,7 +235,7 @@ If your use of this module is licensing-sensitive, verify the current terms your
   scoped exception for this module's "Urladung" and fixture needs.
 - **HTTP transport** uses `java.net.HttpURLConnection` exclusively, no new runtime dependency,
   consistent with the zero-dependency philosophy of the rest of the project, including manual
-  single-hop redirect following across protocol changes (`http` → `https`), since
+  single-hop redirect following across protocol changes (`http` -> `https`), since
   `HttpURLConnection`'s built-in redirect handling does not cover that case.
 - **Requests send a real browser `User-Agent`** (and matching `Accept`/`Sec-Fetch-*` headers)
   instead of Java's default. Several sources block or degrade a request that identifies itself as

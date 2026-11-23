@@ -299,7 +299,7 @@ final class IbanTest {
             .filter(IbanRegistry::isDerivedCountry);
     }
 
-    @DisplayName("Valid IBAN structure and components — all countries")
+    @DisplayName("Valid IBAN structure and components - all countries")
     @ParameterizedTest(name = "[{index}] {3}: {0}")
     @CsvSource(delimiter = '|', nullValues = "(null)", value = {
         // ibanInput                       | len| b | cc | fl | cd | bban                          | bankCode  | branch | account                 | ncd| ibanPlusLen
@@ -511,7 +511,7 @@ final class IbanTest {
      *
      * @param countryData the {@link IbanRegistry} entry to test
      */
-    @DisplayName("Invalid IBAN rejected — all countries")
+    @DisplayName("Invalid IBAN rejected - all countries")
     @ParameterizedTest
     @EnumSource(IbanRegistry.class)
     void of_invalidIbanForAllCountries_throwsException(IbanRegistry countryData) {
@@ -606,7 +606,7 @@ final class IbanTest {
 
     /**
      * Verifies that {@link Iban#validate(CharSequence)} and {@link Iban#of(CharSequence)} throw
-     * identical {@link InvalidIbanException}s — same message and same {@code reason} field — so
+     * identical {@link InvalidIbanException}s - same message and same {@code reason} field - so
      * callers that do not need the {@link Iban} instance pay no observational price for using
      * the allocation-free overload.
      */
@@ -1030,7 +1030,7 @@ final class IbanTest {
      * </ul>
      */
     @DisplayName("getCurrency() and getCurrencyCode() return the correct ISO 4217 currency")
-    @ParameterizedTest(name = "[{index}] {0} → {1}")
+    @ParameterizedTest(name = "[{index}] {0} -> {1}")
     @CsvSource(delimiter = '|', value = {
         // ibanInput                      | expectedCurrency
         // Eurozone SEPA
@@ -1048,7 +1048,7 @@ final class IbanTest {
         "PT50000201231234567890154        | EUR",  // Portugal
         "ME25505000012345678951           | EUR",  // Montenegro (EUR without EU)
         "XK051212012345678906             | EUR",  // Kosovo (EUR without EU)
-        // Non-Euro SEPA — own currencies
+        // Non-Euro SEPA - own currencies
         "GB29NWBK60161331926819           | GBP",  // United Kingdom
         "CH9300762011623852957            | CHF",  // Switzerland
         "LI21088100002324013AA            | CHF",  // Liechtenstein (uses CHF)
@@ -1090,7 +1090,7 @@ final class IbanTest {
      * This sweeps all {@link IbanRegistry} entries to ensure no constant is
      * accidentally misconfigured in {@link de.speedbanking.util.Country}.
      */
-    @DisplayName("getCurrencyCode() is consistent with getCurrency().getAlphaCode() — all countries")
+    @DisplayName("getCurrencyCode() is consistent with getCurrency().getAlphaCode() - all countries")
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
     void getCurrencyCode_allCountries_consistentWithGetCurrency(IbanRegistry countryData) {
@@ -1112,7 +1112,7 @@ final class IbanTest {
 
     /**
      * Verifies that {@link Iban#getCurrency()} returns a non-null value for all
-     * countries currently in the registry — none of them correspond to the only
+     * countries currently in the registry - none of them correspond to the only
      * currency-less {@link de.speedbanking.util.Country} entry ({@code AQ}).
      */
     @DisplayName("getCurrency() is non-null for all IbanRegistry entries")

@@ -65,7 +65,7 @@ final class ValidBicTest {
     }
 
     // -------------------------------------------------------------------------
-    // Null / empty → always valid
+    // Null / empty -> always valid
     // -------------------------------------------------------------------------
 
     @DisplayName("null and empty pass without @NotNull/@NotBlank")

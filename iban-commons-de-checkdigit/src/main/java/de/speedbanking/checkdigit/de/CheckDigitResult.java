@@ -21,11 +21,11 @@ import java.util.Objects;
  * Outcome of a {@link GermanCheckDigitMethod} computation.
  * <p>
  * A positive result ({@link #isValid()} {@code == true}) does <em>not</em> mean the
- * account actually exists at the bank — only that the check digit embedded in the
+ * account actually exists at the bank - only that the check digit embedded in the
  * account number is internally consistent with the method used.
  * <p>
  * Some methods (e.g. {@link GermanCheckDigitMethod#M09}, and certain account-number
- * ranges of {@link GermanCheckDigitMethod#M08}) perform no verification at all — for
+ * ranges of {@link GermanCheckDigitMethod#M08}) perform no verification at all - for
  * these, {@link #isChecked()} is {@code false} and {@link #isValid()} is {@code true}
  * by convention, so that callers who only branch on {@link #isValid()} tolerate the
  * account number rather than rejecting it.
@@ -69,7 +69,7 @@ public final class CheckDigitResult {
     }
 
     /**
-     * Whether the account number is consistent with the check digit method — either
+     * Whether the account number is consistent with the check digit method - either
      * because verification passed, or because the method performs no verification
      * (see {@link #isChecked()}).
      *

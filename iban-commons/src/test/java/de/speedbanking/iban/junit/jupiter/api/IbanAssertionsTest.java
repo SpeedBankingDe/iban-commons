@@ -469,13 +469,13 @@ final class IbanAssertionsTest {
             .hasMessage("The IBAN to compare against must not be null");
     }
 
-    @DisplayName("isSepa() - convenience shorthand for isSepa(true) — success path")
+    @DisplayName("isSepa() - convenience shorthand for isSepa(true) - success path")
     @Test
     void isSepa_noArg_success() {
         assertThatIban(VALID_CY).isSepa();
     }
 
-    @DisplayName("isNotSepa() - convenience shorthand for isSepa(false) — success path")
+    @DisplayName("isNotSepa() - convenience shorthand for isSepa(false) - success path")
     @Test
     void isNotSepa_success() {
         // Pakistan (PK) is not a SEPA country

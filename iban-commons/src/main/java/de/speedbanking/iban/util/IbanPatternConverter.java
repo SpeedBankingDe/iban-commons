@@ -112,7 +112,7 @@ public final class IbanPatternConverter {
     /**
      * Performs the actual, uncached parsing of an already null/empty/whitespace-checked pattern
      * notation string. Extracted from {@link #parseSegments} so that only this pure computation
-     * — not the cheap upfront validation — is memoized in {@link #SEGMENT_CACHE}.
+     * - not the cheap upfront validation - is memoized in {@link #SEGMENT_CACHE}.
      *
      * @param patternNotation the pre-validated IBAN structure pattern string
      * @return the sequential, validated segments

@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * <h2>Example</h2>
  * <pre>{@code
- * // at startup — before any IBAN operation:
+ * // at startup - before any IBAN operation:
  * IbanConfig.configure(IbanConfig.builder()
  *     .allowSpace(true)
  *     .allowLowercase(true)
@@ -66,7 +66,7 @@ public final class IbanConfig {
      * <p>
      * A plain volatile read is an order of magnitude cheaper than an
      * {@link AtomicReference#updateAndGet} CAS loop, so this field allows
-     * {@link #get()} — which is called on every IBAN operation — to bypass
+     * {@link #get()} - which is called on every IBAN operation - to bypass
      * the slow path entirely once the configuration has been frozen.
      * <p>
      * {@code null} means "not yet frozen"; any non-null value is the active,
@@ -175,7 +175,7 @@ public final class IbanConfig {
      * @return the active {@link IbanConfig} instance; never {@code null}
      */
     static IbanConfig get() {
-        // fast path: single volatile read — no CAS, no lambda, no allocation
+        // fast path: single volatile read - no CAS, no lambda, no allocation
         // this is the common case for every IBAN operation after startup
         IbanConfig cfg = activeConfig;
         if (cfg != null) {

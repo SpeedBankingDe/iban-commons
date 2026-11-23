@@ -46,7 +46,7 @@ import java.util.stream.Stream;
  * JUnit 5 annotation that provides a stream of randomly generated IBAN strings
  * for parameterized tests.
  * <p>
- * Each yielded {@link Arguments} instance contains a single randomly generated IBAN string —
+ * Each yielded {@link Arguments} instance contains a single randomly generated IBAN string -
  * valid or intentionally corrupted, depending on {@link #invalidPercentage()}.
  * <p>
  * The pool of countries used for generation can be narrowed via {@link #value()} or
@@ -80,7 +80,7 @@ public @interface RandomIbanSource {
      * Shorthand for {@link #includeCountries()}.
      * <p>
      * Specifying countries here is equivalent to specifying them in {@link #includeCountries()}.
-     * Both attributes must not be used simultaneously — doing so causes an
+     * Both attributes must not be used simultaneously - doing so causes an
      * {@link IllegalArgumentException} at test discovery time.
      * <p>
      * Example: {@code @RandomIbanSource({IbanRegistry.DE, IbanRegistry.AT})}
@@ -164,7 +164,7 @@ public @interface RandomIbanSource {
          * @return a stream of {@link Arguments}, each wrapping one IBAN string;
          *         the stream has exactly {@link #count()} elements
          * @throws IllegalArgumentException if {@link #count()} is not positive,
-         *                                  or {@link #invalidPercentage()} is outside 0–100,
+         *                                  or {@link #invalidPercentage()} is outside 0-100,
          *                                  or {@link #value()} and {@link #includeCountries()} are both non-empty,
          *                                  or if the country pool is empty after filtering
          */
@@ -191,7 +191,7 @@ public @interface RandomIbanSource {
          * @return a non-empty list of countries eligible for IBAN generation
          * @throws IllegalArgumentException if {@link #value()} and {@link #includeCountries()} are both non-empty,
          *                                  or {@link #count()} is not positive,
-         *                                  or {@link #invalidPercentage()} is outside 0–100,
+         *                                  or {@link #invalidPercentage()} is outside 0-100,
          *                                  or the include and exclude lists overlap,
          *                                  or if the resulting pool is empty
          */
@@ -200,7 +200,7 @@ public @interface RandomIbanSource {
             if (config.count() <= 0) {
                 throwIllegalArgument("count must be positive, but was " + config.count());
             } else if (config.invalidPercentage() < 0 || config.invalidPercentage() > 100) {
-                throwIllegalArgument("invalidPercentage must be 0–100, but was " + config.invalidPercentage());
+                throwIllegalArgument("invalidPercentage must be 0-100, but was " + config.invalidPercentage());
             }
 
             Set<IbanRegistry> valueCountries = toCountrySet(config.value());
@@ -279,7 +279,7 @@ public @interface RandomIbanSource {
          * {@link IbanValidator#isValid(String)}.
          *
          * @param countries         non-empty list of eligible countries
-         * @param invalidPercentage percentage chance (0–100) that the IBAN will be corrupted
+         * @param invalidPercentage percentage chance (0-100) that the IBAN will be corrupted
          * @param random            the random source to use for country selection and corruption
          * @return a valid or deliberately corrupted IBAN string
          */

@@ -24,16 +24,16 @@ package de.speedbanking.util;
  * <p>
  * Supranational / regional currencies are included as first-class members:
  * <ul>
- *   <li>{@link #EUR} — Euro (Eurozone + territories)</li>
- *   <li>{@link #XAF} — CFA Franc BEAC (Central Africa)</li>
- *   <li>{@link #XOF} — CFA Franc BCEAO (West Africa)</li>
- *   <li>{@link #XCD} — East Caribbean Dollar</li>
- *   <li>{@link #XPF} — CFP Franc (Pacific territories)</li>
+ *   <li>{@link #EUR} - Euro (Eurozone + territories)</li>
+ *   <li>{@link #XAF} - CFA Franc BEAC (Central Africa)</li>
+ *   <li>{@link #XOF} - CFA Franc BCEAO (West Africa)</li>
+ *   <li>{@link #XCD} - East Caribbean Dollar</li>
+ *   <li>{@link #XPF} - CFP Franc (Pacific territories)</li>
  * </ul>
  * <p>
  * The enum covers exactly the currency codes assigned in {@link Country}; it does
  * <em>not</em> claim to be a complete ISO 4217 registry. In particular, precious-metal
- * codes ({@code XAU}, {@code XAG}, …) and the testing code {@code XTS} are absent.
+ * codes ({@code XAU}, {@code XAG}, ...) and the testing code {@code XTS} are absent.
  * <p>
  * <strong>Note on the name {@code Currency}:</strong> {@link java.util.Currency} is a
  * class in the standard library. Within this package there is no conflict; code that
@@ -49,108 +49,108 @@ public enum Currency {
     // -------------------------------------------------------------------------
     // A
     // -------------------------------------------------------------------------
-    /** UAE Dirham — United Arab Emirates */
+    /** UAE Dirham - United Arab Emirates */
     AED("UAE Dirham",                           784),
-    /** Afghan Afghani — Afghanistan */
+    /** Afghan Afghani - Afghanistan */
     AFN("Afghan Afghani",                       971),
-    /** Albanian Lek — Albania */
+    /** Albanian Lek - Albania */
     ALL("Albanian Lek",                           8),
-    /** Armenian Dram — Armenia */
+    /** Armenian Dram - Armenia */
     AMD("Armenian Dram",                         51),
-    /** Netherlands Antillean Guilder — Curaçao, Sint Maarten */
+    /** Netherlands Antillean Guilder - Curaçao, Sint Maarten */
     ANG("Netherlands Antillean Guilder",        532),
-    /** Angolan Kwanza — Angola */
+    /** Angolan Kwanza - Angola */
     AOA("Angolan Kwanza",                       973),
-    /** Argentine Peso — Argentina */
+    /** Argentine Peso - Argentina */
     ARS("Argentine Peso",                        32),
-    /** Australian Dollar — Australia and territories */
+    /** Australian Dollar - Australia and territories */
     AUD("Australian Dollar",                     36),
-    /** Aruban Florin — Aruba */
+    /** Aruban Florin - Aruba */
     AWG("Aruban Florin",                        533),
-    /** Azerbaijani Manat — Azerbaijan */
+    /** Azerbaijani Manat - Azerbaijan */
     AZN("Azerbaijani Manat",                    944),
 
     // -------------------------------------------------------------------------
     // B
     // -------------------------------------------------------------------------
-    /** Bosnia-Herzegovina Convertible Mark — Bosnia and Herzegovina */
+    /** Bosnia-Herzegovina Convertible Mark - Bosnia and Herzegovina */
     BAM("Bosnia-Herzegovina Convertible Mark",  977),
-    /** Barbadian Dollar — Barbados */
+    /** Barbadian Dollar - Barbados */
     BBD("Barbadian Dollar",                      52),
-    /** Bangladeshi Taka — Bangladesh */
+    /** Bangladeshi Taka - Bangladesh */
     BDT("Bangladeshi Taka",                      50),
-    /** Bulgarian Lev — Bulgaria */
+    /** Bulgarian Lev - Bulgaria */
     BGN("Bulgarian Lev",                        975),
-    /** Bahraini Dinar — Bahrain */
+    /** Bahraini Dinar - Bahrain */
     BHD("Bahraini Dinar",                        48),
-    /** Burundian Franc — Burundi */
+    /** Burundian Franc - Burundi */
     BIF("Burundian Franc",                      108),
-    /** Bermudian Dollar — Bermuda */
+    /** Bermudian Dollar - Bermuda */
     BMD("Bermudian Dollar",                      60),
-    /** Brunei Dollar — Brunei Darussalam */
+    /** Brunei Dollar - Brunei Darussalam */
     BND("Brunei Dollar",                         96),
-    /** Bolivian Boliviano — Bolivia */
+    /** Bolivian Boliviano - Bolivia */
     BOB("Bolivian Boliviano",                    68),
-    /** Brazilian Real — Brazil */
+    /** Brazilian Real - Brazil */
     BRL("Brazilian Real",                       986),
-    /** Bahamian Dollar — Bahamas */
+    /** Bahamian Dollar - Bahamas */
     BSD("Bahamian Dollar",                       44),
-    /** Bhutanese Ngultrum — Bhutan */
+    /** Bhutanese Ngultrum - Bhutan */
     BTN("Bhutanese Ngultrum",                    64),
-    /** Botswana Pula — Botswana */
+    /** Botswana Pula - Botswana */
     BWP("Botswana Pula",                         72),
-    /** Belarusian Ruble — Belarus (redenominated 2016) */
+    /** Belarusian Ruble - Belarus (redenominated 2016) */
     BYN("Belarusian Ruble",                     933),
-    /** Belize Dollar — Belize */
+    /** Belize Dollar - Belize */
     BZD("Belize Dollar",                         84),
 
     // -------------------------------------------------------------------------
     // C
     // -------------------------------------------------------------------------
-    /** Canadian Dollar — Canada */
+    /** Canadian Dollar - Canada */
     CAD("Canadian Dollar",                      124),
-    /** Congolese Franc — Congo, Democratic Republic of the */
+    /** Congolese Franc - Congo, Democratic Republic of the */
     CDF("Congolese Franc",                      976),
-    /** Swiss Franc — Switzerland, Liechtenstein */
+    /** Swiss Franc - Switzerland, Liechtenstein */
     CHF("Swiss Franc",                          756),
-    /** Chilean Peso — Chile */
+    /** Chilean Peso - Chile */
     CLP("Chilean Peso",                         152),
-    /** Chinese Yuan Renminbi — China */
+    /** Chinese Yuan Renminbi - China */
     CNY("Chinese Yuan Renminbi",                156),
-    /** Colombian Peso — Colombia */
+    /** Colombian Peso - Colombia */
     COP("Colombian Peso",                       170),
-    /** Costa Rican Colón — Costa Rica */
+    /** Costa Rican Colón - Costa Rica */
     CRC("Costa Rican Colón",                    188),
-    /** Cuban Peso — Cuba */
+    /** Cuban Peso - Cuba */
     CUP("Cuban Peso",                           192),
-    /** Cape Verdean Escudo — Cabo Verde */
+    /** Cape Verdean Escudo - Cabo Verde */
     CVE("Cape Verdean Escudo",                  132),
-    /** Czech Koruna — Czechia */
+    /** Czech Koruna - Czechia */
     CZK("Czech Koruna",                         203),
 
     // -------------------------------------------------------------------------
     // D
     // -------------------------------------------------------------------------
-    /** Djiboutian Franc — Djibouti */
+    /** Djiboutian Franc - Djibouti */
     DJF("Djiboutian Franc",                     262),
-    /** Danish Krone — Denmark, Faroe Islands, Greenland */
+    /** Danish Krone - Denmark, Faroe Islands, Greenland */
     DKK("Danish Krone",                         208),
-    /** Dominican Peso — Dominican Republic */
+    /** Dominican Peso - Dominican Republic */
     DOP("Dominican Peso",                       214),
-    /** Algerian Dinar — Algeria */
+    /** Algerian Dinar - Algeria */
     DZD("Algerian Dinar",                        12),
 
     // -------------------------------------------------------------------------
     // E
     // -------------------------------------------------------------------------
-    /** Egyptian Pound — Egypt */
+    /** Egyptian Pound - Egypt */
     EGP("Egyptian Pound",                       818),
-    /** Eritrean Nakfa — Eritrea */
+    /** Eritrean Nakfa - Eritrea */
     ERN("Eritrean Nakfa",                       232),
-    /** Ethiopian Birr — Ethiopia */
+    /** Ethiopian Birr - Ethiopia */
     ETB("Ethiopian Birr",                       230),
     /**
-     * Euro — Eurozone member states and territories.
+     * Euro - Eurozone member states and territories.
      * <p>
      * Countries: AD, AT, AX, BE, BL, CY, DE, EE, ES, FI, FR, GF, GP, GR, HR,
      * IE, IT, LT, LU, LV, MC, ME, MF, MQ, MT, NL, PM, PT, RE, SI, SK, SM,
@@ -161,307 +161,307 @@ public enum Currency {
     // -------------------------------------------------------------------------
     // F
     // -------------------------------------------------------------------------
-    /** Fijian Dollar — Fiji */
+    /** Fijian Dollar - Fiji */
     FJD("Fijian Dollar",                        242),
-    /** Falkland Islands Pound — Falkland Islands */
+    /** Falkland Islands Pound - Falkland Islands */
     FKP("Falkland Islands Pound",               238),
 
     // -------------------------------------------------------------------------
     // G
     // -------------------------------------------------------------------------
-    /** British Pound Sterling — United Kingdom and Crown Dependencies */
+    /** British Pound Sterling - United Kingdom and Crown Dependencies */
     GBP("British Pound Sterling",               826),
-    /** Georgian Lari — Georgia */
+    /** Georgian Lari - Georgia */
     GEL("Georgian Lari",                        981),
-    /** Ghanaian Cedi — Ghana */
+    /** Ghanaian Cedi - Ghana */
     GHS("Ghanaian Cedi",                        936),
-    /** Gibraltar Pound — Gibraltar */
+    /** Gibraltar Pound - Gibraltar */
     GIP("Gibraltar Pound",                      292),
-    /** Gambian Dalasi — Gambia */
+    /** Gambian Dalasi - Gambia */
     GMD("Gambian Dalasi",                       270),
-    /** Guinean Franc — Guinea */
+    /** Guinean Franc - Guinea */
     GNF("Guinean Franc",                        324),
-    /** Guatemalan Quetzal — Guatemala */
+    /** Guatemalan Quetzal - Guatemala */
     GTQ("Guatemalan Quetzal",                   320),
-    /** Guyanese Dollar — Guyana */
+    /** Guyanese Dollar - Guyana */
     GYD("Guyanese Dollar",                      328),
 
     // -------------------------------------------------------------------------
     // H
     // -------------------------------------------------------------------------
-    /** Hong Kong Dollar — Hong Kong */
+    /** Hong Kong Dollar - Hong Kong */
     HKD("Hong Kong Dollar",                     344),
-    /** Honduran Lempira — Honduras */
+    /** Honduran Lempira - Honduras */
     HNL("Honduran Lempira",                     340),
-    /** Haitian Gourde — Haiti */
+    /** Haitian Gourde - Haiti */
     HTG("Haitian Gourde",                       332),
-    /** Hungarian Forint — Hungary */
+    /** Hungarian Forint - Hungary */
     HUF("Hungarian Forint",                     348),
 
     // -------------------------------------------------------------------------
     // I
     // -------------------------------------------------------------------------
-    /** Indonesian Rupiah — Indonesia */
+    /** Indonesian Rupiah - Indonesia */
     IDR("Indonesian Rupiah",                    360),
-    /** Israeli New Shekel — Israel, Palestine */
+    /** Israeli New Shekel - Israel, Palestine */
     ILS("Israeli New Shekel",                   376),
-    /** Indian Rupee — India */
+    /** Indian Rupee - India */
     INR("Indian Rupee",                         356),
-    /** Iraqi Dinar — Iraq */
+    /** Iraqi Dinar - Iraq */
     IQD("Iraqi Dinar",                          368),
-    /** Iranian Rial — Iran */
+    /** Iranian Rial - Iran */
     IRR("Iranian Rial",                         364),
-    /** Icelandic Króna — Iceland */
+    /** Icelandic Króna - Iceland */
     ISK("Icelandic Króna",                      352),
 
     // -------------------------------------------------------------------------
     // J
     // -------------------------------------------------------------------------
-    /** Jamaican Dollar — Jamaica */
+    /** Jamaican Dollar - Jamaica */
     JMD("Jamaican Dollar",                      388),
-    /** Jordanian Dinar — Jordan */
+    /** Jordanian Dinar - Jordan */
     JOD("Jordanian Dinar",                      400),
-    /** Japanese Yen — Japan */
+    /** Japanese Yen - Japan */
     JPY("Japanese Yen",                         392),
 
     // -------------------------------------------------------------------------
     // K
     // -------------------------------------------------------------------------
-    /** Kenyan Shilling — Kenya */
+    /** Kenyan Shilling - Kenya */
     KES("Kenyan Shilling",                      404),
-    /** Kyrgyzstani Som — Kyrgyzstan */
+    /** Kyrgyzstani Som - Kyrgyzstan */
     KGS("Kyrgyzstani Som",                      417),
-    /** Cambodian Riel — Cambodia */
+    /** Cambodian Riel - Cambodia */
     KHR("Cambodian Riel",                       116),
-    /** Comorian Franc — Comoros */
+    /** Comorian Franc - Comoros */
     KMF("Comorian Franc",                       174),
-    /** North Korean Won — Korea, Democratic People's Republic of */
+    /** North Korean Won - Korea, Democratic People's Republic of */
     KPW("North Korean Won",                     408),
-    /** South Korean Won — Korea, Republic of */
+    /** South Korean Won - Korea, Republic of */
     KRW("South Korean Won",                     410),
-    /** Kuwaiti Dinar — Kuwait */
+    /** Kuwaiti Dinar - Kuwait */
     KWD("Kuwaiti Dinar",                        414),
-    /** Cayman Islands Dollar — Cayman Islands */
+    /** Cayman Islands Dollar - Cayman Islands */
     KYD("Cayman Islands Dollar",                136),
-    /** Kazakhstani Tenge — Kazakhstan */
+    /** Kazakhstani Tenge - Kazakhstan */
     KZT("Kazakhstani Tenge",                    398),
 
     // -------------------------------------------------------------------------
     // L
     // -------------------------------------------------------------------------
-    /** Laotian Kip — Lao PDR */
+    /** Laotian Kip - Lao PDR */
     LAK("Laotian Kip",                          418),
-    /** Lebanese Pound — Lebanon */
+    /** Lebanese Pound - Lebanon */
     LBP("Lebanese Pound",                       422),
-    /** Sri Lankan Rupee — Sri Lanka */
+    /** Sri Lankan Rupee - Sri Lanka */
     LKR("Sri Lankan Rupee",                     144),
-    /** Liberian Dollar — Liberia */
+    /** Liberian Dollar - Liberia */
     LRD("Liberian Dollar",                      430),
-    /** Lesotho Loti — Lesotho */
+    /** Lesotho Loti - Lesotho */
     LSL("Lesotho Loti",                         426),
-    /** Libyan Dinar — Libya */
+    /** Libyan Dinar - Libya */
     LYD("Libyan Dinar",                         434),
 
     // -------------------------------------------------------------------------
     // M
     // -------------------------------------------------------------------------
-    /** Moroccan Dirham — Morocco, Western Sahara */
+    /** Moroccan Dirham - Morocco, Western Sahara */
     MAD("Moroccan Dirham",                      504),
-    /** Moldovan Leu — Moldova */
+    /** Moldovan Leu - Moldova */
     MDL("Moldovan Leu",                         498),
-    /** Malagasy Ariary — Madagascar */
+    /** Malagasy Ariary - Madagascar */
     MGA("Malagasy Ariary",                      969),
-    /** Macedonian Denar — North Macedonia */
+    /** Macedonian Denar - North Macedonia */
     MKD("Macedonian Denar",                     807),
-    /** Myanmar Kyat — Myanmar */
+    /** Myanmar Kyat - Myanmar */
     MMK("Myanmar Kyat",                         104),
-    /** Mongolian Tögrög — Mongolia */
+    /** Mongolian Tögrög - Mongolia */
     MNT("Mongolian Tögrög",                     496),
-    /** Macanese Pataca — Macao */
+    /** Macanese Pataca - Macao */
     MOP("Macanese Pataca",                      446),
-    /** Mauritanian Ouguiya — Mauritania (new, since 2018) */
+    /** Mauritanian Ouguiya - Mauritania (new, since 2018) */
     MRU("Mauritanian Ouguiya",                  929),
-    /** Mauritian Rupee — Mauritius */
+    /** Mauritian Rupee - Mauritius */
     MUR("Mauritian Rupee",                      480),
-    /** Maldivian Rufiyaa — Maldives */
+    /** Maldivian Rufiyaa - Maldives */
     MVR("Maldivian Rufiyaa",                    462),
-    /** Malawian Kwacha — Malawi */
+    /** Malawian Kwacha - Malawi */
     MWK("Malawian Kwacha",                      454),
-    /** Mexican Peso — Mexico */
+    /** Mexican Peso - Mexico */
     MXN("Mexican Peso",                         484),
-    /** Malaysian Ringgit — Malaysia */
+    /** Malaysian Ringgit - Malaysia */
     MYR("Malaysian Ringgit",                    458),
-    /** Mozambican Metical — Mozambique */
+    /** Mozambican Metical - Mozambique */
     MZN("Mozambican Metical",                   943),
 
     // -------------------------------------------------------------------------
     // N
     // -------------------------------------------------------------------------
-    /** Namibian Dollar — Namibia */
+    /** Namibian Dollar - Namibia */
     NAD("Namibian Dollar",                      516),
-    /** Nigerian Naira — Nigeria */
+    /** Nigerian Naira - Nigeria */
     NGN("Nigerian Naira",                       566),
-    /** Nicaraguan Córdoba — Nicaragua */
+    /** Nicaraguan Córdoba - Nicaragua */
     NIO("Nicaraguan Córdoba",                   558),
-    /** Norwegian Krone — Norway, Bouvet Island, Svalbard and Jan Mayen */
+    /** Norwegian Krone - Norway, Bouvet Island, Svalbard and Jan Mayen */
     NOK("Norwegian Krone",                      578),
-    /** Nepalese Rupee — Nepal */
+    /** Nepalese Rupee - Nepal */
     NPR("Nepalese Rupee",                       524),
-    /** New Zealand Dollar — New Zealand and territories */
+    /** New Zealand Dollar - New Zealand and territories */
     NZD("New Zealand Dollar",                   554),
 
     // -------------------------------------------------------------------------
     // O
     // -------------------------------------------------------------------------
-    /** Omani Rial — Oman */
+    /** Omani Rial - Oman */
     OMR("Omani Rial",                           512),
 
     // -------------------------------------------------------------------------
     // P
     // -------------------------------------------------------------------------
-    /** Peruvian Sol — Peru */
+    /** Peruvian Sol - Peru */
     PEN("Peruvian Sol",                         604),
-    /** Papua New Guinean Kina — Papua New Guinea */
+    /** Papua New Guinean Kina - Papua New Guinea */
     PGK("Papua New Guinean Kina",               598),
-    /** Philippine Peso — Philippines */
+    /** Philippine Peso - Philippines */
     PHP("Philippine Peso",                      608),
-    /** Pakistani Rupee — Pakistan */
+    /** Pakistani Rupee - Pakistan */
     PKR("Pakistani Rupee",                      586),
-    /** Polish Złoty — Poland */
+    /** Polish Złoty - Poland */
     PLN("Polish Złoty",                         985),
-    /** Paraguayan Guaraní — Paraguay */
+    /** Paraguayan Guaraní - Paraguay */
     PYG("Paraguayan Guaraní",                   600),
 
     // -------------------------------------------------------------------------
     // Q
     // -------------------------------------------------------------------------
-    /** Qatari Riyal — Qatar */
+    /** Qatari Riyal - Qatar */
     QAR("Qatari Riyal",                         634),
 
     // -------------------------------------------------------------------------
     // R
     // -------------------------------------------------------------------------
-    /** Romanian Leu — Romania */
+    /** Romanian Leu - Romania */
     RON("Romanian Leu",                         946),
-    /** Serbian Dinar — Serbia */
+    /** Serbian Dinar - Serbia */
     RSD("Serbian Dinar",                        941),
-    /** Russian Ruble — Russian Federation */
+    /** Russian Ruble - Russian Federation */
     RUB("Russian Ruble",                        643),
-    /** Rwandan Franc — Rwanda */
+    /** Rwandan Franc - Rwanda */
     RWF("Rwandan Franc",                        646),
 
     // -------------------------------------------------------------------------
     // S
     // -------------------------------------------------------------------------
-    /** Saudi Riyal — Saudi Arabia */
+    /** Saudi Riyal - Saudi Arabia */
     SAR("Saudi Riyal",                          682),
-    /** Solomon Islands Dollar — Solomon Islands */
+    /** Solomon Islands Dollar - Solomon Islands */
     SBD("Solomon Islands Dollar",                90),
-    /** Seychellois Rupee — Seychelles */
+    /** Seychellois Rupee - Seychelles */
     SCR("Seychellois Rupee",                    690),
-    /** Sudanese Pound — Sudan */
+    /** Sudanese Pound - Sudan */
     SDG("Sudanese Pound",                       938),
-    /** Swedish Krona — Sweden */
+    /** Swedish Krona - Sweden */
     SEK("Swedish Krona",                        752),
-    /** Singapore Dollar — Singapore */
+    /** Singapore Dollar - Singapore */
     SGD("Singapore Dollar",                     702),
-    /** Saint Helenian Pound — Saint Helena, Ascension and Tristan da Cunha */
+    /** Saint Helenian Pound - Saint Helena, Ascension and Tristan da Cunha */
     SHP("Saint Helenian Pound",                 654),
-    /** Sierra Leonean Leone — Sierra Leone (redenominated 2022) */
+    /** Sierra Leonean Leone - Sierra Leone (redenominated 2022) */
     SLE("Sierra Leonean Leone",                 925),
-    /** Somali Shilling — Somalia */
+    /** Somali Shilling - Somalia */
     SOS("Somali Shilling",                      706),
-    /** Surinamese Dollar — Suriname */
+    /** Surinamese Dollar - Suriname */
     SRD("Surinamese Dollar",                    968),
-    /** South Sudanese Pound — South Sudan */
+    /** South Sudanese Pound - South Sudan */
     SSP("South Sudanese Pound",                 728),
-    /** São Tomé and Príncipe Dobra — São Tomé and Príncipe */
+    /** São Tomé and Príncipe Dobra - São Tomé and Príncipe */
     STN("São Tomé and Príncipe Dobra",          930),
-    /** Syrian Pound — Syrian Arab Republic */
+    /** Syrian Pound - Syrian Arab Republic */
     SYP("Syrian Pound",                         760),
-    /** Swazi Lilangeni — Eswatini */
+    /** Swazi Lilangeni - Eswatini */
     SZL("Swazi Lilangeni",                      748),
 
     // -------------------------------------------------------------------------
     // T
     // -------------------------------------------------------------------------
-    /** Thai Baht — Thailand */
+    /** Thai Baht - Thailand */
     THB("Thai Baht",                            764),
-    /** Tajikistani Somoni — Tajikistan */
+    /** Tajikistani Somoni - Tajikistan */
     TJS("Tajikistani Somoni",                   972),
-    /** Turkmenistani Manat — Turkmenistan */
+    /** Turkmenistani Manat - Turkmenistan */
     TMT("Turkmenistani Manat",                  934),
-    /** Tunisian Dinar — Tunisia */
+    /** Tunisian Dinar - Tunisia */
     TND("Tunisian Dinar",                       788),
-    /** Tongan Paʻanga — Tonga */
+    /** Tongan Paʻanga - Tonga */
     TOP("Tongan Paʻanga",                       776),
-    /** Turkish Lira — Türkiye */
+    /** Turkish Lira - Türkiye */
     TRY("Turkish Lira",                         949),
-    /** Trinidad and Tobago Dollar — Trinidad and Tobago */
+    /** Trinidad and Tobago Dollar - Trinidad and Tobago */
     TTD("Trinidad and Tobago Dollar",           780),
-    /** New Taiwan Dollar — Taiwan */
+    /** New Taiwan Dollar - Taiwan */
     TWD("New Taiwan Dollar",                    901),
-    /** Tanzanian Shilling — Tanzania */
+    /** Tanzanian Shilling - Tanzania */
     TZS("Tanzanian Shilling",                   834),
 
     // -------------------------------------------------------------------------
     // U
     // -------------------------------------------------------------------------
-    /** Ukrainian Hryvnia — Ukraine */
+    /** Ukrainian Hryvnia - Ukraine */
     UAH("Ukrainian Hryvnia",                    980),
-    /** Ugandan Shilling — Uganda */
+    /** Ugandan Shilling - Uganda */
     UGX("Ugandan Shilling",                     800),
     /**
-     * US Dollar — United States and territories.
+     * US Dollar - United States and territories.
      * <p>
      * Also used as legal tender in: AS, BQ, EC, FM, GU, IO, MH, MP, PA, PR, SV,
      * TC, TL, UM, VG, VI.
      */
     USD("US Dollar",                            840),
-    /** Uruguayan Peso — Uruguay */
+    /** Uruguayan Peso - Uruguay */
     UYU("Uruguayan Peso",                       858),
-    /** Uzbekistani Som — Uzbekistan */
+    /** Uzbekistani Som - Uzbekistan */
     UZS("Uzbekistani Som",                      860),
 
     // -------------------------------------------------------------------------
     // V
     // -------------------------------------------------------------------------
-    /** Venezuelan Bolívar Soberano — Venezuela (since 2018) */
+    /** Venezuelan Bolívar Soberano - Venezuela (since 2018) */
     VES("Venezuelan Bolívar Soberano",          928),
-    /** Vietnamese Đồng — Viet Nam */
+    /** Vietnamese Đồng - Viet Nam */
     VND("Vietnamese Đồng",                      704),
-    /** Vanuatu Vatu — Vanuatu */
+    /** Vanuatu Vatu - Vanuatu */
     VUV("Vanuatu Vatu",                         548),
 
     // -------------------------------------------------------------------------
     // W
     // -------------------------------------------------------------------------
-    /** Samoan Tālā — Samoa */
+    /** Samoan Tālā - Samoa */
     WST("Samoan Tālā",                          882),
 
     // -------------------------------------------------------------------------
-    // X — supranational / regional currencies
+    // X - supranational / regional currencies
     // -------------------------------------------------------------------------
     /**
-     * CFA Franc BEAC — Central African Economic and Monetary Community.
+     * CFA Franc BEAC - Central African Economic and Monetary Community.
      * <p>
      * Countries: CF, CG, CM, GA, GQ, TD.
      */
     XAF("CFA Franc BEAC",                       950),
     /**
-     * East Caribbean Dollar — Organisation of Eastern Caribbean States.
+     * East Caribbean Dollar - Organisation of Eastern Caribbean States.
      * <p>
      * Countries: AG, AI, DM, GD, KN, LC, MS, VC.
      */
     XCD("East Caribbean Dollar",                951),
     /**
-     * CFA Franc BCEAO — West African Economic and Monetary Union.
+     * CFA Franc BCEAO - West African Economic and Monetary Union.
      * <p>
      * Countries: BF, BJ, CI, GW, ML, NE, SN, TG.
      */
     XOF("CFA Franc BCEAO",                      952),
     /**
-     * CFP Franc — French Pacific Territories.
+     * CFP Franc - French Pacific Territories.
      * <p>
      * Countries: NC, PF, WF.
      */
@@ -470,17 +470,17 @@ public enum Currency {
     // -------------------------------------------------------------------------
     // Y
     // -------------------------------------------------------------------------
-    /** Yemeni Rial — Yemen */
+    /** Yemeni Rial - Yemen */
     YER("Yemeni Rial",                          886),
 
     // -------------------------------------------------------------------------
     // Z
     // -------------------------------------------------------------------------
-    /** South African Rand — South Africa */
+    /** South African Rand - South Africa */
     ZAR("South African Rand",                   710),
-    /** Zambian Kwacha — Zambia */
+    /** Zambian Kwacha - Zambia */
     ZMW("Zambian Kwacha",                       967),
-    /** Zimbabwean Gold — Zimbabwe */
+    /** Zimbabwean Gold - Zimbabwe */
     ZWG("Zimbabwean Gold",                      932);
 
     // -------------------------------------------------------------------------
@@ -509,7 +509,7 @@ public enum Currency {
     /**
      * Returns the three-letter ISO 4217 alphabetic currency code.
      * <p>
-     * Identical to {@link #name()} — provided for symmetry with {@link #getNumericCode()}.
+     * Identical to {@link #name()} - provided for symmetry with {@link #getNumericCode()}.
      *
      * @return the alphabetic code (e.g., {@code "EUR"}, {@code "GBP"})
      */

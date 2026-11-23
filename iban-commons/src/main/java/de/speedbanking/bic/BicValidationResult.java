@@ -19,7 +19,7 @@ package de.speedbanking.bic;
  * An immutable container that holds the result of a BIC validation attempt.
  * <p>
  * The object contains either the validated BIC (on success), or a
- * {@link BicValidationError} (on failure) — never both, never neither.
+ * {@link BicValidationError} (on failure) - never both, never neither.
  * <p>
  * Intentionally avoids {@link java.util.Optional} to keep the internal validation
  * path allocation-free on the failure side.

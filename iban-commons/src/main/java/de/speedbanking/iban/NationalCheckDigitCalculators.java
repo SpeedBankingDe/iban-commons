@@ -67,7 +67,7 @@ final class NationalCheckDigitCalculators {
     private static final int MODULO_BASE              = 97;
 
     /**
-     * Magic constant for the MOD 97-10 NCD formula: {@code NCD = 98 − remainder}.
+     * Magic constant for the MOD 97-10 NCD formula: {@code NCD = 98 - remainder}.
      * Equals {@code MODULO_BASE + 1}.
      */
     private static final int CHECK_DIGIT_MAGIC_NUMBER = 98;
@@ -217,7 +217,7 @@ final class NationalCheckDigitCalculators {
 
     /**
      * Returns a character array containing the two ASCII digit characters
-     * of {@code value}, zero-padded (e.g. {@code 7} → {@code "07"}).
+     * of {@code value}, zero-padded (e.g. {@code 7} -> {@code "07"}).
      * <p>
      * This implementation uses a static cache to avoid allocations.
      *
@@ -262,7 +262,7 @@ final class NationalCheckDigitCalculators {
      * <p>
      * <strong>Algorithm:</strong>
      * Weighted MOD 10 applied to the 7-digit bank/branch prefix.
-     * Weights: {@code {9, 7, 3, 1, 9, 7, 3}} (cyclic). Result: {@code (10 − sum % 10) % 10}.
+     * Weights: {@code {9, 7, 3, 1, 9, 7, 3}} (cyclic). Result: {@code (10 - sum % 10) % 10}.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
@@ -283,7 +283,7 @@ final class NationalCheckDigitCalculators {
      * <p>
      * <strong>Algorithm:</strong>
      * ISO 7064 MOD 97-10 variant. The NCD field is masked with {@code "00"}, then
-     * {@code mod97} is computed over the BBAN prefix. NCD = {@code 98 − remainder},
+     * {@code mod97} is computed over the BBAN prefix. NCD = {@code 98 - remainder},
      * with {@code 0} treated as {@code 98} to avoid a zero check digit.
      * <p>
      * To avoid unnecessary heap allocation, the masked BBAN is presented to
@@ -329,7 +329,7 @@ final class NationalCheckDigitCalculators {
      * <strong>Algorithm:</strong>
      * MOD 97 applied to the 10-digit prefix (bank code + account number).
      * NCD = remainder, except remainder {@code 0} yields NCD = {@code 97}.
-     * Result range: {@code 01–97}.
+     * Result range: {@code 01-97}.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
@@ -348,7 +348,7 @@ final class NationalCheckDigitCalculators {
      * <p>
      * <strong>Algorithm:</strong>
      * Weighted MOD 10 with weights {@code {7, 3, 1}} (cyclic, left-to-right) over the BBAN prefix.
-     * Result: {@code (10 − sum % 10) % 10}.
+     * Result: {@code (10 - sum % 10) % 10}.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
@@ -379,7 +379,7 @@ final class NationalCheckDigitCalculators {
      * </ul>
      * <p>
      * <strong>Algorithm:</strong>
-     * Weighted MOD 11. Result = {@code 11 − (sum % 11)}, mapping 11 → 0 and 10 → 1.
+     * Weighted MOD 11. Result = {@code 11 - (sum % 11)}, mapping 11 -> 0 and 10 -> 1.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
@@ -396,8 +396,8 @@ final class NationalCheckDigitCalculators {
     /**
      * Computes a single Spanish DC digit using weighted MOD 11.
      * <p>
-     * Formula: {@code result = 11 − (sum % 11)}, with special cases
-     * {@code 11 → 0} and {@code 10 → 1}.
+     * Formula: {@code result = 11 - (sum % 11)}, with special cases
+     * {@code 11 -> 0} and {@code 10 -> 1}.
      *
      * @param iban         the IBAN character array
      * @param offset       start index in the array
@@ -431,7 +431,7 @@ final class NationalCheckDigitCalculators {
      * Luhn (MOD 10) applied right-to-left over the 13-digit prefix.
      * Weights {@code {2, 1}} alternate from the rightmost digit leftward.
      * Products ≥ 10 are reduced by summing their digits.
-     * NCD = {@code (10 − sum % 10) % 10}.
+     * NCD = {@code (10 - sum % 10) % 10}.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
@@ -463,13 +463,13 @@ final class NationalCheckDigitCalculators {
      * Tunisia (TN) and Djibouti (DJ) use the same formula.
      * <p>
      * <strong>RIB - Clé RIB (Relevé d'Identité Bancaire):</strong>
-     * Two-digit checksum {@code 01–97} at the end of the BBAN.
+     * Two-digit checksum {@code 01-97} at the end of the BBAN.
      * <p>
      * <strong>Algorithm:</strong>
      * MOD 97 with French-specific letter substitution (see {@link #getFrenchRIBValue(char)}).
-     * NCD = {@code 97 − (prefix_remainder × 100 mod 97)}, always in range 01-97.
+     * NCD = {@code 97 - (prefix_remainder × 100 mod 97)}, always in range 01-97.
      * <p>
-     * <strong>Letter mapping</strong> (differs from ISO 7064 A=10, B=11…):
+     * <strong>Letter mapping</strong> (differs from ISO 7064 A=10, B=11...):
      * <table>
      *   <caption>French RIB letter values</caption>
      *   <tr><th>Value</th><th>Letters</th></tr>
@@ -496,8 +496,8 @@ final class NationalCheckDigitCalculators {
     /**
      * Computes MOD 97 using the French RIB letter-to-digit mapping.
      * <p>
-     * Unlike {@link Mod97#calculateRange(CharSequence, int, int)} (ISO 7064, A=10…Z=35),
-     * each letter is mapped to a <em>single</em> digit 1–9 (see {@link #getFrenchRIBValue(char)})
+     * Unlike {@link Mod97#calculateRange(CharSequence, int, int)} (ISO 7064, A=10...Z=35),
+     * each letter is mapped to a <em>single</em> digit 1-9 (see {@link #getFrenchRIBValue(char)})
      * and fed as one digit into the streaming accumulator.
      *
      * @param data   the character array
@@ -514,10 +514,10 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * Maps a character to its French RIB single-digit value (0–9).
+     * Maps a character to its French RIB single-digit value (0-9).
      * <p>
-     * Digits {@code '0'–'9'} map to themselves.
-     * Letters follow a cyclic 1–9 pattern that repeats across A–I, J–R, and S–Z
+     * Digits {@code '0'-'9'} map to themselves.
+     * Letters follow a cyclic 1-9 pattern that repeats across A-I, J-R, and S-Z
      * (with S=2 rather than S=1, skipping 1 in the third group).
      *
      * @param ch the input character (digit or uppercase ASCII letter)
@@ -573,19 +573,19 @@ final class NationalCheckDigitCalculators {
      * processes the remaining 22 characters from index 5 onward.
      * <p>
      * <strong>CIN (Codice di Controllo / Codice Identificativo Numero):</strong>
-     * A single letter {@code 'A'–'Z'} derived from the 22-character BBAN suffix (bank + branch
+     * A single letter {@code 'A'-'Z'} derived from the 22-character BBAN suffix (bank + branch
      * + account).
      * <p>
      * <strong>Algorithm:</strong>
      * <ol>
      *   <li>Assign a numeric value to each character:
      *     <ul>
-     *       <li><em>Odd positions</em> (1st, 3rd, …): use {@link #IT_ODD_MAP}.</li>
-     *       <li><em>Even positions</em> (2nd, 4th, …): digits map to 0–9, letters to 10–35.</li>
+     *       <li><em>Odd positions</em> (1st, 3rd, ...): use {@link #IT_ODD_MAP}.</li>
+     *       <li><em>Even positions</em> (2nd, 4th, ...): digits map to 0-9, letters to 10-35.</li>
      *     </ul>
      *   </li>
      *   <li>Sum all values and take {@code sum % 26}.</li>
-     *   <li>Convert result (0–25) to letter {@code 'A'–'Z'}.</li>
+     *   <li>Convert result (0-25) to letter {@code 'A'-'Z'}.</li>
      * </ol>
      *
      * @param c    the calculator of the country
@@ -612,7 +612,7 @@ final class NationalCheckDigitCalculators {
      * <p>
      * <strong>Algorithm:</strong>
      * Weighted MOD 11 with weights {@code {5, 4, 3, 2, 7, 6, 5, 4, 3, 2}} applied to the
-     * 10-digit prefix (bank + account). NCD = {@code remainder == 0 ? 0 : 11 − remainder}.
+     * 10-digit prefix (bank + account). NCD = {@code remainder == 0 ? 0 : 11 - remainder}.
      * <p>
      * <strong>Special case - result {@code 10}:</strong>
      * A computed result of {@code 10} means the account number is <em>not issuable</em> by
@@ -798,7 +798,7 @@ final class NationalCheckDigitCalculators {
      * This is the standard algorithm used by BA, ME, MK, MZ, PT, RS, SI, TL and XK.
      * <p>
      * <strong>Calculation:</strong>
-     * {@code NCD = 98 − ((prefix_remainder × 100) mod 97)}, where
+     * {@code NCD = 98 - ((prefix_remainder × 100) mod 97)}, where
      * {@code prefix_remainder} is {@code mod97} applied to all BBAN digits before the
      * NCD field.
      * <p>
@@ -820,7 +820,7 @@ final class NationalCheckDigitCalculators {
 
         /**
          * Computes the two-digit NCD using the MOD 97-10 formula:
-         * {@code 98 − ((prefix_remainder × 100) mod 97)}.
+         * {@code 98 - ((prefix_remainder × 100) mod 97)}.
          *
          * @param iban the normalized IBAN
          * @return two-element {@code char[]} with the zero-padded NCD (e.g. {@code {'0', '7'}})

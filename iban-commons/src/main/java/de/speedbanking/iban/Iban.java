@@ -175,7 +175,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * fails, and returning normally if it succeeds.
      * <p>
      * Unlike {@link #parse(CharSequence)}, this method does not allocate an {@code Iban} instance,
-     * making it the preferred choice when the validated value is not needed afterwards — for
+     * making it the preferred choice when the validated value is not needed afterwards - for
      * example in Bean Validation constraints or simple guard checks.
      *
      * @param iban the IBAN character sequence, may include spaces if {@link IbanConfig#isAllowSpace()} is {@code true}

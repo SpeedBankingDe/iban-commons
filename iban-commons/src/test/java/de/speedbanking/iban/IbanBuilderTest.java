@@ -84,7 +84,7 @@ final class IbanBuilderTest {
     @Test
     void requireCountry_derivedCountry_returnsActual() {
         // AX (Åland Islands) ist in der Registry von FI (Finnland) abgeleitet; keines der acht
-        // Custom-Builder-Länder hat aktuell eine abgeleitete Variante — daher hier bewusst
+        // Custom-Builder-Länder hat aktuell eine abgeleitete Variante - daher hier bewusst
         // sachfremde, aber reale Registry-Daten, um genau diesen Zweig zu erreichen.
         assertThat(IbanBuilder.requireCountry(IbanRegistry.AX, IbanRegistry.FI)).isSameAs(IbanRegistry.AX);
     }

@@ -34,21 +34,21 @@ package de.speedbanking.util;
  *       Exceptionally reserved codes used only for specific purposes (e.g., {@code EU}, {@code UN})
  *   </li>
  *   <li>
- *       User-assigned codes ({@code AA}, {@code QM}–{@code QZ}, {@code XA}–{@code XZ},
- *       {@code ZZ}) — <em>except</em> {@code XK} (Kosovo), which is widely adopted
+ *       User-assigned codes ({@code AA}, {@code QM}-{@code QZ}, {@code XA}-{@code XZ},
+ *       {@code ZZ}) - <em>except</em> {@code XK} (Kosovo), which is widely adopted
  *       in banking and payment systems
  *   </li>
  * </ul>
  * <p>
  * Notes on currency assignments:
  * <ul>
- *   <li>{@code AQ} (Antarctica) carries a {@code null} {@link Currency} — no currency is in use.</li>
+ *   <li>{@code AQ} (Antarctica) carries a {@code null} {@link Currency} - no currency is in use.</li>
  *   <li>Overseas territories use the currency of their administering state
- *       (e.g., {@code AX} → {@link Currency#EUR}, {@code GG} → {@link Currency#GBP}).</li>
+ *       (e.g., {@code AX} -> {@link Currency#EUR}, {@code GG} -> {@link Currency#GBP}).</li>
  *   <li>Countries using another nation's currency without formal adoption are listed
- *       with the actually circulating currency (e.g., {@code ME}, {@code XK} → {@link Currency#EUR}).</li>
- *   <li>Currency constants reflect ISO 4217 as of 2025 (e.g., {@code SL} → {@link Currency#SLE},
- *       {@code BY} → {@link Currency#BYN}, {@code VE} → {@link Currency#VES}).</li>
+ *       with the actually circulating currency (e.g., {@code ME}, {@code XK} -> {@link Currency#EUR}).</li>
+ *   <li>Currency constants reflect ISO 4217 as of 2025 (e.g., {@code SL} -> {@link Currency#SLE},
+ *       {@code BY} -> {@link Currency#BYN}, {@code VE} -> {@link Currency#VES}).</li>
  * </ul>
  * <p>
  * For more information, see:
@@ -77,7 +77,7 @@ public enum Country {
     AM("Armenia",                                              Currency.AMD, Continent.ASIA),
     /** Angola */
     AO("Angola",                                               Currency.AOA, Continent.AFRICA),
-    /** Antarctica — no currency in use */
+    /** Antarctica - no currency in use */
     AQ("Antarctica",                                           null,         Continent.ANTARCTICA),
     /** Argentina */
     AR("Argentina",                                            Currency.ARS, Continent.SOUTH_AMERICA),
@@ -750,7 +750,7 @@ public enum Country {
      * The lookup is case-sensitive; only uppercase codes are recognized
      * (e.g., {@code "LT"} matches, {@code "lt"} does not).
      * <p>
-     * Leading or trailing whitespace is <em>not</em> stripped — {@code " DE"} is not
+     * Leading or trailing whitespace is <em>not</em> stripped - {@code " DE"} is not
      * a valid two-letter code and returns {@code null}.
      *
      * @param code the two-letter ISO 3166-1 Alpha-2 code (case-sensitive, e.g., {@code "LV"});
@@ -783,7 +783,7 @@ public enum Country {
      * {@link StringBuffer}, etc.).
      * <p>
      * This method performs an exact lookup against the full list of assigned codes.
-     * Pure format checks (two uppercase letters A–Z) are <em>not</em> sufficient —
+     * Pure format checks (two uppercase letters A-Z) are <em>not</em> sufficient -
      * for example, {@code "AA"} or {@code "ZZ"} pass a format check but are not assigned.
      *
      * @param code the two-letter code to check (case-sensitive); may be any {@link CharSequence}
