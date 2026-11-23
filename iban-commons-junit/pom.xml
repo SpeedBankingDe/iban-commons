@@ -49,6 +49,11 @@
             <artifactId>iban-commons</artifactId>
         </dependency>
 
+        <!--
+            IbanAssertions and BicAssertions live in the test sources of iban-commons, whose own
+            tests use them. Moving them here would need a test dependency from iban-commons on
+            this module, which Maven rejects as a reactor cycle regardless of scope.
+        -->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>iban-commons</artifactId>

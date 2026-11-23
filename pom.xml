@@ -185,21 +185,6 @@
                 <classifier>tests</classifier>
             </dependency>
 
-            <!--
-                iban-commons-junit as test dependency for iban-commons.
-                Using test scope here avoids a circular compile dependency:
-                  iban-commons (compile) -> iban-commons-junit (test-only)
-                  iban-commons-junit (compile) -> iban-commons
-                Maven does not consider test-scoped deps when checking for cycles,
-                so the reactor build order (iban-commons first) is unambiguous.
-            -->
-            <dependency>
-                <groupId>de.speedbanking</groupId>
-                <artifactId>iban-commons-junit</artifactId>
-                <version>${project.version}</version>
-                <scope>test</scope>
-            </dependency>
-
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
