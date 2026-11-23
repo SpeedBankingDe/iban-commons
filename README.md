@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/maven-central/last-update/de.speedbanking/iban-commons?label=Updated&style=flat-square&color=blue" alt="Maven Central Last Update">
   <a href="https://github.com/SpeedBankingDe/iban-commons/stargazers"><img src="https://img.shields.io/github/stars/SpeedBankingDe/iban-commons?logo=github&label=&logoColor=white&labelColor=555555&color=007ec6&style=flat-square" alt="GitHub Stars"></a>
   <br>
-  <img src="https://img.shields.io/badge/coverage-99%25-brightgreen?style=flat-square" alt="Test Coverage">
+  <a href="https://sonarcloud.io/summary/overall?id=SpeedBankingDe_iban-commons"><img src="https://img.shields.io/sonar/coverage/SpeedBankingDe_iban-commons?server=https%3A%2F%2Fsonarcloud.io&label=coverage&style=flat-square" alt="Test Coverage"></a>
   <a href="https://github.com/SpeedBankingDe/iban-commons/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SpeedBankingDe/iban-commons/ci.yml?label=Build%20(Linux%2FWin%2C%20JDK%208%2F21%2F25)&style=flat-square" alt="GitHub Actions Workflow Status"></a>
   <a href="https://javadoc.io/doc/de.speedbanking/iban-commons"><img src="https://javadoc.io/badge2/de.speedbanking/iban-commons/javadoc.svg?style=flat-square" alt="Javadoc"></a>
   <a href="https://apidia.net/mvn/de.speedbanking/iban-commons"><img src="https://apidia.net/mvn/de.speedbanking/iban-commons/badge_flat_square.svg" alt="APIdia"></a>
