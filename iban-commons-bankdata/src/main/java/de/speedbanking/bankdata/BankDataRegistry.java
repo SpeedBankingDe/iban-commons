@@ -138,7 +138,7 @@ public final class BankDataRegistry {
     public static CountryDataCache getCache(String countryCode) {
         CountryBankDataLoader loader = LOADERS.get(countryCode);
         if (loader == null) {
-            throw new IllegalArgumentException("Unsupported bank data country code: " + countryCode);
+            throw new IllegalArgumentException(String.format("Unsupported bank data country code: %s", countryCode));
         }
         return CACHES.computeIfAbsent(countryCode, code -> new CountryDataCache(loader, DOWNLOADER_FACTORY.get().get()));
     }

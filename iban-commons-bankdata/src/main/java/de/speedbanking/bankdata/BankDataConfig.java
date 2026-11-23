@@ -313,8 +313,8 @@ public final class BankDataConfig {
         BankDataConfig result = STATE.updateAndGet(current -> {
             if (current.frozen) {
                 throw new IllegalStateException(
-                    BankDataConfig.class.getSimpleName() + " is already in use and cannot be changed - "
-                    + "call configure() before the first get() invocation");
+                    String.format("%s is already in use and cannot be changed - call configure() before the first get() invocation",
+                        BankDataConfig.class.getSimpleName()));
             }
             return new State(config, false);
         }).config;
@@ -428,7 +428,7 @@ public final class BankDataConfig {
         public Builder staleThreshold(Duration value) {
             requireNonNull(value, "staleThreshold must not be null");
             if (value.compareTo(MIN_STALE_THRESHOLD) < 0) {
-                throw new IllegalArgumentException("staleThreshold must be at least " + MIN_STALE_THRESHOLD + ", got " + value);
+                throw new IllegalArgumentException(String.format("staleThreshold must be at least %s, got %s", MIN_STALE_THRESHOLD, value));
             }
             this.staleThreshold = value;
             return this;
@@ -469,10 +469,10 @@ public final class BankDataConfig {
         private static Duration requireValidTimeout(String name, Duration value) {
             requireNonNull(value, name + " must not be null");
             if (value.isZero() || value.isNegative()) {
-                throw new IllegalArgumentException(name + " must be positive, got " + value);
+                throw new IllegalArgumentException(String.format("%s must be positive, got %s", name, value));
             }
             if (value.compareTo(MAX_TIMEOUT) > 0) {
-                throw new IllegalArgumentException(name + " must not exceed " + MAX_TIMEOUT + ", got " + value);
+                throw new IllegalArgumentException(String.format("%s must not exceed %s, got %s", name, MAX_TIMEOUT, value));
             }
             return value;
         }
@@ -570,11 +570,11 @@ public final class BankDataConfig {
             Properties properties = new Properties();
             try (InputStream in = BankDataConfig.class.getResourceAsStream(BUNDLED_RESOURCE_PATH)) {
                 if (in == null) {
-                    throw new IllegalStateException("Bundled resource '" + BUNDLED_RESOURCE_PATH + "' not found on classpath");
+                    throw new IllegalStateException(String.format("Bundled resource '%s' not found on classpath", BUNDLED_RESOURCE_PATH));
                 }
                 properties.load(in);
             } catch (IOException ex) {
-                throw new IllegalStateException("Failed to load bundled resource '" + BUNDLED_RESOURCE_PATH + "'", ex);
+                throw new IllegalStateException(String.format("Failed to load bundled resource '%s'", BUNDLED_RESOURCE_PATH), ex);
             }
             return new ExternalProperties(properties);
         }

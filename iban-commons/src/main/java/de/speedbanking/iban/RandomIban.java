@@ -224,7 +224,7 @@ public final class RandomIban {
     public static String invalidString(String countryCode) {
         IbanRegistry country = IbanRegistry.getByCode(countryCode);
         if (country == null) {
-            throw new IllegalArgumentException("Unsupported country code: " + countryCode);
+            throw new IllegalArgumentException(String.format("Unsupported country code: %s", countryCode));
         }
         return invalidString(country);
     }
@@ -356,7 +356,7 @@ public final class RandomIban {
     static StringBuilder sabotageIban(StringBuilder iban, Random random) {
         requireNonNull(iban, "iban must not be null");
         if (iban.length() < IbanRegistry.MIN_IBAN_LENGTH) {
-            throw new IllegalArgumentException("IBAN length must be at least " + IbanRegistry.MIN_IBAN_LENGTH);
+            throw new IllegalArgumentException(String.format("IBAN length must be at least %s", IbanRegistry.MIN_IBAN_LENGTH));
         }
         requireRandom(random);
 
@@ -533,7 +533,7 @@ public final class RandomIban {
         private static IbanRegistry requireSupportedCode(String countryCode) {
             IbanRegistry entry = IbanRegistry.getByCode(countryCode);
             if (entry == null) {
-                throw new IllegalArgumentException("Unsupported country code: " + countryCode);
+                throw new IllegalArgumentException(String.format("Unsupported country code: %s", countryCode));
             }
             return entry;
         }

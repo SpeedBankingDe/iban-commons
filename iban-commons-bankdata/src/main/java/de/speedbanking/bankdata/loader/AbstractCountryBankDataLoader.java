@@ -67,11 +67,11 @@ public abstract class AbstractCountryBankDataLoader<C extends Enum<C> & ColumnDe
     private static String resolveCountryCode(Class<?> clazz) {
         String simpleName = clazz.getSimpleName();
         if (simpleName.length() < 2) {
-            throw new IllegalStateException("Class name '" + simpleName + "' is too short to extract ISO country code");
+            throw new IllegalStateException(String.format("Class name '%s' is too short to extract ISO country code", simpleName));
         }
         Country country = Country.fromCode(simpleName.substring(simpleName.length() - 2, simpleName.length()).toUpperCase(Locale.ROOT));
         if (country == null) {
-            throw new IllegalStateException("Cannot derive country from class name '" + simpleName + "'");
+            throw new IllegalStateException(String.format("Cannot derive country from class name '%s'", simpleName));
         }
         return country.getCode();
     }
@@ -167,8 +167,8 @@ public abstract class AbstractCountryBankDataLoader<C extends Enum<C> & ColumnDe
     protected final void requireMinColumns(List<String> fields, int rowNumber, String sourceLabel, String separatorDescription)
         throws BankDataParseException {
         if (fields.size() < columns.getMinColumnCount()) {
-            throw new BankDataParseException("Malformed " + sourceLabel + " row " + rowNumber
-                + ": expected at least " + columns.getMinColumnCount() + " " + separatorDescription + "-separated fields, got " + fields.size());
+            throw new BankDataParseException(String.format("Malformed %s row %s: expected at least %s %s-separated fields, got %s",
+                sourceLabel, rowNumber, columns.getMinColumnCount(), separatorDescription, fields.size()));
         }
     }
 

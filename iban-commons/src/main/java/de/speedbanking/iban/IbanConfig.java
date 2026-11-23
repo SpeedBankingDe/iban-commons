@@ -148,14 +148,14 @@ public final class IbanConfig {
      * @return the newly installed configuration instance
      * @throws IllegalStateException if the configuration has already been frozen
      */
-    public static IbanConfig configure(final IbanConfig config) {
+    public static IbanConfig configure(IbanConfig config) {
         requireNonNull(config, "Config must not be null");
 
         IbanConfig result = STATE.updateAndGet(current -> {
             if (current.frozen) {
                 throw new IllegalStateException(
-                    IbanConfig.class.getSimpleName() + " is already in use and cannot be changed - "
-                    + "call configure() before the first get() or accessor invocation");
+                    String.format("%s is already in use and cannot be changed - call configure() before the first get() or accessor invocation",
+                        IbanConfig.class.getSimpleName()));
             }
             return new State(config, false);
         }).config;
@@ -211,7 +211,7 @@ public final class IbanConfig {
      * @param config the configuration instance to install; must not be {@code null}
      * @return the newly installed configuration instance
      */
-    static IbanConfig reset(final IbanConfig config) {
+    static IbanConfig reset(IbanConfig config) {
         requireNonNull(config, "Config must not be null");
         activeConfig = null; // invalidate fast-path cache
         return STATE.updateAndGet(current -> new State(config, false)).config;
@@ -262,7 +262,7 @@ public final class IbanConfig {
          * @param value {@code true} to enable
          * @return this builder
          */
-        public Builder validateNcd(final boolean value) {
+        public Builder validateNcd(boolean value) {
             this.validateNcd = value;
             return this;
         }
@@ -273,7 +273,7 @@ public final class IbanConfig {
          * @param value {@code true} to enable
          * @return this builder
          */
-        public Builder calculateNcd(final boolean value) {
+        public Builder calculateNcd(boolean value) {
             this.calculateNcd = value;
             return this;
         }
@@ -284,7 +284,7 @@ public final class IbanConfig {
          * @param value {@code true} to enable
          * @return this builder
          */
-        public Builder allowSpace(final boolean value) {
+        public Builder allowSpace(boolean value) {
             this.allowSpace = value;
             return this;
         }
@@ -295,7 +295,7 @@ public final class IbanConfig {
          * @param value {@code true} to enable
          * @return this builder
          */
-        public Builder allowLowercase(final boolean value) {
+        public Builder allowLowercase(boolean value) {
             this.allowLowercase = value;
             return this;
         }

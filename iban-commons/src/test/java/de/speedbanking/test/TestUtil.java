@@ -64,7 +64,7 @@ public final class TestUtil {
      * @throws IOException if an I/O error occurs
      */
     @SuppressWarnings("TypeParameterUnusedInFormals")
-    public static <T extends Serializable> byte[] serialize(final T object) throws IOException {
+    public static <T extends Serializable> byte[] serialize(T object) throws IOException {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
              ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(object);
@@ -82,7 +82,7 @@ public final class TestUtil {
      * @throws ClassNotFoundException if the class of the serialized object cannot be found
      */
     @SuppressWarnings({"TypeParameterUnusedInFormals", "unchecked"})
-    public static <T extends Serializable> T deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {
+    public static <T extends Serializable> T deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
         try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
              ObjectInputStream ois = new ObjectInputStream(bais)) {
             return (T) ois.readObject();
@@ -104,7 +104,7 @@ public final class TestUtil {
      * @param newName the UTF-8 class name to substitute (e.g., {@code "de.speedbanking.iban.Iban"})
      * @return a new byte array with the class name replaced, or the original array if no match was found
      */
-    public static byte[] replaceClassName(final byte[] stream, final String oldName, final String newName) {
+    public static byte[] replaceClassName(byte[] stream, String oldName, String newName) {
 
         byte[] oldBytes = oldName.getBytes(UTF_8);
         byte[] newBytes = newName.getBytes(UTF_8);
@@ -174,7 +174,7 @@ public final class TestUtil {
      * @throws IOException if writing fails
      */
     public static <T extends Serializable> byte[] buildMementoStream(
-            final T template, final long streamVersion, final String value) throws IOException {
+            T template, long streamVersion, String value) throws IOException {
         // 1. Serialize the template to get a well-formed stream with the correct class descriptor.
         byte[] templateBytes = serialize(template);
 
@@ -249,7 +249,7 @@ public final class TestUtil {
      * @param stream the serialized byte array to search
      * @return the index of the {@code TC_BLOCKDATA} byte, or {@code -1} if not found
      */
-    static int findBlockDataWithVersionMarker(final byte[] stream) {
+    static int findBlockDataWithVersionMarker(byte[] stream) {
         // needle: TC_BLOCKDATA (0x77), skip 1 byte (block length), then STREAM_VERSION=1L
         byte[] versionLong = {0, 0, 0, 0, 0, 0, 0, 1};
         int result = -1;
@@ -277,7 +277,7 @@ public final class TestUtil {
      * @param needle   the byte sequence to search for; must not be {@code null}
      * @return the zero-based start index of the first match, or {@code -1} if none
      */
-    static int indexOf(final byte[] haystack, final byte[] needle) {
+    static int indexOf(byte[] haystack, byte[] needle) {
         int result = -1;
         for (int i = 0; result == -1 && i <= haystack.length - needle.length; i++) {
             boolean match = true;

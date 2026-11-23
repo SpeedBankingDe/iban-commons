@@ -825,7 +825,7 @@ public enum Country {
             || countryCode.length() != 2
             || !Character.isUpperCase(countryCode.charAt(0))
             || !Character.isUpperCase(countryCode.charAt(1))) {
-            throw new IllegalArgumentException("Valid country code required: " + countryCode);
+            throw new IllegalArgumentException(String.format("Valid country code required: %s", countryCode));
         }
 
         // the base Unicode value for the Regional Indicator Symbol Letter 'A'

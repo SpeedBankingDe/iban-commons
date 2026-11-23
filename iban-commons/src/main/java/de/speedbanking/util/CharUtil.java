@@ -43,7 +43,7 @@ public final class CharUtil {
      *
      * @since 1.8.0
      */
-    public static boolean isDigit(final char c) {
+    public static boolean isDigit(char c) {
         return c >= '0' && c <= '9';
     }
 
@@ -55,7 +55,7 @@ public final class CharUtil {
      *
      * @since 1.8.2
      */
-    public static boolean isNotDigit(final char c) {
+    public static boolean isNotDigit(char c) {
         return c < '0' || c > '9';
     }
 
@@ -71,7 +71,7 @@ public final class CharUtil {
      *
      * @since 1.8.0
      */
-    public static boolean isAllDigits(final char[] chars, final int beginIndex, final int endIndex) {
+    public static boolean isAllDigits(char[] chars, int beginIndex, int endIndex) {
         requireInput(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length);
 
@@ -95,7 +95,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isAllDigits(final CharSequence chars, final int beginIndex, final int endIndex) {
+    public static boolean isAllDigits(CharSequence chars, int beginIndex, int endIndex) {
         requireInput(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length());
 
@@ -119,7 +119,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isAllDigits(final CharSequence chars) {
+    public static boolean isAllDigits(CharSequence chars) {
         requireInput(chars);
         return isAllDigits(chars, 0, chars.length());
     }
@@ -132,7 +132,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isLowerCase(final char c) {
+    public static boolean isLowerCase(char c) {
         return c >= 'a' && c <= 'z';
     }
 
@@ -144,7 +144,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isNotLowerCase(final char c) {
+    public static boolean isNotLowerCase(char c) {
         return c < 'a' || c > 'z';
     }
 
@@ -156,7 +156,7 @@ public final class CharUtil {
      *
      * @since 1.8.0
      */
-    public static boolean isUpperCase(final char c) {
+    public static boolean isUpperCase(char c) {
         return c >= 'A' && c <= 'Z';
     }
 
@@ -168,7 +168,7 @@ public final class CharUtil {
      *
      * @since 1.8.2
      */
-    public static boolean isNotUpperCase(final char c) {
+    public static boolean isNotUpperCase(char c) {
         return c < 'A' || c > 'Z';
     }
 
@@ -184,7 +184,7 @@ public final class CharUtil {
      *
      * @since 1.8.0
      */
-    public static boolean isAllUpperCase(final char[] chars, final int beginIndex, final int endIndex) {
+    public static boolean isAllUpperCase(char[] chars, int beginIndex, int endIndex) {
         requireInput(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length);
 
@@ -208,7 +208,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isAllUpperCase(final CharSequence chars, final int beginIndex, final int endIndex) {
+    public static boolean isAllUpperCase(CharSequence chars, int beginIndex, int endIndex) {
         requireInput(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length());
 
@@ -232,7 +232,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isAllUpperCase(final CharSequence chars) {
+    public static boolean isAllUpperCase(CharSequence chars) {
         requireInput(chars);
         return isAllUpperCase(chars, 0, chars.length());
     }
@@ -245,7 +245,7 @@ public final class CharUtil {
      *
      * @since 1.8.0
      */
-    public static boolean isDigitOrUpperCase(final char c) {
+    public static boolean isDigitOrUpperCase(char c) {
         return (c >= '0' && c <= '9')
             || (c >= 'A' && c <= 'Z');
     }
@@ -262,7 +262,7 @@ public final class CharUtil {
      *
      * @since 1.8.0
      */
-    public static boolean isAllDigitOrUpperCase(final char[] chars, final int beginIndex, final int endIndex) {
+    public static boolean isAllDigitOrUpperCase(char[] chars, int beginIndex, int endIndex) {
         requireInput(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length);
 
@@ -287,7 +287,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isAllDigitOrUpperCase(final CharSequence chars, final int beginIndex, final int endIndex) {
+    public static boolean isAllDigitOrUpperCase(CharSequence chars, int beginIndex, int endIndex) {
         requireInput(chars);
         requireValidIndices(beginIndex, endIndex, 0, chars.length());
 
@@ -308,7 +308,7 @@ public final class CharUtil {
      *
      * @since 1.8.5
      */
-    public static boolean isAllDigitOrUpperCase(final CharSequence chars) {
+    public static boolean isAllDigitOrUpperCase(CharSequence chars) {
         requireInput(chars);
         return isAllDigitOrUpperCase(chars, 0, chars.length());
     }
@@ -327,10 +327,10 @@ public final class CharUtil {
      * @return a new character array containing the characters
      * @throws NullPointerException if {@code chars} is null
      */
-    public static char[] toCharArray(final CharSequence chars, final int charsLen) {
+    public static char[] toCharArray(CharSequence chars, int charsLen) {
         requireInput(chars);
-        final int len = charsLen < 0 ? chars.length() : charsLen;
-        final char[] arr = new char[len];
+        int len = charsLen < 0 ? chars.length() : charsLen;
+        char[] arr = new char[len];
         for (int i = 0; i < len; i++) {
             arr[i] = chars.charAt(i);
         }
@@ -346,7 +346,7 @@ public final class CharUtil {
      * @return a new character array containing all characters
      * @throws NullPointerException if {@code chars} is null
      */
-    public static char[] toCharArray(final CharSequence chars) {
+    public static char[] toCharArray(CharSequence chars) {
         return toCharArray(chars, -1);
     }
 
@@ -359,7 +359,7 @@ public final class CharUtil {
      * @return {@code input} if not {@code null}
      * @throws NullPointerException if {@code input} is {@code null}
      */
-    private static <T> T requireInput(final T input) {
+    private static <T> T requireInput(T input) {
         return requireNonNull(input, "Input cannot be null");
     }
 
@@ -372,7 +372,7 @@ public final class CharUtil {
      * @param maxEndIndex   the maximum allowed end index
      * @throws IndexOutOfBoundsException if the range is invalid
      */
-    private static void requireValidIndices(final int beginIndex, final int endIndex, final int minBeginIndex, final int maxEndIndex) {
+    private static void requireValidIndices(int beginIndex, int endIndex, int minBeginIndex, int maxEndIndex) {
         if (beginIndex < minBeginIndex || endIndex > maxEndIndex || beginIndex > endIndex) {
             throw new IndexOutOfBoundsException(String.format("Invalid range (%d, %d) specified, valid range (%d, %d)",
                 beginIndex, endIndex, minBeginIndex, maxEndIndex));

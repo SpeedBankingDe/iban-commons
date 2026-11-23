@@ -77,7 +77,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @param normIban    the normalized, validated IBAN characters
      * @param countryData the metadata for the country code (format, structure)
      */
-    Iban(final CharSequence normIban, final IbanRegistry countryData) {
+    Iban(CharSequence normIban, IbanRegistry countryData) {
         this.ibanStr = normIban.toString();
         this.countryData = countryData;
     }
@@ -109,7 +109,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @see #of(CharSequence)
      * @since 1.8.5
      */
-    public static Iban of(final String iban) throws InvalidIbanException {
+    public static Iban of(String iban) throws InvalidIbanException {
         return parse(iban);
     }
 
@@ -184,7 +184,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *
      * @since 1.8.7
      */
-    public static void validate(final CharSequence iban) throws InvalidIbanException {
+    public static void validate(CharSequence iban) throws InvalidIbanException {
         IbanValidationResult result = IbanValidator.validate(iban, IbanConfig.isAllowSpace());
         if (!result.isValid()) {
             throw InvalidIbanException.of(result.error, iban, result.countryData == null ? null : result.countryData.getCountryCode());
@@ -200,7 +200,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *
      * @since 1.8.0
      */
-    public static boolean isValid(final CharSequence iban) {
+    public static boolean isValid(CharSequence iban) {
         return IbanValidator.isValid(iban);
     }
 
@@ -216,7 +216,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * @see #isValid(CharSequence)
      * @since 1.8.5
      */
-    public static boolean isValid(final String iban) {
+    public static boolean isValid(String iban) {
         return IbanValidator.isValid(iban);
     }
 
@@ -745,9 +745,9 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      *
      * @since 1.8.3
      */
-    private void readObject(final ObjectInputStream stream) throws InvalidObjectException {
+    private void readObject(ObjectInputStream stream) throws InvalidObjectException {
         throw new InvalidObjectException(
-            Iban.class.getSimpleName() + " must be deserialized via its " + Memento.class.getSimpleName() + " proxy");
+            String.format("%s must be deserialized via its %s proxy", Iban.class.getSimpleName(), Memento.class.getSimpleName()));
     }
 
     /**
@@ -762,7 +762,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     @SuppressWarnings("unused") // invoked exclusively by the Java serialization framework
     private void readObjectNoData() throws InvalidObjectException {
         throw new InvalidObjectException(
-            Iban.class.getSimpleName() + " must be deserialized via its " + Memento.class.getSimpleName() + " proxy");
+            String.format("%s must be deserialized via its %s proxy", Iban.class.getSimpleName(), Memento.class.getSimpleName()));
     }
 
     /**
@@ -827,7 +827,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         Memento() {
         }
 
-        Memento(final String value) {
+        Memento(String value) {
             this();
             this.value = value;
         }
@@ -838,7 +838,7 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
          * @param out the object output stream
          * @throws IOException if an I/O error occurs
          */
-        private void writeObject(final ObjectOutputStream out) throws IOException {
+        private void writeObject(ObjectOutputStream out) throws IOException {
             out.writeLong(STREAM_VERSION);
             out.writeUTF(value);
         }
@@ -850,10 +850,10 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
          * @param in the object input stream
          * @throws InvalidObjectException if an I/O error occurs or the version is unsupported
          */
-        private void readObject(final ObjectInputStream in) throws IOException {
-            final long version = in.readLong();
+        private void readObject(ObjectInputStream in) throws IOException {
+            long version = in.readLong();
             if (version != STREAM_VERSION) {
-                throw new InvalidObjectException("Unsupported Iban Memento stream version: " + version);
+                throw new InvalidObjectException(String.format("Unsupported Iban Memento stream version: %s", version));
             }
             this.value = in.readUTF();
         }
@@ -867,9 +867,10 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         private Object readResolve() throws InvalidObjectException {
             try {
                 return parse(this.value);
-            } catch (final RuntimeException ex) {
-                final InvalidObjectException ioe =
-                    new InvalidObjectException("Cannot restore " + Iban.class.getSimpleName() + " from serialized form: " + ex.getMessage());
+            } catch (RuntimeException ex) {
+                InvalidObjectException ioe =
+                    new InvalidObjectException(String.format("Cannot restore %s from serialized form: %s",
+                        Iban.class.getSimpleName(), ex.getMessage()));
                 ioe.initCause(ex);
                 throw ioe;
             }

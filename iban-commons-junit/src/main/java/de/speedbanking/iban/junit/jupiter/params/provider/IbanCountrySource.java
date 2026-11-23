@@ -112,8 +112,8 @@ public @interface IbanCountrySource {
 
             if (result.isEmpty()) {
                 throw new IllegalStateException(
-                    "No " + IbanRegistry.class.getSimpleName() + " entries matched the configured "
-                    + "includeCountries/excludeCountries filter of @" + IbanCountrySource.class.getSimpleName() + ".");
+                    String.format("No %s entries matched the configured includeCountries/excludeCountries filter of @%s.",
+                        IbanRegistry.class.getSimpleName(), IbanCountrySource.class.getSimpleName()));
             }
 
             return result.stream().map(registry -> Arguments.of(registry.getCountryCode(), registry.getCountryName()));

@@ -134,8 +134,9 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         if (actual == expected || (actual.isDerivedCountry() && actual.getBaseCountry() == expected)) {
             return actual;
         }
-        throw new IllegalArgumentException("This builder only supports " + expected.getCountryCode()
-        + " or derived countries but was constructed with country data for " + actual.getCountryCode());
+        throw new IllegalArgumentException(String.format("This builder only supports %s or derived countries but was "
+            + "constructed with country data for %s",
+            expected.getCountryCode(), actual.getCountryCode()));
     }
 
     /**

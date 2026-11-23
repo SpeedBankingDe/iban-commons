@@ -46,7 +46,7 @@ public final class Formatter {
      * @return the formatted IBAN string with spaces, or {@code null} if the input is {@code null} or empty
      * @since 1.8.0
      */
-    public static String format(final CharSequence normalizedIban) {
+    public static String format(CharSequence normalizedIban) {
         return format(normalizedIban, DEFAULT_GROUP_SIZE);
     }
 
@@ -60,7 +60,7 @@ public final class Formatter {
      *
      * @since 1.8.0
      */
-    public static String format(final CharSequence inputIban, final int groupSize) {
+    public static String format(CharSequence inputIban, int groupSize) {
         if (groupSize <= 0) {
             throw new IllegalArgumentException("Group size must be a positive integer");
         }
@@ -76,7 +76,7 @@ public final class Formatter {
         }
 
         // pre-allocate StringBuilder with sufficient capacity to avoid resizing
-        final StringBuilder formatted = new StringBuilder(ibanLen + (ibanLen / groupSize));
+        StringBuilder formatted = new StringBuilder(ibanLen + (ibanLen / groupSize));
 
         for (int i = 0; i < ibanLen; i++) {
             char c = inputIban.charAt(i);

@@ -43,11 +43,13 @@ final class BankDataLoaderDefaults {
         Properties properties = new Properties();
         try (InputStream in = BankDataLoaderDefaults.class.getResourceAsStream(BankDataConfig.BUNDLED_RESOURCE_PATH)) {
             if (in == null) {
-                throw new IllegalStateException("Bundled resource '" + BankDataConfig.BUNDLED_RESOURCE_PATH + "' not found on classpath");
+                throw new IllegalStateException(String.format("Bundled resource '%s' not found on classpath",
+                    BankDataConfig.BUNDLED_RESOURCE_PATH));
             }
             properties.load(in);
         } catch (IOException ex) {
-            throw new IllegalStateException("Failed to load bundled resource '" + BankDataConfig.BUNDLED_RESOURCE_PATH + "'", ex);
+            throw new IllegalStateException(String.format("Failed to load bundled resource '%s'",
+                BankDataConfig.BUNDLED_RESOURCE_PATH), ex);
         }
         return properties;
     }
@@ -63,7 +65,8 @@ final class BankDataLoaderDefaults {
         String key = "loader." + countryCode + ".url";
         String value = PROPERTIES.getProperty(key);
         if (value == null || value.isEmpty()) {
-            throw new IllegalStateException("Bundled resource '" + BankDataConfig.BUNDLED_RESOURCE_PATH + "' has no '" + key + "' entry");
+            throw new IllegalStateException(String.format("Bundled resource '%s' has no '%s' entry",
+                BankDataConfig.BUNDLED_RESOURCE_PATH, key));
         }
         return URI.create(value.trim());
     }

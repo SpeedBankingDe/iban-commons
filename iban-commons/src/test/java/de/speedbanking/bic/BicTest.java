@@ -488,7 +488,7 @@ final class BicTest {
     })
     void serialization_validBic_preservesState(String bicInput) throws IOException, ClassNotFoundException {
         Bic original = Bic.of(bicInput);
-        final Bic bic = original;
+        Bic bic = original;
 
         Bic restored = TestUtil.deserialize(TestUtil.serialize(bic));
 
@@ -520,10 +520,10 @@ final class BicTest {
     void serialization_bic8AndBic11_preservesFormat() throws IOException, ClassNotFoundException {
         Bic originalBic8  = Bic.of("MARKDEFF");
         Bic originalBic11 = Bic.of("MARKDEFFXXX");
-        final Bic bic = originalBic8;
+        Bic bic = originalBic8;
 
         Bic restoredBic8  = TestUtil.deserialize(TestUtil.serialize(bic));
-        final Bic bic1 = originalBic11;
+        Bic bic1 = originalBic11;
         Bic restoredBic11 = TestUtil.deserialize(TestUtil.serialize(bic1));
 
         assertThat(restoredBic8.isBic8())
@@ -571,10 +571,10 @@ final class BicTest {
     @Test
     void deserialization_directBicInStream_throwsException() throws IOException {
         byte[] mementoBytes = TestUtil.serialize(Bic.of("MARKDEFF"));
-        final byte[] stream = mementoBytes;
+        byte[] stream = mementoBytes;
 
         byte[] tamperedBytes = TestUtil.replaceClassName(stream, Bic.Memento.class.getName(), Bic.class.getName());
-        final byte[] bytes = tamperedBytes;
+        byte[] bytes = tamperedBytes;
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(bytes)))
             .as("Direct deserialization of Bic must be rejected")
@@ -592,7 +592,7 @@ final class BicTest {
     @Test
     void deserialization_validBic_producesDistinctInstance() throws ClassNotFoundException, IOException {
         Bic original = Bic.of("DEUTDEFF");
-        final Bic bic = original;
+        Bic bic = original;
         Bic restored = TestUtil.deserialize(TestUtil.serialize(bic));
 
         assertThat(restored)

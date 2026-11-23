@@ -95,7 +95,7 @@ public final class MinimalXlsxReader {
         }
 
         if (sheetXml == null) {
-            throw new IOException("Not a readable XLSX file, missing required part " + SHEET1_ENTRY);
+            throw new IOException(String.format("Not a readable XLSX file, missing required part %s", SHEET1_ENTRY));
         }
 
         List<String> sharedStrings = sharedStringsXml == null ? Collections.<String>emptyList() : parseSharedStrings(sharedStringsXml);
@@ -213,7 +213,7 @@ public final class MinimalXlsxReader {
             try {
                 sharedIndex = Integer.parseInt(rawValue);
             } catch (NumberFormatException ex) {
-                throw new IOException("Malformed XLSX shared string index '" + rawValue + "', expected an integer", ex);
+                throw new IOException(String.format("Malformed XLSX shared string index '%s', expected an integer", rawValue), ex);
             }
             return sharedIndex >= 0 && sharedIndex < sharedStrings.size() ? sharedStrings.get(sharedIndex) : "";
         }

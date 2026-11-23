@@ -42,7 +42,7 @@ public final class IbanPlusKey {
      * @param iban the IBAN instance
      * @return the concatenated lookup code (Bank + Branch + NCD), or {@code null} if no routing data is present
      */
-    public static String of(final Iban iban) {
+    public static String of(Iban iban) {
         if (iban == null) {
             return null;
         }
@@ -68,7 +68,7 @@ public final class IbanPlusKey {
      * @param ibanStr the IBAN string to parse
      * @return the lookup code, or {@code null} if parsing fails or input is invalid
      */
-    public static String of(final String ibanStr) {
+    public static String of(String ibanStr) {
         return Iban.tryParse(ibanStr).map(IbanPlusKey::of).orElse(null);
     }
 

@@ -84,14 +84,14 @@ final class HttpDownloader implements Downloader {
             if (isRedirect(status) && remainingHops > 0) {
                 String location = connection.getHeaderField("Location");
                 if (location == null || location.isEmpty()) {
-                    throw new IOException("Received redirect status " + status + " from " + uri + " without a Location header");
+                    throw new IOException(String.format("Received redirect status %s from %s without a Location header", status, uri));
                 }
                 URI target;
                 try {
                     target = uri.resolve(location);
                 } catch (IllegalArgumentException ex) {
-                    throw new IOException("Received redirect status " + status + " from " + uri
-                        + " with a malformed Location header '" + location + "'", ex);
+                    throw new IOException(String.format("Received redirect status %s from %s with a malformed Location header '%s'",
+                        status, uri, location), ex);
                 }
                 if (isDowngrade(uri, target)) {
                     throw new IOException(String.format("Refusing redirect from %s to non-HTTPS location %s", uri, target));
@@ -99,7 +99,7 @@ final class HttpDownloader implements Downloader {
                 return download(target, connectTimeout, readTimeout, remainingHops - 1);
             }
             if (status < 200 || status >= 300) {
-                throw new HttpDownloadException("Unexpected HTTP status " + status + " downloading " + uri, status);
+                throw new HttpDownloadException(String.format("Unexpected HTTP status %s downloading %s", status, uri), status);
             }
             long contentLength = connection.getContentLengthLong();
             if (contentLength > BoundedStreams.MAX_BYTES) {

@@ -146,7 +146,7 @@ public final class Mod97 {
      * @param c     the character to accumulate
      * @return updated remainder in {@code [0, 96]}, or {@link #INVALID_REMAINDER}
      */
-    private static int accumulate(final int total, final char c) {
+    private static int accumulate(int total, char c) {
         if (c >= '0' && c <= '9') {
             return (total * 10 + (c - '0')) % MODULUS;
         } else if (c >= 'A' && c <= 'Z') {
@@ -166,7 +166,7 @@ public final class Mod97 {
      * @return {@code true} if both characters are digits and their combined value
      *         lies in the valid range
      */
-    private static boolean hasValidCheckDigitRange(final char c1, final char c2) {
+    private static boolean hasValidCheckDigitRange(char c1, char c2) {
         if (c1 < '0' || c1 > '9' || c2 < '0' || c2 > '9') {
             return false;
         }
@@ -218,12 +218,12 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    public static int calculate(final char[] input, final int inputLen) {
+    public static int calculate(char[] input, int inputLen) {
         if (input == null) {
             return INVALID_REMAINDER;
         }
 
-        final int len = inputLen > 0 ? inputLen : input.length;
+        int len = inputLen > 0 ? inputLen : input.length;
         if (len < HEADER_LENGTH) {
             return INVALID_REMAINDER;
         }
@@ -261,7 +261,7 @@ public final class Mod97 {
      *
      * @see #calculate(char[], int)
      */
-    public static int calculate(final char[] input) {
+    public static int calculate(char[] input) {
         if (input == null) {
             return INVALID_REMAINDER;
         }
@@ -289,12 +289,12 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    public static int calculate(final CharSequence iban) {
+    public static int calculate(CharSequence iban) {
         if (iban == null) {
             return INVALID_REMAINDER;
         }
 
-        final int len = iban.length();
+        int len = iban.length();
         if (len < HEADER_LENGTH) {
             return INVALID_REMAINDER;
         }
@@ -343,7 +343,7 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    public static int calculateRange(final char[] data, final int offset, final int length) {
+    public static int calculateRange(char[] data, int offset, int length) {
         requireNonNull(data, "Data must not be null");
 
         if (offset < 0 || length < 0 || offset + length > data.length) {
@@ -381,7 +381,7 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    public static int calculateRange(final CharSequence data, final int offset, final int length) {
+    public static int calculateRange(CharSequence data, int offset, int length) {
         requireNonNull(data, "Data must not be null");
 
         if (offset < 0 || length < 0 || offset + length > data.length()) {
@@ -419,7 +419,7 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    public static boolean isValid(final char[] iban) {
+    public static boolean isValid(char[] iban) {
         return iban != null && iban.length >= HEADER_LENGTH
             && hasValidCheckDigitRange(iban[CHECK_DIGIT_INDEX_1], iban[CHECK_DIGIT_INDEX_2])
             && calculate(iban) == VALID_REMAINDER;
@@ -442,7 +442,7 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    public static boolean isValid(final char[] iban, final int length) {
+    public static boolean isValid(char[] iban, int length) {
         return iban != null && length >= HEADER_LENGTH && length <= iban.length
             && hasValidCheckDigitRange(iban[CHECK_DIGIT_INDEX_1], iban[CHECK_DIGIT_INDEX_2])
             && calculate(iban, length) == VALID_REMAINDER;
@@ -459,7 +459,7 @@ public final class Mod97 {
      *
      * @since 1.8.5
      */
-    public static boolean isValid(final CharSequence iban) {
+    public static boolean isValid(CharSequence iban) {
         return iban != null && iban.length() >= HEADER_LENGTH
             && hasValidCheckDigitRange(iban.charAt(CHECK_DIGIT_INDEX_1), iban.charAt(CHECK_DIGIT_INDEX_2))
             && calculate(iban) == VALID_REMAINDER;

@@ -491,7 +491,7 @@ public enum Currency {
     /** The ISO 4217 three-digit numeric currency code. */
     private final int    numericCode;
 
-    Currency(final String currencyName, final int numericCode) {
+    Currency(String currencyName, int numericCode) {
         this.currencyName = currencyName;
         this.numericCode  = numericCode;
     }

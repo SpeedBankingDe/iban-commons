@@ -297,7 +297,7 @@ final class PatternCacheTest extends Assertions {
 
         // when
         for (int i = 0; i < threadCount; i++) {
-            final int index = i;
+            int index = i;
             threads[i] = new Thread(() -> patterns[index] = patternCache.getPattern(regex));
             threads[i].start();
         }

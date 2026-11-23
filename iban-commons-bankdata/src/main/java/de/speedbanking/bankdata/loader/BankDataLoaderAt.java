@@ -125,7 +125,8 @@ public final class BankDataLoaderAt extends AbstractCountryBankDataLoader<BankDa
         }
 
         if (!headerSeen) {
-            throw new BankDataParseException("Malformed Austrian OeNB raw source: header row with a '" + HEADER_MARKER + "' column not found");
+            throw new BankDataParseException(String.format("Malformed Austrian OeNB raw source: header row with a '%s' column not found",
+                HEADER_MARKER));
         }
 
         return new ArrayList<>(byBankCode.values());

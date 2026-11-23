@@ -44,10 +44,10 @@ final class IbanComponent {
         this.type = requireNonNull(type, "type required");
         this.patternStr = requireNonNull(patternStr, "patternStr required");
         if (beginIndex < 0) {
-            throw new IllegalArgumentException("beginIndex must be >= 0, was " + beginIndex);
+            throw new IllegalArgumentException(String.format("beginIndex must be >= 0, was %s", beginIndex));
         }
         if (length <= 0) {
-            throw new IllegalArgumentException("length must be > 0, was " + length);
+            throw new IllegalArgumentException(String.format("length must be > 0, was %s", length));
         }
         this.beginIndex = beginIndex;
         this.length = length;
@@ -133,7 +133,7 @@ final class IbanComponent {
      * @param sequence the full, normalized IBAN character sequence
      * @return a new array containing the characters occupied by this component
      */
-    char[] extractFrom(final char[] sequence) {
+    char[] extractFrom(char[] sequence) {
         char[] result = new char[length];
         System.arraycopy(sequence, beginIndex, result, 0, length);
         return result;

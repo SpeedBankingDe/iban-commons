@@ -60,16 +60,16 @@ public final class Alpha2EnumLookup<E extends Enum<E>> {
             CharSequence code = codeExtractor.apply(constant);
             if (code == null || code.length() != CODE_LEN) {
                 throw new IllegalArgumentException(
-                    "Code for enum constant " + enumClass.getSimpleName() + "." + constant.name()
-                    + " must be exactly " + CODE_LEN + " characters long, but was: " + code);
+                    String.format("Code for enum constant %s.%s must be exactly %s characters long, but was: %s",
+                        enumClass.getSimpleName(), constant.name(), CODE_LEN, code));
             }
 
             char c1 = code.charAt(0);
             char c2 = code.charAt(1);
             if (isNotUpperCase(c1) || isNotUpperCase(c2)) {
                 throw new IllegalArgumentException(
-                    "Code for enum constant " + enumClass.getSimpleName() + "." + constant.name()
-                    + " must contain only uppercase ASCII letters, but was: " + code);
+                    String.format("Code for enum constant %s.%s must contain only uppercase ASCII letters, but was: %s",
+                        enumClass.getSimpleName(), constant.name(), code));
             }
 
             lookupTable[packToIndex(c1, c2)] = constant;
@@ -117,7 +117,7 @@ public final class Alpha2EnumLookup<E extends Enum<E>> {
      * @param c the character to check
      * @return {@code true} if the character is not an uppercase letter, {@code false} otherwise
      */
-    static boolean isNotUpperCase(final char c) {
+    static boolean isNotUpperCase(char c) {
         return c < 'A' || c > 'Z';
     }
 

@@ -107,13 +107,13 @@ public final class CountryDataCache {
     /** HTTP 429 Too Many Requests: a standard rate-limit signal, not a wrong/moved source URL. */
     private static final int            HTTP_TOO_MANY_REQUESTS = 429;
 
-    private final CountryBankDataLoader loader;
-    private final Downloader            downloader;
-    private final Object                loadLock                  = new Object();
-    private final AtomicReference<State> state                    = new AtomicReference<>();
-    private final AtomicBoolean         refreshInFlight           = new AtomicBoolean(false);
-    private volatile long               bundledRecordCount        = -1;
-    private final AtomicReference<Future<?>> lastRefreshFuture    = new AtomicReference<>();
+    private final CountryBankDataLoader      loader;
+    private final Downloader                 downloader;
+    private final Object                     loadLock           = new Object();
+    private final AtomicReference<State>     state              = new AtomicReference<>();
+    private final AtomicBoolean              refreshInFlight    = new AtomicBoolean(false);
+    private volatile long                    bundledRecordCount = -1;
+    private final AtomicReference<Future<?>> lastRefreshFuture  = new AtomicReference<>();
 
     /**
      * Creates a new cache for the given country loader.

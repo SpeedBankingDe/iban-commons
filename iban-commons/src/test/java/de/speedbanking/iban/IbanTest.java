@@ -841,7 +841,7 @@ final class IbanTest {
     @Test
     void serialization_validIban_usesMementoProxy() throws IOException {
         Iban iban = Iban.of("DE89370400440532013000");
-        final Iban iban1 = iban;
+        Iban iban1 = iban;
         byte[] bytes = TestUtil.serialize(iban1);
 
         // the serialized stream must contain the Memento class name, not Iban itself
@@ -867,19 +867,19 @@ final class IbanTest {
     void deserialization_directIbanInStream_throwsException() throws IOException {
         // Obtain a valid Iban serialized form (which uses Memento)
         Iban iban = Iban.of("DE89370400440532013000");
-        final Iban iban1 = iban;
+        Iban iban1 = iban;
         byte[] mementoBytes = TestUtil.serialize(iban1);
 
         // Replace the Memento class descriptor with the Iban class descriptor in the stream
         // to simulate a crafted stream that bypasses writeReplace.
         String mementoClassName = Iban.Memento.class.getName(); // "de.speedbanking.iban.Iban$Memento"
         String ibanClassName    = Iban.class.getName();
-        final byte[] stream = mementoBytes;
-        final String oldName = mementoClassName;
-        final String newName = ibanClassName;         // "de.speedbanking.iban.Iban"
+        byte[] stream = mementoBytes;
+        String oldName = mementoClassName;
+        String newName = ibanClassName;         // "de.speedbanking.iban.Iban"
 
         byte[] tamperedBytes = TestUtil.replaceClassName(stream, oldName, newName);
-        final byte[] bytes = tamperedBytes;
+        byte[] bytes = tamperedBytes;
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(bytes)))
             .as("Direct deserialization of Iban must be rejected")
@@ -897,7 +897,7 @@ final class IbanTest {
     @Test
     void deserialization_validIban_createsNewInstance() throws IOException, ClassNotFoundException {
         Iban original = Iban.of("NL91ABNA0417164300");
-        final Iban iban = original;
+        Iban iban = original;
         Iban restored = TestUtil.deserialize(TestUtil.serialize(iban));
 
         assertThatIban(restored)
@@ -922,7 +922,7 @@ final class IbanTest {
     void serialization_sepaIban_preservesSepaFlag(String ibanInput, boolean expectedSepa)
             throws IOException, ClassNotFoundException {
         Iban original = Iban.of(ibanInput.trim());
-        final Iban iban = original;
+        Iban iban = original;
         Iban restored = TestUtil.deserialize(TestUtil.serialize(iban));
 
         assertThat(restored.isSepa())

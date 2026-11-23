@@ -180,9 +180,9 @@ public final class IbanValidator {
      *
      * @since 1.8.5
      */
-    static int normalize(final CharSequence input, final int inputLen,
-        final char[] output,
-        final boolean allowSpace, final boolean allowLower) {
+    static int normalize(CharSequence input, int inputLen,
+        char[] output,
+        boolean allowSpace, boolean allowLower) {
 
         if (!allowSpace && !allowLower) {
             if (inputLen > MAX_IBAN_LENGTH) {
@@ -238,9 +238,9 @@ public final class IbanValidator {
      *
      * @since 1.8.5
      */
-    static int normalize(final String input, final int inputLen,
-        final char[] output,
-        final boolean allowSpace, final boolean allowLower) {
+    static int normalize(String input, int inputLen,
+        char[] output,
+        boolean allowSpace, boolean allowLower) {
 
         if (!allowSpace && !allowLower) {
             if (inputLen > MAX_IBAN_LENGTH) {
@@ -305,7 +305,7 @@ public final class IbanValidator {
      * @see IbanConfig#isAllowLowercase()
      * @since 1.8.0
      */
-    public static boolean isValid(final CharSequence iban) {
+    public static boolean isValid(CharSequence iban) {
         if (iban == null) {
             return false;
         }
@@ -349,7 +349,7 @@ public final class IbanValidator {
      * @see #isValid(CharSequence)
      * @since 1.8.5
      */
-    public static boolean isValid(final String iban) {
+    public static boolean isValid(String iban) {
         if (iban == null) {
             return false;
         }
@@ -390,7 +390,7 @@ public final class IbanValidator {
      * @see #validate(CharSequence, boolean)
      * @since 1.8.0
      */
-    static IbanValidationResult validate(final CharSequence rawIban) {
+    static IbanValidationResult validate(CharSequence rawIban) {
         return validate(rawIban, IbanConfig.isAllowSpace());
     }
 
@@ -513,7 +513,7 @@ public final class IbanValidator {
      * @see #validate(CharSequence)
      * @since 1.8.5
      */
-    static IbanValidationResult validate(final String rawIban) {
+    static IbanValidationResult validate(String rawIban) {
         return validate(rawIban, IbanConfig.isAllowSpace());
     }
 
@@ -529,7 +529,7 @@ public final class IbanValidator {
      * @see #validate(CharSequence, boolean)
      * @since 1.8.5
      */
-    static IbanValidationResult validate(final String rawIban, final boolean allowSpace) {
+    static IbanValidationResult validate(String rawIban, boolean allowSpace) {
         if (rawIban == null) {
             return IbanValidationResult.invalid(IbanValidationError.EMPTY);
         }
@@ -592,7 +592,7 @@ public final class IbanValidator {
      * @param iban the normalized IBAN {@link CharSequence} (uppercase, no spaces)
      * @return {@code true} if the checksum is valid
      */
-    public static boolean isMod97Valid(final CharSequence iban) {
+    public static boolean isMod97Valid(CharSequence iban) {
         return Mod97.isValid(iban);
     }
 
@@ -607,12 +607,12 @@ public final class IbanValidator {
      * @param iban the normalized IBAN {@link CharSequence} (uppercase, no spaces)
      * @return the remainder (0-96), or {@link #INVALID_MOD97} on invalid input
      */
-    public static int calculateMod97(final CharSequence iban) {
+    public static int calculateMod97(CharSequence iban) {
         if (iban == null) {
             return INVALID_MOD97;
         }
 
-        final int len = iban.length();
+        int len = iban.length();
 
         if (len < MIN_IBAN_LENGTH || len > MAX_IBAN_LENGTH) {
             return INVALID_MOD97;

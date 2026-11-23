@@ -68,7 +68,7 @@ public final class BicValidator {
      *
      * @since 1.8.8
      */
-    public static boolean isValid(final CharSequence bic) {
+    public static boolean isValid(CharSequence bic) {
         if (bic == null) {
             return false;
         }
@@ -93,7 +93,7 @@ public final class BicValidator {
      *
      * @since 1.8.8
      */
-    public static boolean isValid(final String bic) {
+    public static boolean isValid(String bic) {
         if (bic == null) {
             return false;
         }
@@ -118,7 +118,7 @@ public final class BicValidator {
      *
      * @since 1.8.0
      */
-    static BicValidationResult validate(final CharSequence bic) {
+    static BicValidationResult validate(CharSequence bic) {
         if (bic == null) {
             return BicValidationResult.invalid(BicValidationError.EMPTY);
         }
@@ -149,7 +149,7 @@ public final class BicValidator {
      * @param len the pre-calculated length of the sequence
      * @return the first encountered {@link BicValidationError}, or {@code null} if all characters are valid
      */
-    static BicValidationError validateInternal(final char[] buffer, final int len) {
+    static BicValidationError validateInternal(char[] buffer, int len) {
         for (int i = 0; i < len; i++) {
             char c = buffer[i];
 
@@ -184,7 +184,7 @@ public final class BicValidator {
      * @param len the pre-calculated length of the BIC (8 or 11)
      * @return {@code true} if all positional and structural constraints match, {@code false} otherwise
      */
-    static boolean isValidInternal(final char[] bic, final int len) {
+    static boolean isValidInternal(char[] bic, int len) {
         for (int i = 0; i < len; i++) {
             if (i < Bic.COUNTRY_CODE_START) {
                 if (isNotUpperCase(bic[i])) {
@@ -218,7 +218,7 @@ public final class BicValidator {
      * @param target the destination array
      * @return the destination array
      */
-    static char[] copyToBuffer(final CharSequence source, final int sourceLen, final char[] target) {
+    static char[] copyToBuffer(CharSequence source, int sourceLen, char[] target) {
         if (source instanceof String) {
             ((String) source).getChars(0, sourceLen, target, 0);
         } else if (source instanceof StringBuilder) {

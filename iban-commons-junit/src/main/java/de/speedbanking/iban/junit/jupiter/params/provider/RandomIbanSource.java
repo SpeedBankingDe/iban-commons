@@ -198,9 +198,9 @@ public @interface RandomIbanSource {
         private static List<IbanRegistry> validateAndBuild(RandomIbanSource config) {
 
             if (config.count() <= 0) {
-                throwIllegalArgument("count must be positive, but was " + config.count());
+                throwIllegalArgument(String.format("count must be positive, but was %s", config.count()));
             } else if (config.invalidPercentage() < 0 || config.invalidPercentage() > 100) {
-                throwIllegalArgument("invalidPercentage must be 0-100, but was " + config.invalidPercentage());
+                throwIllegalArgument(String.format("invalidPercentage must be 0-100, but was %s", config.invalidPercentage()));
             }
 
             Set<IbanRegistry> valueCountries = toCountrySet(config.value());
@@ -233,8 +233,8 @@ public @interface RandomIbanSource {
                         .filter(excludeCountries::contains)
                         .collect(toList());
                     if (!overlap.isEmpty()) {
-                        throwIllegalArgument("countries appear in both include and exclude: "
-                            + overlap.stream().map(IbanRegistry::getCountryCode).collect(joining(", ")));
+                        throwIllegalArgument(String.format("countries appear in both include and exclude: %s",
+                            overlap.stream().map(IbanRegistry::getCountryCode).collect(joining(", "))));
                     }
                 }
 
@@ -267,7 +267,7 @@ public @interface RandomIbanSource {
         }
 
         private static void throwIllegalArgument(String message) {
-            throw new IllegalArgumentException("@" + RandomIbanSource.class.getSimpleName() + ": " + message);
+            throw new IllegalArgumentException(String.format("@%s: %s", RandomIbanSource.class.getSimpleName(), message));
         }
 
         /**

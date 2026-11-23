@@ -3513,7 +3513,7 @@ public enum IbanRegistry {
      * @return the matching {@link IbanRegistry} constant,
      *         or {@code null} if the code is {@code null}, not exactly two characters, or unknown in this registry
      */
-    public static IbanRegistry getByCode(final CharSequence code) {
+    public static IbanRegistry getByCode(CharSequence code) {
         return code == null || code.length() != 2 ? null : getByCode(code.charAt(0), code.charAt(1));
     }
 
@@ -3526,7 +3526,7 @@ public enum IbanRegistry {
      * @param c2 the second character of the country code
      * @return the {@code IbanRegistry} entry, or {@code null} if unknown in this registry
      */
-    public static IbanRegistry getByCode(final char c1, final char c2) {
+    public static IbanRegistry getByCode(char c1, char c2) {
         int idx = calcLookupIndex(c1, c2);
         return idx < 0 ? null : ALL_ENTRIES[idx];
     }
@@ -3541,7 +3541,7 @@ public enum IbanRegistry {
      * @param c2 the second character of the country code
      * @return the base {@code IbanRegistry} entry, or {@code null} if derived or unknown in this registry
      */
-    public static IbanRegistry getBaseEntryByCode(final char c1, final char c2) {
+    public static IbanRegistry getBaseEntryByCode(char c1, char c2) {
         int idx = calcLookupIndex(c1, c2);
         return idx < 0 ? null : BASE_ENTRIES[idx];
     }
@@ -3660,14 +3660,14 @@ public enum IbanRegistry {
             StructureData build() {
                 for (IbanComponentType component : Arrays.asList(IbanComponentType.BBAN, IbanComponentType.BANK_CODE, IbanComponentType.ACCOUNT_NUMBER)) {
                     if (!components.containsKey(component)) {
-                        throw new IllegalStateException(component.getLabel() + " must be set");
+                        throw new IllegalStateException(String.format("%s must be set", component.getLabel()));
                     }
                 }
 
                 int derivedIbanLength = MIN_IBAN_BASE_LENGTH + IbanPatternConverter.calculateTotalLength(components.get(IbanComponentType.BBAN).getPattern());
                 if (derivedIbanLength < MIN_IBAN_LEN || derivedIbanLength > MAX_IBAN_LEN) { // ISO 13616 limits
                     throw new IllegalStateException(
-                        "IBAN length must be between " + MIN_IBAN_LEN + " and " + MAX_IBAN_LEN + ", but was " + derivedIbanLength);
+                        String.format("IBAN length must be between %s and %s, but was %s", MIN_IBAN_LEN, MAX_IBAN_LEN, derivedIbanLength));
                 }
 
                 return new StructureData(this);
