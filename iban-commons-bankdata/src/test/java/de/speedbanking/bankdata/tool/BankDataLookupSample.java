@@ -84,7 +84,7 @@ public final class BankDataLookupSample {
             }
         }
         if (assignedBankData.isEmpty()) {
-            throw new IllegalStateException("No BIC-assigned bank data available for country " + countryCode);
+            throw new IllegalStateException(String.format("No BIC-assigned bank data available for country %s", countryCode));
         }
         BankData bankData = randomElement(assignedBankData);
 

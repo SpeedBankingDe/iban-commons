@@ -334,7 +334,7 @@ public final class TestUtil {
         try {
             constructor = clazz.getDeclaredConstructor();
         } catch (NoSuchMethodException | SecurityException ex) {
-            throw new AssertionError("Private default constructor not found for " + clazz.getSimpleName(), ex);
+            throw new AssertionError(String.format("Private default constructor not found for %s", clazz.getSimpleName()), ex);
         }
 
         assertThat(Modifier.isPrivate(constructor.getModifiers()))

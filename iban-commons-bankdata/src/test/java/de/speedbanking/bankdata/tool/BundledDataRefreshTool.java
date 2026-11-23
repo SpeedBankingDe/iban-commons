@@ -146,7 +146,7 @@ public final class BundledDataRefreshTool {
      */
     static boolean allowsBundledSnapshot(String countryCode) {
         return BankDataRegistry.getLoader(countryCode)
-            .orElseThrow(() -> new IllegalStateException("No loader registered for country " + countryCode))
+            .orElseThrow(() -> new IllegalStateException(String.format("No loader registered for country %s", countryCode)))
             .allowsBundledSnapshot();
     }
 
@@ -196,7 +196,7 @@ public final class BundledDataRefreshTool {
     private static RefreshResult refreshCountry(String countryCode, Downloader downloader) throws IOException, BankDataParseException {
         Optional<CountryBankDataLoader> maybeLoader = BankDataRegistry.getLoader(countryCode);
         if (!maybeLoader.isPresent()) {
-            throw new IllegalStateException("No loader registered for country " + countryCode);
+            throw new IllegalStateException(String.format("No loader registered for country %s", countryCode));
         }
         CountryBankDataLoader loader = maybeLoader.get();
 

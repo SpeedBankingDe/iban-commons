@@ -118,7 +118,7 @@ final class BankDataLoaderChTest {
         return records.stream()
             .filter(r -> r.getBankCode().equals(bankCode))
             .findFirst()
-            .orElseThrow(() -> new AssertionError("No record found for bank code " + bankCode));
+            .orElseThrow(() -> new AssertionError(String.format("No record found for bank code %s", bankCode)));
     }
 
 }

@@ -45,6 +45,11 @@
         <property name="checks" value="JavadocMethod|MissingJavadocMethod|MissingJavadocType"/>
         <property name="files" value="[\\/]src[\\/]test[\\/]"/>
     </module>
+    <!-- the generated IbanRegistry constants keep the upstream spelling of SWIFT registry addresses -->
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="asciiPunctuation"/>
+        <property name="files" value="IbanRegistry\.java$"/>
+    </module>
     <module name="SuppressWarningsFilter"/>
 
     <module name="TreeWalker">
@@ -167,6 +172,21 @@
         <module name="RegexpSinglelineJava">
             <property name="format" value="\s+$"/>
             <property name="message" value="Line has trailing whitespace."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="id" value="asciiPunctuation"/>
+            <property name="format" value="[&#x2013;&#x2014;&#x2018;&#x2019;&#x201C;&#x201D;&#x2026;&#x2192;&#x2212;]"/>
+            <property name="message" value="Use ASCII punctuation instead of typographic dashes, quotes, arrows or ellipses."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="(\(|, )final |^\s{8,}final [\w&lt;&gt;\[\]?]+ \w+ ="/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message" value="No final on parameters or local variables."/>
+        </module>
+        <module name="RegexpSinglelineJava">
+            <property name="format" value="new \w*(Exception|Error)\((?!String\.format)[^;]*(&quot;\s*\+|\+\s*&quot;)"/>
+            <property name="ignoreComments" value="true"/>
+            <property name="message" value="Build exception messages with String.format, not string concatenation."/>
         </module>
         <module name="RightCurly"/>
         <module name="SimplifyBooleanExpression"/>

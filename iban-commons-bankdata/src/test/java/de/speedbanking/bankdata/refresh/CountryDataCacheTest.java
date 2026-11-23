@@ -672,7 +672,7 @@ final class CountryDataCacheTest {
             requestedUris.add(uri);
             byte[] bytes = responses.get(uri);
             if (bytes == null) {
-                throw new IOException("No canned response configured for " + uri);
+                throw new IOException(String.format("No canned response configured for %s", uri));
             }
             return bytes;
         }
