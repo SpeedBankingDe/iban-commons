@@ -24,7 +24,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -88,9 +87,9 @@ public final class MinimalXlsxReader {
             while ((entry = zip.getNextEntry()) != null) {
                 String name = entry.getName();
                 if (SHARED_STRINGS_ENTRY.equals(name)) {
-                    sharedStringsXml = readAll(zip);
+                    sharedStringsXml = BoundedStreams.readAll(zip, BoundedStreams.MAX_BYTES, SHARED_STRINGS_ENTRY);
                 } else if (SHEET1_ENTRY.equals(name)) {
-                    sheetXml = readAll(zip);
+                    sheetXml = BoundedStreams.readAll(zip, BoundedStreams.MAX_BYTES, SHEET1_ENTRY);
                 }
             }
         }
@@ -258,16 +257,6 @@ public final class MinimalXlsxReader {
         } catch (ParserConfigurationException | SAXException ex) {
             throw new IOException("Failed to parse XLSX XML part", ex);
         }
-    }
-
-    private static byte[] readAll(InputStream in) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] chunk = new byte[4096];
-        int bytesRead;
-        while ((bytesRead = in.read(chunk)) != -1) {
-            buffer.write(chunk, 0, bytesRead);
-        }
-        return buffer.toByteArray();
     }
 
 }

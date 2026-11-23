@@ -3,15 +3,23 @@ package de.speedbanking.bankdata.io;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -158,11 +166,62 @@ final class HttpDownloaderTest {
             .satisfies(ex -> assertThat(((HttpDownloadException) ex).getStatusCode()).isEqualTo(404));
     }
 
+    @Test
+    void download_announcedLengthBeyondLimit_throwsIOException() throws Exception {
+        // a raw socket rather than HttpServer, which (since JDK 25) drops the connection without
+        // sending the headers when the announced body never follows
+        try (ServerSocket socket = new ServerSocket(0, 1, InetAddress.getByName("localhost"))) {
+            Thread responder = new Thread(() -> respondWithContentLength(socket, BoundedStreams.MAX_BYTES + 1L));
+            responder.start();
+            URI uri = URI.create(String.format("http://localhost:%s/huge", socket.getLocalPort()));
+
+            assertThatThrownBy(() -> Downloader.createDefault().download(uri, TIMEOUT, TIMEOUT))
+                .isInstanceOf(IOException.class)
+                .hasMessageContaining("exceeding the limit");
+            responder.join(TIMEOUT.toMillis());
+        }
+    }
+
+    @ParameterizedTest(name = "[{index}] {0} -> {1}: {2}")
+    @CsvSource(delimiter = '|', value = {
+        "https://a.example/x | http://b.example/y  | true",
+        "HTTPS://a.example/x | ftp://b.example/y   | true",
+        "https://a.example/x | https://b.example/y | false",
+        "http://a.example/x  | https://b.example/y | false",
+        "http://a.example/x  | http://b.example/y  | false",
+    })
+    void isDowngrade_schemeCombination_detectsHttpsToNonHttps(URI source, URI target, boolean expected) {
+        assertThat(HttpDownloader.isDowngrade(source, target)).isEqualTo(expected);
+    }
+
     private HttpServer startServer(String path, com.sun.net.httpserver.HttpHandler handler) throws IOException {
         HttpServer newServer = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
         newServer.createContext(path, handler);
         newServer.start();
         return newServer;
+    }
+
+    /**
+     * Answers a single request with a 200 status line and the given {@code Content-Length}, but no
+     * body, then waits for the client to hang up.
+     *
+     * @param socket        the listening socket
+     * @param contentLength the announced body length
+     */
+    private static void respondWithContentLength(ServerSocket socket, long contentLength) {
+        try (Socket client = socket.accept();
+             BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), US_ASCII));
+             OutputStream out = client.getOutputStream()) {
+            String line = in.readLine();
+            while (line != null && !line.isEmpty()) {
+                line = in.readLine();
+            }
+            out.write(String.format("HTTP/1.1 200 OK\r\nContent-Length: %s\r\n\r\n", contentLength).getBytes(US_ASCII));
+            out.flush();
+            in.read();
+        } catch (IOException ignored) {
+            // the client closing the connection early is the expected outcome
+        }
     }
 
     private URI uri(String path) {

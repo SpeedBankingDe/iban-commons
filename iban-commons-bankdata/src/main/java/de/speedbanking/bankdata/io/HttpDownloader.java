@@ -15,9 +15,7 @@
  */
 package de.speedbanking.bankdata.io;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
@@ -32,7 +30,8 @@ import java.time.Duration;
  * {@link HttpURLConnection#setInstanceFollowRedirects(boolean)} does not follow redirects across
  * protocol changes (e.g. {@code http -> https}), and does not follow a {@code 308} at all, so this
  * implementation manually follows a single additional redirect hop when it still receives a
- * {@code 301}, {@code 302}, {@code 303}, {@code 307}, or {@code 308} response.
+ * {@code 301}, {@code 302}, {@code 303}, {@code 307}, or {@code 308} response. That hop is refused
+ * if it would leave HTTPS. Response bodies are capped at {@link BoundedStreams#MAX_BYTES}.
  * <p>
  * <strong>Why a browser {@code User-Agent}.</strong> Several of the national sources this module
  * downloads from (see the per-country {@code BankDataLoader*} classes) block or degrade requests
@@ -94,12 +93,20 @@ final class HttpDownloader implements Downloader {
                     throw new IOException("Received redirect status " + status + " from " + uri
                         + " with a malformed Location header '" + location + "'", ex);
                 }
+                if (isDowngrade(uri, target)) {
+                    throw new IOException(String.format("Refusing redirect from %s to non-HTTPS location %s", uri, target));
+                }
                 return download(target, connectTimeout, readTimeout, remainingHops - 1);
             }
             if (status < 200 || status >= 300) {
                 throw new HttpDownloadException("Unexpected HTTP status " + status + " downloading " + uri, status);
             }
-            return readFully(connection.getInputStream());
+            long contentLength = connection.getContentLengthLong();
+            if (contentLength > BoundedStreams.MAX_BYTES) {
+                throw new IOException(String.format("Response from %s announces %d bytes, exceeding the limit of %d bytes",
+                    uri, contentLength, BoundedStreams.MAX_BYTES));
+            }
+            return BoundedStreams.readAll(connection.getInputStream(), BoundedStreams.MAX_BYTES, String.format("Response from %s", uri));
         } finally {
             connection.disconnect();
         }
@@ -124,14 +131,15 @@ final class HttpDownloader implements Downloader {
             || status == 308;
     }
 
-    private static byte[] readFully(InputStream in) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte[] chunk = new byte[8192];
-        int bytesRead;
-        while ((bytesRead = in.read(chunk)) != -1) {
-            buffer.write(chunk, 0, bytesRead);
-        }
-        return buffer.toByteArray();
+    /**
+     * Whether following a redirect from {@code source} to {@code target} would leave HTTPS.
+     *
+     * @param source the URI that answered with the redirect
+     * @param target the resolved redirect location
+     * @return {@code true} if {@code source} uses HTTPS and {@code target} does not
+     */
+    static boolean isDowngrade(URI source, URI target) {
+        return "https".equalsIgnoreCase(source.getScheme()) && !"https".equalsIgnoreCase(target.getScheme());
     }
 
 }
