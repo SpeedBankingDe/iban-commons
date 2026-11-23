@@ -953,6 +953,32 @@ final class IbanTest {
     }
 
     /**
+     * An IBAN created while NCD validation is off must still deserialize in a JVM that has it on.
+     * The CIN of the registry example IT60X0542811101000000123456 is changed from X to Y, with the
+     * IBAN check digits recalculated, so only the national check digit is wrong.
+     *
+     * @throws Exception if serialization fails
+     */
+    @Test
+    void mementoReadResolve_invalidNcdWithNcdValidationOn_restoresIban() throws Exception {
+        String badNcd = "IT64Y0542811101000000123456";
+        IbanConfig ibanConfig = IbanConfig.get();
+
+        try {
+            IbanConfig.reset(IbanConfig.builder().validateNcd(false).build());
+            byte[] bytes = TestUtil.serialize(Iban.of(badNcd));
+            IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
+
+            Iban restored = TestUtil.deserialize(bytes);
+
+            assertThat(Iban.isValid(badNcd)).isFalse();
+            assertThat(restored.toString()).isEqualTo(badNcd);
+        } finally {
+            IbanConfig.reset(ibanConfig);
+        }
+    }
+
+    /**
      * Verifies that {@link Iban.Memento#readObject(ObjectInputStream)} throws
      * {@link InvalidObjectException} when the stream contains an unsupported version number.
      * <p>

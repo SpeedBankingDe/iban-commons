@@ -126,10 +126,22 @@ final class CountryValidator {
      *         and, if present, its National Check Digit is valid, {@code false} otherwise
      */
     boolean validateIban(char[] iban) {
+        return validateBbanPattern(iban) && validateNationalCheckDigit(iban);
+    }
+
+    /**
+     * Checks the BBAN inside the given IBAN against the country's pattern only, without the
+     * National Check Digit. The same preconditions as for {@link #validateIban(char[])} apply.
+     *
+     * @param iban the fully assembled, normalized IBAN as a {@code char[]}
+     * @return {@code true} if the IBAN conforms to the country's structural rules
+     *
+     * @since 1.8.15
+     */
+    boolean validateBbanPattern(char[] iban) {
         return isAllDigitsInRanges(iban, digitRanges)
             && isAllUpperCaseInRanges(iban, upperCaseRanges)
-            && isAllDigitOrUpperCaseInRanges(iban, digitOrUpperCaseRanges)
-            && validateNationalCheckDigit(iban);
+            && isAllDigitOrUpperCaseInRanges(iban, digitOrUpperCaseRanges);
     }
 
     /**

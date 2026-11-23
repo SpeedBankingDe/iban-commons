@@ -485,6 +485,18 @@ public final class IbanValidator {
      * @since 1.8.12
      */
     static IbanValidationError validateStructure(char[] iban) {
+        return validateStructure(iban, true);
+    }
+
+    /**
+     * Like {@link #validateStructure(char[])}, but lets the caller skip the National Check Digit.
+     *
+     * @param iban     the normalized IBAN, exactly as long as the IBAN; must not be {@code null}
+     * @param checkNcd whether to check the National Check Digit, subject to {@link IbanConfig#isValidateNcd()}
+     * @return the first validation error found, or {@code null} if the structure is valid
+     * @since 1.8.15
+     */
+    static IbanValidationError validateStructure(char[] iban, boolean checkNcd) {
         if (iban.length < MIN_IBAN_LENGTH || iban.length > MAX_IBAN_LENGTH) {
             return IbanValidationError.INCORRECT_LENGTH;
         }
@@ -496,7 +508,9 @@ public final class IbanValidator {
             return IbanValidationError.INCORRECT_LENGTH_COUNTRY;
         } else if (isNotDigit(iban[IbanRegistry.INDEX_CHECK_DIGIT1]) || isNotDigit(iban[IbanRegistry.INDEX_CHECK_DIGIT2])) {
             return IbanValidationError.INVALID_CHECK_DIGITS;
-        } else if (!getCountryValidator(countryData).validateIban(iban)) {
+        }
+        CountryValidator validator = getCountryValidator(countryData);
+        if (checkNcd ? !validator.validateIban(iban) : !validator.validateBbanPattern(iban)) {
             return IbanValidationError.INVALID_STRUCTURE;
         }
         return null;

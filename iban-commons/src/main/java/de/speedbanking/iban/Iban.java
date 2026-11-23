@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import de.speedbanking.util.Country;
 import de.speedbanking.util.Currency;
+import de.speedbanking.util.Mod97;
 
 import java.io.IOException;
 import java.io.InvalidObjectException;
@@ -797,8 +798,8 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
      * Implements the <em>Serialization Proxy Pattern</em>: during serialization,
      * {@link Iban#writeReplace()} substitutes the {@code Iban} instance with this
      * lightweight carrier. During deserialization, {@link #readResolve()} reconstructs
-     * the {@code Iban} by calling {@link Iban#parse(CharSequence)}, which runs the full
-     * validation pipeline. This guarantees that:
+     * the {@code Iban} after validating length, country, BBAN structure and checksum
+     * again. This guarantees that:
      * <ul>
      *   <li>No invalid {@code Iban} object can be injected via a crafted byte stream.</li>
      *   <li>The {@code Iban} class needs neither a public no-arg constructor nor mutable fields.</li>
@@ -859,21 +860,30 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
         }
 
         /**
-         * Reconstructs the {@link Iban} instance after deserialization by running full validation.
+         * Reconstructs the {@link Iban} instance after deserialization by running the validation
+         * pipeline again.
+         * <p>
+         * The National Check Digit is not checked here: whether an {@code Iban} could be created
+         * depended on the {@link IbanConfig} of the JVM that serialized it, and a JVM configured
+         * with {@link IbanConfig#isValidateNcd()} must still be able to read it back.
          *
          * @return the validated, immutable {@link Iban} instance
          * @throws InvalidObjectException if the stored IBAN string fails validation
          */
         private Object readResolve() throws InvalidObjectException {
-            try {
-                return parse(this.value);
-            } catch (RuntimeException ex) {
-                InvalidObjectException ioe =
-                    new InvalidObjectException(String.format("Cannot restore %s from serialized form: %s",
-                        Iban.class.getSimpleName(), ex.getMessage()));
-                ioe.initCause(ex);
+            char[] chars = value.toCharArray();
+            IbanValidationError error = IbanValidator.validateStructure(chars, false);
+            if (error == null && !Mod97.isValid(chars)) {
+                error = IbanValidationError.INVALID_CHECKSUM;
+            }
+            if (error != null) {
+                InvalidIbanException cause = InvalidIbanException.of(error, value);
+                InvalidObjectException ioe = new InvalidObjectException(String.format("Cannot restore %s from serialized form: %s",
+                    Iban.class.getSimpleName(), cause.getMessage()));
+                ioe.initCause(cause);
                 throw ioe;
             }
+            return new Iban(value, IbanRegistry.getBaseEntryByCode(chars[0], chars[1]));
         }
     }
 
