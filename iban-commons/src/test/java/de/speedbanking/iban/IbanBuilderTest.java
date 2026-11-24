@@ -15,7 +15,6 @@ import static de.speedbanking.iban.junit.jupiter.api.IbanAssertions.assertThatIn
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import de.speedbanking.iban.IbanBuilder.AccountTypeAndControlIbanBuilderWithBranchCode;
 import de.speedbanking.iban.IbanBuilder.AccountTypeIbanBuilderWithBranchCode;
@@ -72,37 +71,6 @@ final class IbanBuilderTest {
         IbanBuilder<?> giBuilder = IbanRegistry.GR.builder();
         assertThat(giBuilder)
             .isInstanceOf(IbanBuilderWithBranchCode.class);
-    }
-
-    @DisplayName("requireCountry: returns actual when it exactly matches the expected base country")
-    @Test
-    void requireCountry_exactMatch_returnsActual() {
-        assertThat(IbanBuilder.requireCountry(IbanRegistry.BG, IbanRegistry.BG)).isSameAs(IbanRegistry.BG);
-    }
-
-    @DisplayName("requireCountry: returns actual when it is a country derived from the expected base country")
-    @Test
-    void requireCountry_derivedCountry_returnsActual() {
-        // AX (Åland Islands) ist in der Registry von FI (Finnland) abgeleitet; keines der acht
-        // Custom-Builder-Länder hat aktuell eine abgeleitete Variante - daher hier bewusst
-        // sachfremde, aber reale Registry-Daten, um genau diesen Zweig zu erreichen.
-        assertThat(IbanBuilder.requireCountry(IbanRegistry.AX, IbanRegistry.FI)).isSameAs(IbanRegistry.AX);
-    }
-
-    @DisplayName("requireCountry: throws IllegalArgumentException for an unrelated country")
-    @Test
-    void requireCountry_unrelatedCountry_throwsIllegalArgumentException() {
-        assertThatThrownBy(() -> IbanBuilder.requireCountry(IbanRegistry.DE, IbanRegistry.BG))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("This builder only supports BG or derived countries but was constructed with country data for DE");
-    }
-
-    @DisplayName("requireCountry: throws NullPointerException when actual is null")
-    @Test
-    void requireCountry_nullActual_throwsNPE() {
-        assertThatNullPointerException()
-            .isThrownBy(() -> IbanBuilder.requireCountry(null, IbanRegistry.BG))
-            .withMessage("countryData must not be null");
     }
 
     @DisplayName("AbstractCustomIbanBuilder: throws NPE with descriptive message when component undefined for country")

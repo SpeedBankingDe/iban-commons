@@ -112,34 +112,6 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
     }
 
     /**
-     * Validates that {@code actual} is either the {@code expectedBase} country entry or a derived country based on it.
-     * <p>
-     * Intended as a guard for builder subclasses whose custom BBAN component (pattern and position)
-     * is hardcoded for a single base country and therefore cannot honor an arbitrary {@link IbanRegistry}
-     * argument; such a guard turns an accidental mis-wiring into an immediate, clear failure instead of
-     * silently producing an invalid IBAN.
-     * <p>
-     * Currently unused within this class: none of the builders defined here are hardcoded to a single
-     * country anymore (see {@link NationalCodeIbanBuilderWithBranchCode} and its siblings, which accept
-     * any {@link IbanRegistry} whose structure defines the relevant component). Kept as package-private
-     * infrastructure for a future builder that does need this guard; remove if no other caller exists.
-     *
-     * @param actual   the country data passed to the builder constructor, must not be null
-     * @param expected the single base country this builder subclass supports, must not be null
-     * @return {@code actual}, unchanged
-     * @throws IllegalArgumentException if {@code actual} is neither {@code expectedBase} nor a country derived from it
-     */
-    static IbanRegistry requireCountry(IbanRegistry actual, IbanRegistry expected) {
-        requireNonNull(actual, "countryData must not be null");
-        if (actual == expected || (actual.isDerivedCountry() && actual.getBaseCountry() == expected)) {
-            return actual;
-        }
-        throw new IllegalArgumentException(String.format("This builder only supports %s or derived countries but was "
-            + "constructed with country data for %s",
-            expected.getCountryCode(), actual.getCountryCode()));
-    }
-
-    /**
      * Returns the configured {@link Random} instance, falling back to {@link ThreadLocalRandom#current()}
      * to avoid unnecessary synchronization overhead and allocation costs.
      *
