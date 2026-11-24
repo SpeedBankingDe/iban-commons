@@ -408,6 +408,7 @@ final class IbanBuilderTest {
     @DisplayName("fixCheckDigits: throws IllegalArgumentException when length is out of bounds")
     @ParameterizedTest(name = "[{index}] {0}")
     @ValueSource(strings = {
+        "GL0", // too short to hold both check digits
         "GL00", // too short
         "GL006471123456789012345678901234567890" // too long
     })

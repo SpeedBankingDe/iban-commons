@@ -125,6 +125,16 @@ final class IbanCountrySourceTest {
                                .isNotEqualTo("CH");
     }
 
+    @Test
+    void includeAndExclude_sameCountry_throwsIllegalStateException() {
+        assertThatIllegalStateException()
+            .isThrownBy(() -> countArguments(IbanCountrySourceDeExcludeDe.class))
+            .withMessage("No IbanRegistry entries matched the configured includeCountries/excludeCountries filter of @IbanCountrySource.");
+    }
+
+    @IbanCountrySource(includeCountries = {IbanRegistry.DE}, excludeCountries = {IbanRegistry.DE})
+    private @interface IbanCountrySourceDeExcludeDe {}
+
     // =========================================================================
     // Argument content - countryCode and countryName values
     // =========================================================================

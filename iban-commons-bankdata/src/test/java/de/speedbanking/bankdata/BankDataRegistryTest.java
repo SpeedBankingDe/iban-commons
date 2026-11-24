@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -48,6 +50,18 @@ final class BankDataRegistryTest {
     @Test
     void cacheLookup_calledTwice_returnsSameInstance() {
         assertThat(BankDataRegistry.getCache("DE")).isSameAs(BankDataRegistry.getCache("DE"));
+    }
+
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ValueSource(strings = {
+        "XA", // class is no loader
+        "XB", // loader class is abstract
+        "XC", // loader class has no no-argument constructor
+        "XD", // static initializer of the loader class fails
+        "XE", // no loader class at all
+    })
+    void tryLoadForCountry_unusableLoaderClass_returnsNull(String countryCode) {
+        assertThat(BankDataRegistry.tryLoadForCountry(countryCode)).isNull();
     }
 
     @Test

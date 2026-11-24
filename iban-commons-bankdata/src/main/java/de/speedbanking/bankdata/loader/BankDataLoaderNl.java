@@ -16,7 +16,6 @@
 package de.speedbanking.bankdata.loader;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 
 import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bankdata.io.ColumnDefinition;
@@ -132,7 +131,7 @@ public final class BankDataLoaderNl extends AbstractCountryBankDataLoader<BankDa
         Map<String, BankData> byBankCode = new LinkedHashMap<>();
 
         for (String[] arrayFields : rows) {
-            List<String> fields = arrayFields != null ? asList(arrayFields) : emptyList();
+            List<String> fields = asList(arrayFields);
             String identifier = getColumns().getOrEmpty(Column.IDENTIFIER, fields);
             if (!isBankIdentifier(identifier)) {
                 continue; // blank row, or a non-data row (title row, column-header row)

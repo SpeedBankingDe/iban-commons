@@ -3,6 +3,8 @@ package de.speedbanking.iban.junit.jupiter.params.provider;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import static java.util.stream.Collectors.toList;
+
 import de.speedbanking.iban.Iban;
 import de.speedbanking.iban.IbanRegistry;
 
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -118,6 +121,25 @@ final class RandomIbanSourceTest {
                 String iban = (String) arg.get()[0];
                 assertThat(iban).doesNotStartWith("DE");
             });
+    }
+
+    @Test
+    void provideArguments_disjointExcludeAndHalfInvalid_mixesValidAndInvalidIbans() {
+        // with 200 draws at 50 percent, getting only valid or only invalid IBANs is practically impossible
+        RandomIbanSource mockAnnotation = createAnnotation(
+            null, 200, 50,
+            new IbanRegistry[] {IbanRegistry.AT, IbanRegistry.DE},
+            new IbanRegistry[] {IbanRegistry.CH},
+            RandomIbanSource.Sepa.ANY);
+        provider.accept(mockAnnotation);
+
+        List<String> ibans = provider.provideArguments(null, null)
+            .map(arg -> (String) arg.get()[0])
+            .collect(toList());
+
+        // a corrupted IBAN may also have a corrupted country code, so only the valid ones are checked for it
+        assertThat(ibans).hasSize(200).anyMatch(iban -> !Iban.isValid(iban));
+        assertThat(ibans.stream().filter(Iban::isValid)).isNotEmpty().allMatch(iban -> iban.matches("(AT|DE).*"));
     }
 
     @Test

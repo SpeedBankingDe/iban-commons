@@ -328,6 +328,14 @@ final class IbanRegistrySourceTest {
         assertThat(desc).contains("minIbanLength=16").contains("maxIbanLength=20");
     }
 
+    @Test
+    void describe_withCurrencies_containsCurrencyCodes() {
+        IbanRegistrySource src = IbanRegistrySourceEurGbp.class.getAnnotation(IbanRegistrySource.class);
+        String desc = IbanRegistrySource.IbanRegistryArgumentsProvider.describe(src);
+
+        assertThat(desc).contains("currency=EUR, GBP");
+    }
+
     // =========================================================================
     // Helper
     // =========================================================================

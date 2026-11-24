@@ -48,6 +48,18 @@ final class AbstractCountryBankDataLoaderTest {
         }
     }
 
+    /** Invalid: simple name too short to end in a country code. */
+    private static final class L extends AbstractCountryBankDataLoader<BankDataLoaderPl.Column> {
+        L() {
+            super(BankDataLoaderPl.Column.class, DEFAULT_URI);
+        }
+
+        @Override
+        public List<BankData> parse(InputStream rawSource, String sourceVersion) throws BankDataParseException {
+            throw new BankDataParseException("not needed for this test");
+        }
+    }
+
     @Test
     void constructor_derivesCountryCodeFromClassNameSuffix() {
         assertThat(new LoaderPl().getCountryCode()).isEqualTo("PL");
@@ -57,6 +69,12 @@ final class AbstractCountryBankDataLoaderTest {
     void constructor_classNameSuffixNotACountry_throws() {
         assertThatIllegalStateException().isThrownBy(LoaderZz::new)
             .withMessageContaining("Cannot derive country");
+    }
+
+    @Test
+    void constructor_classNameTooShort_throws() {
+        assertThatIllegalStateException().isThrownBy(L::new)
+            .withMessage("Class name 'L' is too short to extract ISO country code");
     }
 
     @Test

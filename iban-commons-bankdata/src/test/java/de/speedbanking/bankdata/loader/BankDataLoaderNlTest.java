@@ -85,7 +85,7 @@ final class BankDataLoaderNlTest {
 
     /**
      * Builds a minimal XLSX mirroring the real {@code BIC-lijst-NL.xlsx}: a single-cell title row,
-     * then a header row, then data rows: BIC;Identifier;Name.
+     * then a header row, then data rows: BIC;Identifier;Name, and finally rows that must be skipped.
      */
     private static byte[] buildSampleXlsx() throws IOException {
         String sharedStringsXml =
@@ -104,6 +104,8 @@ final class BankDataLoaderNlTest {
             + "<si><t>ANDLNL2A</t></si>"                // 10
             + "<si><t>ANDL</t></si>"                    // 11
             + "<si><t>ANADOLUBANK</t></si>"             // 12
+            + "<si><t>AB1C</t></si>"                    // 13 (not a bank identifier: digit)
+            + "<si><t>ABcD</t></si>"                    // 14 (not a bank identifier: lowercase letter)
             + "</sst>";
 
         String sheetXml =
@@ -122,6 +124,8 @@ final class BankDataLoaderNlTest {
             + "<row r=\"5\">"
             + "<c r=\"B5\" t=\"s\"><v>11</v></c><c r=\"C5\" t=\"s\"><v>12</v></c>"
             + "</row>"
+            + "<row r=\"6\"><c r=\"B6\" t=\"s\"><v>13</v></c></row>"
+            + "<row r=\"8\"><c r=\"B8\" t=\"s\"><v>14</v></c></row>" // row 7 missing, as for an empty row
             + "</sheetData></worksheet>";
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

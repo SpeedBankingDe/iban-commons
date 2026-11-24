@@ -49,7 +49,8 @@ final class NaiveLogFormatterTest {
     @CsvSource({
         "de.speedbanking.bankdata.refresh.CountryDataCache, CountryDataCache",
         "CountryDataCache, CountryDataCache",
-        "'', ''"
+        "'', ''",
+        ", ''", // no logger name at all
     })
     void format_shortLoggerName_extractsSimpleClassName(String loggerName, String expectedShortName) {
         LogRecord logRecord = new LogRecord(Level.INFO, "test");

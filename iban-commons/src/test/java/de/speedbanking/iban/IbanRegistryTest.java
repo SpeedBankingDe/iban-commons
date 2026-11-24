@@ -275,6 +275,13 @@ final class IbanRegistryTest {
             .isNull();
     }
 
+    @ParameterizedTest(name = "[{index}] ''{0}{1}''")
+    @CsvSource({"@, E", "d, E", "D, @", "D, e"})
+    void getByCode_charOutsideUpperCaseLetters_returnsNull(char c1, char c2) {
+        assertThat(IbanRegistry.getByCode(c1, c2)).isNull();
+        assertThat(IbanRegistry.getBaseEntryByCode(c1, c2)).isNull();
+    }
+
     @DisplayName("isBaseCountry/isDerivedCountry should reflect the base/derived hierarchy")
     @Test
     void isBaseCountryAndIsDerivedCountry_registry_reflectHierarchy() {
@@ -420,7 +427,7 @@ final class IbanRegistryTest {
 
     @DisplayName("Should satisfy equals and hashCode for ContactData")
     @Test
-    @SuppressWarnings("SelfAssertion")
+    @SuppressWarnings({"SelfAssertion", "PMD.EqualsNull"}) // equals(null) is tested as well
     void contactData_equalsAndHashCode_areConsistent() {
         IbanRegistry.ContactData contact1 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
         IbanRegistry.ContactData contact2 = IbanRegistry.ContactData.of("Org", "Dept", "Street", "City", "Mail", "Tel");
@@ -433,6 +440,7 @@ final class IbanRegistryTest {
             .isNotEqualTo(contactDiff)
             .isNotNull()
             .isNotEqualTo(new Object());
+        assertThat(contact1.equals(null)).isFalse();
     }
 
     @DisplayName("Should cover all equality branches for ContactData")

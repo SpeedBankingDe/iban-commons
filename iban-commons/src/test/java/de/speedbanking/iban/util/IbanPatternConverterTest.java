@@ -192,6 +192,17 @@ final class IbanPatternConverterTest {
     }
 
     @Test
+    void isEmpty_withAndWithoutSegments_reflectsSegmentCount() {
+        assertThat(Segments.of().isEmpty()).isTrue();
+        assertThat(IbanPatternConverter.parseSegments("4!a").isEmpty()).isFalse();
+    }
+
+    @Test
+    void equals_otherType_returnsFalse() {
+        assertThat(IbanPatternConverter.parseSegments("4!a")).isNotEqualTo("4!a");
+    }
+
+    @Test
     void allMatch_predicate_returnsWhetherAllSegmentsMatch() {
         Segments segments = Segments.of(Segment.of(NUMERIC, 4), Segment.of(NUMERIC, 2));
 

@@ -1,12 +1,14 @@
 package de.speedbanking.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 final class Alpha2EnumLookupTest {
@@ -106,6 +108,14 @@ final class Alpha2EnumLookupTest {
         assertThrows(IllegalArgumentException.class, () ->
             new Alpha2EnumLookup<>(BadCaseEnum.class, BadCaseEnum::getCode)
         );
+    }
+
+    @DisplayName("should throw IllegalArgumentException when a code is null or its second letter is not uppercase")
+    @ParameterizedTest(name = "[{index}] code ''{0}''")
+    @NullSource
+    @ValueSource(strings = {"Aa", "A1"})
+    void shouldThrowExceptionForNullCodeOrInvalidSecondLetter(String code) {
+        assertThatIllegalArgumentException().isThrownBy(() -> new Alpha2EnumLookup<>(ValidTestEnum.class, e -> code));
     }
 
 }

@@ -9,6 +9,8 @@ import de.speedbanking.bankdata.BankData;
 import de.speedbanking.bankdata.spi.BankDataParseException;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -42,13 +44,17 @@ final class BankDataLoaderChTest {
         assertThat(loader.allowsBundledSnapshot()).isFalse();
     }
 
-    @Test
-    void parse_rowWithTooFewColumns_throwsBankDataParseException() {
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {
+        "700;2026-09-15;N;;070008", // far fewer than the required 21 fields
+        "700",                      // a single field that is not blank
+    })
+    void parse_rowWithTooFewColumns_throwsBankDataParseException(String row) {
         String header = "IID/QR-IID;Valid on;Concatenation;New IID/QR-IID;SIC IID;Headquarters;IID type;"
             + "QR-IID allocation;Name of bank/institution;Street Name;Building Number;Post Code;Town Name;"
             + "Country;BIC;SIC participation;RTGS customer payments, CHF;IP customer payments, CHF;"
             + "euroSIC participation;LSV+/BDD, CHF;LSV+/BDD, EUR;20260101000000\n"
-            + "700;2026-09-15;N;;070008\n"; // far fewer than the required 21 fields
+            + row + "\n";
         InputStream in = new ByteArrayInputStream(header.getBytes(UTF_8));
 
         assertThatThrownBy(() -> loader.parse(in, "test-version"))
@@ -85,6 +91,23 @@ final class BankDataLoaderChTest {
 
         assertThat(records).hasSize(1);
         assertThat((Object) records.get(0).getBic()).isNull();
+    }
+
+    @Test
+    void parse_blankLineAndRowWithoutIid_areSkipped() throws Exception {
+        String content = "IID/QR-IID;Valid on;Concatenation;New IID/QR-IID;SIC IID;Headquarters;IID type;"
+            + "QR-IID allocation;Name of bank/institution;Street Name;Building Number;Post Code;Town Name;"
+            + "Country;BIC;SIC participation;RTGS customer payments, CHF;IP customer payments, CHF;"
+            + "euroSIC participation;LSV+/BDD, CHF;LSV+/BDD, EUR;20260101000000\n"
+            + "\n"
+            + ";2026-09-15;N;;070008;700;1;;Ohne IID;Bahnhofstrasse;1;8001;Zuerich;CH;;Y;Y;Y;Y;Y;N\n"
+            + "700;2026-09-15;N;;070008;700;1;;Musterbank;Bahnhofstrasse;1;8001;Zuerich;CH;"
+            + "UBSWCHZHXXX;Y;Y;Y;Y;Y;N\n";
+        InputStream in = new ByteArrayInputStream(content.getBytes(UTF_8));
+
+        List<BankData> records = loader.parse(in, "test-version");
+
+        assertThat(records).extracting(BankData::getBankCode).containsExactly("00700");
     }
 
     @Test

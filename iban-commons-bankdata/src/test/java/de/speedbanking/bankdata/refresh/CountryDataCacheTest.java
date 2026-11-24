@@ -463,6 +463,7 @@ final class CountryDataCacheTest {
 
     @ParameterizedTest(name = "[{index}] HTTP {0} -> {1}")
     @CsvSource({
+        "308, WARNING", // too many redirects, not a client error
         "400, SEVERE",
         "404, SEVERE",
         "429, WARNING", // rate limited, expected to recover by itself

@@ -47,6 +47,19 @@ final class IbanConstraintValidatorGlobalAllowSpaceTest {
         }
     }
 
+    static final class WithSpacedIban {
+        @ValidIban(allowSpace = true)
+        private final String iban;
+
+        WithSpacedIban(String iban) {
+            this.iban = iban;
+        }
+
+        String iban() {
+            return iban;
+        }
+    }
+
     @BeforeEach
     void configureGlobalAllowSpace() {
         IbanConfigTestBridge.reset(IbanConfig.builder().allowSpace(true).build());
@@ -75,6 +88,12 @@ final class IbanConstraintValidatorGlobalAllowSpaceTest {
     @Test
     void compactIban_globalAllowSpaceTrue_annotationAllowSpaceFalse_isValid() {
         assertThat(validator.validate(new WithIban("DE89370400440532013000"))).isEmpty();
+    }
+
+    @DisplayName("grouped IBAN passes when both the annotation and the global config allow spaces")
+    @Test
+    void groupedIban_globalAndAnnotationAllowSpaceTrue_isValid() {
+        assertThat(validator.validate(new WithSpacedIban("DE89 3704 0044 0532 0130 00"))).isEmpty();
     }
 
 }

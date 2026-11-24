@@ -314,6 +314,7 @@ final class BicTest {
         "MARKDEFF | MARKDEFFXXX",
         "NEDSZAJJ | NEDSZAJJXXX"
     })
+    @SuppressWarnings("PMD.EqualsNull") // equals(null) is what is being tested
     void equality_bic8AndBic11Xxx_areEqual(String bic8Value, String bic11Value) {
         Bic bic8 = Bic.of(bic8Value);
         Bic bic11First = Bic.of(bic11Value);
@@ -333,6 +334,7 @@ final class BicTest {
         assertThat(bic8.equals(bic8))
             .as("A BIC instance must be equal to itself via explicit equals call")
             .isTrue();
+        assertThat(bic8.equals(null)).isFalse();
 
         // second chain: bic11First equals and hashCode checks
         assertThat(bic11First)

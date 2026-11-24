@@ -7,6 +7,8 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import de.speedbanking.bankdata.BankData;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -66,9 +68,10 @@ final class BankDataLoaderCzTest {
         assertThat(records.get(0).getBankCode()).isEqualTo("0300");
     }
 
-    @Test
-    void parse_blankLine_isSkipped() throws Exception {
-        String content = "header;ignored;ignored\n\n0100;Musterbanka;KOMBCZPPXXX;Y\n";
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {"", ";Musterbanka without code;KOMBCZPPXXX;Y"})
+    void parse_blankLineOrLineWithoutBankCode_isSkipped(String skippedLine) throws Exception {
+        String content = "header;ignored;ignored\n" + skippedLine + "\n0100;Musterbanka;KOMBCZPPXXX;Y\n";
         InputStream in = new ByteArrayInputStream(content.getBytes(UTF_8));
 
         List<BankData> records = loader.parse(in, "test-version");

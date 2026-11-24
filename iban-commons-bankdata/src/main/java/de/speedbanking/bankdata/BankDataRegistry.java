@@ -73,7 +73,13 @@ public final class BankDataRegistry {
         return loaders;
     }
 
-    private static CountryBankDataLoader tryLoadForCountry(String countryCode) {
+    /**
+     * Instantiates the loader class for the given country, following the naming convention.
+     *
+     * @param countryCode the ISO country code
+     * @return the loader, or {@code null} if there is no loader class or it cannot be instantiated
+     */
+    static CountryBankDataLoader tryLoadForCountry(String countryCode) {
         String loaderClassName = LOADER_PACKAGE
             + '.'
             + "BankDataLoader"

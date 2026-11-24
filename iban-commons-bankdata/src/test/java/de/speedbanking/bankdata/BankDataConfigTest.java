@@ -3,6 +3,7 @@ package de.speedbanking.bankdata;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.assertj.core.api.Assumptions.assumeThat;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 
 import java.io.IOException;
 import java.net.URI;
@@ -267,6 +270,49 @@ final class BankDataConfigTest {
         BankDataConfig config = BankDataConfig.builder().build();
 
         assertThat(config.getConnectTimeout()).isEqualTo(Duration.ofSeconds(5));
+    }
+
+    @Test
+    void configFile_unrelatedOrEmptyKeys_areIgnored() throws IOException {
+        writeConfigFile(
+            "loader.DE.uri = https://mirror.example.com/blz.csv",
+            "loader.AT.url =",
+            "casing.CZ.on = false",
+            "staleThreshold =",
+            "connectTimeout = -PT5S");
+
+        BankDataConfig config = BankDataConfig.builder().build();
+
+        assertThat(config.getSourceUriOverride("DE")).isEmpty();
+        assertThat(config.getSourceUriOverride("AT")).isEmpty();
+        assertThat(config.isDisplayCasingEnabled("CZ")).isTrue();
+        assertThat(config.getStaleThreshold()).isEqualTo(Duration.ofDays(90));
+        assertThat(config.getConnectTimeout()).isEqualTo(Duration.ofSeconds(5));
+    }
+
+    @Test
+    void configFile_pathIsDirectory_fallsBackToDefaults() {
+        System.setProperty(BankDataConfig.CONFIG_FILE_SYSTEM_PROPERTY, tempDir.toString());
+
+        BankDataConfig config = BankDataConfig.builder().build();
+
+        assertThat(config.getStaleThreshold()).isEqualTo(Duration.ofDays(90));
+    }
+
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @NullAndEmptySource
+    void configFile_noPathConfigured_usesDefaults(String path) {
+        // assumes the environment variable is not set either, as on CI and usual developer machines
+        assumeThat(System.getenv(BankDataConfig.CONFIG_FILE_ENV_VARIABLE)).isNull();
+        if (path == null) {
+            System.clearProperty(BankDataConfig.CONFIG_FILE_SYSTEM_PROPERTY);
+        } else {
+            System.setProperty(BankDataConfig.CONFIG_FILE_SYSTEM_PROPERTY, path);
+        }
+
+        BankDataConfig config = BankDataConfig.builder().build();
+
+        assertThat(config.getStaleThreshold()).isEqualTo(Duration.ofDays(90));
     }
 
     @Test

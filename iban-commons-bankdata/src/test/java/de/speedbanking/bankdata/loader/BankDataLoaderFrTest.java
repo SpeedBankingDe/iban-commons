@@ -104,6 +104,23 @@ final class BankDataLoaderFrTest {
     }
 
     @Test
+    void parse_blankLineAndMalformedRiadCodes_areSkipped() throws Exception {
+        String content = HEADER
+            + "\r\n"
+            + "DE00001\tDEUTDEFFXXX\tFR\tRelocated institution\t\tRue Example 1\t75001\tParis\t"
+            + "Credit institution S122\t\t\t\tY\tN\r\n" // RIAD_CODE of another country
+            + "FR\tBNPAFRPPXXX\tFR\tNo bank code\t\tRue Example 2\t75002\tParis\t"
+            + "Credit institution S122\t\t\t\tY\tN\r\n" // RIAD_CODE without a bank code
+            + "FR30004\tBNPAFRPPXXX\tFR\tBNP Paribas\t\t16 Boulevard des Italiens\t75009\tParis\t"
+            + "Credit institution S122\t\t\t\tY\tN\r\n";
+        InputStream in = new ByteArrayInputStream(content.getBytes(UTF_16));
+
+        List<BankData> records = loader.parse(in, "test-version");
+
+        assertThat(records).extracting(BankData::getBankCode).containsExactly("30004");
+    }
+
+    @Test
     void parse_rowWithEmptyBic_recordIncludedWithNullBic() throws Exception {
         String content = HEADER
             + "FR14749\t\tFR\tBanque Stellantis France\t\tRue Example 1\t92500\tRueil-Malmaison\t"

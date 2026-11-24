@@ -505,6 +505,38 @@ final class IbanValidatorTest {
     }
 
     @Test
+    void validateStructure_withoutNcdInvalidBban_returnsInvalidStructure() {
+        assertThat(IbanValidator.validateStructure("DE91A00000000123456789".toCharArray(), false)).isEqualTo(INVALID_STRUCTURE);
+    }
+
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {"XX91100000000123456789", "DE91A00000000123456789"})
+    void isValid_charSequenceWithUnknownCountryOrInvalidBban_returnsFalse(String input) {
+        assertThat(IbanValidator.isValid(CharBuffer.wrap(input))).isFalse();
+    }
+
+    @Test
+    void validate_onlySpaces_returnsEmpty() {
+        assertThat(IbanValidator.validate("    ", true).error).isEqualTo(EMPTY);
+        assertThat(IbanValidator.validate((CharSequence) "    ", true).error).isEqualTo(EMPTY);
+    }
+
+    @Test
+    @ResourceLock(IbanConfigTest.RESOURCE_NAME)
+    void validate_lowercaseAllowedSpacesNot_returnsNormalizedIban() {
+        IbanConfig previous = IbanConfig.get();
+        try {
+            IbanConfig.reset(IbanConfig.builder().allowSpace(false).allowLowercase(true).build());
+            String lowercase = VALID_NORM_DE.toLowerCase(Locale.ROOT);
+
+            assertThat(IbanValidator.validate(lowercase, false).normIban).hasToString(VALID_NORM_DE);
+            assertThat(IbanValidator.validate((CharSequence) lowercase, false).normIban).hasToString(VALID_NORM_DE);
+        } finally {
+            IbanConfig.reset(previous);
+        }
+    }
+
+    @Test
     void clearThreadLocal_afterValidation_keepsValidationWorking() {
         assertThat(IbanValidator.isValid(VALID_NORM_DE)).isTrue();
 

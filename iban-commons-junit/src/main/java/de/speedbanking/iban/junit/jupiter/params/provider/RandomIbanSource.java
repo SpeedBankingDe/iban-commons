@@ -198,9 +198,9 @@ public @interface RandomIbanSource {
         private static List<IbanRegistry> validateAndBuild(RandomIbanSource config) {
 
             if (config.count() <= 0) {
-                throwIllegalArgument(String.format("count must be positive, but was %s", config.count()));
+                throw illegalArgument(String.format("count must be positive, but was %s", config.count()));
             } else if (config.invalidPercentage() < 0 || config.invalidPercentage() > 100) {
-                throwIllegalArgument(String.format("invalidPercentage must be 0-100, but was %s", config.invalidPercentage()));
+                throw illegalArgument(String.format("invalidPercentage must be 0-100, but was %s", config.invalidPercentage()));
             }
 
             Set<IbanRegistry> valueCountries = toCountrySet(config.value());
@@ -209,7 +209,7 @@ public @interface RandomIbanSource {
 
             // value() and includeCountries() must not both be specified
             if (!valueCountries.isEmpty() && !includeCountries.isEmpty()) {
-                throwIllegalArgument("value and includeCountries must not be used simultaneously");
+                throw illegalArgument("value and includeCountries must not be used simultaneously");
             }
 
             // resolve effective include list
@@ -233,7 +233,7 @@ public @interface RandomIbanSource {
                         .filter(excludeCountries::contains)
                         .collect(toList());
                     if (!overlap.isEmpty()) {
-                        throwIllegalArgument(String.format("countries appear in both include and exclude: %s",
+                        throw illegalArgument(String.format("countries appear in both include and exclude: %s",
                             overlap.stream().map(IbanRegistry::getCountryCode).collect(joining(", "))));
                     }
                 }
@@ -244,7 +244,7 @@ public @interface RandomIbanSource {
             List<IbanRegistry> pool = stream.collect(toList());
 
             if (pool.isEmpty()) {
-                throwIllegalArgument("country pool empty after applying the configured filters");
+                throw illegalArgument("country pool empty after applying the configured filters");
             }
 
             return pool;
@@ -266,8 +266,11 @@ public @interface RandomIbanSource {
             return set;
         }
 
-        private static void throwIllegalArgument(String message) {
-            throw new IllegalArgumentException(String.format("@%s: %s", RandomIbanSource.class.getSimpleName(), message));
+        /**
+         * Creates the exception for an invalid annotation configuration, prefixed with the annotation name.
+         */
+        private static IllegalArgumentException illegalArgument(String message) {
+            return new IllegalArgumentException(String.format("@%s: %s", RandomIbanSource.class.getSimpleName(), message));
         }
 
         /**

@@ -110,6 +110,14 @@ final class NaiveLoggerTest {
     }
 
     @Test
+    void log_nullArgsArray_recordHasNoParameters() {
+        logger.info("Fixed message, no placeholders", (Object[]) null);
+
+        assertThat(published).hasSize(1);
+        assertThat((Object) published.get(0).getParameters()).isNull();
+    }
+
+    @Test
     void log_levelDisabled_publishesNothing() {
         delegate.setLevel(Level.OFF);
 

@@ -77,6 +77,9 @@ final class CharUtilTest {
         assertThatIndexOutOfBoundsException()
             .isThrownBy(() -> CharUtil.isAllDigits(arr, 3, 3))
             .withMessage("Invalid range (3, 3) specified, valid range (0, 2)");
+        assertThatIndexOutOfBoundsException()
+            .isThrownBy(() -> CharUtil.isAllDigits(arr, 1, 0))
+            .withMessage("Invalid range (1, 0) specified, valid range (0, 2)");
     }
 
     @ParameterizedTest(name = "Char ''{0}'' should be uppercase")

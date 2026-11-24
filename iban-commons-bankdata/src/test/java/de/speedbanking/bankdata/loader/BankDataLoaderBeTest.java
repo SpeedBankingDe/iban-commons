@@ -39,8 +39,8 @@ final class BankDataLoaderBeTest {
         }
 
         assertThat(records)
-            .hasSize(4)
-            .extracting(BankData::getBankCode).containsExactly("001", "068", "171", "999");
+            .hasSize(5)
+            .extracting(BankData::getBankCode).containsExactly("001", "068", "171", "999", "998");
 
         BankData first = records.get(0);
         assertThat((Object) first.getBic()).hasToString("GEBABEBBXXX"); // raw source value has embedded spaces, stripped
@@ -56,6 +56,8 @@ final class BankDataLoaderBeTest {
 
         BankData unassigned = records.stream().filter(r -> "999".equals(r.getBankCode())).findFirst().orElseThrow(AssertionError::new);
         assertThat((Object) unassigned.getBic()).isNull(); // "VRIJ" placeholder for an unassigned code is not a valid BIC
+
+        assertThat(records.get(4).getBankName()).isEmpty(); // no name in any language
     }
 
     /**
@@ -105,6 +107,8 @@ final class BankDataLoaderBeTest {
             + "<row r=\"6\">"
             + "<c r=\"A6\"><v>999</v></c><c r=\"B6\" t=\"s\"><v>12</v></c><c r=\"C6\" t=\"s\"><v>12</v></c>"
             + "</row>"
+            + "<row r=\"8\"><c r=\"B8\" t=\"s\"><v>10</v></c></row>" // row 7 missing, row 8 without a code
+            + "<row r=\"9\"><c r=\"A9\"><v>998</v></c><c r=\"B9\" t=\"s\"><v>10</v></c></row>" // no name at all
             + "</sheetData></worksheet>";
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();

@@ -787,6 +787,13 @@ final class IbanTest {
     // Serialization tests (Memento Pattern)
     // =========================================================================
 
+    @Test
+    void getBban_calledTwice_returnsCachedString() {
+        Iban iban = Iban.of("DE89370400440532013000");
+
+        assertThat(iban.getBban()).isEqualTo("370400440532013000").isSameAs(iban.getBban());
+    }
+
     /**
      * Verifies that a round-trip serialization/deserialization of an {@link Iban} instance
      * produces an equal object with the same normalized string and country data.
@@ -942,9 +949,10 @@ final class IbanTest {
      * @throws IOException if the byte stream cannot be written
      */
     @DisplayName("Memento.readResolve() rejects invalid IBAN payload")
-    @Test
-    void mementoReadResolve_invalidIban_throwsException() throws IOException {
-        byte[] corruptStream = TestUtil.buildMementoStream(Iban.of("DE89370400440532013000"), "NOT_AN_IBAN");
+    @ParameterizedTest(name = "[{index}] ''{0}''")
+    @ValueSource(strings = {"NOT_AN_IBAN", "DE88370400440532013000"}) // invalid structure, invalid checksum
+    void mementoReadResolve_invalidIban_throwsException(String payload) throws IOException {
+        byte[] corruptStream = TestUtil.buildMementoStream(Iban.of("DE89370400440532013000"), payload);
 
         assertThat(catchThrowable(() -> TestUtil.deserialize(corruptStream)))
             .as("readResolve() must reject an invalid IBAN stored in the Memento")

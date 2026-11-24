@@ -11,6 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -125,9 +126,10 @@ final class HttpDownloaderTest {
         assertThat(requests).hasValue(2);
     }
 
-    @Test
-    void download_redirectWithoutLocationHeader_throwsIOException() throws Exception {
-        server = startServer("/no-location", exchange -> exchange.sendResponseHeaders(302, -1));
+    @ParameterizedTest(name = "[{index}] status {0}")
+    @ValueSource(ints = {301, 302, 303, 307})
+    void download_redirectWithoutLocationHeader_throwsIOException(int status) throws Exception {
+        server = startServer("/no-location", exchange -> exchange.sendResponseHeaders(status, -1));
 
         assertThatThrownBy(() -> Downloader.createDefault().download(uri("/no-location"), TIMEOUT, TIMEOUT))
             .isInstanceOf(IOException.class)

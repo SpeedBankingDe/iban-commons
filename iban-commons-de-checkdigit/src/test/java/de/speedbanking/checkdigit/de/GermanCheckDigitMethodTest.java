@@ -367,6 +367,40 @@ final class GermanCheckDigitMethodTest {
         "85 | 1699508230 | true",  // digits 3 and 4 are 99, sum % 11 == 0 -> check digit 0
         "85 | 4099043982 | false", // digits 3 and 4 are 99, sum % 11 == 1 -> result 10 never matches
         "87 | 0865873781 | true",  // Methode A and B invalid, Methode C (Modulus 7) valid
+        "87 | 0000000000 | true",  // Methode A skips leading zeros up to the last digit
+        "25 | 0800000030 | true",  // remainder 10 with digit 2 >= 8 -> clamped to 0
+        "25 | 0800000031 | false", // same branch, mismatch
+        "25 | 0100000010 | true",  // remainder 11 -> clamped to 0
+        "25 | 0123456789 | true",  // remainder 2 to 9 is the check digit itself
+        "45 | 4123056782 | true",  // digit 1 is 4, digit 2 is not 8 -> method 00
+        "45 | 4123056780 | false", // same branch, mismatch
+        "50 | 0012345678 | false", // first attempt invalid, digit 3 != 0 -> no shifted retry
+        "50 | 0112345678 | false", // first attempt invalid, digit 2 != 0 -> no shifted retry
+        "69 | 9512345675 | true",  // digit 1 is 9, digit 2 neither 3 nor 7 -> Variante 1 is tried
+        "70 | 1236012340 | true",  // digit 4 is 6, digit 5 is not 9 -> weights over all 9 digits
+        "70 | 1236912346 | true",  // digits 4-5 are 69 -> weights over digits 4-9
+        "70 | 1236912340 | false", // same branch, mismatch
+        "70 | 1235012341 | true",  // digit 4 is 5 -> weights over digits 4-9
+        "79 | 2123456720 | true",  // leading digit 2 -> check digit at digit 9
+        "79 | 9123456750 | true",  // leading digit 9 -> check digit at digit 9
+        "79 | 9123456740 | false", // same branch, mismatch
+        "82 | 1290123455 | true",  // digit 3 is 9, digit 4 is not -> method 33
+        "82 | 1299123457 | true",  // digits 3-4 are 99 -> method 10
+        "82 | 1299123455 | false", // same branch, mismatch
+        "83 | 0190123455 | true",  // digit 3 is 9, digit 4 is not -> Methode A to C
+        "85 | 0190123456 | true",  // digit 3 is 9, digit 4 is not -> Methode A to C
+        "93 | 0001200000 | true",  // digit 4 != 0 -> Kundennummer at digits 1-5
+        "93 | 0001210000 | false", // same branch, mismatch
+        "93 | 0012350000 | true",  // digit 3 != 0 -> Kundennummer at digits 1-5
+        "76 | 2123456789 | false", // Kontoart 2 is not allowed
+        "76 | 3123456789 | false", // Kontoart 3 is not allowed
+        "76 | 1123456789 | false", // Kontoart 1 is not allowed
+        "C5 | 0001234567 | false", // digits 1-3 are 0, digit 4 is not -> no special case applies
+        "C5 | 0020000000 | false", // two leading zeros, digit 3 below the not-checked range
+        "C5 | 0060000000 | false", // two leading zeros, digit 3 above the not-checked range
+        "C5 | 0900000000 | false", // one leading zero, digit 2 is 9
+        "C5 | 7100000000 | false", // leading digit 7 without the documented 70 prefix
+        "C5 | 8100000000 | false", // leading digit 8 without the documented 85 prefix
     })
     void calculate_knownVectors_branchCoverage(String code, String account, boolean expectedValid) {
         assertVector(code, account, expectedValid);
@@ -410,6 +444,14 @@ final class GermanCheckDigitMethodTest {
         "C0 | 13051172 | 6932875274 | true",  // Variante 2 test number
         "C0 | 13051172 | 0132572975 | false", // Variante 2 test number
         "C0 | 13051172 | 3038752371 | false", // Variante 2 test number
+        "C0 | 13051172 | 0123456789 | true",  // one leading zero -> method 20 only (hand-derived)
+        "C0 | 13051172 | 0001234560 | true",  // three leading zeros -> method 20 only (hand-derived)
+        "52 | 13051172 | 0112345678 | false", // one leading zero -> rejected (hand-derived)
+        "52 | 13051172 | 1234567890 | false", // 10 digits not starting with 9 -> rejected (hand-derived)
+        "52 | 13051172 | 0010000000 | false", // digits 5-10 all zero, empty ESER account part
+        "53 | 16052072 | 0010000000 | false", // digits 5-10 all zero, empty ESER account part
+        "B6 | 80053782 | 0260000000 | false", // digits 2-4 are 260, not 269 -> Variante 2
+        "B6 | 80053782 | 0210000000 | false", // digits 2-3 are 21, not 26 -> Variante 2
     })
     void calculate_knownVectorsWithBlz(String code, String blz, String account, boolean expectedValid) {
         assertVector(code, blz, account, expectedValid);
@@ -443,6 +485,42 @@ final class GermanCheckDigitMethodTest {
 
         assertThat(result.isChecked()).isFalse();
         assertThat(result.isValid()).isTrue();
+    }
+
+    @ParameterizedTest(name = "[{index}] method {0}: account {1}")
+    @CsvSource(delimiter = '|', value = {
+        "45 | 4812345678", // digits 1-2 are 48
+        "45 | 1234156789", // digit 5 is 1
+        "B0 | 1000000200", // digit 8 is 2
+        "B0 | 1000000300", // digit 8 is 3
+        "B7 | 0010000000", // between the two checked ranges
+        "B7 | 0900000000", // above both checked ranges
+    })
+    void calculate_exceptionRange_notChecked(String code, String account) {
+        CheckDigitResult result = GermanCheckDigitMethod.fromCode(code).calculate(BLZ, account.toCharArray());
+
+        assertThat(result.isChecked()).isFalse();
+        assertThat(result.isValid()).isTrue();
+    }
+
+    @ParameterizedTest(name = "[{index}] prefix {0}: check digit at index {1}")
+    @CsvSource({
+        "51, 9", "55, 9", "61, 9", "64, 9", "66, 9", "70, 9", "73, 9", "82, 9", "88, 9", "94, 9", "95, 9",
+        "32, 2", "39, 2", "41, 2", "49, 2", "52, 2", "54, 2", "56, 2", "60, 2", "62, 2", "63, 2", "67, 2",
+        "69, 2", "71, 2", "72, 2", "83, 2", "87, 2", "89, 2", "90, 2", "92, 2", "93, 2", "96, 2", "98, 2",
+    })
+    void calculate_m57_prefix_selectsCheckDigitPosition(String prefix, int checkIndex) {
+        // exactly one digit at the check digit position yields a valid account number
+        char[] account = (prefix + "00000000").toCharArray();
+        int validCount = 0;
+        for (char digit = '0'; digit <= '9'; digit++) {
+            account[checkIndex] = digit;
+            if (GermanCheckDigitMethod.M57.calculate(BLZ, account).isValid()) {
+                validCount++;
+            }
+        }
+
+        assertThat(validCount).isOne();
     }
 
     @Test
