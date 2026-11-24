@@ -74,13 +74,13 @@ boolean valid = Iban.isValid("FR1420041010050500013M02606");
 ```java
 Iban iban = Iban.of("IT60X0542811101000000123456");
 
-iban.getCountryCode();    // "IT"
-iban.getCountryName();    // "Italy"
-iban.getCountryFlag();    // "🇮🇹"
-iban.getBankCode();       // "05428"
-iban.getBranchCode();     // "11101"
-iban.getAccountNumber();  // "000000123456"
-iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
+iban.getCountryCode();    // IT
+iban.getCountryName();    // Italy
+iban.getCountryFlag();    // 🇮🇹
+iban.getBankCode();       // 05428
+iban.getBranchCode();     // 11101
+iban.getAccountNumber();  // 000000123456
+iban.toFormattedString(); // IT60 X054 2811 1010 0000 0123 456
 ```
 
 -----
@@ -107,7 +107,7 @@ iban.toFormattedString(); // "IT60 X054 2811 1010 0000 0123 456"
 
 * **Java 8 compatibility**
 
-  Targeting Java 8 for maximum reach, built and verified using JDK 21+ ensuring full binary compatibility
+  Targeting Java 8 for maximum reach, built with JDK 21 and tested on Windows and Linux with JDK 8, 21, 25 and all upcoming LTS versions
 
 * **Comprehensive Coverage**
 
