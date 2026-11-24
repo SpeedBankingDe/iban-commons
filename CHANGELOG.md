@@ -4,7 +4,7 @@ Release notes of earlier versions of IBAN Commons. The notes of the current rele
 [README](README.md), every release is also listed on the
 [GitHub releases page](https://github.com/SpeedBankingDe/iban-commons/releases).
 
-## 1.8.13
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.13
 
 ### 42% Smaller Jar
 The core jar shrinks from 252 kB in 1.8.12 to 145 kB, smaller than 1.8.4 despite everything added since. The 112 generated country validator classes are replaced by a single `CountryValidator` that derives its checks from the BBAN pattern in `IbanRegistry`. National check digit algorithms are plain methods shared by all countries using them. The jar no longer carries local variable tables, `package-info` classes or synthetic accessor classes.
@@ -24,7 +24,7 @@ A few rarely used public types were removed or moved:
 * `InvalidBaseException`, the common base of `InvalidIbanException` and `InvalidBicException`, moved from `de.speedbanking.iban.util` to `de.speedbanking.util`.
 * `IbanPatternConverter.parseSegments()` returns the new `Segments` type instead of `List<Segment>`. The static helpers `aggregateSegments()`, `buildRegex()`, `allMatch()`, `isAllNumeric()` and `calculateTotalLength(Iterable)` are replaced by instance methods of `Segments`.
 
-## 1.8.12
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.12
 
 ### Bank Data Lookup Module
 New optional [`iban-commons-bankdata`](README.md#bank-data-lookup-iban-commons-bankdata) module resolving BIC and bank name from an IBAN or a country-specific bank code (DE, AT, CH, CZ, BE, PL, NL, ES, FR), with a bundled offline fallback dataset and a lazy, non-blocking background refresh against each country's official bank directory. For Germany, each record also carries the check digit method the Bundesbank publishes for the bank. Depends on `iban-commons`.
@@ -44,7 +44,7 @@ The parts that `Iban` caches for its getters (`getBankCode()`, `getAccountNumber
 ### Build Requirement: JDK 21
 The project now requires JDK 21 to build. The compiled artifacts remain binary-compatible with Java 8, and CI runs the test suite on Java 8 as well.
 
-## 1.8.11
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.11
 
 ### IBAN Registry Release 103
 `IbanRegistry` is now cross-checked against SWIFT IBAN Registry Release 103 (Sep 2026), up from Release 100. The only structural change: Brazil's bank identifier and account-type/control digits are now alphanumeric instead of numeric/alpha-only (`8!c...1!c1!c` instead of `8!n...1!a1!c`).
@@ -58,12 +58,12 @@ Running the JAR directly (`java -jar iban-commons.jar`) now prints its title, ve
 ### Test Suite Hardening
 Line and mutation coverage (via pitest) were pushed further across `iban-commons-de-checkdigit`, `iban-commons-junit`, and `iban-commons-validation`, closing gaps mutation testing had exposed.
 
-## 1.8.10
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.10
 
 ### German Account Check Digit Module
 New standalone [`iban-commons-de-checkdigit`](README.md#german-account-check-digit-iban-commons-de-checkdigit) module implementing 122 of the Deutsche Bundesbank's "Prüfzifferberechnungsmethoden in der deutschen Kreditwirtschaft" (methods `00`-`99`, `A0`-`D9`) for verifying a German domestic account number against a Bankleitzahl. Zero dependency on `iban-commons` itself.
 
-## 1.8.9
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.9
 
 ### IbanBuilder
 New `IbanBuilder` API (obtained via `IbanRegistry#builder()`) generates structurally valid, correctly checksummed IBANs from explicit or randomly filled components - useful for tests and fixtures.
@@ -77,7 +77,7 @@ Added `PatternCache` (thread-safe compiled-`Pattern` cache) and `RegexSimplifier
 ### Internal Consolidation
 `CountryUtil` was merged into `Country` (including `createFlagEmoji`), and several country data entries were corrected (Bolivia name, Tonga continent, ZWL->ZWG rename, KGS typo).
 
-## 1.8.8
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.8
 
 ### Optimized BIC Validation Pipeline
 Extended the zero-allocation principles fully to the BIC parsing and validation pipeline.
@@ -88,7 +88,7 @@ Integrated the latest JMH benchmark results (June 2026) for both the IBAN and BI
 ### Internal Quality Refinements
 Fine-tuned internal validation rules and alignment with Error Prone guidelines.
 
-## 1.8.7
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.7
 
 ### Zero Allocation on the Hot Path
 `IbanValidationResult` now caches one singleton per `IbanValidationError` constant at class-load time - failed validations no longer allocate on the rejection path.
@@ -99,7 +99,7 @@ New allocation-free `Iban.validate()` and `Bic.validate()` methods throw on inva
 ### Internal Refactoring & Correctness
 `Objects.hash()` replaced with the classic Bloch prime-accumulation pattern throughout - no vararg array, no autoboxing of primitives.
 
-## 1.8.6
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.6
 
 ### Invalid IBAN Generator
 New utilities for generating structurally invalid IBAN strings with controlled sabotage strategies.
@@ -110,7 +110,7 @@ The build now integrates [Error Prone](https://errorprone.info/) with [`error‑
 ### Dedicated JUnit Extensions Module
 JUnit 5 extensions (enhanced IBAN and BIC assertions, parameterized test support) have been extracted into a standalone `iban-commons-junit` sub-module.
 
-## 1.8.5
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> 1.8.5
 
 ### Zero-Allocation Validation Pipeline
 The internal validation pipeline was migrated from `CharSequence` to `char[]` throughout - across all 80+ country validators, `NationalCheckDigitCalculator`, and `AbstractNcdCountryValidator`. This eliminates virtual dispatch on `charAt()` and reduces heap allocation to exactly 0 B/op.

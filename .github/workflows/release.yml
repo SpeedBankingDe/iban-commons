@@ -35,8 +35,9 @@ jobs:
                 {
                     echo "Release artifacts are available at Maven Central."
                     echo
-                    awk -v heading="## 🆕 What's New in ${{ steps.version.outputs.base }}" '
-                        $0 == heading { found = 1; next }
+                    # the heading may start with an icon, so only its text at the end is compared
+                    awk -v heading="What's New in ${{ steps.version.outputs.base }}" '
+                        /^## / && substr($0, length($0) - length(heading) + 1) == heading { found = 1; next }
                         found && (/^-----/ || /^## /) { exit }
                         # skip blank lines between the heading and the first line of text
                         found && !started && /^$/ { next }

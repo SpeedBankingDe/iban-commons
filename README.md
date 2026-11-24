@@ -13,7 +13,11 @@
   <a href="https://apidia.net/mvn/de.speedbanking/iban-commons"><img src="https://apidia.net/mvn/de.speedbanking/iban-commons/badge_flat_square.svg" alt="APIdia"></a>
 </div>
 
-**[🚀 Quick Start](#-quick-start) • [📖 Examples](#-code-examples) • [📊 Benchmarks](#-performance-benchmarks) • [📝 Changelog](CHANGELOG.md) • [📚 Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/) • [💬 Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
+<div align="center">
+
+**<picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/rocket-dark.svg"><img src=".github/icons/rocket.svg" height="16" alt=""></picture> [Quick Start](#--quick-start)&emsp;<picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/code-dark.svg"><img src=".github/icons/code.svg" height="16" alt=""></picture> [Examples](#--code-examples)&emsp;<picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/chart-bar-dark.svg"><img src=".github/icons/chart-bar.svg" height="16" alt=""></picture> [Benchmarks](#--performance-benchmarks)&emsp;<picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/history-dark.svg"><img src=".github/icons/history.svg" height="16" alt=""></picture> [Changelog](CHANGELOG.md)&emsp;<picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/book-dark.svg"><img src=".github/icons/book.svg" height="16" alt=""></picture> [Javadoc](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/)&emsp;<picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/messages-dark.svg"><img src=".github/icons/messages.svg" height="16" alt=""></picture> [Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)**
+
+</div>
 
 `iban-commons` is a Java IBAN validation library and BIC validator for Java 8+, providing fast and reliable parsing, validation, and formatting of International Bank Account Numbers (IBAN) and Business Identifier Codes (BIC/SWIFT codes).
 Designed for high-performance enterprise applications, it covers 127 countries, is Android-compatible (API 24+, or 21+ with core library desugaring), and has zero compile or runtime dependencies outside the Java Standard Library.
@@ -22,7 +26,7 @@ An optional [`iban-commons-de-checkdigit`](#german-account-check-digit-iban-comm
 
 An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) module resolves the BIC and bank name behind an IBAN or a country-specific bank code (DE, AT, CH, LI, CZ, BE, PL, NL, ES, FR, GR, PT), with a bundled offline fallback dataset and lazy background refresh.
 
-## Why IBAN Commons?
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/bolt-dark.svg"><img src=".github/icons/bolt.svg" height="20" alt=""></picture> Why IBAN Commons?
 
 | Feature                    | iban-commons   | jbanking  | Apache Commons |  iban4j   | garvelink |
 |----------------------------|:--------------:|:---------:|:--------------:|:---------:|:---------:|
@@ -37,7 +41,7 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 
 -----
 
-## 🚀 Quick Start
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/rocket-dark.svg"><img src=".github/icons/rocket.svg" height="20" alt=""></picture> Quick Start
 
 ### 1. Add Dependency
 
@@ -85,7 +89,7 @@ iban.toFormattedString(); // IT60 X054 2811 1010 0000 0123 456
 
 -----
 
-## 🔑 Key Features
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/list-check-dark.svg"><img src=".github/icons/list-check.svg" height="20" alt=""></picture> Key Features
 
 * **Zero Dependencies & Small Footprint**
 
@@ -120,7 +124,7 @@ iban.toFormattedString(); // IT60 X054 2811 1010 0000 0123 456
 
 -----
 
-## 💡 Code Examples
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/code-dark.svg"><img src=".github/icons/code.svg" height="20" alt=""></picture> Code Examples
 
 The API is designed for simplicity, focusing on two main ways to create a valid object: a throwing factory method for quick use and a safe parsing method using `Optional`.
 
@@ -315,7 +319,7 @@ data it returns.
 
 -----
 
-## 🔄 Migrating from Other Libraries
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/arrows-exchange-dark.svg"><img src=".github/icons/arrows-exchange.svg" height="20" alt=""></picture> Migrating from Other Libraries
 
 ### From iban4j
 
@@ -358,7 +362,7 @@ Iban iban = Iban.of("GB82WEST12345698765432");
 
 -----
 
-## 📊 Performance Benchmarks
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/chart-bar-dark.svg"><img src=".github/icons/chart-bar.svg" height="20" alt=""></picture> Performance Benchmarks
 
 `iban-commons` is designed for **high throughput** and **minimal overhead**.
 
@@ -372,7 +376,7 @@ SerialGC (`-XX:+UseSerialGC`), `-XX:-StackTraceInThrowable`, `-Xms2G -Xmx2G`.
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| 🌟 **iban-commons**     |      **5,755,902** |       **0**   | baseline         |
+| **iban-commons**        |      **5,755,902** |       **0**   | baseline         |
 | jbanking                |          4,258,449 |           325 | 1.4× slower      |
 | iban4j                  |          4,207,195 |           506 | 1.4× slower      |
 | Apache Commons          |          3,052,124 |           398 | 1.9× slower      |
@@ -382,7 +386,7 @@ SerialGC (`-XX:+UseSerialGC`), `-XX:-StackTraceInThrowable`, `-Xms2G -Xmx2G`.
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| 🌟 **iban-commons**     |     **10,883,875** |       **0**   | baseline         |
+| **iban-commons**        |     **10,883,875** |       **0**   | baseline         |
 | jbanking                |          7,322,453 |           171 | 1.5× slower      |
 | Apache Commons          |          6,065,384 |           210 | 1.8× slower      |
 | iban4j                  |          2,089,403 |           972 | 5.2× slower      |
@@ -404,14 +408,14 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 
 -----
 
-## 🆕 What's New in 1.8.14
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/sparkles-dark.svg"><img src=".github/icons/sparkles.svg" height="20" alt=""></picture> What's New in 1.8.14
 
 ### Android API 24
 The core module runs on Android from API level 24 (Android 7.0) without core library desugaring. Up to 1.8.13 it needed API level 26, since it used `ThreadLocal.withInitial` and created `java.time.YearMonth` values when `IbanRegistry` was initialized. The build now checks the core classes against the Android API 24 signatures. Only `IbanRegistry.getLastUpdate()`, which returns a `YearMonth`, still needs API level 26; `getLastUpdateYear()` and `getLastUpdateMonth()` work on all levels.
 
 -----
 
-## ❓ FAQ
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/help-circle-dark.svg"><img src=".github/icons/help-circle.svg" height="20" alt=""></picture> FAQ
 
 <details>
 <summary>Which countries are supported?</summary>
@@ -511,7 +515,7 @@ Simple checksum validation alone is insufficient for real-world use.
 
 -----
 
-## 🤝 Contributing
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/git-pull-request-dark.svg"><img src=".github/icons/git-pull-request.svg" height="20" alt=""></picture> Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
@@ -534,18 +538,18 @@ mvn clean verify
 
 -----
 
-## 💬 Support & Community
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/message-circle-dark.svg"><img src=".github/icons/message-circle.svg" height="20" alt=""></picture> Support & Community
 
 - Questions? Ask in [Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)
 - Found a bug or missing a feature? Open an [Issue](https://github.com/SpeedBankingDe/iban-commons/issues)
 - API Reference: [Javadoc on javadoc.io](https://javadoc.io/doc/de.speedbanking/iban-commons/latest/)
 - Website: [www.speedbanking.de](https://www.speedbanking.de/)
 
-**Please star this repo 🌟 if you find it useful.**
+**Please star this repo if you find it useful.**
 
 -----
 
-## 🔒 Security
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/shield-lock-dark.svg"><img src=".github/icons/shield-lock.svg" height="20" alt=""></picture> Security
 
 To report a vulnerability, please use GitHub's private
 [Security Advisory](https://github.com/SpeedBankingDe/iban-commons/security/advisories/new)
@@ -556,7 +560,7 @@ into `Iban` and `Bic`, see [SECURITY.md](SECURITY.md).
 
 -----
 
-## ⚖️ License
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/scale-dark.svg"><img src=".github/icons/scale.svg" height="20" alt=""></picture> License
 
 This project is licensed under the **Apache License, Version 2.0**. You can find the full text of the license [here](https://www.apache.org/licenses/LICENSE-2.0).
 
@@ -569,7 +573,7 @@ This project is licensed under the **Apache License, Version 2.0**. You can find
       <strong>Enjoying 
         <a href="https://github.com/SpeedBankingDe/iban-commons" style="color: #3a82c2; text-decoration: none;">iban-commons</a>?
       </strong><br>
-      <strong>Please leave a 🌟 to support the project!</strong><br>
+      <strong>Please leave a star to support the project!</strong><br>
       <small>Your stars help to keep open source development visible and going.</small>
     </td>
   </tr>
