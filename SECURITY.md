@@ -1,91 +1,47 @@
 # Security Policy
 
-## Supported Versions
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tag-dark.svg"><img src=".github/icons/tag.svg" height="20" alt=""></picture> Supported Versions
 
-Security fixes are applied to the **latest stable release** only.
-Older versions do not receive backported patches.
+Security fixes go into the latest release only. Older versions do not receive backported patches.
 
-| Version | Supported |
-|---------|-----------|
-| latest  | ✅         |
-| older   | ❌         |
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/shield-lock-dark.svg"><img src=".github/icons/shield-lock.svg" height="20" alt=""></picture> Reporting a Vulnerability
 
-## Reporting a Vulnerability
+Please do not report security vulnerabilities through public GitHub issues. Use GitHub's private reporting instead (Security tab of the repository, then "Report a vulnerability"), or send an email to the maintainer address listed in `pom.xml`.
 
-**Please do not report security vulnerabilities through public GitHub issues.**
+A good report contains a description of the vulnerability and its impact, the steps to reproduce it or a minimal proof of concept, and the affected versions. You can expect an acknowledgement within 5 business days and a status update within 14 days.
 
-Report vulnerabilities privately via GitHub's built-in mechanism:
-**Security -> Report a vulnerability** (in the repository's Security tab).
-
-Alternatively, send an email to the maintainer address listed in `pom.xml`.
-Please include:
-
-- A description of the vulnerability and its potential impact
-- Steps to reproduce or a minimal proof-of-concept
-- The affected version(s)
-
-You can expect an acknowledgement within **5 business days** and a status update
-within **14 days**.
-
-## Security Design
-
-### Serialization (IBAN and BIC)
-
-`Iban` and `Bic` are immutable value objects that implement `java.io.Serializable`.
-Both classes use the **Serialization Proxy Pattern** to defend against
-byte-stream injection attacks:
-
-- **`writeReplace()`** substitutes each instance with a lightweight `Memento` proxy
-  before it is written to a stream. Only the normalized string value crosses the
-  serialization boundary.
-- **`readResolve()`** in `Memento` reconstructs the object exclusively through the
-  public factory method (`Iban.parse()` / `Bic.of()`), which runs the full
-  validation pipeline (length, structure, ISO 7064 Mod 97-10 check digits).
-- **`readObject()`** and **`readObjectNoData()`** on `Iban` and `Bic` unconditionally
-  throw `InvalidObjectException`, blocking any attempt to deserialize a raw instance
-  directly - even from a crafted byte stream.
-- The `Memento` stream format includes an explicit **version `long`** written before
-  the value string. A version mismatch causes `InvalidObjectException` during
-  deserialization, enabling forward-compatible format evolution.
-
-Consequence: it is not possible to deserialize an `Iban` or `Bic` object that would
-fail validation. An attacker cannot inject an instance with an invalid check digit,
-an unsupported country code, or a malformed BBAN via a manipulated stream.
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/shield-check-dark.svg"><img src=".github/icons/shield-check.svg" height="20" alt=""></picture> Security Design
 
 ### Input Validation
 
-All public factory methods (`Iban.of()`, `Iban.parse()`, `Bic.of()`, etc.) validate
-their input against the project's IBAN Registry (based on SWIFT IBAN Registry) 
-before constructing an object.
-Invalid input throws `InvalidIbanException` or `InvalidBicException` respectively;
-it never silently produces a malformed instance.
+All public factory methods (`Iban.of()`, `Iban.parse()`, `Bic.of()` etc.) validate their input against the library's IBAN registry, which is based on the SWIFT IBAN Registry, before they create an object. Invalid input throws `InvalidIbanException` or `InvalidBicException`, it never results in a malformed instance.
 
-### No Network Access
+### Serialization
 
-This library performs no network I/O. All country and registry data is compiled
-into the library at build time.
+`Iban` and `Bic` are immutable and implement `java.io.Serializable` using the serialization proxy pattern:
+
+- `writeReplace()` replaces each instance with a small `Memento` proxy, so only the normalized string value is written to the stream.
+- `readResolve()` in `Memento` validates that value again before it creates the object: structure and Mod 97-10 check digits for an `Iban` (national check digits are left out, so the result does not depend on the configuration of the reading JVM), the full `Bic.parse()` for a `Bic`.
+- `readObject()` and `readObjectNoData()` on `Iban` and `Bic` always throw `InvalidObjectException`, so a raw instance cannot be deserialized directly, not even from a crafted byte stream.
+- The `Memento` stream starts with a version number. A version mismatch causes an `InvalidObjectException`.
+
+As a result, a manipulated stream cannot produce an `Iban` with an invalid check digit, an unknown country code or a malformed BBAN, nor an invalid `Bic`.
+
+### Network Access
+
+The core module, `iban-commons-validation` and `iban-commons-de-checkdigit` perform no network I/O. All their data is compiled into the library.
+
+`iban-commons-bankdata` downloads bank directories from the official sources of each country and caches them locally (by default in `~/.iban-commons/bankdata`). All bundled source URLs use HTTPS, and a redirect from HTTPS to plain HTTP is rejected. Responses and unpacked XLSX parts are limited to 64 MB, and the XML parser rejects DTDs. If a download fails, the module keeps using its cached or bundled data. Setting `disableNetwork = true` in the configuration turns off all downloads. The source URLs can be overridden by a configuration file, which is therefore treated as trusted input.
 
 ### Dependencies
 
-The library has **no runtime dependencies** beyond the Java standard library.
-The attack surface from transitive dependencies is therefore zero.
+The core module has no runtime dependencies beyond the Java standard library. `iban-commons-validation` needs the Jakarta Validation API, which the application provides. `iban-commons-bankdata` only depends on the other modules of this project.
 
-### Android Compatibility Notes
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/circle-off-dark.svg"><img src=".github/icons/circle-off.svg" height="20" alt=""></picture> Out of Scope
 
-The core module runs on Android from API level 24, which the build verifies
-against the Android API signatures. The only exception is
-`IbanRegistry.getLastUpdate()`, which returns a `java.time.YearMonth` (API 26+);
-`getLastUpdateYear()` and `getLastUpdateMonth()` return the same information on
-all levels. API levels 21 to 23 need core library desugaring, see the Android
-section of the README.
+The following is not considered a security vulnerability of this library:
 
-## Out of Scope
-
-The following are **not** considered security vulnerabilities for this library:
-
-- IBAN or BIC values that are syntactically valid but belong to non-existent accounts
-  (this library validates format and check digits, not account existence)
-- Countries or formats not yet listed in the SWIFT IBAN Registry or not 'manually'
-  maintained in the library's own registry
-- Behavior of third-party code that wraps or re-serializes instances produced by
-  this library
+- An IBAN or BIC that is syntactically valid but belongs to an account or bank that does not exist. The library validates formats and check digits, not existence.
+- Countries or formats that are not listed in the SWIFT IBAN Registry and not maintained in the library's own registry.
+- Outdated or wrong entries in the bank directories that `iban-commons-bankdata` takes from its upstream sources.
+- The behavior of third-party code that wraps or re-serializes instances created by this library.
