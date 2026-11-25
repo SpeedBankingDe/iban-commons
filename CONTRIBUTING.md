@@ -1,204 +1,110 @@
 # Contributing to IBAN Commons
 
-First off, thank you for considering contributing to IBAN Commons! 🎉
+Thank you for considering a contribution to IBAN Commons. Fixing a typo, reporting a bug, sharing an idea or sending a pull request all help, and every one of them is welcome.
 
-We welcome contributions from everyone, whether you're fixing a typo, reporting a bug, or implementing a new feature.
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/rocket-dark.svg"><img src=".github/icons/rocket.svg" height="20" alt=""></picture> Quick Start
 
-## 🚀 Quick Start
+1. Fork the repository and clone your fork: `git clone https://github.com/YOUR_USERNAME/iban-commons.git`
+2. Create a branch: `git checkout -b feature/your-feature-name`
+3. Make your changes and run `mvn`
+4. Push the branch to your fork and open a pull request
 
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/iban-commons.git`
-3. Create a branch: `git checkout -b feature/your-feature-name`
-4. Make your changes and commit them
-5. Push to your fork: `git push origin feature/your-feature-name`
-6. Open a Pull Request and describe your changes
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/bug-dark.svg"><img src=".github/icons/bug.svg" height="20" alt=""></picture> Reporting Bugs
 
-## 💡 How Can I Contribute?
+Please open an [issue](https://github.com/SpeedBankingDe/iban-commons/issues/new/choose) using the bug report template. Helpful are the library version, your Java version and OS, the input that misbehaves (an IBAN or BIC, anonymized if it is real), and what you expected instead. A failing test or a short code snippet makes a fix much faster.
 
-### Reporting Bugs 🐛
+Security issues should not go into a public issue, see [SECURITY.md](SECURITY.md).
 
-Found a bug? Please open an [issue](https://github.com/SpeedBankingDe/iban-commons/issues) with:
-- A clear, descriptive title
-- Steps to reproduce the issue
-- Expected vs. actual behavior
-- Your Java version and OS
-- Sample code if possible
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/bulb-dark.svg"><img src=".github/icons/bulb.svg" height="20" alt=""></picture> Suggesting Enhancements
 
-### Suggesting Enhancements 💡
+- Ensure you are on the latest version
+- Check existing [issues](https://github.com/SpeedBankingDe/iban-commons/issues) and [discussions](https://github.com/SpeedBankingDe/iban-commons/discussions) first
+- Open a new issue or discussion
+- Explain your use case and why this fix or enhancement is needed
 
-Have an idea? We'd love to hear it! Please:
-- Check [existing discussions](https://github.com/SpeedBankingDe/iban-commons/discussions) first
-- Open a new discussion or issue
-- Explain your use case and why this enhancement would be useful
+For larger changes, please discuss the idea before writing the code, so your work does not end up going in a different direction than the project.
 
-### Submitting Code Changes ✨
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/tool-dark.svg"><img src=".github/icons/tool.svg" height="20" alt=""></picture> Building
 
-We appreciate all contributions! Here's what we look for:
+You need JDK 21 or newer to build. The library itself targets Java 8, so the compiler rejects APIs that are not available there. Maven 3.9+ is required, or use the included wrapper (`./mvnw`).
 
-#### Code Quality
-- **Follow existing style**: Use the same code style as the rest of the project (import order, 4 spaces-indenting, bracket placements)
-- **Write tests**: All new features and bug fixes must have tests
-- **Keep it simple**: Prefer clarity over cleverness
-- **Document**: Add JavaDoc for public APIs
-
-#### Testing
-```bash
-# Run all tests
-mvn clean verify
-
-# Run specific test
-mvn test -Dtest=IbanTest
-```
-
-#### Commit Messages
-Write clear, concise commit messages.\
-Refer to the issue if issue-related.
-```
-Add support for new country XY
-
-- Implement IBAN structure for country XY
-- Add test cases for XY IBANs
-- Update IbanRegistry with official data
-```
-
-## 🏗️ Development Setup
-
-### Prerequisites
-- **JDK 21** or higher required to build the project
-- Maven 3.9+
-- Git
-- Spare Time
-
-### Building
 ```bash
 git clone https://github.com/SpeedBankingDe/iban-commons.git
 cd iban-commons
-mvn clean install
+mvn
 
-# Running all tests
-mvn test
+# a single module and the modules it depends on
+mvn -pl iban-commons-bankdata -am
 
-# Running the tests on Java 8 (needs a JDK 8 in ~/.m2/toolchains.xml)
-mvn -Dtest.jdk=8 clean verify
+# run the tests on Java 8, as CI does (needs a JDK 8 in ~/.m2/toolchains.xml)
+mvn -Dtest.jdk=8
 ```
 
-### Code Quality Checks
-We use several tools to maintain code quality:
-- [**Checkstyle**](https://checkstyle.sourceforge.io/): Code style enforcement
-- [**PMD**](https://pmd.github.io/): Static code analysis
-- [**PITest**](https://pitest.org/): Mutation testing
-- [**Maven Enforcer Plugin**](https://maven.apache.org/enforcer/maven-enforcer-plugin/): Control certain environmental constraints
+`mvn` runs the default goal `clean verify`. It compiles with [Error Prone](https://errorprone.info/), runs [Checkstyle](https://checkstyle.sourceforge.io/), [PMD](https://pmd.github.io/), the tests and the [Maven Enforcer](https://maven.apache.org/enforcer/maven-enforcer-plugin/) rules, and fails on any violation. There is no separate lint step. New files need the Apache license header, which `mvn license:format` adds. Mutation tests with [PITest](https://pitest.org/) are optional: `mvn test-compile org.pitest:pitest-maven:mutationCoverage`.
 
-Run all checks:
+CI runs the tests on Java 8, 21 and 25, on Ubuntu and Windows.
+
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/code-dark.svg"><img src=".github/icons/code.svg" height="20" alt=""></picture> Coding Guidelines
+
+The best guide is the surrounding code, and the `.editorconfig` takes care of formatting in most IDEs. Beyond what Checkstyle and PMD enforce, a few things are worth knowing:
+
+- The core module has no runtime dependencies, and it should stay that way. Please discuss any new dependency first, also in the optional modules.
+- Code must run on Java 8. The core module must also run on Android (API 24+), which the build checks.
+- Validation is on the hot path, so think about allocations and performance. Model classes are immutable and thread-safe.
+- Every public class and method needs Javadoc. New public classes get an `@since` tag with the upcoming version.
+- No `final` on local variables or method parameters. Member declarations are aligned in columns, local ones are not.
+- Exception messages use `String.format` with placeholders instead of string concatenation.
+- Javadoc, Markdown and commit messages use plain ASCII punctuation (no typographic dashes or quotes).
+
+[AGENTS.md](AGENTS.md) describes these and further conventions in more detail.
+
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/flask-dark.svg"><img src=".github/icons/flask.svg" height="20" alt=""></picture> Testing
+
+New features and bug fixes need tests. Test coverage is around 99%, please help keep it there, including invalid input and edge cases.
+
+Tests use JUnit 5 and [AssertJ](https://assertj.github.io/doc/), not the JUnit assertions. Test methods are named `methodUnderTest_condition_expectedOutcome`, without "should" or "when". Cases that differ only in input and output go into one `@ParameterizedTest`. Please keep test classes flat, without `@Nested` classes.
+
+```java
+@Test
+void of_tooShort_throwsInvalidIbanException() {
+    assertThatThrownBy(() -> Iban.of("DE123"))
+        .isInstanceOf(InvalidIbanException.class);
+}
+
+@ParameterizedTest
+@ValueSource(strings = {"", "INVALID", "DE00123456789"})
+void tryParse_invalidInput_returnsEmpty(String input) {
+    assertThat(Iban.tryParse(input)).isEmpty();
+}
+```
+
+To iterate over countries or random IBANs, use the source annotations from `iban-commons-junit` (`@IbanCountrySource`, `@RandomIbanSource`, `@IbanRegistrySource`) rather than a hand-written `@MethodSource`.
+
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/git-commit-dark.svg"><img src=".github/icons/git-commit.svg" height="20" alt=""></picture> Commit Messages
+
+Commit subjects follow the `type(scope): subject` pattern you can see in `git log`, for example `fix: deserialize Iban regardless of NCD config` or `feat(bankdata): add LI, GR and PT`. Keep the subject short and in present tense, and use the body to explain why, if that is not obvious. Mention the issue number if there is one.
+
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/git-pull-request-dark.svg"><img src=".github/icons/git-pull-request.svg" height="20" alt=""></picture> Pull Requests
+
+Before opening a pull request, run `mvn` and update the Javadoc and the README if the change is visible to users. Small, focused pull requests are easier to review than large ones. Breaking changes to the public API need to be discussed first.
+
+After you open the pull request, CI builds it on all supported platforms. A maintainer will review it, and some back and forth is normal. If you can, add follow-up commits to the pull request rather than force-pushing, so the review stays easy to follow.
+
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/world-dark.svg"><img src=".github/icons/world.svg" height="20" alt=""></picture> Country Data
+
+The IBAN formats in `IbanRegistry` are generated from the [SWIFT IBAN Registry](https://www.swift.com/standards/data-standards/iban) and should not be edited by hand. If a country is missing or a format is outdated, please open an issue with a reference to the registry release.
+
+Bank data for further countries is a good place to contribute. `iban-commons-bankdata` finds a loader by its class name `BankDataLoader<CC>` in the `loader` package. A new country needs such a loader (the existing ones show how to read the usual source formats), its source URL in `_bankdata.properties`, a bundled CSV snapshot and a test. `BundledDataRefreshTool` creates the snapshot:
+
 ```bash
-mvn clean verify
+cd iban-commons-bankdata
+mvn test-compile exec:java@refresh-bundled-bankdata -Dexec.args="CC"
 ```
 
-## 📝 Coding Guidelines
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/messages-dark.svg"><img src=".github/icons/messages.svg" height="20" alt=""></picture> Questions
 
-### General Principles
-- **Zero dependencies**: Do not add external dependencies without discussion
-- **Java 8 compatible**: Code must work with Java 8
-- **Immutability**: Prefer immutable objects
-- **Thread-safety**: Ensure thread-safe code
-- **Performance**: Consider performance impact
+If something is unclear, just ask in [Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions). Please be kind and patient with each other, the project is maintained in spare time.
 
-### Naming Conventions
-- **Classes**: `PascalCase` (e.g., `IbanValidator`)
-- **Methods**: `camelCase` (e.g., `validateChecksum()`)
-- **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_IBAN_LENGTH`)
-- **Packages**: lowercase (e.g., `de.speedbanking.iban`)
+By contributing, you agree that your contributions are licensed under the [Apache License 2.0](LICENSE.txt), like the rest of the project.
 
-### Documentation
-- **JavaDoc**: Required for all public APIs
-- **Inline comments**: Use sparingly, prefer self-documenting code
-- **README**: Update if adding user-facing features
-
-## 🧪 Testing Guidelines
-
-### Test Coverage
-- Aim for 100% coverage
-- Test both _happy paths_ and _edge cases_
-- Include tests for _invalid input_
-
-### Test Naming
-Use descriptive names that explain what's being tested:
-```java
-@Test
-void shouldThrowExceptionWhenIbanIsTooShort() {
-    assertThrows(InvalidIbanException.class, 
-        () -> Iban.of("DE123"));
-}
-
-@Test
-void shouldReturnEmptyOptionalForInvalidIban() {
-    Optional<Iban> result = Iban.tryParse("INVALID");
-    assertThat(result).isEmpty();
-}
-```
-
-### AssertJ
-We use [AssertJ](https://assertj.github.io/doc/) for fluent assertions:
-```java
-assertThat(iban.getCountryCode()).isEqualTo("DE");
-assertThat(iban.getBankCode()).isNotNull();
-assertThat(validIbans).hasSize(5).allMatch(Iban::isValid);
-```
-
-## 🔍 Pull Request Process
-
-1. **Update documentation** if needed (README, JavaDoc)
-2. **Add/update tests** for your changes
-3. **Run all tests**: `mvn clean verify`
-4. **Check that builds pass** on GitHub Actions
-5. **Request review** from maintainers
-6. **Address feedback** promptly and kindly
-
-### PR Checklist
-- [ ] Code follows project style
-- [ ] Tests added/updated
-- [ ] All tests pass
-- [ ] Documentation updated
-- [ ] No breaking changes (or discussed first)
-- [ ] Commit messages are clear
-
-## 🌟 Adding New Countries
-
-To add support for a new IBAN country:
-
-1. **Get official data** from [SWIFT IBAN Registry](https://www.swift.com/standards/data-standards/iban)
-2. **Add enum constant** in `IbanRegistry.java`
-3. **Add tests** in `IbanRegistryTest.java` and `IbanTest.java`
-4. **Update documentation** if needed
-5. **Run benchmarks** to ensure no performance regression
-
-## 💬 Communication
-
-- **Be respectful**: We're all here to help
-- **Be patient**: Maintainers are volunteers
-- **Be constructive**: Focus on solutions, not problems
-- **Ask questions**: If something's unclear, just ask!
-
-For questions or discussions:
-- 💬 [GitHub Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)
-- 🐛 [GitHub Issues](https://github.com/SpeedBankingDe/iban-commons/issues)
-
-## 📜 Code of Conduct
-
-This project follows a simple code of conduct:
-- **Be kind** and respectful
-- **Welcome** newcomers
-- **Focus** on constructive feedback
-- **Respect** different viewpoints and experiences
-
-## 🙏 Recognition
-
-All contributors will be recognized in:
-- GitHub contributors list
-- Release notes (for significant contributions)
-
-Thank you for helping make IBAN Commons better! 🚀
-
----
-
-**Questions?** Don't hesitate to ask in [Discussions](https://github.com/SpeedBankingDe/iban-commons/discussions)!
+Thank you for helping make IBAN Commons better.
