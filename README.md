@@ -30,13 +30,13 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 
 | Feature                    | iban-commons   | jbanking  | Apache Commons |  iban4j   | garvelink |
 |----------------------------|:--------------:|:---------:|:--------------:|:---------:|:---------:|
-| **Throughput (ops/s)**     | **10,883,875** | 7,322,453 |   6,065,384    | 2,089,403 | 1,980,023 |
-| **Memory (B/op)**          |      **0**     |    171    |      210       |    972    |    559    |
+| **Throughput (ops/s)**     | **11,217,693** | 7,761,777 |   6,417,898    | 2,338,722 | 2,206,021 |
+| **Memory (B/op)**          |      **0**     |    179    |      210       |    967    |    559    |
 | **Dependencies**           |        0       |     0     |       4        |     0     |     0     |
 | **Java Version**           |       8+       |    8+     |       8+       |    11+    |    8+     |
 | **Countries**              |       127      |    98     |      105       |    106    |    111    |
 
-> Throughput: rejection path (invalid IBANs) · JMH · OpenJDK 25.0.3 · Linux · single core · SerialGC · `-XX:-StackTraceInThrowable` · 2026-10-25<br>
+> Throughput: rejection path (invalid IBANs) · JMH · OpenJDK 25.0.3 · Linux · single core · SerialGC · `-XX:-StackTraceInThrowable` · 2026-11-27<br>
 > Compared versions: jbanking 4.3.0 · Apache Commons Validator 1.11.0 · iban4j 3.2.14 · garvelink iban 1.17.0. Countries count every country code accepted, including territories using another country's format.
 
 -----
@@ -98,8 +98,8 @@ iban.toFormattedString(); // IT60 X054 2811 1010 0000 0123 456
 * **High Performance**
 
   Zero-allocation validation pipeline - `char[]`-based processing eliminates heap pressure throughout.
-  Validates **5,755,902 IBANs/s** on the accept path and **10,883,875 IBANs/s** on early rejection;
-  allocation is exactly **0 B/op**, against 171 to 972 B/op for competing libraries.
+  Validates **5,910,767 IBANs/s** on the accept path and **11,217,693 IBANs/s** on early rejection;
+  allocation is exactly **0 B/op**, against 179 to 967 B/op for competing libraries.
 
 * **Simple, intuitive API**
 
@@ -370,35 +370,35 @@ We use the Java Microbenchmark Harness (**JMH**) to compare the throughput of `i
 
 Measured on **Intel Core i7-1165G7 @ 2.80GHz**, OpenJDK 25.0.3, Linux, single core (`taskset -c 0`),
 SerialGC (`-XX:+UseSerialGC`), `-XX:-StackTraceInThrowable`, `-Xms2G -Xmx2G`.
-3 forks × 5 warmup and 5 measurement iterations × 2 s each, run 2026-10-25 with iban-commons 1.8.13.
+3 forks × 5 warmup and 5 measurement iterations × 2 s each, run 2026-11-27 with iban-commons 1.8.14.
 
 ### Valid IBANs (accept path)
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| **iban-commons**        |      **5,755,902** |       **0**   | baseline         |
-| jbanking                |          4,258,449 |           325 | 1.4× slower      |
-| iban4j                  |          4,207,195 |           506 | 1.4× slower      |
-| Apache Commons          |          3,052,124 |           398 | 1.9× slower      |
-| garvelink java-iban     |          1,906,954 |           725 | 3.0× slower      |
+| **iban-commons**        |      **5,910,767** |       **0**   | baseline         |
+| jbanking                |          4,325,613 |           325 | 1.4× slower      |
+| iban4j                  |          4,273,620 |           505 | 1.4× slower      |
+| Apache Commons          |          3,078,120 |           398 | 1.9× slower      |
+| garvelink java-iban     |          1,908,918 |           724 | 3.1× slower      |
 
 ### Invalid IBANs (rejection path)
 
 | Library                 | Throughput (ops/s) | Memory (B/op) | vs. iban-commons |
 |:------------------------|-------------------:|--------------:|:----------------:|
-| **iban-commons**        |     **10,883,875** |       **0**   | baseline         |
-| jbanking                |          7,322,453 |           171 | 1.5× slower      |
-| Apache Commons          |          6,065,384 |           210 | 1.8× slower      |
-| iban4j                  |          2,089,403 |           972 | 5.2× slower      |
-| garvelink java-iban     |          1,980,023 |           559 | 5.5× slower      |
+| **iban-commons**        |     **11,217,693** |       **0**   | baseline         |
+| jbanking                |          7,761,777 |           179 | 1.4× slower      |
+| Apache Commons          |          6,417,898 |           210 | 1.7× slower      |
+| iban4j                  |          2,338,722 |           967 | 4.8× slower      |
+| garvelink java-iban     |          2,206,021 |           559 | 5.1× slower      |
 
 Each invalid IBAN is derived from a valid one by applying one of six sabotage strategies with equal probability: incrementing a check digit (triggering a Mod-97 failure), replacing the country code with the non-registered code `XY`, substituting a valid but mismatched ISO 3166 country code, injecting a letter into the numeric BBAN section, swapping two adjacent characters (transposition), or truncating the string below the minimum structural length.
 
 ### Key Observations
 
-1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input - reaching **5,755,902 ops/s** on the accept path and **10,883,875 ops/s** on early rejection.
+1. **Leading Throughput:** `iban-commons` is the fastest across both valid and invalid input - reaching **5,910,767 ops/s** on the accept path and **11,217,693 ops/s** on early rejection.
 2. **Fast Rejection:** Invalid IBANs are rejected faster than valid ones because many fail length or country-code checks before the full Mod-97 computation is reached.
-3. **Zero Allocation:** Memory allocation is **0 B/op** on both paths. Competing libraries allocate 171 to 972 B/op.
+3. **Zero Allocation:** Memory allocation is **0 B/op** on both paths. Competing libraries allocate 179 to 967 B/op.
 
 > **Note on `-XX:-StackTraceInThrowable`:** All forks run with this JVM flag, which suppresses stack trace generation to isolate pure algorithmic cost. This makes the comparison fair for libraries using exceptions for control flow (notably `iban4j`). For production-realistic measurements, remove the flag and re-run.
 
