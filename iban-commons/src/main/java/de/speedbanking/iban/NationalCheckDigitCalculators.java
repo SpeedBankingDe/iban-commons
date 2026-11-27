@@ -344,20 +344,24 @@ final class NationalCheckDigitCalculators {
      * National Check Digit algorithm for <strong>Estonia (EE)</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 2n bank + 2n branch + 11n account + 1n NCD
-     *  = 16 digits (IBAN length 20). Only the 15 digits before the NCD are used.
+     *  = 16 digits (IBAN length 20). The 13 digits between bank code and NCD are used, which
+     * hold the domestic account number left-padded with zeros.
      * <p>
      * <strong>Algorithm:</strong>
-     * Weighted MOD 10 with weights {@code {7, 3, 1}} (cyclic, left-to-right) over the BBAN prefix.
-     * Result: {@code (10 - sum % 10) % 10}.
+     * Weighted MOD 10 with weights {@code {7, 3, 1}} (cyclic, right-to-left, starting with the
+     * digit next to the NCD). Result: {@code (10 - sum % 10) % 10}.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
      * @return the check digit
+     * @see <a href="https://www.pangaliit.ee/arveldused/iban/siseriiklik-kontonumber">Pangaliit: domestic account number (Estonian)</a>
      */
     static char[] ee(NcdCalculatorBase c, char[] iban) {
+        int ncdBegin = c.ncdComponent.getBeginIndex();
+        int accountStart = BBAN_START + 2; // after 2n bank code
         int s = 0;
-        for (int i = BBAN_START; i < c.ncdComponent.getBeginIndex(); i++) {
-            s += (iban[i] - '0') * EE_WEIGHTS[(i - BBAN_START) % EE_WEIGHTS.length];
+        for (int i = 0; i < ncdBegin - accountStart; i++) {
+            s += (iban[ncdBegin - 1 - i] - '0') * EE_WEIGHTS[i % EE_WEIGHTS.length];
         }
         return oneDigit((10 - s % 10) % 10);
     }
@@ -547,13 +551,14 @@ final class NationalCheckDigitCalculators {
      * (NCD2), which covers the 15-digit account number starting at IBAN index 12.
      * <p>
      * <strong>Algorithm:</strong>
-     * Weighted MOD 10 with weights {@code {9, 7, 3, 1}} (cyclic). The NCD equals the ones digit
-     * of the weighted sum, i.e., {@code sum % 10} (the NCD is chosen so that including it makes
-     * the total sum a multiple of 10 using weight 1 for the NCD position).
+     * Weighted MOD 10 with weights {@code {9, 7, 3, 1}} (cyclic). The NCD has weight 1 and is
+     * chosen so that the total sum including it is a multiple of 10, i.e.
+     * {@code (10 - sum % 10) % 10}.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
      * @return the check digit
+     * @see <a href="https://njt.jog.gov.hu/jogszabaly/2017-35-20-2C">MNB decree 35/2017, annex 1 (Hungarian)</a>
      */
     static char[] hu(NcdCalculatorBase c, char[] iban) {
         int accountStart = BBAN_START + 8; // after 3n bank + 4n branch + 1n NCD1
@@ -561,7 +566,7 @@ final class NationalCheckDigitCalculators {
         for (int i = 0; i < 15; i++) {
             s += (iban[accountStart + i] - '0') * HU_WEIGHTS[i % HU_WEIGHTS.length];
         }
-        return oneDigit(s % 10);
+        return oneDigit((10 - s % 10) % 10);
     }
 
     /**
@@ -581,7 +586,7 @@ final class NationalCheckDigitCalculators {
      *   <li>Assign a numeric value to each character:
      *     <ul>
      *       <li><em>Odd positions</em> (1st, 3rd, ...): use {@link #IT_ODD_MAP}.</li>
-     *       <li><em>Even positions</em> (2nd, 4th, ...): digits map to 0-9, letters to 10-35.</li>
+     *       <li><em>Even positions</em> (2nd, 4th, ...): digits map to 0-9, letters to 0-25.</li>
      *     </ul>
      *   </li>
      *   <li>Sum all values and take {@code sum % 26}.</li>
@@ -598,8 +603,11 @@ final class NationalCheckDigitCalculators {
         int sum = 0;
         for (int i = cinIndex + 1; i < bbanEnd; i++) {
             char ch = iban[i];
-            int val = (ch <= '9') ? ch - '0' : ch - 'A' + 10;
-            sum += ((i - cinIndex - 1) % 2 == 0) ? IT_ODD_MAP[val] : val;
+            if ((i - cinIndex - 1) % 2 == 0) {
+                sum += IT_ODD_MAP[ch <= '9' ? ch - '0' : ch - 'A' + 10];
+            } else {
+                sum += ch <= '9' ? ch - '0' : ch - 'A';
+            }
         }
         return oneLetter(sum % 26);
     }

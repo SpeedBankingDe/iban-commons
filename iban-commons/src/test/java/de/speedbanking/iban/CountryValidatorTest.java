@@ -37,6 +37,22 @@ final class CountryValidatorTest {
             .isTrue();
     }
 
+    // the registry examples alone did not catch wrong algorithms, as their NCDs happen to
+    // match them; the IT IBAN is made up, with letters at an odd and an even position of the
+    // account number and its CIN worked out by hand from the CIN tables
+    @ParameterizedTest(name = "[{index}] {0}")
+    @CsvSource({
+        "EE471000001020145685",
+        "HU93116000060000000012345676",
+        "IT81D05428111010000CC123456",
+    })
+    void validateIban_ibanBeyondRegistryExample_returnsTrue(String iban) {
+        IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
+
+        assertThat(IbanValidator.getCountryValidator(IbanRegistry.getByCode(iban.substring(0, 2))).validateIban(iban))
+            .isTrue();
+    }
+
     @ParameterizedTest(name = "[{index}] {0}")
     @EnumSource(IbanRegistry.class)
     void validateIban_bbanOfSpaces_returnsFalse(IbanRegistry countryData) {
