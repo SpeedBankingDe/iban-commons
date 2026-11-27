@@ -55,7 +55,6 @@ final class IbanTest {
     static void prepareIbanConfig() {
         IbanConfig.reset(IbanConfig.builder()
             .validateNcd(true)
-            .calculateNcd(true)
             .allowSpace(true)
             .build());
     }

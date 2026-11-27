@@ -185,16 +185,10 @@ final class CountryValidatorTest {
             .isTrue();
     }
 
-    @ParameterizedTest(name = "[{index}] calculateNcd={0}")
-    @CsvSource(delimiter = '|', value = {
-        "true  | 33",
-        "false | 00",
-    })
-    void calculateNationalCheckDigit_ncdPlaceholder_returnsExpected(boolean calculateNcd, String expected) {
-        IbanConfig.reset(IbanConfig.builder().calculateNcd(calculateNcd).build());
-
+    @Test
+    void calculateNationalCheckDigit_ncdPlaceholder_returnsCalculatedNcd() {
         assertThat(IbanValidator.getCountryValidator(IbanRegistry.PT).calculateNationalCheckDigit("PT50002700000001234567800".toCharArray()))
-            .containsExactly(expected.toCharArray());
+            .containsExactly('3', '3');
     }
 
     @Test

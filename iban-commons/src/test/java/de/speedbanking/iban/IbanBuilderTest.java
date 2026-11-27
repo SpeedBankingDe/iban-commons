@@ -48,7 +48,7 @@ final class IbanBuilderTest {
 
     @BeforeAll
     static void prepareConfig() {
-        IbanConfig.reset(IbanConfig.builder().validateNcd(true).calculateNcd(true).build());
+        IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
     }
 
     @AfterAll
@@ -147,7 +147,7 @@ final class IbanBuilderTest {
 
     /**
      * Verifies that for every country defining a National Check Digit (NCD), random generation
-     * produces a valid IBAN with correct national check digits when calculation is enabled.
+     * produces a valid IBAN with correct national check digits.
      */
     @DisplayName("build: random generation produces valid NCD for all NCD-enabled countries")
     @ParameterizedTest(name = "[{index}] {0}")

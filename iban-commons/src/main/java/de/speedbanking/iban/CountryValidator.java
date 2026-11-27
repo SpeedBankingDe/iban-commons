@@ -174,9 +174,6 @@ final class CountryValidator {
 
     /**
      * Computes the National Check Digit (NCD) for the given IBAN.
-     * <p>
-     * If NCD calculation is disabled in {@link IbanConfig}, the NCD already present in
-     * {@code iban} is returned unchanged.
      *
      * @param iban the normalized IBAN as a {@code char[]}
      * @return the NCD as a char array, its length matches the NCD field width
@@ -188,9 +185,7 @@ final class CountryValidator {
         if (ncdCalculator == null) {
             throw new IllegalStateException(String.format("%s has no national check digit", countryData.getCountryCode()));
         }
-        return IbanConfig.isCalculateNcd()
-            ? ncdCalculator.calculateNationalCheckDigit(iban)
-            : countryData.getNationalCheckDigitComponent().extractFrom(iban);
+        return ncdCalculator.calculateNationalCheckDigit(iban);
     }
 
     /**

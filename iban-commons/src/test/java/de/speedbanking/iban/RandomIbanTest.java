@@ -36,8 +36,7 @@ final class RandomIbanTest {
     @BeforeAll
     static void prepareConfig() {
         IbanConfig.reset(IbanConfig.builder()
-            .validateNcd(true)
-            .calculateNcd(true).build());
+            .validateNcd(true).build());
     }
 
     @AfterAll

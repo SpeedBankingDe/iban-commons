@@ -179,7 +179,6 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
 
         fillUnsetPositions(iban, bban);
 
-        // always calculate NCD regardless of IbanConfig#isCalculateNcd
         fixNationalCheckDigit(getCountryData(), iban);
 
         fixCheckDigits(iban);

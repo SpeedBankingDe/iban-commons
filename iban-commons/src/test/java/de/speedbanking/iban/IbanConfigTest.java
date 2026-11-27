@@ -36,7 +36,6 @@ final class IbanConfigTest {
     @Test
     void get_default_hasAllOptionsDisabled() {
         assertThat(IbanConfig.isValidateNcd()).isFalse();
-        assertThat(IbanConfig.isCalculateNcd()).isFalse();
         assertThat(IbanConfig.isAllowSpace()).isFalse();
         assertThat(IbanConfig.isAllowLowercase()).isFalse();
     }
@@ -102,7 +101,6 @@ final class IbanConfigTest {
     void builder_allPropertiesConfigured_setsAll() {
         IbanConfig config = IbanConfig.builder()
             .validateNcd(true)
-            .calculateNcd(true)
             .allowSpace(false)
             .allowLowercase(false)
             .build();
@@ -110,7 +108,6 @@ final class IbanConfigTest {
         // validate state using toString to avoid using the static global methods
         assertThat(config.toString())
             .contains("validateNcd=true")
-            .contains("calculateNcd=true")
             .contains("allowSpace=false")
             .contains("allowLowercase=false");
     }
@@ -135,7 +132,6 @@ final class IbanConfigTest {
         assertThat(result)
             .contains("IbanConfig")
             .contains("validateNcd=false")
-            .contains("calculateNcd=false")
             .contains("allowSpace=false")
             .contains("allowLowercase=false");
     }

@@ -76,7 +76,6 @@ public final class IbanConfig {
     private static volatile IbanConfig          activeConfig;
 
     private final boolean                       validateNcd;
-    private final boolean                       calculateNcd;
     private final boolean                       allowSpace;
     private final boolean                       allowLowercase;
 
@@ -88,7 +87,6 @@ public final class IbanConfig {
      */
     IbanConfig(Builder builder) {
         this.validateNcd    = builder.validateNcd;
-        this.calculateNcd   = builder.calculateNcd;
         this.allowSpace     = builder.allowSpace;
         this.allowLowercase = builder.allowLowercase;
     }
@@ -102,17 +100,6 @@ public final class IbanConfig {
      */
     public static boolean isValidateNcd() {
         return get().validateNcd;
-    }
-
-    /**
-     * Returns whether National Check Digit (NCD) calculation is enabled in the global configuration.
-     * <p>
-     * Calling this method freezes the configuration.
-     *
-     * @return {@code true} if enabled
-     */
-    public static boolean isCalculateNcd() {
-        return get().calculateNcd;
     }
 
     /**
@@ -222,7 +209,6 @@ public final class IbanConfig {
         return getClass().getSimpleName()
                + '['
                + "validateNcd="    + validateNcd + ", "
-               + "calculateNcd="   + calculateNcd + ", "
                + "allowSpace="     + allowSpace + ", "
                + "allowLowercase=" + allowLowercase
                + ']';
@@ -246,7 +232,6 @@ public final class IbanConfig {
     public static final class Builder {
 
         private boolean validateNcd;
-        private boolean calculateNcd;
         private boolean allowSpace;
         private boolean allowLowercase;
 
@@ -264,17 +249,6 @@ public final class IbanConfig {
          */
         public Builder validateNcd(boolean value) {
             this.validateNcd = value;
-            return this;
-        }
-
-        /**
-         * Enables or disables National Check Digit (NCD) calculation.
-         *
-         * @param value {@code true} to enable
-         * @return this builder
-         */
-        public Builder calculateNcd(boolean value) {
-            this.calculateNcd = value;
             return this;
         }
 
