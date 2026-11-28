@@ -94,6 +94,19 @@ final class IbanBuilderTest {
         assertThatIbanString(iban.toString()).isValid();
     }
 
+    @ParameterizedTest(name = "[{index}] {0}")
+    @CsvSource({
+        "AX",
+        "GF",
+        "IM",
+    })
+    void build_derivedCountry_returnsIbanOfBaseCountry(IbanRegistry countryData) {
+        Iban iban = countryData.builder().withRandom(new Random(42L)).build();
+
+        assertThat(iban.getCountryCode()).isEqualTo(countryData.getBaseCountry().getCountryCode());
+        assertThat(iban.getCountryCode()).isEqualTo(Iban.of(iban.toString()).getCountryCode());
+    }
+
     @DisplayName("build: custom inputs produce expected IBAN string for Greenland (GL)")
     @Test
     void build_customInputs_producesValidIban() {

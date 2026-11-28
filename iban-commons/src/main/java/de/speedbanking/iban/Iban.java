@@ -222,10 +222,14 @@ public final class Iban implements Serializable, CharSequence, Comparable<Iban> 
     }
 
     /**
-     * Returns the two-letter ISO country code (positions 1 and 2).
+     * Returns the two-letter ISO country code, usually the one at positions 1 and 2.
      * <p>
      * This is the <strong>ISO 3166-1 Alpha-2</strong> country code, which identifies the country of the bank.
      * This code forms the initial part of every IBAN.
+     * <p>
+     * A territory code accepted as an alias of another country's format, such as {@code AX} for
+     * Finland, reports the code of that country ({@code "FI"}). The IBAN string keeps the code it
+     * was given.
      * <p>
      * Examples:
      * <ul>

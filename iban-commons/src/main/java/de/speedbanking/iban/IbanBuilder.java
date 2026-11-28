@@ -187,7 +187,7 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         // correct checksum, so the result is provably valid at this point. Re-parsing it via
         // Iban.of() would repeat that same structural + checksum validation for no benefit;
         // constructing directly (this class shares Iban's package) skips that redundant pass.
-        return new Iban(new String(iban), getCountryData());
+        return new Iban(new String(iban), getCountryData().getBaseCountry());
     }
 
     /**
