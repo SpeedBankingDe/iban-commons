@@ -599,15 +599,13 @@ final class NationalCheckDigitCalculators {
      * 10-digit prefix (bank + account). NCD = {@code remainder == 0 ? 0 : 11 - remainder}.
      * <p>
      * <strong>Special case - result {@code 10}:</strong>
-     * A computed result of {@code 10} means the account number is <em>not issuable</em> by
-     * Norwegian banks (Bankenes Standardiseringskontor). In this case
-     * {@link NationalCheckDigitCalculator#calculateNationalCheckDigit(char[])} returns the NCD value already present in the
-     * input IBAN unchanged (passthrough), so that {@link NationalCheckDigitCalculator#validateNationalCheckDigit(char[])} will
-     * always pass for such account numbers.
+     * No single check digit exists, banks do not issue such account numbers. The algorithm
+     * returns {@code null} then, so validation fails and {@link IbanBuilder} does not use the
+     * account number.
      *
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
-     * @return the check digit
+     * @return the check digit, or {@code null} if the account number admits none
      */
     static char[] no(NcdCalculatorBase c, char[] iban) {
         int sum = 0;
@@ -616,7 +614,7 @@ final class NationalCheckDigitCalculators {
         }
         int remainder = sum % 11;
         int result    = (remainder == 0) ? 0 : (11 - remainder);
-        return result == 10 ? c.ncdComponent.extractFrom(iban) : oneDigit(result);
+        return result == 10 ? null : oneDigit(result);
     }
 
     /**
@@ -663,7 +661,8 @@ final class NationalCheckDigitCalculators {
          * during the validation of country-specific checksums (e.g., Italy's CIN).
          *
          * @param iban the normalized IBAN character array
-         * @return {@code true} if the stored NCD matches the computed NCD
+         * @return {@code true} if the stored NCD matches the computed NCD, {@code false} also if
+         *         the BBAN admits no NCD at all
          */
         @Override
         public boolean validateNationalCheckDigit(char[] iban) {
@@ -675,7 +674,7 @@ final class NationalCheckDigitCalculators {
             char[] computedNcd = calculateNationalCheckDigit(iban);
 
             // perform an in-place comparison to stay within L1 cache and avoid allocation
-            if (length != computedNcd.length) {
+            if (computedNcd == null || length != computedNcd.length) {
                 return false;
             }
 

@@ -174,6 +174,29 @@ final class IbanBuilderTest {
             .isTrue();
     }
 
+    // 5598 658263 gives a MOD 11 result of 10, for which no Norwegian check digit exists
+    @Test
+    void build_noAccountWithoutCheckDigit_throwsInvalidIbanException() {
+        IbanBuilder<?> builder = IbanRegistry.NO.builder().bankCode("5598").accountNumber("658263");
+
+        assertThatInvalidIbanException()
+            .isThrownBy(builder::build);
+    }
+
+    // about every 11th random Norwegian account number admits no check digit and is drawn again
+    @Test
+    void build_noRandomAccount_alwaysProducesValidIban() {
+        Random rnd = new Random(42L);
+        IbanBuilder<?> builder = IbanRegistry.NO.builder().withRandom(rnd).bankCode("5598");
+
+        for (int i = 0; i < 1000; i++) {
+            String iban = builder.build().toString();
+            assertThat(IbanValidator.isValid(iban))
+                .as("random Norwegian IBAN %s", iban)
+                .isTrue();
+        }
+    }
+
     @DisplayName("createSegment: passing null charType throws NullPointerException")
     @Test
     void createSegment_unknownCharType_throwsNullPointerException() {

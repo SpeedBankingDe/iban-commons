@@ -72,6 +72,13 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         }
     };
 
+    /**
+     * Number of attempts {@link #build()} makes when the BBAN admits no national check digit,
+     * each with fresh random content. Only a random BBAN can succeed on a later attempt, and
+     * one fails with a probability of 1/11 at most, so this bound is never reached by chance.
+     */
+    private static final int   MAX_BUILD_ATTEMPTS = 32;
+
     /** The registry entry defining this builder's country structure, never {@code null}. */
     private final IbanRegistry countryData;
 
@@ -158,8 +165,9 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * Builds and returns a fully formatted and valid IBAN instance.
      *
      * @return the constructed IBAN
-     * @throws InvalidIbanException if a component value does not match its pattern, or if the
-     *                              assembled IBAN unexpectedly fails structural validation
+     * @throws InvalidIbanException if a component value does not match its pattern, if the given
+     *                              values admit no national check digit, or if the assembled IBAN
+     *                              unexpectedly fails structural validation
      */
     public final Iban build() {
         // Start from country code, "00" check-digit placeholder (fixed up below) and an unset
@@ -170,16 +178,16 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         // produce a structurally valid IBAN, without generating characters that a component
         // overwrites anyway.
         IbanComponent bban = getCountryData().getStructureData().getComponent(BBAN);
-        char[] iban = buildBuffer(bban);
+        char[] iban = assembleBban(bban);
 
-        resolveComponent(iban, getCountryData().getBankCodeComponent(), bankCode);
-        resolveComponent(iban, getCountryData().getAccountNumberComponent(), accountNumber);
-
-        appendSubclassComponents(iban);
-
-        fillUnsetPositions(iban, bban);
-
-        fixNationalCheckDigit(getCountryData(), iban);
+        // a BBAN may admit no national check digit, e.g. a Norwegian account number whose
+        // MOD 11 result is 10; random content gets another chance, given values do not
+        for (int attempt = 1; fixNationalCheckDigit(getCountryData(), iban) == null; attempt++) {
+            if (attempt == MAX_BUILD_ATTEMPTS) {
+                throw InvalidIbanException.of(IbanValidationError.INVALID_BBAN, new String(iban), getCountryData().getCountryCode());
+            }
+            iban = assembleBban(bban);
+        }
 
         fixCheckDigits(iban);
 
@@ -188,6 +196,25 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         // Iban.of() would repeat that same structural + checksum validation for no benefit;
         // constructing directly (this class shares Iban's package) skips that redundant pass.
         return new Iban(new String(iban), getCountryData().getBaseCountry());
+    }
+
+    /**
+     * Writes the components of this builder into a fresh working buffer and fills the remaining
+     * BBAN positions with random content.
+     *
+     * @param bban the BBAN component of the country
+     * @return the working buffer with a completely written BBAN
+     */
+    private char[] assembleBban(IbanComponent bban) {
+        char[] iban = buildBuffer(bban);
+
+        resolveComponent(iban, getCountryData().getBankCodeComponent(), bankCode);
+        resolveComponent(iban, getCountryData().getAccountNumberComponent(), accountNumber);
+
+        appendSubclassComponents(iban);
+
+        fillUnsetPositions(iban, bban);
+        return iban;
     }
 
     /**
@@ -418,7 +445,8 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
      * @param iban        the IBAN with a completely written BBAN; modified in place; may not
      *                    be {@code null}
      * @return {@code iban}, unmodified if no NCD field is defined for the country,
-     *         otherwise with the NCD field overwritten in place
+     *         otherwise with the NCD field overwritten in place; {@code null} if the BBAN
+     *         admits no NCD
      */
     static char[] fixNationalCheckDigit(IbanRegistry countryData, char[] iban) {
         requireNonNull(countryData, "countryData must not be null");
@@ -435,6 +463,9 @@ public class IbanBuilder<B extends IbanBuilder<B>> {
         }
 
         char[] ncd = IbanValidator.getCountryValidator(countryData).calculateNationalCheckDigit(iban);
+        if (ncd == null) {
+            return null;
+        }
         System.arraycopy(ncd, 0, iban, ncdCompo.getBeginIndex(), ncd.length);
 
         return iban;

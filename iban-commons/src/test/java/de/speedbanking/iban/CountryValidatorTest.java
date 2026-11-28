@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.stream.Stream;
 
@@ -61,6 +62,19 @@ final class CountryValidatorTest {
         IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
 
         assertThat(IbanValidator.getCountryValidator(IbanRegistry.AO).validateIban("AO33100000000000000000800"))
+            .isFalse();
+    }
+
+    // bank code and account number give a MOD 11 result of 10, so no check digit is valid
+    @ParameterizedTest(name = "[{index}] {0}")
+    @ValueSource(strings = {
+        "NO8755986582634",
+        "NO5976579276223",
+    })
+    void validateIban_noAccountWithoutCheckDigit_returnsFalse(String iban) {
+        IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
+
+        assertThat(IbanValidator.getCountryValidator(IbanRegistry.NO).validateIban(iban))
             .isFalse();
     }
 

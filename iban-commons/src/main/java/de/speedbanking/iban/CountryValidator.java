@@ -176,7 +176,8 @@ final class CountryValidator {
      * Computes the National Check Digit (NCD) for the given IBAN.
      *
      * @param iban the normalized IBAN as a {@code char[]}
-     * @return the NCD as a char array, its length matches the NCD field width
+     * @return the NCD as a char array, its length matches the NCD field width, or {@code null}
+     *         if the BBAN admits no valid NCD
      * @throws IllegalStateException if the country has no NCD
      *
      * @since 1.8.13

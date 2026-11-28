@@ -42,7 +42,8 @@ package de.speedbanking.iban;
  *       guaranteed to be digits or uppercase ASCII letters.</li>
  *   <li>{@link #calculateNationalCheckDigit(char[])} returns the NCD as a {@code char[]}
  *       whose length equals the width of
- *       {@link IbanRegistry#getNationalCheckDigitComponent()}.</li>
+ *       {@link IbanRegistry#getNationalCheckDigitComponent()}, or {@code null} if the BBAN
+ *       admits no valid NCD (e.g. a Norwegian account number whose MOD 11 result is 10).</li>
  *   <li>{@link #validateNationalCheckDigit(char[])} computes the expected NCD and compares
  *       it with the value already present in {@code iban}.</li>
  * </ul>
@@ -81,7 +82,8 @@ interface NationalCheckDigitCalculator {
      * @param iban the normalized IBAN as a {@code char[]};
      * must not be {@code null} and is guaranteed to contain only
      * digits and uppercase ASCII letters
-     * @return the computed NCD as a char array (length matches the NCD field width)
+     * @return the computed NCD as a char array (length matches the NCD field width), or
+     * {@code null} if the BBAN admits no valid NCD
      */
     char[] calculateNationalCheckDigit(char[] iban);
 
