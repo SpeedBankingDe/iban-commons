@@ -35,9 +35,10 @@ An optional [`iban-commons-bankdata`](#bank-data-lookup-iban-commons-bankdata) m
 | **Dependencies**           |        0       |     0     |       4        |     0     |     0     |
 | **Java Version**           |       8+       |    8+     |       8+       |    11+    |    8+     |
 | **Countries**              |       127      |    98     |      105       |    106    |    111    |
+| **National Check Digits**  |       43       |     0     |       0        |     15    |     0     |
 
 > Throughput: rejection path (invalid IBANs) · JMH · OpenJDK 25.0.3 · Linux · single core · SerialGC · `-XX:-StackTraceInThrowable` · 2026-11-27<br>
-> Compared versions: jbanking 4.3.0 · Apache Commons Validator 1.11.0 · iban4j 3.2.14 · garvelink iban 1.17.0. Countries count every country code accepted, including territories using another country's format.
+> Compared versions: jbanking 4.3.0 · Apache Commons Validator 1.11.0 · iban4j 3.2.14 · garvelink iban 1.17.0. Countries count every country code accepted, including territories using another country's format. National Check Digits count the country codes whose national check digit can be verified, an opt-in in iban-commons and iban4j.
 
 -----
 
