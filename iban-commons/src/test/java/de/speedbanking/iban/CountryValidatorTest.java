@@ -39,9 +39,11 @@ final class CountryValidatorTest {
 
     // the registry examples alone did not catch wrong algorithms, as their NCDs happen to
     // match them; the IT IBAN is made up, with letters at an odd and an even position of the
-    // account number and its CIN worked out by hand from the CIN tables
+    // account number and its CIN worked out by hand from the CIN tables; the AO prefix is a
+    // multiple of 97, for which ISO 7064 MOD 97-10 gives 98
     @ParameterizedTest(name = "[{index}] {0}")
     @CsvSource({
+        "AO06100000000000000000898",
         "EE471000001020145685",
         "HU93116000060000000012345676",
         "IT81D05428111010000CC123456",
@@ -51,6 +53,15 @@ final class CountryValidatorTest {
 
         assertThat(IbanValidator.getCountryValidator(IbanRegistry.getByCode(iban.substring(0, 2))).validateIban(iban))
             .isTrue();
+    }
+
+    // same AO prefix as above, with 00 instead of 98, which leaves remainder 0 instead of 1
+    @Test
+    void validateIban_aoNcd00ForPrefixMultipleOf97_returnsFalse() {
+        IbanConfig.reset(IbanConfig.builder().validateNcd(true).build());
+
+        assertThat(IbanValidator.getCountryValidator(IbanRegistry.AO).validateIban("AO33100000000000000000800"))
+            .isFalse();
     }
 
     @ParameterizedTest(name = "[{index}] {0}")

@@ -47,6 +47,7 @@ final class NationalCheckDigitCalculatorsTest {
         "SN | FR",
         "IT | IT",
         "SM | IT",
+        "AO | Mod97RemainderOneNcdCalculator",
         "PT | Mod97RemainderOneNcdCalculator",
         "SE | NoOpNcdCalculator",
     })

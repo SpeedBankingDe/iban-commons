@@ -46,7 +46,7 @@ import java.util.stream.IntStream;
  * <pre>
  * NationalCheckDigitCalculator            (interface)
  * └── NcdCalculatorBase                   (abstract, holds countryData, default validate)
- *     ├── AlgorithmNcdCalculator          (delegates to al, ao, be, ee, es, fi, fr, ...)
+ *     ├── AlgorithmNcdCalculator          (delegates to al, be, ee, es, fi, fr, ...)
  *     ├── NoOpNcdCalculator               (no NCD validation, passthrough)
  *     └── Mod97RemainderOneNcdCalculator  (ISO 7064 MOD 97-10, remainder == 1)
  * </pre>
@@ -157,7 +157,6 @@ final class NationalCheckDigitCalculators {
     private static Map<Country, Function<IbanRegistry, NationalCheckDigitCalculator>> createFactories() {
         Map<Country, Function<IbanRegistry, NationalCheckDigitCalculator>> factories = new EnumMap<>(Country.class);
         register(factories, NationalCheckDigitCalculators::al, AL);
-        register(factories, NationalCheckDigitCalculators::ao, AO);
         register(factories, NationalCheckDigitCalculators::be, BE);
         register(factories, NationalCheckDigitCalculators::ee, EE);
         register(factories, NationalCheckDigitCalculators::es, ES);
@@ -168,7 +167,7 @@ final class NationalCheckDigitCalculators {
         register(factories, NationalCheckDigitCalculators::fr, FR, DJ, MC, TN,
             BF, BJ, CF, CM, GQ, KM, SN); // West-African CFA franc zone
         register(factories, Mod97RemainderOneNcdCalculator::new,
-            BA, ME, MK, MZ, PT, RS, SI, TL, XK);
+            AO, BA, ME, MK, MZ, PT, RS, SI, TL, XK);
         register(factories, NoOpNcdCalculator::new,
             CG, CI, FO, GW, MG, ML, MR, NE, SE, TD, TR);
         return factories;
@@ -275,51 +274,6 @@ final class NationalCheckDigitCalculators {
             s += (iban[BBAN_START + i] - '0') * AL_WEIGHTS[i];
         }
         return oneDigit((10 - s % 10) % 10);
-    }
-
-    /**
-     * National Check Digit algorithm for <strong>Angola (AO)</strong>.
-     * <p>
-     * <strong>BBAN structure:</strong> 21n prefix + 2n NCD = 23 digits (IBAN length 25).
-     * <p>
-     * <strong>Algorithm:</strong>
-     * ISO 7064 MOD 97-10 variant. The NCD field is masked with {@code "00"}, then
-     * {@code mod97} is computed over the BBAN prefix. NCD = {@code 98 - remainder},
-     * with {@code 0} treated as {@code 98} to avoid a zero check digit.
-     * <p>
-     * To avoid unnecessary heap allocation, the masked BBAN is presented to
-     * {@link Mod97#calculateRange(CharSequence, int, int)} as a virtual
-     * {@link CharSequence} view over the original IBAN - no intermediate {@code char[]}
-     * is allocated.
-     *
-     * @param c    the calculator of the country
-     * @param iban the normalized IBAN
-     * @return the check digits
-     */
-    static char[] ao(NcdCalculatorBase c, char[] iban) {
-        int prefixLen = c.ncdComponent.getBeginIndex() - BBAN_START;
-        int maskedLen = c.countryData.getIbanLength() - BBAN_START;
-
-        // virtual CharSequence view: forwards the BBAN prefix as-is, and substitutes
-        // '0' for the two NCD positions - without copying any characters
-        int remainder = Mod97.calculateRange(new CharSequence() {
-            @Override
-            public int length() {
-                return maskedLen;
-            }
-
-            @Override
-            public char charAt(int index) {
-                return index < prefixLen ? iban[BBAN_START + index] : '0';
-            }
-
-            @Override
-            public CharSequence subSequence(int s, int e) {
-                throw new UnsupportedOperationException();
-            }
-        }, 0, maskedLen);
-
-        return twoDigits(remainder == 0 ? 0 : CHECK_DIGIT_MAGIC_NUMBER - remainder);
     }
 
     /**
@@ -804,7 +758,7 @@ final class NationalCheckDigitCalculators {
      * <em>full</em> BBAN (including the NCD) must produce a remainder of exactly {@code 1}
      * when divided by {@code 97}.
      * <p>
-     * This is the standard algorithm used by BA, ME, MK, MZ, PT, RS, SI, TL and XK.
+     * This is the standard algorithm used by AO, BA, ME, MK, MZ, PT, RS, SI, TL and XK.
      * <p>
      * <strong>Calculation:</strong>
      * {@code NCD = 98 - ((prefix_remainder × 100) mod 97)}, where
