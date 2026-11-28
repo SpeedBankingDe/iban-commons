@@ -267,6 +267,7 @@ final class NationalCheckDigitCalculators {
      * @param c    the calculator of the country
      * @param iban the normalized IBAN
      * @return the check digit
+     * @see <a href="https://www.bankofalbania.org/rc/doc/IBAN_Regulation_26774.pdf">Bank of Albania decision 26/2022, annex 4</a>
      */
     static char[] al(NcdCalculatorBase c, char[] iban) {
         int s = 0;
@@ -812,6 +813,8 @@ final class NationalCheckDigitCalculators {
      * <p>
      * <strong>Validation:</strong>
      * {@code mod97(full_BBAN) == 1}.
+     *
+     * @see <a href="https://www.iso.org/standard/31531.html">ISO 7064:2003</a>
      *
      * @since 1.8.13
      */
