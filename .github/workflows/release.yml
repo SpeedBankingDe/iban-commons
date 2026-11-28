@@ -27,7 +27,7 @@ jobs:
             run: |
                 VERSION="${GITHUB_REF_NAME#iban-commons-}"
                 echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-                # release candidates such as 1.8.12-RC1 are described in the section of their base version
+                # release candidates such as 1.8.15-RC1 are described in the section of their base version
                 echo "base=${VERSION%%-*}" >> "$GITHUB_OUTPUT"
 
         -   name: Extract release notes from README

@@ -23,7 +23,7 @@
 #   bash update-docs-version.sh <project-name> <version>
 #
 # EXAMPLE (Manual):
-#   bash src/main/scripts/update-docs-version.sh "iban-commons" "1.8.6"
+#   bash src/main/scripts/update-docs-version.sh "iban-commons" "1.8.15"
 #
 # EXAMPLE (Maven exec-plugin):
 #   <arguments>
@@ -69,7 +69,7 @@ NEW_VERSION="${NEW_VERSION%-SNAPSHOT}"
 if [[ -z "${NEW_VERSION}" ]]; then
     if git -C "${PROJECT_ROOT}" rev-parse --git-dir > /dev/null 2>&1; then
         RAW_TAG="$(git -C "${PROJECT_ROOT}" describe --tags --abbrev=0 2>/dev/null || true)"
-        # Normalise common tag formats: v1.8.5, iban-commons-1.8.5, 1.8.5
+        # Normalise common tag formats: v1.8.15, iban-commons-1.8.15, 1.8.15
         NEW_VERSION="${RAW_TAG#v}"
         NEW_VERSION="${NEW_VERSION#${PROJ_NAME}-}"
         NEW_VERSION="${NEW_VERSION%-SNAPSHOT}"

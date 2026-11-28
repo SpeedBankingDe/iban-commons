@@ -409,10 +409,36 @@ All performance tests are fully open and available in the [SpeedBankingDe/iban-c
 
 -----
 
-## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/sparkles-dark.svg"><img src=".github/icons/sparkles.svg" height="20" alt=""></picture> What's New in 1.8.14
+## <picture><source media="(prefers-color-scheme: dark)" srcset=".github/icons/sparkles-dark.svg"><img src=".github/icons/sparkles.svg" height="20" alt=""></picture> What's New in 1.8.15
 
-### Android API 24
-The core module runs on Android from API level 24 (Android 7.0) without core library desugaring. Up to 1.8.13 it needed API level 26, since it used `ThreadLocal.withInitial` and created `java.time.YearMonth` values when `IbanRegistry` was initialized. The build now checks the core classes against the Android API 24 signatures. Only `IbanRegistry.getLastUpdate()`, which returns a `YearMonth`, still needs API level 26; `getLastUpdateYear()` and `getLastUpdateMonth()` work on all levels.
+### Bank Data for LI, GR and PT
+`iban-commons-bankdata` now also covers Liechtenstein, Greece and Portugal, 12 countries in total. LI is read from the same SIX Bank Master file as CH and, like CH, ships without a bundled snapshot, since SIX has not granted permission to redistribute its data. GR and PT come from the ECB list that already serves ES and FR, with bundled snapshots. The snapshots of AT, ES, FR, NL and PL are refreshed.
+
+### Safer Bank Data Downloads
+Downloads and unpacked XLSX parts are capped at 64 MB, so an oversized response or a zip bomb only makes the refresh fail and the lookup keeps using the data it has. A redirect from HTTPS to plain HTTP is no longer followed.
+
+### Iban Deserialization Fix
+An `Iban` created with national check digit validation turned off could not be deserialized in a JVM that has it turned on. Deserialization now checks length, country, BBAN pattern and checksum, but not the national check digit, so such values can be read back regardless of the `IbanConfig` in effect.
+
+### National Check Digit Fixes
+With national check digit validation turned on, valid IBANs from several countries were rejected:
+* Angola: the check digits are 98 rather than 00 when bank, branch and account number together form a multiple of 97, as ISO 7064 MOD 97-10 requires.
+* Estonia: the check digit is weighted right to left over the account number only, without the bank code.
+* Hungary: the check digit is the complement of the weighted sum rather than its last digit.
+* Italy and San Marino: the CIN values letters at even positions from 0 to 25 rather than from 10 to 35.
+
+Norwegian account numbers whose MOD 11 result is 10 admit no check digit, banks do not issue them. They are now rejected, before any check digit passed.
+
+### IbanBuilder Fixes
+`IbanBuilder`, and with it `RandomIban` and `@RandomIbanSource`, now always calculates the national check digit. Before, it did so only with `calculateNcd(true)` in `IbanConfig` and otherwise left a random value in place, so most IBANs built for countries with a national check digit failed its validation. The builder also no longer produces Norwegian account numbers without a valid check digit.
+
+IBANs built for a territory such as `AX` now report the country code of the base country (`FI`), like a parsed one.
+
+### Tested on JDK 25
+CI now runs the tests on JDK 8, 21 and 25, on Linux and Windows.
+
+### Breaking Changes
+The `calculateNcd` setting is removed from `IbanConfig`, together with `IbanConfig.isCalculateNcd()` and `IbanConfig.Builder.calculateNcd(boolean)`, as the national check digit is now always calculated. Drop the call when updating.
 
 -----
 

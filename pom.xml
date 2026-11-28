@@ -649,7 +649,7 @@
 
                 <plugin>
                     <!-- https://www.mojohaus.org/exec-maven-plugin/
-                         e.g. mvn exec:exec@update-docs-version -DreleaseVersion=1.8.6 -->
+                         e.g. mvn exec:exec@update-docs-version -DreleaseVersion=1.8.15 -->
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>${dep.plugin.exec.version}</version>
