@@ -255,7 +255,7 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Albania (AL)</strong>.
+     * National Check Digit algorithm for <strong>Albania ({@link IbanRegistry#AL AL})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 7n bank/branch + 1n NCD + 16n account = 24 digits (IBAN length 28).
      * <p>
@@ -277,7 +277,7 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Belgium (BE)</strong>.
+     * National Check Digit algorithm for <strong>Belgium ({@link IbanRegistry#BE BE})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 3n bank + 7n account + 2n NCD = 12 digits (IBAN length 16).
      * <p>
@@ -296,7 +296,7 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Estonia (EE)</strong>.
+     * National Check Digit algorithm for <strong>Estonia ({@link IbanRegistry#EE EE})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 2n bank + 2n branch + 11n account + 1n NCD
      *  = 16 digits (IBAN length 20). The 13 digits between bank code and NCD are used, which
@@ -322,7 +322,7 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Spain (ES)</strong>.
+     * National Check Digit algorithm for <strong>Spain ({@link IbanRegistry#ES ES})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 4n bank + 4n branch + 2n DC + 10n account = 20 digits
      * (IBAN length 24).
@@ -380,8 +380,8 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Finland (FI)</strong> and
-     * <strong>Åland Islands (AX)</strong>.
+     * National Check Digit algorithm for <strong>Finland ({@link IbanRegistry#FI FI})</strong> and
+     * <strong>Åland Islands ({@link IbanRegistry#AX AX})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 6n bank + 7n account + 1n NCD = 14 digits
      * (IBAN length 18).
@@ -410,16 +410,37 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>France (FR)</strong> and all associated
+     * National Check Digit algorithm for <strong>France ({@link IbanRegistry#FR FR})</strong> and all associated
      * territories.
      * <p>
      * Territories sharing this algorithm:
-     * Guadeloupe (GP), Martinique (MQ), French Guiana (GF), Réunion (RE),
-     * French Polynesia (PF), French Southern Territories (TF), Mayotte (YT),
-     * New Caledonia (NC), Saint Barthélemy (BL), Saint Martin (MF),
-     * Saint Pierre and Miquelon (PM), Wallis and Futuna (WF), Monaco (MC),
-     * and several West-African countries (BF, BJ, CF, CM, GQ, KM, SN).
-     * Tunisia (TN) and Djibouti (DJ) use the same formula.
+     * <ul>
+     *   <li>Guadeloupe ({@link IbanRegistry#GP GP})</li>
+     *   <li>Martinique ({@link IbanRegistry#MQ MQ})</li>
+     *   <li>French Guiana ({@link IbanRegistry#GF GF})</li>
+     *   <li>Réunion ({@link IbanRegistry#RE RE})</li>
+     *   <li>French Polynesia ({@link IbanRegistry#PF PF})</li>
+     *   <li>French Southern Territories ({@link IbanRegistry#TF TF})</li>
+     *   <li>Mayotte ({@link IbanRegistry#YT YT})</li>
+     *   <li>New Caledonia ({@link IbanRegistry#NC NC})</li>
+     *   <li>Saint Barthélemy ({@link IbanRegistry#BL BL})</li>
+     *   <li>Saint Martin ({@link IbanRegistry#MF MF})</li>
+     *   <li>Saint Pierre and Miquelon ({@link IbanRegistry#PM PM})</li>
+     *   <li>Wallis and Futuna ({@link IbanRegistry#WF WF})</li>
+     * </ul>
+     * Countries using the same formula:
+     * <ul>
+     *   <li>Monaco ({@link IbanRegistry#MC MC})</li>
+     *   <li>Benin ({@link IbanRegistry#BJ BJ})</li>
+     *   <li>Burkina Faso ({@link IbanRegistry#BF BF})</li>
+     *   <li>Cameroon ({@link IbanRegistry#CM CM})</li>
+     *   <li>Central African Republic ({@link IbanRegistry#CF CF})</li>
+     *   <li>Comoros ({@link IbanRegistry#KM KM})</li>
+     *   <li>Djibouti ({@link IbanRegistry#DJ DJ})</li>
+     *   <li>Equatorial Guinea ({@link IbanRegistry#GQ GQ})</li>
+     *   <li>Senegal ({@link IbanRegistry#SN SN})</li>
+     *   <li>Tunisia ({@link IbanRegistry#TN TN})</li>
+     * </ul>
      * <p>
      * <strong>RIB - Clé RIB (Relevé d'Identité Bancaire):</strong>
      * Two-digit checksum {@code 01-97} at the end of the BBAN.
@@ -499,7 +520,7 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Hungary (HU)</strong>.
+     * National Check Digit algorithm for <strong>Hungary ({@link IbanRegistry#HU HU})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 3n bank + 4n branch + 1n NCD1 + 15n account + 1n NCD2
      * = 24 digits (IBAN length 28). This implementation computes the <em>second</em> check digit
@@ -525,8 +546,8 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Italy (IT)</strong> and
-     * <strong>San Marino (SM)</strong>.
+     * National Check Digit algorithm for <strong>Italy ({@link IbanRegistry#IT IT})</strong> and
+     * <strong>San Marino ({@link IbanRegistry#SM SM})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 1a CIN + 5n bank + 5n branch + 12c account = 23 chars
      * (IBAN length 27). The CIN is at {@code BBAN_START} (IBAN index 4); the algorithm
@@ -568,7 +589,7 @@ final class NationalCheckDigitCalculators {
     }
 
     /**
-     * National Check Digit algorithm for <strong>Norway (NO)</strong>.
+     * National Check Digit algorithm for <strong>Norway ({@link IbanRegistry#NO NO})</strong>.
      * <p>
      * <strong>BBAN structure:</strong> 4n bank + 6n account + 1n NCD = 11 digits
      * (IBAN length 15).
@@ -758,7 +779,9 @@ final class NationalCheckDigitCalculators {
      * <em>full</em> BBAN (including the NCD) must produce a remainder of exactly {@code 1}
      * when divided by {@code 97}.
      * <p>
-     * This is the standard algorithm used by AO, BA, ME, MK, MZ, PT, RS, SI, TL and XK.
+     * This is the standard algorithm used by {@link IbanRegistry#AO AO}, {@link IbanRegistry#BA BA}, {@link IbanRegistry#ME ME}, {@link IbanRegistry#MK MK},
+     * {@link IbanRegistry#MZ MZ}, {@link IbanRegistry#PT PT}, {@link IbanRegistry#RS RS}, {@link IbanRegistry#SI SI},
+     * {@link IbanRegistry#TL TL} and {@link IbanRegistry#XK XK}.
      * <p>
      * <strong>Calculation:</strong>
      * {@code NCD = 98 - ((prefix_remainder × 100) mod 97)}, where
