@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *   <li>Optionally call {@link #configure(IbanConfig)} once at application startup
  *       (e.g. in a {@code @PostConstruct} method or {@code main()}) to supply a
  *       custom configuration built via {@link Builder}.</li>
- *   <li>The first call to {@link #get()} or any of the static accessors (e.g., {@link #isAllowSpace()})
+ *   <li>The first IBAN operation or call to one of the static accessors (e.g., {@link #isAllowSpace()})
  *       freezes the configuration permanently.
  *       Any subsequent call to {@link #configure(IbanConfig)} will throw an
  *       {@link IllegalStateException}.</li>
@@ -47,7 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *     .build());
  *
  * // anywhere in the application:
- * if (IbanConfig.get().isAllowLowercase()) { ... }
+ * if (IbanConfig.isAllowLowercase()) { ... }
  * }</pre>
  *
  * @since 1.8.5
@@ -141,7 +141,7 @@ public final class IbanConfig {
         IbanConfig result = STATE.updateAndGet(current -> {
             if (current.frozen) {
                 throw new IllegalStateException(
-                    String.format("%s is already in use and cannot be changed - call configure() before the first get() or accessor invocation",
+                    String.format("%s is already in use and cannot be changed - call configure() before the first IBAN operation or accessor invocation",
                         IbanConfig.class.getSimpleName()));
             }
             return new State(config, false);
